@@ -2,10 +2,21 @@
 
 namespace App\Providers;
 
+use App\Events\NewEmail;
+use App\Events\NewOrder;
+use App\Events\OrderChangeStatus;
+use App\Events\ClientViewCategory;
+use App\Events\OrderStatusChanged;
+use App\Listeners\NewEmailListener;
+use Illuminate\Support\Facades\Event;
+use App\Listeners\OrderChangeListener;
 use Illuminate\Auth\Events\Registered;
+use App\Listeners\NewOrderCreatedListener;
+use App\Listeners\ClientViewCategoryListener;
+use App\Listeners\InformClientOrderChange;
+use App\Listeners\InformOrderClient;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -17,6 +28,22 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+        NewEmail::class => [
+            NewEmailListener::class,
+        ],
+        ClientViewCategory::class => [
+            ClientViewCategoryListener::class
+        ],
+        OrderChangeStatus::class => [
+            OrderChangeListener::class,
+        ],
+        NewOrder::class=>[
+            NewOrderCreatedListener::class,
+            InformOrderClient::class,
+        ],
+        OrderStatusChanged::class => [
+            InformClientOrderChange::class,
         ],
     ];
 

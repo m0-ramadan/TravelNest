@@ -1,0 +1,21 @@
+{
+  "name": "Luxor and Aswan Travel",
+  "short_name": "Luxor and Aswan Travel",
+  "description": "Luxor and Aswan Travel best travel agency in Egypt specialized in providing professional advice on planning Travel Packages, Nile Cruises and Day Tours.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1c325c",
+  "icons": [
+    {
+      "src": "/favicon/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
