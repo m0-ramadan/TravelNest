@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
@@ -31,10 +32,10 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function reviews()
-    {
-        return $this->hasMany(Review::class);
-    }
+    // public function reviews()
+    // {
+    //     return $this->hasMany(Review::class);
+    // }
     public function notifications()
     {
         return $this->morphMany(\App\Models\Notification::class, 'notifiable');
@@ -44,22 +45,68 @@ class User extends Authenticatable
         return $this->hasMany(\App\Models\Favourite::class);
     }
 
-    public function favouriteProducts()
-    {
-        return $this->belongsToMany(\App\Models\Product::class, 'favourites');
-    }
 
     public function favorites()
     {
         return $this->hasMany(Favorite::class);
     }
 
-    public function orders()
+    // العلاقات
+    public function bookings()
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Booking::class);
     }
-    public function cart()
+
+    public function reviews()
     {
-        return $this->hasOne(Cart::class);
+        return $this->hasMany(Review::class);
+    }
+
+    public function inquiries()
+    {
+        return $this->hasMany(Inquiry::class);
+    }
+
+    public function assignedBookings()
+    {
+        return $this->hasMany(Booking::class, 'assigned_to');
+    }
+
+    public function assignedInquiries()
+    {
+        return $this->hasMany(Inquiry::class, 'assigned_to');
+    }
+
+    // النطاقات (Scopes)
+    public function scopeCustomers($query)
+    {
+        return $query->where('role', 'customer');
+    }
+
+    public function scopeAgents($query)
+    {
+        return $query->where('role', 'agent');
+    }
+
+    public function scopeAdmins($query)
+    {
+        return $query->where('role', 'admin');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    // الأحداث (Events)
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            if (empty($user->password)) {
+                $user->password = bcrypt(Str::random(10));
+            }
+        });
     }
 }

@@ -48,7 +48,7 @@ class Kernel extends HttpKernel
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\LanguageMiddleware::class,
-            // \App\Http\Middleware\LogVisitor::class,
+             \App\Http\Middleware\LogVisitor::class,
 
         ],
     ];
@@ -75,7 +75,7 @@ class Kernel extends HttpKernel
         'api.key' => \App\Http\Middleware\ApiKeyMiddleware::class,
         // 'api.cors' => \App\Http\Middleware\Cors::class,
         //  'permission' => \App\Http\Middleware\CheckPermission::class,
-        'permission' => PermissionMiddleware::class,
-        'role' => RoleMiddleware::class, // Optional
+        // 'permission' => PermissionMiddleware::class,
+        // 'role' => RoleMiddleware::class, // Optional
     ];
 }

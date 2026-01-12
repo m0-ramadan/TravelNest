@@ -846,36 +846,36 @@
            <div class="d-none d-lg-flex w-100 justify-content-between align-items-center">
                <ul class="navbar-nav mx-auto">
                    <li class="nav-item">
-                       <a class="nav-link" href="index.html">Home</a>
+                       <a class="nav-link" href="{{ route('website.home') }}">Home</a>
                    </li>
-                   <li class="nav-item dropdown">
-                       <a class="nav-link dropdown-toggle" href="index.html#" data-bs-toggle="dropdown">
-                           Destinations <i class="la la-angle-down"></i>
-                       </a>
-                       <ul class="dropdown-menu">
-                           <li><a class="dropdown-item" href="Egypt.html">
-                                   <i class="la la-map-marker"></i> Egypt
-                               </a></li>
-                           <li><a class="dropdown-item" href="en/Jordan.html">
-                                   <i class="la la-map-marker"></i> Jordan
-                               </a></li>
-                           <li><a class="dropdown-item" href="Dubai.html">
-                                   <i class="la la-map-marker"></i> Dubai
-                               </a></li>
-                           <li><a class="dropdown-item" href="Morocco.html">
-                                   <i class="la la-map-marker"></i> Morocco
-                               </a></li>
-                           <li><a class="dropdown-item" href="Oman.html">
-                                   <i class="la la-map-marker"></i> Oman
-                               </a></li>
-                           <li><a class="dropdown-item" href="Turkey.html">
-                                   <i class="la la-map-marker"></i> Turkey
-                               </a></li>
-                           <li><a class="dropdown-item" href="African-Safari.html">
-                                   <i class="la la-binoculars"></i> African Safari
-                               </a></li>
-                       </ul>
-                   </li>
+ <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            Destinations <i class="la la-angle-down"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="https://www.luxorandaswan.com/Egypt">
+                                <i class="la la-map-marker"></i> Egypt
+                            </a></li>
+                            <li><a class="dropdown-item" href="https://www.luxorandaswan.com/Jordan">
+                                <i class="la la-map-marker"></i> Jordan
+                            </a></li>
+                            <li><a class="dropdown-item" href="https://www.luxorandaswan.com/Dubai">
+                                <i class="la la-map-marker"></i> Dubai
+                            </a></li>
+                            <li><a class="dropdown-item" href="https://www.luxorandaswan.com/Morocco">
+                                <i class="la la-map-marker"></i> Morocco
+                            </a></li>
+                            <li><a class="dropdown-item" href="https://www.luxorandaswan.com/Oman">
+                                <i class="la la-map-marker"></i> Oman
+                            </a></li>
+                            <li><a class="dropdown-item" href="https://www.luxorandaswan.com/Turkey">
+                                <i class="la la-map-marker"></i> Turkey
+                            </a></li>
+                            <li><a class="dropdown-item" href="https://www.luxorandaswan.com/African-Safari">
+                                <i class="la la-binoculars"></i> African Safari
+                            </a></li>
+                        </ul>
+                    </li>
                    <li class="nav-item">
                        <a class="nav-link" href="multicountries/index.html">Multi Country</a>
                    </li>
@@ -1103,6 +1103,7 @@
            </a>
        </div>
    </div>
+
    <script type="bbfb53b5999c6c3f61fbade4-text/javascript">
         // Enhanced mobile menu scrolling
         function scrollToElementInMobileMenu(elementId) {
@@ -1337,4 +1338,5 @@
         document.querySelectorAll('.mobile-action-btn, .mobile-enquiry-btn').forEach(button => {
             button.addEventListener('click', addRippleEffect);
         });
+        
     </script>
