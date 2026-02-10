@@ -1527,7 +1527,7 @@
         }
 
         .verified-badge {
-            background: #00aa6c;
+            background: #2358e6eb;
             color: white;
             font-size: 0.75rem;
             padding: 6px 12px;
@@ -2654,7 +2654,7 @@
         <div class="container">
             <div class="text-center mb-5">
                 <div
-                    style="background: #00aa6c; color: white; padding: 10px 20px; border-radius: 25px; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 30px;">
+                    style="background: #2358e6eb; color: white; padding: 10px 20px; border-radius: 25px; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 30px;">
                     <i class="la la-tripadvisor"></i>
                     TripAdvisor Certified Excellence
                 </div>

@@ -32,6 +32,8 @@
     <link rel="stylesheet" href="{{ request()->root() }}/website/css/line-awesome.css">
     <link rel="stylesheet" href="{{ request()->root() }}/website/css/new/style.css">
 
+
+
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -44,6 +46,8 @@
         crossorigin>
 
     @yield('css')
+    <link rel="stylesheet" href="{{ request()->root() }}/website/css/style_new.css">
+
 </head>
 
 <body>
@@ -84,7 +88,7 @@
                         onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.style.borderColor='transparent'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-medium)'"
                         data-cf-modified-bbfb53b5999c6c3f61fbade4-="">
                         <div class="choose-icon"
-                            style="width: 80px; height: 80px; background: var(--gradient-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2.2rem; color: white; box-shadow: var(--shadow-gold); transition: all 0.3s ease;">
+                            style="width: 80px; height: 80px;  border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2.2rem; color: white; box-shadow: var(--shadow-gold); transition: all 0.3s ease;">
                             <i class="la la-cog"></i>
                         </div>
                         <h3 class="choose-title"
@@ -118,7 +122,7 @@
                         onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.style.borderColor='transparent'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-medium)'"
                         data-cf-modified-bbfb53b5999c6c3f61fbade4-="">
                         <div class="choose-icon"
-                            style="width: 80px; height: 80px; background: var(--gradient-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2.2rem; color: white; box-shadow: var(--shadow-gold); transition: all 0.3s ease;">
+                            style="width: 80px; height: 80px;  border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2.2rem; color: white; box-shadow: var(--shadow-gold); transition: all 0.3s ease;">
                             <i class="la la-lightbulb"></i>
                         </div>
                         <h3 class="choose-title"
@@ -149,7 +153,7 @@
                         onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.style.borderColor='transparent'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-medium)'"
                         data-cf-modified-bbfb53b5999c6c3f61fbade4-="">
                         <div class="choose-icon"
-                            style="width: 80px; height: 80px; background: var(--gradient-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2.2rem; color: white; box-shadow: var(--shadow-gold); transition: all 0.3s ease;">
+                            style="width: 80px; height: 80px;  border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2.2rem; color: white; box-shadow: var(--shadow-gold); transition: all 0.3s ease;">
                             <i class="la la-user-graduate"></i>
                         </div>
                         <h3 class="choose-title"
@@ -180,7 +184,7 @@
                         onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.style.borderColor='transparent'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-medium)'"
                         data-cf-modified-bbfb53b5999c6c3f61fbade4-="">
                         <div class="choose-icon"
-                            style="width: 80px; height: 80px; background: var(--gradient-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2.2rem; color: white; box-shadow: var(--shadow-gold); transition: all 0.3s ease;">
+                            style="width: 80px; height: 80px;  border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2.2rem; color: white; box-shadow: var(--shadow-gold); transition: all 0.3s ease;">
                             <i class="la la-shield-alt"></i>
                         </div>
                         <h3 class="choose-title"
@@ -247,7 +251,7 @@
 
 
     @yield('js')
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

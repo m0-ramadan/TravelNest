@@ -1,28 +1,95 @@
 :root {
-    /* Enhanced color palette */
-    --primary-navy: #1c325c;
-    --deep-teal: #1a4b66;
-    --rich-gold: #c5955b;
-    --warm-bronze: #b8860b;
-    --sage-green: #8b9b6b;
-    --cream-elegant: #f8f6f1;
-    --pearl-luxury: #fefcf7;
-    --charcoal-deep: #2c3e50;
-    --warm-gray: #6c757d;
-    --light-sand: #f5f3ee;
+    /* Blue & White Theme - Enhanced Version */
+    --primary-navy: #1a365d;        /* primary-blue */
+    --deep-teal: #2c5282;           /* secondary-blue */
+    --rich-gold: #4299e1;           /* light-blue */
+    --warm-bronze: #d69e2e;         /* accent-gold */
+    --sage-green: #63b3ed;          /* light-blue variation */
+    --cream-elegant: #f7fafc;       /* off-white */
+    --pearl-luxury: #ffffff;        /* pure-white */
+    --charcoal-deep: #2d3748;       /* dark gray-blue */
+    --warm-gray: #718096;           /* gray-medium */
+    --light-sand: #e2e8f0;          /* gray-light */
     
-    /* Enhanced gradients */
-    --gradient-hero: linear-gradient(135deg, #1c325c 0%, #1a4b66 50%, #2c3e50 100%);
-    --gradient-gold: linear-gradient(135deg, #c5955b 0%, #b8860b 100%);
-    --gradient-elegant: linear-gradient(135deg, #f8f6f1 0%, #fefcf7 100%);
-    --gradient-overlay: linear-gradient(135deg, rgba(28, 50, 92, 0.9) 0%, rgba(26, 75, 102, 0.8) 100%);
+    /* Additional blue shades for more flexibility */
+    --blue-50: #ebf8ff;            /* soft-blue */
+    --blue-100: #bee3f8;
+    --blue-200: #90cdf4;
+    --blue-300: #63b3ed;
+    --blue-400: #4299e1;
+    --blue-500: #3182ce;
+    --blue-600: #2c5282;
+    --blue-700: #2d3748;
+    --blue-800: #1a365d;
+    --blue-900: #1a202c;
+    
+    /* Gold accent colors */
+    --gold-50: #faf089;            /* accent-gold-light */
+    --gold-100: #f6e05e;
+    --gold-200: #ecc94b;
+    --gold-300: #d69e2e;           /* accent-gold */
+    --gold-400: #b7791f;
+    --gold-500: #975a16;
+    
+    /* Gray scale */
+    --gray-50: #f7fafc;            /* off-white */
+    --gray-100: #edf2f7;
+    --gray-200: #e2e8f0;           /* gray-light */
+    --gray-300: #cbd5e0;
+    --gray-400: #a0aec0;           /* gray-medium */
+    --gray-500: #718096;           /* warm-gray */
+    --gray-600: #4a5568;
+    --gray-700: #2d3748;           /* charcoal-deep */
+    --gray-800: #1a202c;
+    --gray-900: #171923;
+    
+    /* Enhanced gradients - Blue & White Theme */
+    --gradient-hero: linear-gradient(135deg, var(--primary-navy) 0%, var(--deep-teal) 50%, var(--rich-gold) 100%);
+    --gradient-gold: linear-gradient(135deg, var(--rich-gold) 0%, var(--sage-green) 100%);
+    --gradient-elegant: linear-gradient(135deg, var(--cream-elegant) 0%, var(--pearl-luxury) 100%);
+    --gradient-overlay: linear-gradient(135deg, rgba(26, 54, 93, 0.9) 0%, rgba(44, 82, 130, 0.8) 100%);
+    --gradient-blue: linear-gradient(135deg, var(--primary-navy) 0%, var(--deep-teal) 100%);
+    --gradient-light-blue: linear-gradient(135deg, var(--rich-gold) 0%, #90cdf4 100%);
+    --gradient-white: linear-gradient(135deg, var(--pure-white) 0%, var(--off-white) 100%);
     
     /* Enhanced shadows */
-    --shadow-subtle: 0 2px 12px rgba(28, 50, 92, 0.08);
-    --shadow-medium: 0 8px 32px rgba(28, 50, 92, 0.12);
-    --shadow-dramatic: 0 16px 48px rgba(28, 50, 92, 0.15);
-    --shadow-gold: 0 4px 20px rgba(197, 149, 91, 0.3);
+    --shadow-subtle: 0 2px 12px rgba(26, 54, 93, 0.08);
+    --shadow-medium: 0 8px 32px rgba(26, 54, 93, 0.12);
+    --shadow-dramatic: 0 16px 48px rgba(26, 54, 93, 0.15);
+    --shadow-gold: 0 4px 20px rgba(214, 158, 46, 0.3);
+    --shadow-blue: 0 4px 20px rgba(66, 153, 225, 0.3);
+    --shadow-white: 0 4px 20px rgba(255, 255, 255, 0.1);
 }
+
+/* Compatibility with existing styles */
+.primary-blue { color: var(--primary-navy); }
+.secondary-blue { color: var(--deep-teal); }
+.light-blue { color: var(--rich-gold); }
+.soft-blue { color: var(--blue-50); }
+.pure-white { color: var(--pearl-luxury); }
+.off-white { color: var(--cream-elegant); }
+.gray-light { color: var(--light-sand); }
+.gray-medium { color: var(--warm-gray); }
+.accent-gold { color: var(--warm-bronze); }
+.accent-gold-light { color: var(--gold-50); }
+
+/* Background colors */
+.bg-primary-blue { background-color: var(--primary-navy); }
+.bg-secondary-blue { background-color: var(--deep-teal); }
+.bg-light-blue { background-color: var(--rich-gold); }
+.bg-soft-blue { background-color: var(--blue-50); }
+.bg-pure-white { background-color: var(--pearl-luxury); }
+.bg-off-white { background-color: var(--cream-elegant); }
+.bg-gray-light { background-color: var(--light-sand); }
+.bg-gray-medium { background-color: var(--warm-gray); }
+.bg-accent-gold { background-color: var(--warm-bronze); }
+.bg-accent-gold-light { background-color: var(--gold-50); }
+
+/* Gradient backgrounds */
+.bg-gradient-hero { background: var(--gradient-hero); }
+.bg-gradient-blue { background: var(--gradient-blue); }
+.bg-gradient-gold { background: var(--gradient-gold); }
+.bg-gradient-white { background: var(--gradient-white); }
 
 * {
     box-sizing: border-box;
@@ -1903,7 +1970,7 @@ body {
 .choose-icon {
     width: 70px;
     height: 70px;
-    background: var(--gradient-gold);
+    /* background: var(--gradient-gold); */
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -3749,4 +3816,17 @@ body {
     .footer-bottom-section .social-links ul {
         gap: 15px;
     }
+}
+
+.navbar>.container,
+.navbar>.container-fluid,
+.navbar>.container-lg,
+.navbar>.container-md,
+.navbar>.container-sm,
+.navbar>.container-xl,
+.navbar>.container-xxl {
+    display: flex !important;      /* لتأكيد override */
+    flex-wrap: nowrap !important;  /* منع التفاف العناصر */
+    align-items: center;
+    justify-content: space-between;
 }
