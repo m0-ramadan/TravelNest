@@ -12,16 +12,16 @@ class CategoryResource extends JsonResource
     {
         return [
             'id'          => $this->id,
-            'name'        => $this->name,
+            'name'        => $this->name ?? 'A/N',
             'slug'        => $this->slug,
-            'description' => $this->description,
+            'description' => $this->description ?? 'A/N',
             'parent'      => $this->whenLoaded('parent', fn() => new self($this->parent)),
             'children'    => self::collection($this->children),
             'order'       => $this->order,
-            'image'       => $this->image ? get_user_image($this->image) : null ,
-            'sub_image'       => $this->sub_image ? get_user_image($this->sub_image) : null ,
+            'image'       => $this->image ? get_user_image($this->image) : null,
+            'sub_image'    => $this->sub_image ? get_user_image($this->sub_image) : null,
             'is_parent'   => $this->isParent(),
-            'category_banners' => BannerItemResource::collection($this->categoryBanners),
+            'category_banners' => $this->categoryBanners ? BannerItemResource::collection($this->categoryBanners) : null,
         ];
     }
 }

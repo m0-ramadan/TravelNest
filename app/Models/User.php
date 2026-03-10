@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Str;
-use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Notifications\Notifiable;
+use App\Models\Wallet\LedgerEntry;
+use App\Models\Wallet\UserWallet;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
@@ -19,7 +20,7 @@ class User extends Authenticatable
         'facebook_id',
         'apple_id',
         'phone',
-        'image'
+        'image',
     ];
 
     protected $hidden = [
@@ -32,81 +33,95 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    // public function reviews()
-    // {
-    //     return $this->hasMany(Review::class);
-    // }
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
     public function notifications()
     {
         return $this->morphMany(\App\Models\Notification::class, 'notifiable');
     }
+
     public function favourites()
     {
         return $this->hasMany(\App\Models\Favourite::class);
     }
 
+    public function favouriteProducts()
+    {
+        return $this->belongsToMany(\App\Models\Product::class, 'favourites');
+    }
 
     public function favorites()
     {
         return $this->hasMany(Favorite::class);
     }
 
-    // العلاقات
-    public function bookings()
+    public function orders()
     {
-        return $this->hasMany(Booking::class);
+        return $this->hasMany(Order::class);
     }
 
-    public function reviews()
+    public function cart()
     {
-        return $this->hasMany(Review::class);
+        return $this->hasOne(Cart::class);
     }
 
-    public function inquiries()
+    /**
+     * Create user wallet
+     */
+    public function createUserWallet()
     {
-        return $this->hasMany(Inquiry::class);
+        if (! $this->userWallet) {
+            return UserWallet::create([
+                'user_id' => $this->id,
+                'balance' => 0,
+                'held_balance' => 0,
+                'currency' => 'EGP',
+                'status' => 'active',
+            ]);
+        }
+        return $this->userWallet;
     }
 
-    public function assignedBookings()
+    /**
+     * Get wallet
+     */
+    public function wallet()
     {
-        return $this->hasMany(Booking::class, 'assigned_to');
+        return $this->userWallet;
     }
 
-    public function assignedInquiries()
+    public function userWallet()
     {
-        return $this->hasMany(Inquiry::class, 'assigned_to');
+        return $this->hasOne(UserWallet::class, 'user_id');
     }
 
-    // النطاقات (Scopes)
-    public function scopeCustomers($query)
+    /**
+     * Check if user can transact
+     */
+    public function canTransact(float $amount, string $type = 'withdrawal'): bool
     {
-        return $query->where('role', 'customer');
+        if ($this->status !== 'active') {
+            return false;
+        }
+
+        $wallet = $this->wallet();
+
+        if (! $wallet || $wallet->status !== 'active') {
+            return false;
+        }
+
+        return true;
     }
 
-    public function scopeAgents($query)
+    /**
+     * Get ledger entries
+     */
+    public function ledgerEntries()
     {
-        return $query->where('role', 'agent');
-    }
-
-    public function scopeAdmins($query)
-    {
-        return $query->where('role', 'admin');
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
-    }
-
-    // الأحداث (Events)
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($user) {
-            if (empty($user->password)) {
-                $user->password = bcrypt(Str::random(10));
-            }
-        });
+        return LedgerEntry::where('owner_type', 'user')
+            ->where('owner_id', $this->id);
     }
 }

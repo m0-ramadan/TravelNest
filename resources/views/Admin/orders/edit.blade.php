@@ -609,7 +609,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="summary-row" bis_skin_checked="1">
+                                    {{-- <div class="summary-row" bis_skin_checked="1">
                                         <span class="summary-label">الشحن:</span>
                                         <div class="input-group input-group-sm" style="width: 150px;"
                                             bis_skin_checked="1">
@@ -619,7 +619,7 @@
                                                 step="0.01" min="0">
                                             <span class="input-group-text">ج.م</span>
                                         </div>
-                                    </div>
+                                    </div> --}}
 
                                     <div class="summary-row" bis_skin_checked="1">
                                         <span class="summary-label">الخصم:</span>

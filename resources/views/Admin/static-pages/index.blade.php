@@ -491,7 +491,7 @@
                                         </td>
                                         <td>
                                             <div class="d-flex gap-2" bis_skin_checked="1">
-                                                <a href="{{ route('admin.static-pages.show', $page) }}"
+                                                <a href="{{ route('admin.static-pages.show', $page->id) }}"
                                                     class="btn btn-sm btn-info" title="عرض">
                                                     <i class="fas fa-eye"></i>
                                                 </a>

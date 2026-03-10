@@ -3,10 +3,41 @@
 @section('title', 'إضافة قسم جديد')
 
 @section('css')
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
             font-family: "Cairo", sans-serif !important;
+        }
+
+        .language-tab {
+            padding: 8px 15px;
+            border: 1px solid #dee2e6;
+            background: rgba(105, 108, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+
+        .language-tab.active {
+            background: rgba(135, 136, 182, 0.2);
+            border-bottom-color: #fff;
+            color: #696cff;
+            font-weight: 600;
+        }
+
+        .language-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 0 5px 5px 5px;
+            background: rgba(105, 108, 255, 0.2);
+        }
+
+        .language-content.active {
+            display: block;
         }
 
         .category-image-preview {
@@ -14,10 +45,10 @@
             height: 200px;
             object-fit: cover;
             border-radius: 10px;
-            /* border: 2px dashed #dee2e6; */
             padding: 5px;
             cursor: pointer;
             transition: all 0.3s ease;
+            border: 2px solid #dee2e6;
         }
 
         .category-image-preview:hover {
@@ -43,6 +74,7 @@
             border-radius: 10px;
             opacity: 0;
             transition: opacity 0.3s ease;
+            cursor: pointer;
         }
 
         .image-upload-container:hover .image-overlay {
@@ -50,7 +82,7 @@
         }
 
         .image-overlay i {
-            /* color: white; */
+            color: white;
             font-size: 24px;
         }
 
@@ -72,7 +104,6 @@
         }
 
         .nav-tabs .nav-link {
-            color: #6c757d;
             border: none;
             padding: 10px 20px;
             font-weight: 500;
@@ -85,18 +116,11 @@
         }
 
         .form-section {
-            /* background: #f8f9fa; */
+            background: #f8f9fa;
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
-            /* border: 1px solid #e9ecef; */
-        }
-
-        .form-section h5 {
-            color: #566a7f;
-            /* border-bottom: 1px solid #dee2e6; */
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
         }
 
         .required::after {
@@ -104,13 +128,8 @@
             color: #dc3545;
         }
 
-        .info-icon {
-            color: #696cff;
-            cursor: help;
-        }
-
         .slug-preview {
-            /* background: #e9ecef; */
+            background: #e9ecef;
             padding: 8px 12px;
             border-radius: 5px;
             margin-top: 5px;
@@ -118,848 +137,1386 @@
             font-size: 14px;
         }
 
-        .tab-content {
-            padding: 20px 0;
+        .slug-preview a {
+            color: #696cff;
+            text-decoration: none;
         }
 
-        .type-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+        .slug-preview a:hover {
+            text-decoration: underline;
         }
 
-        .type-card {
-            flex: 1;
-            /* border: 2px solid #dee2e6; */
+        .ai-features-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 10px;
             padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            color: white;
         }
 
-        .type-card:hover {
-            border-color: #696cff;
-            transform: translateY(-2px);
+        .ai-features-section label {
+            color: white;
         }
 
-        .type-card.active {
-            border-color: #696cff;
-            background-color: rgba(105, 108, 255, 0.1);
+        .input-group-with-ai {
+            position: relative;
         }
 
-        .type-card i {
-            font-size: 40px;
-            margin-bottom: 10px;
-            color: #696cff;
+        .input-group-with-ai .ai-buttons {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 5px;
+            z-index: 5;
         }
 
-        .type-card h6 {
-            margin-bottom: 5px;
-            font-weight: 600;
+        .input-group-with-ai .form-control {
+            padding-left: 100px;
         }
 
-        .type-card p {
-            font-size: 12px;
-            /* color: #6c757d; */
-            margin-bottom: 0;
+        .textarea-with-ai {
+            position: relative;
         }
 
-        .parent-category-selection {
-            max-height: 300px;
-            overflow-y: auto;
-            /* border: 1px solid #dee2e6; */
+        .textarea-with-ai .ai-buttons {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 5;
+            display: flex;
+            gap: 5px;
+        }
+
+        .textarea-with-ai .form-control {
+            padding-top: 50px;
+        }
+
+        .preview-content {
+            min-height: 50px;
+            background-color: #f8f9fa;
             border-radius: 5px;
             padding: 10px;
+            margin-top: 10px;
         }
 
-        .parent-category-item {
-            padding: 8px 12px;
-            border-radius: 5px;
-            margin-bottom: 5px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .parent-category-item:hover {
-            /* background-color: #e9ecef; */
-        }
-
-        .parent-category-item.selected {
-            background-color: #696cff;
-            /* color: white; */
-        }
-
-        .quick-tips {
-            /* background: #e7f7ff; */
-            border-right: 4px solid #696cff;
+        .translation-completed {
+            animation: slideIn 0.5s ease-out;
             padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        .quick-tips h6 {
-            color: #696cff;
+            background: linear-gradient(90deg, #d4edda 0%, #c3e6cb 100%);
+            border-radius: 8px;
+            border: 1px solid #c3e6cb;
             margin-bottom: 10px;
         }
 
-        .quick-tips ul {
-            margin-bottom: 0;
-            padding-left: 20px;
+        .loading-translation {
+            background-color: rgba(248, 249, 250, 0.8);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            padding: 20px;
+            text-align: center;
+            border: 2px dashed #dee2e6;
         }
 
-        .quick-tips li {
-            margin-bottom: 5px;
-            font-size: 14px;
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spin {
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        .toast-container {
+            z-index: 99999;
+        }
+
+        .toast {
+            min-width: 350px;
+            max-width: 500px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            border-radius: 0.375rem;
+        }
+
+        .card.ai-enhanced {
+            border-left: 4px solid #696cff;
+            box-shadow: 0 0.125rem 0.25rem rgba(105, 108, 255, 0.2);
+        }
+
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+
+        .badge-count {
+            background: #696cff;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-right: 5px;
         }
     </style>
 @endsection
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y" bis_skin_checked="1">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="{{ route('admin.index') }}">الرئيسية</a>
-            </li>
-            <li class="breadcrumb-item">
-                <a href="{{ route('admin.categories.index') }}">الأقسام</a>
-            </li>
-            <li class="breadcrumb-item active">إضافة قسم جديد</li>
-        </ol>
-    </nav>
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <!-- breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ route('admin.index') }}">الرئيسية</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ route('admin.categories.index') }}">الأقسام</a>
+                </li>
+                <li class="breadcrumb-item active">إضافة قسم جديد</li>
+            </ol>
+        </nav>
 
-    <div class="row" bis_skin_checked="1">
-        <div class="col-md-8" bis_skin_checked="1">
-            <div class="card mb-4" bis_skin_checked="1">
-                <div class="card-header d-flex justify-content-between align-items-center" bis_skin_checked="1">
-                    <h5 class="mb-0">إضافة قسم جديد</h5>
-                    <a href="{{ route('admin.categories.index') }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-arrow-right me-1"></i> رجوع للقائمة
-                    </a>
-                </div>
-                
-                <div class="card-body" bis_skin_checked="1">
-                    <!-- Quick Tips -->
-                    <div class="quick-tips" bis_skin_checked="1">
-                        <h6><i class="fas fa-lightbulb me-2"></i>نصائح سريعة:</h6>
-                        <ul>
-                            <li>اختر نوع القسم المناسب (رئيسي أو فرعي)</li>
-                            <li>استخدم أسماء واضحة ومعبرة عن محتوى القسم</li>
-                            <li>أضف وصفاً مختصراً لتحسين تجربة المستخدم</li>
-                            <li>اختر صورة مميزة تمثل القسم بشكل واضح</li>
-                            <li>اضبط إعدادات SEO لتحسين ظهور القسم في محركات البحث</li>
-                        </ul>
+        <div class="row">
+            <!-- العمود الرئيسي -->
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            إضافة قسم جديد
+                        </h5>
+                        <div class="btn-group">
+                            <a href="{{ route('admin.categories.index') }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-arrow-right me-1"></i> رجوع
+                            </a>
+                            @if (request('parent_id'))
+                                <a href="{{ route('admin.categories.edit', request('parent_id')) }}"
+                                    class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-level-up-alt me-1"></i> القسم الرئيسي
+                                </a>
+                            @endif
+                        </div>
                     </div>
 
-                    @if($errors->any())
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="fas fa-exclamation-circle me-2"></i>
-                            <ul class="mb-0">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @endif
-
-                    <form action="{{ route('admin.categories.store') }}" method="POST" enctype="multipart/form-data" id="createCategoryForm">
-                        @csrf
-
-                        <!-- Category Type Selection -->
-                        <div class="form-section" bis_skin_checked="1">
-                            <h5><i class="fas fa-layer-group me-2"></i>نوع القسم</h5>
-                            <div class="type-selector" bis_skin_checked="1">
-                                <div class="type-card active" id="parentType" onclick="selectType('parent')">
-                                    <i class="fas fa-folder"></i>
-                                    <h6>قسم رئيسي</h6>
-                                    <p>قسم مستقل يمكن أن يحتوي على أقسام فرعية</p>
-                                </div>
-                                <div class="type-card" id="childType" onclick="selectType('child')">
-                                    <i class="fas fa-folder-plus"></i>
-                                    <h6>قسم فرعي</h6>
-                                    <p>قسم تابع لقسم رئيسي</p>
-                                </div>
+                    <div class="card-body">
+                        @if (session('success'))
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="fas fa-check-circle me-2"></i>
+                                {{ session('success') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
                             </div>
-                            
-                            <!-- Parent Category Selection (Hidden by default) -->
-                            <div id="parentSelection" style="display: none;">
-                                <label class="form-label required">اختر القسم الرئيسي</label>
-                                @if($parentCategories->count() > 0)
-                                    <div class="parent-category-selection" bis_skin_checked="1">
-                                        @foreach($parentCategories as $parent)
-                                            <div class="parent-category-item" 
-                                                 onclick="selectParent({{ $parent->id }}, '{{ $parent->name }}')"
-                                                 id="parent-{{ $parent->id }}">
-                                                <i class="fas fa-folder me-2"></i>
-                                                {{ $parent->name }}
-                                                @if($parent->children_count > 0)
-                                                    <span class="badge bg-info float-end">{{ $parent->children_count }} فرعي</span>
-                                                @endif
-                                            </div>
+                        @endif
+
+                        @if ($errors->any())
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                            </div>
+                        @endif
+
+                        <!-- رسائل الذكاء الاصطناعي -->
+                        <div id="ai-messages" style="display: none;">
+                            <div class="alert alert-info d-flex align-items-center" role="alert">
+                                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                <span id="ai-message-text"></span>
+                            </div>
+                        </div>
+
+                        <!-- إحصائيات اللغات -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center justify-content-between bg-light p-3 rounded">
+                                    <div>
+                                        <h6 class="mb-1">اللغات المتاحة</h6>
+                                        <p class="text-muted mb-0" id="languages-count">
+                                            القسم مدعوم بـ {{ $languages->count() }} لغات
+                                        </p>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        @foreach ($languages as $language)
+                                            <span class="badge bg-primary">{{ $language->name }}</span>
                                         @endforeach
                                     </div>
-                                @else
-                                    <div class="alert alert-warning" bis_skin_checked="1">
-                                        <i class="fas fa-exclamation-triangle me-2"></i>
-                                        لا توجد أقسام رئيسية متاحة. يجب إنشاء قسم رئيسي أولاً.
-                                    </div>
-                                @endif
-                                <input type="hidden" name="parent_id" id="selected_parent_id">
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Tabs Navigation -->
-                        <ul class="nav nav-tabs mb-4" id="categoryTabs" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab">
-                                    <i class="fas fa-info-circle me-2"></i>البيانات الأساسية
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="images-tab" data-bs-toggle="tab" data-bs-target="#images" type="button" role="tab">
-                                    <i class="fas fa-images me-2"></i>الصور
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="seo-tab" data-bs-toggle="tab" data-bs-target="#seo" type="button" role="tab">
-                                    <i class="fas fa-search me-2"></i>SEO
-                                </button>
-                            </li>
-                        </ul>
+                        <form action="{{ route('admin.categories.store') }}" method="POST" enctype="multipart/form-data"
+                            id="createCategoryForm">
+                            @csrf
 
-                        <!-- Tabs Content -->
-                        <div class="tab-content" id="categoryTabsContent">
-                            <!-- Basic Information Tab -->
-                            <div class="tab-pane fade show active" id="basic" role="tabpanel">
-                                <div class="form-section" bis_skin_checked="1">
-                                    <h5>
-                                        <i class="fas fa-info-circle me-2"></i>معلومات القسم
-                                    </h5>
-                                    
-                                    <div class="row" bis_skin_checked="1">
-                                        <div class="col-md-6 mb-3" bis_skin_checked="1">
-                                            <label for="name" class="form-label required">اسم القسم</label>
-                                            <input type="text" class="form-control" id="name" name="name" 
-                                                   value="{{ old('name') }}" required>
-                                            <small class="text-muted">اسم واضح ومعبر عن محتوى القسم</small>
-                                        </div>
-                                        
-                                        <div class="col-md-6 mb-3" bis_skin_checked="1">
-                                            <label for="order" class="form-label">ترتيب العرض</label>
-                                            <input type="number" class="form-control" id="order" name="order" 
-                                                   value="{{ old('order', 0) }}" min="0">
-                                            <small class="text-muted">رقم يحدد ترتيب ظهور القسم (الأصغر أولاً)</small>
-                                        </div>
-                                        
-                                        <div class="col-md-12 mb-3" bis_skin_checked="1">
-                                            <label for="description" class="form-label">الوصف</label>
-                                            <textarea class="form-control" id="description" name="description" 
-                                                      rows="4">{{ old('description') }}</textarea>
-                                            <small class="text-muted">وصف مختصر يظهر في صفحات القسم</small>
-                                        </div>
-                                        
-                                        <div class="col-md-6 mb-3" bis_skin_checked="1">
-                                            <label for="status_id" class="form-label required">الحالة</label>
-                                            <select class="form-select" id="status_id" name="status_id" required>
-                                                <option value="1" {{ old('status_id', 1) == 1 ? 'selected' : '' }}>
-                                                    نشط
-                                                </option>
-                                                <option value="2" {{ old('status_id') == 2 ? 'selected' : '' }}>
-                                                    غير نشط
-                                                </option>
-                                            </select>
-                                        </div>
+                            <!-- قسم إعدادات الذكاء الاصطناعي -->
+                            <div class="ai-features-section">
+                                <h6 class="mb-3">
+                                    <i class="fas fa-robot me-2"></i>
+                                    إعدادات الذكاء الاصطناعي
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="translation_style" class="form-label">أسلوب الترجمة</label>
+                                        <select class="form-select" id="translation_style" name="translation_style">
+                                            <option value="formal" selected>ترجمة رسمية ومهنية</option>
+                                            <option value="simplified">ترجمة مبسطة وسهلة</option>
+                                            <option value="seo">ترجمة محسنة لمحركات البحث</option>
+                                            <option value="creative">ترجمة إبداعية وجذابة</option>
+                                        </select>
                                     </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="tone" class="form-label">نبرة النص</label>
+                                        <select class="form-select" id="tone" name="tone">
+                                            <option value="neutral" selected>محايد</option>
+                                            <option value="friendly">ودود</option>
+                                            <option value="professional">مهني</option>
+                                            <option value="enthusiastic">متحمس</option>
+                                            <option value="persuasive">مقنع</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-2">
+                                    <button type="button" class="btn btn-light" id="generate-with-ai">
+                                        <i class="fas fa-wand-magic-sparkles me-1"></i>
+                                        إنشاء قسم بالذكاء الاصطناعي
+                                    </button>
+                                    <button type="button" class="btn btn-outline-light" id="translate-all-btn">
+                                        <i class="fas fa-language me-1"></i>
+                                        ترجمة لجميع اللغات
+                                    </button>
                                 </div>
                             </div>
 
-                            <!-- Images Tab -->
-                            <div class="tab-pane fade" id="images" role="tabpanel">
-                                <div class="row" bis_skin_checked="1">
-                                    <div class="col-md-6" bis_skin_checked="1">
-                                        <div class="form-section" bis_skin_checked="1">
-                                            <h5>
-                                                <i class="fas fa-image me-2"></i>صورة القسم الرئيسية
-                                            </h5>
-                                            
-                                            <div class="text-center mb-3" bis_skin_checked="1">
-                                                <div class="image-upload-container" bis_skin_checked="1">
-                                                    <img src="https://via.placeholder.com/200x200?text=صورة+القسم" 
-                                                         alt="صورة القسم" 
-                                                         class="category-image-preview" 
-                                                         id="imagePreview">
-                                                    <div class="image-overlay" bis_skin_checked="1">
-                                                        <i class="fas fa-camera"></i>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="mb-3" bis_skin_checked="1">
-                                                <label for="image" class="form-label">اختر صورة</label>
-                                                <input type="file" class="form-control" id="image" name="image" 
-                                                       accept="image/*" onchange="previewImage(this, 'imagePreview')">
-                                                <small class="text-muted">الحجم الأمثل: 800×800 بكسل. الحد الأقصى: 2MB</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-md-6" bis_skin_checked="1">
-                                        <div class="form-section" bis_skin_checked="1">
-                                            <h5>
-                                                <i class="fas fa-image me-2"></i>صورة فرعية
-                                                <span class="badge bg-secondary">اختياري</span>
-                                            </h5>
-                                            
-                                            <div class="text-center mb-3" bis_skin_checked="1">
-                                                <div class="image-upload-container" bis_skin_checked="1">
-                                                    <img src="https://via.placeholder.com/200x200?text=صورة+فرعية" 
-                                                         alt="صورة فرعية" 
-                                                         class="category-image-preview" 
-                                                         id="subImagePreview">
-                                                    <div class="image-overlay" bis_skin_checked="1">
-                                                        <i class="fas fa-camera"></i>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="mb-3" bis_skin_checked="1">
-                                                <label for="sub_image" class="form-label">اختر صورة فرعية</label>
-                                                <input type="file" class="form-control" id="sub_image" name="sub_image" 
-                                                       accept="image/*" onchange="previewImage(this, 'subImagePreview')">
-                                                <small class="text-muted">الحجم الأمثل: 800×800 بكسل. الحد الأقصى: 2MB</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="alert alert-info mt-3" bis_skin_checked="1">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    <strong>ملاحظة:</strong> الصور المسموح بها: JPEG, PNG, JPG, GIF, SVG, WEBP.
-                                </div>
-                            </div>
-
-                            <!-- SEO Tab -->
-                            <div class="tab-pane fade" id="seo" role="tabpanel">
-                                <div class="form-section" bis_skin_checked="1">
-                                    <h5>
-                                        <i class="fas fa-search me-2"></i>إعدادات SEO
-                                    </h5>
-                                    
-                                    <div class="mb-3" bis_skin_checked="1">
-                                        <label for="slug" class="form-label">الرابط (Slug)</label>
-                                        <div class="slug-input-group" bis_skin_checked="1">
-                                            <input type="text" class="form-control" id="slug" name="slug" 
-                                                   value="{{ old('slug') }}">
-                                            <button type="button" class="btn btn-outline-secondary" onclick="generateSlug()">
-                                                <i class="fas fa-sync-alt"></i>
+                            <!-- تبادل اللغات الرئيسي -->
+                            <div class="mb-4">
+                                <div class="language-tabs d-flex border-bottom">
+                                    <button type="button" class="language-tab active" data-target="ar">
+                                        <i class="fas fa-language me-1"></i> العربية
+                                    </button>
+                                    @foreach ($languages as $language)
+                                        @if ($language->code != 'ar')
+                                            <button type="button" class="language-tab"
+                                                data-target="{{ $language->code }}">
+                                                <i class="fas fa-globe me-1"></i> {{ $language->name }}
                                             </button>
-                                        </div>
-                                        <small class="text-muted">رابط SEO الخاص بالقسم. اتركه فارغاً لإنشاء رابط تلقائي</small>
-                                        
-                                        <!-- Slug Preview -->
-                                        <div class="slug-preview mt-2" bis_skin_checked="1" id="slugPreview">
-                                            رابط القسم: 
-                                            <span id="slugPreviewText">سيظهر هنا بعد إدخال الاسم</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mb-3" bis_skin_checked="1">
-                                        <label for="meta_title" class="form-label">عنوان الصفحة (Meta Title)</label>
-                                        <input type="text" class="form-control" id="meta_title" name="meta_title" 
-                                               value="{{ old('meta_title') }}">
-                                        <small class="text-muted">سيظهر في نتائج محركات البحث. الطول الموصى به: 50-60 حرفاً</small>
-                                        <div class="progress mt-1" style="height: 5px;">
-                                            <div class="progress-bar" id="titleProgress" role="progressbar"></div>
-                                        </div>
-                                        <small class="text-muted text-end d-block" id="titleCount">0/60</small>
-                                    </div>
-                                    
-                                    <div class="mb-3" bis_skin_checked="1">
-                                        <label for="meta_description" class="form-label">وصف الصفحة (Meta Description)</label>
-                                        <textarea class="form-control" id="meta_description" name="meta_description" 
-                                                  rows="3">{{ old('meta_description') }}</textarea>
-                                        <small class="text-muted">وصف مختصر يظهر في نتائج البحث. الطول الموصى به: 150-160 حرفاً</small>
-                                        <div class="progress mt-1" style="height: 5px;">
-                                            <div class="progress-bar" id="descProgress" role="progressbar"></div>
-                                        </div>
-                                        <small class="text-muted text-end d-block" id="descCount">0/160</small>
-                                    </div>
-                                    
-                                    <div class="mb-3" bis_skin_checked="1">
-                                        <label for="meta_keywords" class="form-label">الكلمات المفتاحية</label>
-                                        <input type="text" class="form-control" id="meta_keywords" name="meta_keywords" 
-                                               value="{{ old('meta_keywords') }}">
-                                        <small class="text-muted">كلمات مفتاحية مفصولة بفواصل (,) - اختياري</small>
-                                    </div>
+                                        @endif
+                                    @endforeach
                                 </div>
-                            </div>
-                        </div>
 
-                        <!-- Form Actions -->
-                        <div class="d-flex justify-content-between mt-4" bis_skin_checked="1">
-                            <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
-                                <i class="fas fa-redo me-1"></i>إعادة تعيين
-                            </button>
-                            <div class="btn-group" bis_skin_checked="1">
-                                <a href="{{ route('admin.categories.index') }}" class="btn btn-secondary">
-                                    <i class="fas fa-times me-1"></i>إلغاء
-                                </a>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save me-1"></i>حفظ القسم
-                                </button>
-                                <button type="button" class="btn btn-success" onclick="saveAndAddAnother()">
-                                    <i class="fas fa-plus-circle me-1"></i>حفظ وإضافة جديد
-                                </button>
+                                <!-- المحتوى العربي -->
+                                <div class="language-content active" data-lang="ar">
+                                    <div class="card ai-enhanced">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-12 mb-3">
+                                                    <label for="name_ar" class="form-label required">اسم القسم</label>
+                                                    <div class="input-group-with-ai">
+                                                        <div class="ai-buttons">
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-outline-primary ai-enhance-btn"
+                                                                data-target="#name_ar" data-type="title">
+                                                                <i class="fas fa-wand-magic-sparkles"></i>
+                                                            </button>
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-outline-success ai-seo-btn"
+                                                                data-target="#name_ar" data-type="seo_title">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                        <input type="text" class="form-control" id="name_ar"
+                                                            name="name[ar]" value="{{ old('name.ar') }}" required
+                                                            placeholder="اسم القسم بالعربية">
+                                                    </div>
+                                                    <small class="text-muted">اسم واضح ومعبر عن محتوى القسم</small>
+                                                </div>
+
+                                                <div class="col-md-12 mb-3">
+                                                    <label for="parent_id" class="form-label">القسم الرئيسي</label>
+                                                    <select class="form-select select2" id="parent_id" name="parent_id">
+                                                        <option value="">قسم رئيسي (بدون أب)</option>
+                                                        @foreach ($parentCategories as $parent)
+                                                            <option value="{{ $parent->id }}"
+                                                                {{ old('parent_id', request('parent_id')) == $parent->id ? 'selected' : '' }}>
+                                                                {{ $parent->getTranslation('name', 'ar') }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    <small class="text-muted">اختياري - لإنشاء هيكل هرمي للأقسام</small>
+                                                </div>
+
+                                                <div class="col-md-12 mb-3">
+                                                    <label for="description_ar" class="form-label">الوصف</label>
+                                                    <div class="textarea-with-ai">
+                                                        <div class="ai-buttons">
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-outline-primary ai-enhance-btn"
+                                                                data-target="#description_ar" data-type="description">
+                                                                <i class="fas fa-wand-magic-sparkles"></i>
+                                                            </button>
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-outline-success ai-complete-btn"
+                                                                data-target="#description_ar" data-type="description">
+                                                                <i class="fas fa-plus"></i>
+                                                            </button>
+                                                        </div>
+                                                        <textarea class="form-control summernote" id="description_ar" name="description[ar]" rows="4"
+                                                            placeholder="وصف القسم بالعربية">{{ old('description.ar') }}</textarea>
+                                                    </div>
+                                                    <small class="text-muted">وصف مختصر يظهر في صفحات القسم</small>
+                                                </div>
+
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="order" class="form-label">ترتيب العرض</label>
+                                                    <input type="number" class="form-control" id="order"
+                                                        name="order" value="{{ old('order', 0) }}" min="0">
+                                                    <small class="text-muted">رقم يحدد ترتيب ظهور القسم</small>
+                                                </div>
+
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="status_id" class="form-label required">الحالة</label>
+                                                    <select class="form-select" id="status_id" name="status_id" required>
+                                                        <option value="1"
+                                                            {{ old('status_id') == 1 ? 'selected' : '' }}>
+                                                            <i class="fas fa-check-circle"></i> نشط
+                                                        </option>
+                                                        <option value="2"
+                                                            {{ old('status_id') == 2 ? 'selected' : '' }}>
+                                                            <i class="fas fa-times-circle"></i> غير نشط
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- محتوى اللغات الأخرى -->
+                                @foreach ($languages as $language)
+                                    @if ($language->code != 'ar')
+                                        <div class="language-content" data-lang="{{ $language->code }}">
+                                            <div class="card">
+                                                <div class="card-header d-flex justify-content-between align-items-center">
+                                                    <h6 class="mb-0">
+                                                        <i class="fas fa-globe me-2"></i>
+                                                        {{ $language->name }}
+                                                        <span class="badge bg-info ms-2">ترجمة تلقائية</span>
+                                                    </h6>
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-outline-primary translate-btn"
+                                                        data-lang="{{ $language->code }}">
+                                                        <i class="fas fa-robot me-1"></i>
+                                                        ترجمة تلقائية
+                                                    </button>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-12 mb-3">
+                                                            <label for="name_{{ $language->code }}"
+                                                                class="form-label">اسم القسم</label>
+                                                            <input type="text" class="form-control"
+                                                                id="name_{{ $language->code }}"
+                                                                name="name[{{ $language->code }}]"
+                                                                value="{{ old('name.' . $language->code) }}"
+                                                                placeholder="اسم القسم بـ{{ $language->name }}">
+                                                        </div>
+
+                                                        <div class="col-md-12 mb-3">
+                                                            <label for="description_{{ $language->code }}"
+                                                                class="form-label">الوصف</label>
+                                                            <textarea class="form-control" id="description_{{ $language->code }}" name="description[{{ $language->code }}]"
+                                                                rows="4" placeholder="وصف القسم بـ{{ $language->name }}">{{ old('description.' . $language->code) }}</textarea>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- معاينة الترجمة -->
+                                                    <div id="preview_{{ $language->code }}" class="preview-content">
+                                                        <p class="text-muted mb-0">سيتم عرض الترجمة هنا...</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endforeach
                             </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-4" bis_skin_checked="1">
-            <!-- Quick Guide Card -->
-            <div class="card mb-4" bis_skin_checked="1">
-                <div class="card-header" bis_skin_checked="1">
-                    <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>دليل سريع</h5>
-                </div>
-                <div class="card-body" bis_skin_checked="1">
-                    <div class="accordion" id="guideAccordion">
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#guide1">
-                                    ما هو الفرق بين القسم الرئيسي والفرعي؟
-                                </button>
-                            </h2>
-                            <div id="guide1" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                                <div class="accordion-body">
-                                    <strong>القسم الرئيسي:</strong> قسم مستقل يمكن أن يحتوي على أقسام فرعية. مثال: "إلكترونيات".
-                                    <br><br>
-                                    <strong>القسم الفرعي:</strong> قسم تابع لقسم رئيسي. مثال: "هواتف ذكية" تابع لـ"إلكترونيات".
+
+                            <!-- الصور -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-images me-2"></i>
+                                        الصور
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6 class="mb-3">صورة القسم الرئيسية</h6>
+                                            <div class="text-center mb-3">
+                                                <div class="image-upload-container">
+                                                    <img src="https://via.placeholder.com/200x200?text=صورة+القسم"
+                                                        alt="صورة القسم" class="category-image-preview"
+                                                        id="imagePreview">
+                                                    <div class="image-overlay" onclick="$('#image').click()">
+                                                        <i class="fas fa-camera"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="image" class="form-label">الصورة</label>
+                                                <input type="file" class="form-control" id="image" name="image"
+                                                    accept="image/*" onchange="previewImage(this, 'imagePreview')">
+                                                <small class="text-muted">الصيغ المسموحة: JPEG, PNG, JPG, GIF, SVG, WEBP.
+                                                    الحد الأقصى: 2 ميجابايت</small>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <h6 class="mb-3">الصورة الفرعية</h6>
+                                            <div class="text-center mb-3">
+                                                <div class="image-upload-container">
+                                                    <img src="https://via.placeholder.com/200x200?text=صورة+فرعية"
+                                                        alt="صورة فرعية" class="category-image-preview"
+                                                        id="subImagePreview">
+                                                    <div class="image-overlay" onclick="$('#sub_image').click()">
+                                                        <i class="fas fa-camera"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="sub_image" class="form-label">الصورة الفرعية</label>
+                                                <input type="file" class="form-control" id="sub_image"
+                                                    name="sub_image" accept="image/*"
+                                                    onchange="previewImage(this, 'subImagePreview')">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mt-3">
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="appear_in_home"
+                                                    value="1" id="appear_in_home"
+                                                    {{ old('appear_in_home') ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="appear_in_home">
+                                                    <i class="fas fa-home me-1"></i>
+                                                    إظهار كاسلايدر في صفحة الهوم
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#guide2">
-                                    كيف أختار ترتيب القسم؟
-                                </button>
-                            </h2>
-                            <div id="guide2" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                                <div class="accordion-body">
-                                    الرقم الأصغر يظهر أولاً. مثال:
-                                    <ul class="mt-2">
-                                        <li>ترتيب 1 → يظهر أولاً</li>
-                                        <li>ترتيب 2 → يظهر ثانياً</li>
-                                        <li>ترتيب 0 → يظهر أخيراً</li>
-                                    </ul>
+
+                            <!-- SEO بالذكاء الاصطناعي -->
+                            <div class="card mb-4">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-search me-2"></i>
+                                        تحسين محركات البحث (SEO)
+                                    </h5>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="generate-seo">
+                                        <i class="fas fa-robot me-1"></i>
+                                        إنشاء SEO بالذكاء الاصطناعي
+                                    </button>
                                 </div>
-                            </div>
-                        </div>
-                        
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#guide3">
-                                    نصائح لإعدادات SEO
-                                </button>
-                            </h2>
-                            <div id="guide3" class="accordion-collapse collapse" data-bs-parent="#guideAccordion">
-                                <div class="accordion-body">
-                                    1. استخدم كلمات مفتاحية في الاسم والوصف<br>
-                                    2. اجعل العنوان واضحاً ومختصراً (50-60 حرف)<br>
-                                    3. اكتب وصفاً جذاباً (150-160 حرف)<br>
-                                    4. استخدم روابط واضحة وبدون رموز غريبة
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Recent Categories -->
-            <div class="card" bis_skin_checked="1">
-                <div class="card-header" bis_skin_checked="1">
-                    <div class="d-flex justify-content-between align-items-center" bis_skin_checked="1">
-                        <h5 class="mb-0"><i class="fas fa-history me-2"></i>آخر الأقسام المضافة</h5>
-                        <a href="{{ route('admin.categories.index') }}" class="btn btn-sm btn-outline-primary">عرض الكل</a>
-                    </div>
-                </div>
-                <div class="card-body" bis_skin_checked="1">
-                    @if($recentCategories->count() > 0)
-                        <div class="list-group list-group-flush" bis_skin_checked="1">
-                            @foreach($recentCategories as $recent)
-                                <div class="list-group-item px-0 d-flex justify-content-between align-items-center" bis_skin_checked="1">
-                                    <div bis_skin_checked="1">
-                                        <h6 class="mb-1">{{ $recent->name }}</h6>
-                                        <small class="text-muted">
-                                            {{ $recent->created_at->diffForHumans() }}
-                                            @if(!$recent->isParent())
-                                                <span class="badge bg-secondary ms-2">فرعي</span>
+                                <div class="card-body">
+                                    <!-- تبادل اللغات لـ SEO -->
+                                    <div class="language-tabs d-flex border-bottom mb-3">
+                                        <button type="button" class="language-tab active"
+                                            data-seo-target="ar">العربية</button>
+                                        @foreach ($languages as $language)
+                                            @if ($language->code != 'ar')
+                                                <button type="button" class="language-tab"
+                                                    data-seo-target="{{ $language->code }}">
+                                                    {{ $language->name }}
+                                                </button>
                                             @endif
-                                        </small>
+                                        @endforeach
                                     </div>
-                                    <a href="{{ route('admin.categories.edit', $recent) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
+
+                                    <!-- SEO العربي -->
+                                    <div class="language-seo-content active" data-lang="ar">
+                                        <div class="row">
+                                            <div class="col-md-12 mb-3">
+                                                <label for="slug" class="form-label">الرابط (Slug)</label>
+                                                <div class="slug-input-group">
+                                                    <input type="text" class="form-control" id="slug"
+                                                        name="slug" value="{{ old('slug') }}" dir="ltr">
+                                                    <button type="button" class="btn btn-outline-secondary"
+                                                        onclick="generateSlug()">
+                                                        <i class="fas fa-sync-alt"></i>
+                                                    </button>
+                                                </div>
+                                                <small class="text-muted">رابط SEO الخاص بالقسم. اتركه فارغاً لإنشاء رابط
+                                                    تلقائي</small>
+                                                <div class="slug-preview mt-2" id="slugPreview">
+                                                    رابط القسم:
+                                                    <a href="#" target="_blank">
+                                                        {{ url('/categories') }}/<span id="slugValue">رابط-القسم</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-12 mb-3">
+                                                <label for="meta_title_ar" class="form-label">عنوان الصفحة (Meta
+                                                    Title)</label>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" id="meta_title_ar"
+                                                        name="meta_title[ar]" value="{{ old('meta_title.ar') }}"
+                                                        placeholder="عنوان محسن لمحركات البحث">
+                                                    <button type="button" class="btn btn-outline-primary ai-seo-btn"
+                                                        data-target="#meta_title_ar" data-type="meta_title">
+                                                        <i class="fas fa-robot"></i>
+                                                    </button>
+                                                </div>
+                                                <small class="text-muted">الطول الموصى به: 50-60 حرفاً</small>
+                                                <div class="progress mt-1" style="height: 5px;">
+                                                    <div class="progress-bar" id="titleProgress" role="progressbar">
+                                                    </div>
+                                                </div>
+                                                <small class="text-muted text-end d-block" id="titleCount">0/60</small>
+                                            </div>
+
+                                            <div class="col-md-12 mb-3">
+                                                <label for="meta_description_ar" class="form-label">وصف الصفحة (Meta
+                                                    Description)</label>
+                                                <div class="input-group">
+                                                    <textarea class="form-control" id="meta_description_ar" name="meta_description[ar]" rows="3"
+                                                        placeholder="وصف محسن لمحركات البحث">{{ old('meta_description.ar') }}</textarea>
+                                                    <button type="button" class="btn btn-outline-primary ai-seo-btn"
+                                                        data-target="#meta_description_ar" data-type="meta_description">
+                                                        <i class="fas fa-robot"></i>
+                                                    </button>
+                                                </div>
+                                                <small class="text-muted">الطول الموصى به: 150-160 حرفاً</small>
+                                                <div class="progress mt-1" style="height: 5px;">
+                                                    <div class="progress-bar" id="descProgress" role="progressbar"></div>
+                                                </div>
+                                                <small class="text-muted text-end d-block" id="descCount">0/160</small>
+                                            </div>
+
+                                            <div class="col-md-12 mb-3">
+                                                <label for="meta_keywords_ar" class="form-label">الكلمات المفتاحية</label>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" id="meta_keywords_ar"
+                                                        name="meta_keywords[ar]" value="{{ old('meta_keywords.ar') }}"
+                                                        placeholder="كلمات مفتاحية مفصولة بفواصل">
+                                                    <button type="button" class="btn btn-outline-primary ai-seo-btn"
+                                                        data-target="#meta_keywords_ar" data-type="meta_keywords">
+                                                        <i class="fas fa-robot"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SEO للغات الأخرى -->
+                                    @foreach ($languages as $language)
+                                        @if ($language->code != 'ar')
+                                            <div class="language-seo-content" data-lang="{{ $language->code }}">
+                                                <div class="row">
+                                                    <div class="col-md-12 mb-3">
+                                                        <label for="meta_title_{{ $language->code }}"
+                                                            class="form-label">عنوان SEO</label>
+                                                        <input type="text" class="form-control"
+                                                            id="meta_title_{{ $language->code }}"
+                                                            name="meta_title[{{ $language->code }}]"
+                                                            value="{{ old('meta_title.' . $language->code) }}"
+                                                            placeholder="عنوان SEO بـ{{ $language->name }}">
+                                                    </div>
+
+                                                    <div class="col-md-12 mb-3">
+                                                        <label for="meta_description_{{ $language->code }}"
+                                                            class="form-label">وصف SEO</label>
+                                                        <textarea class="form-control" id="meta_description_{{ $language->code }}"
+                                                            name="meta_description[{{ $language->code }}]" rows="3" placeholder="وصف SEO بـ{{ $language->name }}">{{ old('meta_description.' . $language->code) }}</textarea>
+                                                    </div>
+
+                                                    <div class="col-md-12 mb-3">
+                                                        <label for="meta_keywords_{{ $language->code }}"
+                                                            class="form-label">الكلمات المفتاحية</label>
+                                                        <input type="text" class="form-control"
+                                                            id="meta_keywords_{{ $language->code }}"
+                                                            name="meta_keywords[{{ $language->code }}]"
+                                                            value="{{ old('meta_keywords.' . $language->code) }}"
+                                                            placeholder="كلمات مفتاحية بـ{{ $language->name }}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endforeach
                                 </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="text-center py-3" bis_skin_checked="1">
-                            <i class="fas fa-folder-open fa-2x text-muted mb-3"></i>
-                            <p class="text-muted mb-0">لا توجد أقسام مضافة حديثاً</p>
-                        </div>
-                    @endif
+                            </div>
+
+                            <!-- أزرار الحفظ -->
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                                        <i class="fas fa-undo me-1"></i>
+                                        إعادة تعيين
+                                    </button>
+                                </div>
+                                <div class="btn-group">
+                                    <a href="{{ route('admin.categories.index') }}" class="btn btn-secondary">
+                                        <i class="fas fa-times me-1"></i>
+                                        إلغاء
+                                    </a>
+                                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                                        <i class="fas fa-save me-1"></i>
+                                        إضافة القسم
+                                    </button>
+                                    <button type="submit" name="save_and_add_another" value="1"
+                                        class="btn btn-success">
+                                        <i class="fas fa-plus-circle me-1"></i>
+                                        حفظ وإضافة جديد
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
-<!-- Save and Add Another Modal -->
-<div class="modal fade" id="saveAndAddModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">تم الحفظ بنجاح</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center">
-                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                <h5>تم إضافة القسم بنجاح</h5>
-                <p class="text-muted">ماذا تريد أن تفعل بعد ذلك؟</p>
-            </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-primary" onclick="window.location.href='{{ route('admin.categories.create') }}'">
-                    <i class="fas fa-plus me-1"></i>إضافة قسم جديد
-                </button>
-                <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ route('admin.categories.index') }}'">
-                    <i class="fas fa-list me-1"></i>عرض جميع الأقسام
-                </button>
+            <!-- العمود الجانبي -->
+            <div class="col-md-4">
+                <!-- بطاقة المساعدة -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            معلومات المساعدة
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-primary">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            <strong>نصائح سريعة:</strong>
+                            <ul class="mt-2 mb-0">
+                                <li>اختر اسماً واضحاً ومعبراً للقسم</li>
+                                <li>استخدم وصفاً مختصراً يصف محتوى القسم</li>
+                                <li>يمكنك ترك الرابط ليتولد تلقائياً</li>
+                                <li>استخدم الذكاء الاصطناعي لتحسين المحتوى</li>
+                                <li>الصورة المثالية للقسم تكون مقاس 500x500 بكسل</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الأقسام الرئيسية -->
+                @if ($parentCategories->count() > 0)
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-sitemap me-2"></i>
+                                الأقسام الرئيسية
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush">
+                                @foreach ($parentCategories->take(5) as $parent)
+                                    <a href="{{ route('admin.categories.create', ['parent_id' => $parent->id]) }}"
+                                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                        <span>
+                                            <i class="fas fa-folder me-2"></i>
+                                            {{ $parent->getTranslation('name', 'ar') }}
+                                        </span>
+                                        <span
+                                            class="badge bg-primary rounded-pill">{{ $parent->children_count ?? 0 }}</span>
+                                    </a>
+                                @endforeach
+                                @if ($parentCategories->count() > 5)
+                                    <a href="{{ route('admin.categories.index', ['parent_id' => 'null']) }}"
+                                        class="list-group-item list-group-item-action text-center">
+                                        عرض الكل ({{ $parentCategories->count() }})
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- آخر الأقسام المضافة -->
+                @if ($recentCategories->count() > 0)
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-history me-2"></i>
+                                آخر الأقسام المضافة
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush">
+                                @foreach ($recentCategories as $recent)
+                                    <a href="{{ route('admin.categories.edit', $recent->id) }}"
+                                        class="list-group-item list-group-item-action">
+                                        <div class="d-flex align-items-center">
+                                            @if ($recent->image)
+                                                <img src="{{ get_user_image($recent->image) }}"
+                                                    alt="{{ $recent->getTranslation('name', 'ar') }}"
+                                                    class="rounded-circle me-2"
+                                                    style="width: 30px; height: 30px; object-fit: cover;">
+                                            @else
+                                                <div class="avatar-initial bg-label-primary rounded-circle me-2 d-flex align-items-center justify-content-center"
+                                                    style="width: 30px; height: 30px;">
+                                                    <i class="fas fa-folder fa-xs"></i>
+                                                </div>
+                                            @endif
+                                            <div>
+                                                <strong>{{ $recent->getTranslation('name', 'ar') }}</strong>
+                                                <div class="text-muted small">
+                                                    <i class="fas fa-calendar-alt me-1"></i>
+                                                    {{ $recent->created_at->diffForHumans() }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
-</div>
 @endsection
 
 @section('js')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    // Category Type Selection
-    function selectType(type) {
-        const parentCard = document.getElementById('parentType');
-        const childCard = document.getElementById('childType');
-        const parentSelection = document.getElementById('parentSelection');
-        const parentIdInput = document.getElementById('selected_parent_id');
-        
-        if (type === 'parent') {
-            parentCard.classList.add('active');
-            childCard.classList.remove('active');
-            parentSelection.style.display = 'none';
-            parentIdInput.value = ''; // Clear parent ID
-        } else {
-            parentCard.classList.remove('active');
-            childCard.classList.add('active');
-            parentSelection.style.display = 'block';
-            
-            // Check if there are parent categories
-            const parentItems = document.querySelectorAll('.parent-category-item');
-            if (parentItems.length === 0) {
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function() {
+            // تهيئة Summernote
+            $('.summernote').summernote({
+                height: 200,
+                lang: 'ar-AR',
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['insert', ['link', 'picture']],
+                    ['view', ['fullscreen', 'codeview']]
+                ],
+                placeholder: 'أدخل النص هنا...'
+            });
+
+            // تهيئة Select2
+            $('.select2').select2({
+                placeholder: 'اختر القسم الرئيسي',
+                allowClear: true,
+                dir: 'rtl'
+            });
+
+            // تبادل اللغات الرئيسي
+            $('.language-tab[data-target]').on('click', function() {
+                const targetLang = $(this).data('target');
+
+                $('.language-tab[data-target]').removeClass('active');
+                $(this).addClass('active');
+
+                $('.language-content[data-lang]').removeClass('active');
+                $(`.language-content[data-lang="${targetLang}"]`).addClass('active');
+            });
+
+            // تبادل اللغات لـ SEO
+            $('.language-tab[data-seo-target]').on('click', function() {
+                const targetLang = $(this).data('seo-target');
+
+                $('.language-tab[data-seo-target]').removeClass('active');
+                $(this).addClass('active');
+
+                $('.language-seo-content').removeClass('active');
+                $(`.language-seo-content[data-lang="${targetLang}"]`).addClass('active');
+            });
+
+            // عدادات SEO
+            function updateCounter(input, progress, countElement, max) {
+                const length = input.val().length;
+                const percentage = Math.min((length / max) * 100, 100);
+
+                progress.css('width', percentage + '%');
+
+                if (length <= max) {
+                    progress.removeClass('bg-danger').addClass('bg-success');
+                } else {
+                    progress.removeClass('bg-success').addClass('bg-danger');
+                }
+
+                countElement.text(length + '/' + max);
+            }
+
+            $('#meta_title_ar').on('input', function() {
+                updateCounter($(this), $('#titleProgress'), $('#titleCount'), 60);
+            });
+
+            $('#meta_description_ar').on('input', function() {
+                updateCounter($(this), $('#descProgress'), $('#descCount'), 160);
+            });
+
+            // توليد Slug تلقائياً
+            window.generateSlug = function() {
+                const name = $('#name_ar').val();
+                if (name) {
+                    $.ajax({
+                        url: '{{ route('admin.categories.generate-slug') }}',
+                        method: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            name: name
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                $('#slug').val(response.slug);
+                                $('#slugValue').text(response.slug);
+                                showToast('تم', 'تم توليد الرابط بنجاح', 'success');
+                            }
+                        },
+                        error: function() {
+                            // Fallback to client-side generation
+                            let slug = name
+                                .toLowerCase()
+                                .replace(/[^\u0600-\u06FF\w\s-]/g, '')
+                                .replace(/\s+/g, '-')
+                                .replace(/[-\s]+/g, '-')
+                                .trim();
+
+                            $('#slug').val(slug);
+                            $('#slugValue').text(slug);
+                        }
+                    });
+                }
+            };
+
+            // تحديث معاينة Slug
+            $('#slug').on('input', function() {
+                $('#slugValue').text($(this).val() || 'رابط-القسم');
+            });
+
+            // معاينة الصور
+            window.previewImage = function(input, previewId) {
+                const preview = document.getElementById(previewId);
+                const file = input.files[0];
+
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            // زر تحسين بالذكاء الاصطناعي
+            $(document).on('click', '.ai-enhance-btn', function(e) {
+                e.preventDefault();
+                const $button = $(this);
+                const target = $button.data('target');
+                const type = $button.data('type');
+                const $targetElement = $(target);
+                const text = $targetElement.val().trim();
+
+                if (!text) {
+                    showToast('تنبيه', 'الرجاء إدخال نص أولاً قبل التحسين', 'warning');
+                    return;
+                }
+
+                enhanceWithAI(text, target, type, 'enhance', $button);
+            });
+
+            // زر إكمال بالذكاء الاصطناعي
+            $(document).on('click', '.ai-complete-btn', function(e) {
+                e.preventDefault();
+                const $button = $(this);
+                const target = $button.data('target');
+                const type = $button.data('type');
+                const $targetElement = $(target);
+                const text = $targetElement.val().trim();
+
+                if (!text) {
+                    showToast('تنبيه', 'الرجاء إدخال نص أولاً قبل الإكمال', 'warning');
+                    return;
+                }
+
+                enhanceWithAI(text, target, type, 'complete', $button);
+            });
+
+            // زر تحسين SEO
+            $(document).on('click', '.ai-seo-btn', function(e) {
+                e.preventDefault();
+                const $button = $(this);
+                const target = $button.data('target');
+                const type = $button.data('type');
+                const $targetElement = $(target);
+                let text = $targetElement.val().trim();
+
+                if (!text) {
+                    text = $('#name_ar').val().trim();
+                }
+
+                if (!text) {
+                    showToast('تنبيه', 'الرجاء إدخال نص أولاً قبل تحسين SEO', 'warning');
+                    return;
+                }
+
+                enhanceWithAI(text, target, type, 'seo', $button);
+            });
+
+            // دالة تحسين النص بالذكاء الاصطناعي
+            function enhanceWithAI(text, target, type, action, $button) {
+                const originalText = $button.html();
+                $button.prop('disabled', true);
+                $button.html('<i class="fas fa-spinner spin me-1"></i>');
+
+                showAIMessage(`جاري ${getActionText(action)} النص...`);
+
+                $.ajax({
+                    url: '{{ route('admin.categories.ai-enhance') }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        text: text,
+                        type: type,
+                        action: action,
+                        tone: $('#tone').val(),
+                        style: $('#translation_style').val()
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            $(target).val(response.enhanced_text);
+                            if ($(target).hasClass('summernote')) {
+                                $(target).summernote('code', response.enhanced_text);
+                            }
+                            showToast('تم', `تم ${getActionText(action)} النص بنجاح`, 'success');
+
+                            if (action === 'seo' && target === '#meta_title_ar') {
+                                $('#meta_title_ar').trigger('input');
+                            }
+                        } else {
+                            showToast('خطأ', response.message || 'حدث خطأ أثناء المعالجة', 'error');
+                        }
+                    },
+                    error: function() {
+                        showToast('خطأ', 'حدث خطأ في الاتصال بالخادم', 'error');
+                    },
+                    complete: function() {
+                        hideAIMessage();
+                        $button.prop('disabled', false);
+                        $button.html(originalText);
+                    }
+                });
+            }
+
+            // دالة ترجمة تلقائية
+            $('.translate-btn').on('click', function(e) {
+                e.preventDefault();
+                const $button = $(this);
+                const targetLang = $button.data('lang');
+                const name = $('#name_ar').val().trim();
+                const description = $('#description_ar').val().trim();
+
+                if (!name) {
+                    showToast('تنبيه', 'الرجاء إدخال اسم القسم بالعربية أولاً', 'warning');
+                    return;
+                }
+
+                $button.prop('disabled', true);
+                $button.html('<i class="fas fa-spinner spin me-1"></i> جاري الترجمة...');
+
+                showAIMessage(`جاري الترجمة إلى ${targetLang}...`);
+
+                $(`#preview_${targetLang}`).html(`
+                    <div class="loading-translation">
+                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                        <span class="text-muted">جاري الترجمة...</span>
+                    </div>
+                `);
+
+                $.ajax({
+                    url: '{{ route('admin.categories.ai-translate') }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        name: name,
+                        description: description,
+                        target_lang: targetLang,
+                        style: $('#translation_style').val(),
+                        tone: $('#tone').val()
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            $(`#name_${targetLang}`).val(response.translated.name || '');
+                            if (response.translated.description) {
+                                $(`#description_${targetLang}`).val(response.translated
+                                    .description);
+                            }
+
+                            $(`#preview_${targetLang}`).html(`
+                                <div class="translation-completed">
+                                    <h6 class="text-success mb-2">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        تمت الترجمة بنجاح
+                                    </h6>
+                                    <strong>الاسم:</strong> ${truncateText(response.translated.name, 50)}<br>
+                                    <strong>الوصف:</strong> ${truncateText(response.translated.description || '', 50)}
+                                </div>
+                            `);
+
+                            showToast('تم', `تمت الترجمة إلى ${targetLang} بنجاح`, 'success');
+                        } else {
+                            $(`#preview_${targetLang}`).html(
+                                '<div class="text-center py-3 text-danger">فشل في الترجمة</div>'
+                                );
+                            showToast('خطأ', response.message || 'حدث خطأ أثناء الترجمة',
+                                'error');
+                        }
+                    },
+                    error: function() {
+                        $(`#preview_${targetLang}`).html(
+                            '<div class="text-center py-3 text-danger">فشل في الترجمة</div>'
+                            );
+                        showToast('خطأ', 'حدث خطأ أثناء الترجمة', 'error');
+                    },
+                    complete: function() {
+                        hideAIMessage();
+                        $button.prop('disabled', false);
+                        $button.html('<i class="fas fa-robot me-1"></i> ترجمة تلقائية');
+                    }
+                });
+            });
+
+            // زر ترجمة لجميع اللغات
+            $('#translate-all-btn').on('click', function(e) {
+                e.preventDefault();
+                const $button = $(this);
+
+                const languages = [];
+                @foreach ($languages as $language)
+                    @if ($language->code != 'ar')
+                        languages.push('{{ $language->code }}');
+                    @endif
+                @endforeach
+
+                if (languages.length === 0) {
+                    showToast('تنبيه', 'لا توجد لغات أخرى للترجمة', 'warning');
+                    return;
+                }
+
+                const name = $('#name_ar').val().trim();
+                if (!name) {
+                    showToast('تنبيه', 'الرجاء إدخال اسم القسم بالعربية أولاً', 'warning');
+                    return;
+                }
+
+                $button.prop('disabled', true);
+                $button.html('<i class="fas fa-spinner spin me-1"></i> جاري الترجمة...');
+
+                showAIMessage(`جاري الترجمة إلى ${languages.length} لغات...`);
+
+                let completed = 0;
+                languages.forEach(function(lang) {
+                    $.ajax({
+                        url: '{{ route('admin.categories.ai-translate') }}',
+                        method: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            name: name,
+                            description: $('#description_ar').val().trim(),
+                            target_lang: lang,
+                            style: $('#translation_style').val(),
+                            tone: $('#tone').val()
+                        },
+                        success: function(response) {
+                            completed++;
+                            if (response.success) {
+                                $(`#name_${lang}`).val(response.translated.name || '');
+                                if (response.translated.description) {
+                                    $(`#description_${lang}`).val(response.translated
+                                        .description);
+                                }
+
+                                $(`#preview_${lang}`).html(`
+                                    <div class="translation-completed">
+                                        <h6 class="text-success mb-2">
+                                            <i class="fas fa-check-circle me-2"></i>
+                                            تمت الترجمة بنجاح
+                                        </h6>
+                                    </div>
+                                `);
+                            }
+                        },
+                        error: function() {
+                            completed++;
+                        },
+                        complete: function() {
+                            if (completed === languages.length) {
+                                hideAIMessage();
+                                $button.prop('disabled', false);
+                                $button.html(
+                                    '<i class="fas fa-language me-1"></i> ترجمة لجميع اللغات'
+                                    );
+                                showToast('تم', 'تمت الترجمة لجميع اللغات بنجاح',
+                                    'success');
+                            }
+                        }
+                    });
+                });
+            });
+
+            // زر إنشاء قسم بالذكاء الاصطناعي
+            $('#generate-with-ai').on('click', function(e) {
+                e.preventDefault();
+                const $button = $(this);
+                const name = $('#name_ar').val().trim();
+
+                if (!name) {
+                    showToast('تنبيه', 'الرجاء إدخال اسم القسم أولاً', 'warning');
+                    $('#name_ar').focus();
+                    return;
+                }
+
+                $button.prop('disabled', true);
+                $button.html('<i class="fas fa-spinner spin me-1"></i> جاري الإنشاء...');
+
+                showAIMessage('جاري إنشاء القسم بالذكاء الاصطناعي...');
+
+                $.ajax({
+                    url: '{{ route('admin.categories.ai-enhance-full') }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        name: name,
+                        description: $('#description_ar').val().trim(),
+                        tone: $('#tone').val(),
+                        style: $('#translation_style').val()
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            if (response.data.name) {
+                                $('#name_ar').val(response.data.name);
+                            }
+                            if (response.data.description) {
+                                $('#description_ar').summernote('code', response.data
+                                    .description);
+                            }
+                            if (response.data.slug) {
+                                $('#slug').val(response.data.slug);
+                                $('#slugValue').text(response.data.slug);
+                            }
+                            if (response.data.meta_title) {
+                                $('#meta_title_ar').val(response.data.meta_title);
+                                $('#meta_title_ar').trigger('input');
+                            }
+                            if (response.data.meta_description) {
+                                $('#meta_description_ar').val(response.data.meta_description);
+                                $('#meta_description_ar').trigger('input');
+                            }
+                            if (response.data.meta_keywords) {
+                                $('#meta_keywords_ar').val(response.data.meta_keywords);
+                            }
+
+                            showToast('تم', 'تم إنشاء القسم بنجاح', 'success');
+                        } else {
+                            showToast('خطأ', response.message || 'حدث خطأ أثناء الإنشاء',
+                                'error');
+                        }
+                    },
+                    error: function() {
+                        showToast('خطأ', 'حدث خطأ في الاتصال بالخادم', 'error');
+                    },
+                    complete: function() {
+                        hideAIMessage();
+                        $button.prop('disabled', false);
+                        $button.html(
+                            '<i class="fas fa-wand-magic-sparkles me-1"></i> إنشاء قسم بالذكاء الاصطناعي'
+                            );
+                    }
+                });
+            });
+
+            // زر إنشاء SEO
+            $('#generate-seo').on('click', function(e) {
+                e.preventDefault();
+                const $button = $(this);
+                const name = $('#name_ar').val().trim();
+                const description = $('#description_ar').val().trim();
+
+                if (!name) {
+                    showToast('تنبيه', 'الرجاء إدخال اسم القسم أولاً', 'warning');
+                    return;
+                }
+
+                $button.prop('disabled', true);
+                $button.html('<i class="fas fa-spinner spin me-1"></i> جاري الإنشاء...');
+
+                showAIMessage('جاري إنشاء محتوى SEO محسن...');
+
+                $.ajax({
+                    url: '{{ route('admin.categories.ai-generate-seo') }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        name: name,
+                        description: description,
+                        tone: $('#tone').val(),
+                        style: $('#translation_style').val()
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            $('#meta_title_ar').val(response.data.meta_title || '');
+                            $('#meta_description_ar').val(response.data.meta_description || '');
+                            $('#meta_keywords_ar').val(response.data.meta_keywords || '');
+
+                            $('#meta_title_ar').trigger('input');
+                            $('#meta_description_ar').trigger('input');
+
+                            showToast('تم', 'تم إنشاء محتوى SEO بنجاح', 'success');
+                        } else {
+                            showToast('خطأ', response.message || 'حدث خطأ أثناء إنشاء SEO',
+                                'error');
+                        }
+                    },
+                    error: function() {
+                        showToast('خطأ', 'حدث خطأ أثناء إنشاء SEO', 'error');
+                    },
+                    complete: function() {
+                        hideAIMessage();
+                        $button.prop('disabled', false);
+                        $button.html(
+                            '<i class="fas fa-robot me-1"></i> إنشاء SEO بالذكاء الاصطناعي');
+                    }
+                });
+            });
+
+            // إعادة تعيين النموذج
+            window.resetForm = function() {
                 Swal.fire({
+                    title: 'إعادة تعيين',
+                    text: 'هل أنت متأكد من إعادة تعيين جميع الحقول؟',
                     icon: 'warning',
-                    title: 'لا توجد أقسام رئيسية',
-                    text: 'يجب إنشاء قسم رئيسي أولاً قبل إنشاء قسم فرعي.',
-                    confirmButtonText: 'حسناً'
+                    showCancelButton: true,
+                    confirmButtonText: 'نعم، إعادة تعيين',
+                    cancelButtonText: 'إلغاء',
+                    confirmButtonColor: '#696cff',
+                    cancelButtonColor: '#6c757d'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $('#createCategoryForm')[0].reset();
+                        $('#imagePreview').attr('src',
+                            'https://via.placeholder.com/200x200?text=صورة+القسم');
+                        $('#subImagePreview').attr('src',
+                            'https://via.placeholder.com/200x200?text=صورة+فرعية');
+                        $('.summernote').summernote('code', '');
+                        showToast('تم', 'تم إعادة تعيين النموذج', 'success');
+                    }
                 });
-                // Revert to parent type
-                selectType('parent');
-            }
-        }
-    }
-    
-    // Select Parent Category
-    function selectParent(parentId, parentName) {
-        // Remove selected class from all items
-        document.querySelectorAll('.parent-category-item').forEach(item => {
-            item.classList.remove('selected');
-        });
-        
-        // Add selected class to clicked item
-        const selectedItem = document.getElementById('parent-' + parentId);
-        selectedItem.classList.add('selected');
-        
-        // Set hidden input value
-        document.getElementById('selected_parent_id').value = parentId;
-        
-        // Update category name placeholder
-        const nameInput = document.getElementById('name');
-        nameInput.placeholder = `مثال: ${parentName} - فرعي`;
-    }
-    
-    // Image Preview Function
-    function previewImage(input, previewId) {
-        const preview = document.getElementById(previewId);
-        const file = input.files[0];
-        
-        if (file) {
-            // Check file size (2MB max)
-            const maxSize = 2 * 1024 * 1024; // 2MB in bytes
-            if (file.size > maxSize) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'ملف كبير جداً',
-                    text: 'حجم الملف يجب أن يكون أقل من 2 ميجابايت',
-                    confirmButtonText: 'حسناً'
-                });
-                input.value = ''; // Clear the file input
-                return;
-            }
-            
-            // Check file type
-            const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/svg+xml'];
-            if (!validTypes.includes(file.type)) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'نوع ملف غير مدعوم',
-                    text: 'الرجاء اختيار صورة من نوع: JPEG, PNG, JPG, GIF, SVG, WEBP',
-                    confirmButtonText: 'حسناً'
-                });
-                input.value = ''; // Clear the file input
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                preview.src = e.target.result;
-            }
-            reader.readAsDataURL(file);
-        }
-    }
-    
-    // Slug Generation
-    function generateSlug() {
-        const name = document.getElementById('name').value;
-        if (name) {
-            let slug = name
-                .toLowerCase()
-                .replace(/[^\u0600-\u06FF\w\s-]/g, '') // Remove special chars except Arabic and English
-                .replace(/\s+/g, '-')
-                .replace(/[-\s]+/g, '-')
-                .trim();
-            
-            document.getElementById('slug').value = slug;
-            updateSlugPreview();
-        } else {
-            Swal.fire({
-                icon: 'warning',
-                title: 'يرجى إدخال اسم القسم أولاً',
-                text: 'يجب إدخال اسم القسم قبل إنشاء الرابط',
-                confirmButtonText: 'حسناً'
+            };
+
+            // التحقق من صحة النموذج
+            $('#createCategoryForm').on('submit', function(e) {
+                const name = $('#name_ar').val().trim();
+                if (!name) {
+                    e.preventDefault();
+                    Swal.fire('خطأ', 'يرجى إدخال اسم القسم', 'error');
+                    $('#name_ar').focus();
+                    return false;
+                }
+
+                const submitBtn = $('#submit-btn');
+                submitBtn.html('<i class="fas fa-spinner spin me-1"></i> جاري الحفظ...');
+                submitBtn.prop('disabled', true);
+
+                showAIMessage('جاري حفظ القسم...');
+
+                return true;
             });
-        }
-    }
-    
-    // Update Slug Preview
-    function updateSlugPreview() {
-        const slug = document.getElementById('slug').value;
-        const name = document.getElementById('name').value;
-        const parentId = document.getElementById('selected_parent_id').value;
-        
-        let previewText = '';
-        
-        if (slug) {
-            previewText = slug;
-        } else if (name) {
-            // Generate temporary slug for preview
-            previewText = name.toLowerCase()
-                .replace(/[^\u0600-\u06FF\w\s-]/g, '')
-                .replace(/\s+/g, '-')
-                .replace(/[-\s]+/g, '-')
-                .trim();
-        }
-        
-        document.getElementById('slugPreviewText').textContent = 
-            parentId ? `/${previewText}` : previewText;
-    }
-    
-    // SEO Character Counters
-    const titleInput = document.getElementById('meta_title');
-    const descInput = document.getElementById('meta_description');
-    const titleProgress = document.getElementById('titleProgress');
-    const descProgress = document.getElementById('descProgress');
-    const titleCount = document.getElementById('titleCount');
-    const descCount = document.getElementById('descCount');
-    
-    function updateCounter(input, progress, countElement, max) {
-        const length = input.value.length;
-        const percentage = Math.min((length / max) * 100, 100);
-        
-        // Update progress bar
-        progress.style.width = percentage + '%';
-        
-        // Update color based on length
-        if (length <= max) {
-            progress.className = 'progress-bar bg-success';
-        } else {
-            progress.className = 'progress-bar bg-danger';
-        }
-        
-        // Update count text
-        countElement.textContent = length + '/' + max;
-    }
-    
-    if (titleInput) {
-        titleInput.addEventListener('input', function() {
-            updateCounter(this, titleProgress, titleCount, 60);
-        });
-    }
-    
-    if (descInput) {
-        descInput.addEventListener('input', function() {
-            updateCounter(this, descProgress, descCount, 160);
-        });
-    }
-    
-    // Auto-generate meta title from name
-    document.getElementById('name').addEventListener('input', function() {
-        if (titleInput && !titleInput.value) {
-            titleInput.value = this.value;
-            updateCounter(titleInput, titleProgress, titleCount, 60);
-        }
-        updateSlugPreview();
-    });
-    
-    // Auto-generate meta description from description
-    document.getElementById('description').addEventListener('input', function() {
-        if (descInput && !descInput.value) {
-            descInput.value = this.value;
-            updateCounter(descInput, descProgress, descCount, 160);
-        }
-    });
-    
-    // Auto-update slug preview when slug changes
-    document.getElementById('slug').addEventListener('input', updateSlugPreview);
-    
-    // Save and Add Another
-    let saveAndAdd = false;
-    
-    function saveAndAddAnother() {
-        saveAndAdd = true;
-        document.getElementById('createCategoryForm').submit();
-    }
-    
-    // Form Validation
-    document.getElementById('createCategoryForm').addEventListener('submit', function(e) {
-        const name = document.getElementById('name').value.trim();
-        const parentId = document.getElementById('selected_parent_id').value;
-        const isChildType = document.getElementById('childType').classList.contains('active');
-        
-        if (!name) {
-            e.preventDefault();
-            Swal.fire({
-                icon: 'error',
-                title: 'خطأ',
-                text: 'يرجى إدخال اسم القسم'
-            });
-            return false;
-        }
-        
-        if (isChildType && !parentId) {
-            e.preventDefault();
-            Swal.fire({
-                icon: 'error',
-                title: 'خطأ',
-                text: 'يرجى اختيار قسم رئيسي'
-            });
-            return false;
-        }
-        
-        // Check image file sizes
-        const imageInput = document.getElementById('image');
-        const subImageInput = document.getElementById('sub_image');
-        
-        if (imageInput.files.length > 0) {
-            const imageFile = imageInput.files[0];
-            if (imageFile.size > 2 * 1024 * 1024) {
-                e.preventDefault();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'ملف كبير جداً',
-                    text: 'حجم صورة القسم يجب أن يكون أقل من 2 ميجابايت'
-                });
-                return false;
+
+            // دوال مساعدة
+            function getActionText(action) {
+                const actions = {
+                    'enhance': 'تحسين',
+                    'complete': 'إكمال',
+                    'seo': 'تحسين SEO',
+                    'translate': 'ترجمة'
+                };
+                return actions[action] || action;
             }
-        }
-        
-        if (subImageInput.files.length > 0) {
-            const subImageFile = subImageInput.files[0];
-            if (subImageFile.size > 2 * 1024 * 1024) {
-                e.preventDefault();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'ملف كبير جداً',
-                    text: 'حجم الصورة الفرعية يجب أن يكون أقل من 2 ميجابايت'
-                });
-                return false;
+
+            function showAIMessage(message) {
+                $('#ai-message-text').text(message);
+                $('#ai-messages').fadeIn(300);
             }
-        }
-        
-        // Show loading
-        Swal.fire({
-            title: 'جاري الحفظ...',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
+
+            function hideAIMessage() {
+                $('#ai-messages').fadeOut(300);
             }
-        });
-    });
-    
-    // Reset Form
-    function resetForm() {
-        Swal.fire({
-            title: 'هل أنت متأكد؟',
-            text: 'سيتم مسح جميع البيانات المدخلة',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'نعم، امسح',
-            cancelButtonText: 'إلغاء'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('createCategoryForm').reset();
-                document.getElementById('selected_parent_id').value = '';
-                document.querySelectorAll('.parent-category-item').forEach(item => {
-                    item.classList.remove('selected');
+
+            function truncateText(text, maxLength) {
+                if (!text) return '';
+                return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+            }
+
+            function showToast(title, message, type = 'info') {
+                const toastId = 'toast-' + Date.now();
+                const bgColor = {
+                    'success': 'bg-success',
+                    'error': 'bg-danger',
+                    'warning': 'bg-warning',
+                    'info': 'bg-info'
+                } [type] || 'bg-info';
+
+                const toastHtml = `
+                    <div id="${toastId}" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100">
+                        <div class="toast align-items-center text-white ${bgColor} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    <strong>${title}:</strong> ${message}
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                $('body').append(toastHtml);
+                const toastElement = document.getElementById(toastId);
+                const toast = new bootstrap.Toast(toastElement.querySelector('.toast'), {
+                    delay: 5000,
+                    autohide: true
                 });
-                document.getElementById('imagePreview').src = 'https://via.placeholder.com/200x200?text=صورة+القسم';
-                document.getElementById('subImagePreview').src = 'https://via.placeholder.com/200x200?text=صورة+فرعية';
-                updateCounter(titleInput, titleProgress, titleCount, 60);
-                updateCounter(descInput, descProgress, descCount, 160);
-                updateSlugPreview();
-                
-                Swal.fire({
-                    icon: 'success',
-                    title: 'تم المسح',
-                    text: 'تم مسح جميع البيانات بنجاح',
-                    timer: 1500,
-                    showConfirmButton: false
+                toast.show();
+
+                toastElement.addEventListener('hidden.bs.toast', function() {
+                    $(this).remove();
                 });
             }
         });
-    }
-    
-    // Handle form submission response
-    @if(session('success') && request()->has('add_another'))
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const modal = new bootstrap.Modal(document.getElementById('saveAndAddModal'));
-                modal.show();
-            });
-        </script>
-    @endif
-</script>
+    </script>
 @endsection

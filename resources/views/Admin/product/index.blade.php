@@ -8,7 +8,6 @@
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/colreorder/1.7.0/css/colReorder.bootstrap5.min.css" rel="stylesheet">
     <style>
         body {
             font-family: "Cairo", sans-serif !important;
@@ -135,11 +134,6 @@
             margin-bottom: 12px;
         }
 
-        .product-rating {
-            color: #f1c40f;
-            font-size: 12px;
-        }
-
         .product-stock {
             display: flex;
             align-items: center;
@@ -209,7 +203,7 @@
 
         .view-toggle-btn {
             padding: 8px 15px;
-            /* background: #f8f9fa; */
+            background: #f8f9fa;
             border: none;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -237,18 +231,11 @@
             gap: 5px;
             padding: 8px 15px;
             border-radius: 5px;
-            /* background: #f8f9fa; */
+            background: #f8f9fa;
             border: 1px solid #dee2e6;
             color: #495057;
             text-decoration: none;
             transition: all 0.3s ease;
-        }
-
-        .quick-action-btn:hover {
-            /* background: #696cff; */
-            color: white;
-            border-color: #696cff;
-            text-decoration: none;
         }
 
         /* Status Badges */
@@ -260,23 +247,23 @@
         }
 
         .status-active {
-            /* background-color: #d1fae5; */
+            background-color: #d1fae5;
             color: #065f46;
         }
 
         .status-inactive {
-            /* background-color: #fee2e2; */
+            background-color: #fee2e2;
             color: #991b1b;
         }
 
         .status-draft {
-            /* background-color: #fef3c7; */
+            background-color: #fef3c7;
             color: #92400e;
         }
 
         /* Bulk Actions */
         .bulk-actions-container {
-            /* background: #f8f9fa; */
+            background: #f8f9fa;
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 20px;
@@ -293,61 +280,9 @@
             margin-left: 10px;
         }
 
-        /* Statistics Cards */
-        .stats-card {
-            background: #383669;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .stats-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            font-size: 24px;
-        }
-
-        .stats-icon.total {
-            /* background: rgba(105, 108, 255, 0.1); */
-            color: #696cff;
-        }
-
-        .stats-icon.active {
-            /* background: rgba(52, 152, 219, 0.1); */
-            color: #3498db;
-        }
-
-        .stats-icon.inactive {
-            /* background: rgba(231, 76, 60, 0.1); */
-            color: #e74c3c;
-        }
-
-        .stats-icon.low-stock {
-            /* background: rgba(241, 196, 15, 0.1); */
-            color: #f1c40f;
-        }
-
-        .stats-number {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .stats-label {
-            color: #7f8c8d;
-            font-size: 14px;
-        }
-
         /* Advanced Filters */
         .advanced-filters {
-            /* background: #f8f9fa; */
+            background: #f8f9fa;
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
@@ -359,7 +294,7 @@
         }
 
         .filter-section {
-            /* background: white; */
+            background: white;
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 15px;
@@ -427,7 +362,6 @@
             margin-bottom: 20px;
         }
 
-
         .btn-outline-primary.active {
             background-color: #0d6efd !important;
             color: #fff !important;
@@ -451,7 +385,7 @@
 @endsection
 
 @section('content')
-    <div class="container-xxl flex-grow-1 container-p-y" bis_skin_checked="1">
+    <div class="container-xxl flex-grow-1 container-p-y">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item">
@@ -461,50 +395,10 @@
             </ol>
         </nav>
 
-        <!-- Statistics Cards -->
-        <div class="row mb-4" bis_skin_checked="1">
-            <div class="col-md-3 col-sm-6" bis_skin_checked="1">
-                <div class="stats-card" bis_skin_checked="1">
-                    <div class="stats-icon total" bis_skin_checked="1">
-                        <i class="fas fa-box"></i>
-                    </div>
-                    <div class="stats-number" bis_skin_checked="1">{{ $totalProducts }}</div>
-                    <div class="stats-label" bis_skin_checked="1">إجمالي المنتجات</div>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6" bis_skin_checked="1">
-                <div class="stats-card" bis_skin_checked="1">
-                    <div class="stats-icon active" bis_skin_checked="1">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stats-number" bis_skin_checked="1">{{ $activeProducts }}</div>
-                    <div class="stats-label" bis_skin_checked="1">منتجات نشطة</div>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6" bis_skin_checked="1">
-                <div class="stats-card" bis_skin_checked="1">
-                    <div class="stats-icon inactive" bis_skin_checked="1">
-                        <i class="fas fa-times-circle"></i>
-                    </div>
-                    <div class="stats-number" bis_skin_checked="1">{{ $inactiveProducts }}</div>
-                    <div class="stats-label" bis_skin_checked="1">منتجات غير نشطة</div>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6" bis_skin_checked="1">
-                <div class="stats-card" bis_skin_checked="1">
-                    <div class="stats-icon low-stock" bis_skin_checked="1">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div class="stats-number" bis_skin_checked="1">{{ $lowStockProducts }}</div>
-                    <div class="stats-label" bis_skin_checked="1">منخفضة المخزون</div>
-                </div>
-            </div>
-        </div>
-
         <!-- Header Actions -->
-        <div class="card mb-4" bis_skin_checked="1">
-            <div class="card-body" bis_skin_checked="1">
-                <div class="row" bis_skin_checked="1">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
                     <div class="col-md-8">
                         <div class="d-flex flex-wrap align-items-center gap-3">
                             <!-- Search Form -->
@@ -566,10 +460,10 @@
                         </div>
                     </div>
 
-                    <div class="col-md-4" bis_skin_checked="1">
-                        <div class="d-flex justify-content-end align-items-center gap-3" bis_skin_checked="1">
+                    <div class="col-md-4">
+                        <div class="d-flex justify-content-end align-items-center gap-3">
                             <!-- View Toggle -->
-                            <div class="view-toggle" bis_skin_checked="1">
+                            <div class="view-toggle">
                                 <button class="view-toggle-btn active" onclick="toggleView('grid')">
                                     <i class="fas fa-th-large"></i>
                                 </button>
@@ -584,7 +478,7 @@
                             </a>
 
                             <!-- More Actions -->
-                            <div class="dropdown" bis_skin_checked="1">
+                            <div class="dropdown">
                                 <button class="btn btn-outline-secondary" type="button" data-bs-toggle="dropdown">
                                     <i class="fas fa-ellipsis-v"></i>
                                 </button>
@@ -597,11 +491,6 @@
                                     <li>
                                         <a class="dropdown-item" href="#" onclick="exportProducts()">
                                             <i class="fas fa-file-export me-2"></i> تصدير البيانات
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="#" onclick="printProducts()">
-                                            <i class="fas fa-print me-2"></i> طباعة
                                         </a>
                                     </li>
                                     <li>
@@ -621,9 +510,9 @@
                 <!-- Advanced Filters -->
                 <div class="advanced-filters mt-4" id="advancedFilters">
                     <form id="filterForm">
-                        <div class="row" bis_skin_checked="1">
-                            <div class="col-md-3" bis_skin_checked="1">
-                                <div class="filter-section" bis_skin_checked="1">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="filter-section">
                                     <h6 class="filter-section-title">التصنيفات</h6>
                                     <select class="form-select select2" id="categoryFilter" name="category_id">
                                         <option value="">جميع التصنيفات</option>
@@ -634,8 +523,8 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-3" bis_skin_checked="1">
-                                <div class="filter-section" bis_skin_checked="1">
+                            <div class="col-md-3">
+                                <div class="filter-section">
                                     <h6 class="filter-section-title">الحالة</h6>
                                     <select class="form-select" id="statusFilter" name="status_id">
                                         <option value="">جميع الحالات</option>
@@ -646,15 +535,15 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-3" bis_skin_checked="1">
-                                <div class="filter-section" bis_skin_checked="1">
+                            <div class="col-md-3">
+                                <div class="filter-section">
                                     <h6 class="filter-section-title">نطاق السعر</h6>
-                                    <div class="row g-2" bis_skin_checked="1">
-                                        <div class="col-6" bis_skin_checked="1">
+                                    <div class="row g-2">
+                                        <div class="col-6">
                                             <input type="number" class="form-control" placeholder="من"
                                                 name="price_from" id="priceFrom">
                                         </div>
-                                        <div class="col-6" bis_skin_checked="1">
+                                        <div class="col-6">
                                             <input type="number" class="form-control" placeholder="إلى" name="price_to"
                                                 id="priceTo">
                                         </div>
@@ -662,15 +551,15 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-3" bis_skin_checked="1">
-                                <div class="filter-section" bis_skin_checked="1">
+                            <div class="col-md-3">
+                                <div class="filter-section">
                                     <h6 class="filter-section-title">نطاق المخزون</h6>
-                                    <div class="row g-2" bis_skin_checked="1">
-                                        <div class="col-6" bis_skin_checked="1">
+                                    <div class="row g-2">
+                                        <div class="col-6">
                                             <input type="number" class="form-control" placeholder="من"
                                                 name="stock_from" id="stockFrom">
                                         </div>
-                                        <div class="col-6" bis_skin_checked="1">
+                                        <div class="col-6">
                                             <input type="number" class="form-control" placeholder="إلى" name="stock_to"
                                                 id="stockTo">
                                         </div>
@@ -679,54 +568,7 @@
                             </div>
                         </div>
 
-                        <div class="row" bis_skin_checked="1">
-                            <div class="col-md-3" bis_skin_checked="1">
-                                <div class="filter-section" bis_skin_checked="1">
-                                    <h6 class="filter-section-title">الألوان</h6>
-                                    <select class="form-select select2" id="colorFilter" name="color_id" multiple>
-                                        @foreach ($colors as $color)
-                                            <option value="{{ $color->id }}">{{ $color->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="col-md-3" bis_skin_checked="1">
-                                <div class="filter-section" bis_skin_checked="1">
-                                    <h6 class="filter-section-title">المواد</h6>
-                                    <select class="form-select select2" id="materialFilter" name="material_id" multiple>
-                                        @foreach ($materials as $material)
-                                            <option value="{{ $material->id }}">{{ $material->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="col-md-3" bis_skin_checked="1">
-                                <div class="filter-section" bis_skin_checked="1">
-                                    <h6 class="filter-section-title">طرق الطباعة</h6>
-                                    <select class="form-select select2" id="printingMethodFilter"
-                                        name="printing_method_id" multiple>
-                                        @foreach ($printingMethods as $method)
-                                            <option value="{{ $method->id }}">{{ $method->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="col-md-3" bis_skin_checked="1">
-                                <div class="filter-section" bis_skin_checked="1">
-                                    <h6 class="filter-section-title">العروض</h6>
-                                    <select class="form-select select2" id="offerFilter" name="offer_id" multiple>
-                                        @foreach ($offers as $offer)
-                                            <option value="{{ $offer->id }}">{{ $offer->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between mt-3" bis_skin_checked="1">
+                        <div class="d-flex justify-content-between mt-3">
                             <button type="button" class="btn btn-outline-secondary" onclick="clearAdvancedFilters()">
                                 <i class="fas fa-redo me-1"></i> إعادة تعيين الفلاتر
                             </button>
@@ -739,9 +581,9 @@
 
                 <!-- Bulk Actions -->
                 <div class="bulk-actions-container" id="bulkActions">
-                    <div class="d-flex align-items-center justify-content-between" bis_skin_checked="1">
-                        <div class="d-flex align-items-center" bis_skin_checked="1">
-                            <div class="form-check me-3" bis_skin_checked="1">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="form-check me-3">
                                 <input class="form-check-input" type="checkbox" id="selectAllBulk">
                                 <label class="form-check-label" for="selectAllBulk">
                                     تم تحديد <span id="selectedCount">0</span> منتج
@@ -752,8 +594,6 @@
                                 <option value="activate">تفعيل</option>
                                 <option value="deactivate">تعطيل</option>
                                 <option value="move_to_category">نقل إلى تصنيف</option>
-                                <option value="add_to_offer">إضافة إلى عرض</option>
-                                <option value="remove_from_offer">إزالة من عرض</option>
                                 <option value="delete">حذف</option>
                             </select>
                             <button type="button" class="btn btn-primary ms-2" onclick="applyBulkAction()">
@@ -768,22 +608,11 @@
                     <!-- Additional options for certain bulk actions -->
                     <div id="bulkActionOptions" class="mt-3" style="display: none;">
                         <div id="categoryOptions" class="row g-3" style="display: none;">
-                            <div class="col-md-6" bis_skin_checked="1">
+                            <div class="col-md-6">
                                 <select class="form-select" id="bulkCategorySelect">
                                     <option value="">اختر التصنيف</option>
                                     @foreach ($categories as $category)
                                         <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div id="offerOptions" class="row g-3" style="display: none;">
-                            <div class="col-md-6" bis_skin_checked="1">
-                                <select class="form-select" id="bulkOfferSelect">
-                                    <option value="">اختر العرض</option>
-                                    @foreach ($offers as $offer)
-                                        <option value="{{ $offer->id }}">{{ $offer->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -801,21 +630,15 @@
                         <div class="col">
                             <div class="product-card" data-product-id="{{ $product->id }}">
                                 <div class="product-image">
-                                    <img src="{{ $product->primaryImage ? get_user_image($product->primaryImage->path) : asset(env('DEFAULT_PRODUCT_IMAGE')) }}"
+                                    <img src="{{ $product->image_path ? asset('storage/'.$product->image_path) : asset('storage/products/default-product.png') }}"
                                         alt="{{ $product->name }}">
 
                                     <div class="product-badges">
                                         @if ($product->created_at->gt(now()->subDays(7)))
                                             <span class="badge-new">جديد</span>
                                         @endif
-                                        @if ($product->has_discount && $product->discount)
-                                            <span class="badge-discount">
-                                                @if ($product->discount->discount_type === 'percentage')
-                                                    {{ $product->discount->discount_value }}%
-                                                @else
-                                                    خصم
-                                                @endif
-                                            </span>
+                                        @if ($product->has_discount)
+                                            <span class="badge-discount">خصم</span>
                                         @endif
                                         @if ($product->stock == 0)
                                             <span class="badge-out-of-stock">نفذ من المخزون</span>
@@ -837,24 +660,20 @@
 
                                     <div class="product-price">
                                         <span class="current-price">
-                                            {{ number_format($product->final_price, 2) }} ج.م
+                                            {{ number_format($product->price, 2) }} {{ $product->price_text ?? 'ج.م' }}
                                         </span>
-                                        @if ($product->has_discount && $product->price > $product->final_price)
+                                        @if ($product->has_discount && $product->discount)
                                             <span class="old-price">
-                                                {{ number_format($product->price, 2) }} ج.م
+                                                {{ number_format($product->price, 2) }} {{ $product->price_text ?? 'ج.م' }}
                                             </span>
                                         @endif
                                     </div>
 
                                     <div class="product-meta">
-                                        <div class="product-rating" bis_skin_checked="1">
-                                            <i class="fas fa-star"></i>
-                                            {{ number_format($product->average_rating, 1) }}
-                                        </div>
-                                        <div class="product-stock" bis_skin_checked="1">
+                                        <div class="product-stock">
                                             <span
                                                 class="stock-indicator {{ $product->stock == 0 ? 'out-of-stock' : ($product->stock < 10 ? 'low-stock' : 'in-stock') }}"></span>
-                                            {{ $product->stock }} قطعة
+                                            {{ $product->stock ?? 0 }} قطعة
                                         </div>
                                     </div>
 
@@ -947,14 +766,14 @@
 
         <!-- Table View -->
         <div id="tableView" class="view-container" style="display: none;">
-            <div class="card" bis_skin_checked="1">
-                <div class="card-body" bis_skin_checked="1">
-                    <div class="table-responsive" bis_skin_checked="1">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
                         <table class="table table-hover" id="productsTable">
                             <thead>
                                 <tr>
                                     <th width="50">
-                                        <div class="form-check" bis_skin_checked="1">
+                                        <div class="form-check">
                                             <input class="form-check-input" type="checkbox" id="selectAllTable">
                                         </div>
                                     </th>
@@ -963,7 +782,6 @@
                                     <th>التصنيف</th>
                                     <th>السعر</th>
                                     <th>المخزون</th>
-                                    <th>التقييم</th>
                                     <th>الحالة</th>
                                     <th>تاريخ الإضافة</th>
                                     <th>الإجراءات</th>
@@ -973,18 +791,17 @@
                                 @foreach ($products as $product)
                                     <tr data-product-id="{{ $product->id }}">
                                         <td>
-                                            <div class="form-check" bis_skin_checked="1">
+                                            <div class="form-check">
                                                 <input class="form-check-input product-checkbox" type="checkbox"
                                                     value="{{ $product->id }}">
                                             </div>
                                         </td>
                                         <td>
-                                            <img src="{{ $product->primaryImage ? get_user_image($product->primaryImage->path) : 'https://via.placeholder.com/60x60?text=No+Image' }}"
+                                            <img src="{{ $product->image_path ? asset('storage/'.$product->image_path) : asset('storage/products/default-product.png') }}"
                                                 alt="{{ $product->name }}" class="product-table-image">
                                         </td>
                                         <td>
-                                            <div class="product-table-name" title="{{ $product->name }}"
-                                                bis_skin_checked="1">
+                                            <div class="product-table-name" title="{{ $product->name }}">
                                                 {{ $product->name }}
                                             </div>
                                             <small class="text-muted">{{ Str::limit($product->description, 50) }}</small>
@@ -995,28 +812,16 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <div bis_skin_checked="1">
-                                                <strong class="text-success">{{ number_format($product->final_price, 2) }}
-                                                    ج.م</strong>
-                                                @if ($product->has_discount && $product->price > $product->final_price)
-                                                    <br>
-                                                    <small class="text-muted text-decoration-line-through">
-                                                        {{ number_format($product->price, 2) }} ج.م
-                                                    </small>
-                                                @endif
+                                            <div>
+                                                <strong class="text-success">{{ number_format($product->price, 2) }}
+                                                    {{ $product->price_text ?? 'ج.م' }}</strong>
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="d-flex align-items-center gap-2" bis_skin_checked="1">
+                                            <div class="d-flex align-items-center gap-2">
                                                 <span
                                                     class="stock-indicator {{ $product->stock == 0 ? 'out-of-stock' : ($product->stock < 10 ? 'low-stock' : 'in-stock') }}"></span>
-                                                {{ $product->stock }}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="product-rating" bis_skin_checked="1">
-                                                <i class="fas fa-star text-warning"></i>
-                                                {{ number_format($product->average_rating, 1) }}
+                                                {{ $product->stock ?? 0 }}
                                             </div>
                                         </td>
                                         <td>
@@ -1032,7 +837,7 @@
                                             {{ $product->created_at->format('Y/m/d') }}
                                         </td>
                                         <td>
-                                            <div class="d-flex gap-2" bis_skin_checked="1">
+                                            <div class="d-flex gap-2">
                                                 <a href="{{ route('admin.products.show', $product->id) }}"
                                                     class="btn btn-sm btn-outline-info" title="عرض">
                                                     <i class="fas fa-eye"></i>
@@ -1105,7 +910,6 @@
                             </nav>
                         </div>
                     @endif
-
                 </div>
             </div>
         </div>
@@ -1121,16 +925,16 @@
                 </div>
                 <div class="modal-body">
                     <form id="quickEditForm">
-                        <div class="row" bis_skin_checked="1">
-                            <div class="col-md-6 mb-3" bis_skin_checked="1">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">السعر</label>
                                 <input type="number" class="form-control" name="price" step="0.01">
                             </div>
-                            <div class="col-md-6 mb-3" bis_skin_checked="1">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">المخزون</label>
                                 <input type="number" class="form-control" name="stock" min="0">
                             </div>
-                            <div class="col-md-6 mb-3" bis_skin_checked="1">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">الحالة</label>
                                 <select class="form-select" name="status_id">
                                     <option value="1">نشط</option>
@@ -1138,7 +942,7 @@
                                     <option value="3">مسودة</option>
                                 </select>
                             </div>
-                            <div class="col-md-6 mb-3" bis_skin_checked="1">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">التصنيف</label>
                                 <select class="form-select" name="category_id">
                                     @foreach ($categories as $category)
@@ -1156,49 +960,8 @@
             </div>
         </div>
     </div>
-
-    <!-- Export Modal -->
-    <div class="modal fade" id="exportModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">تصدير المنتجات</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3" bis_skin_checked="1">
-                        <label class="form-label">نوع الملف</label>
-                        <select class="form-select" id="exportType">
-                            <option value="excel">Excel</option>
-                            <option value="csv">CSV</option>
-                            <option value="pdf">PDF</option>
-                        </select>
-                    </div>
-                    <div class="mb-3" bis_skin_checked="1">
-                        <label class="form-label">الأعمدة</label>
-                        <select class="form-select select2" id="exportColumns" multiple>
-                            <option value="id" selected>رقم المنتج</option>
-                            <option value="name" selected>اسم المنتج</option>
-                            <option value="category" selected>التصنيف</option>
-                            <option value="price" selected>السعر</option>
-                            <option value="stock" selected>المخزون</option>
-                            <option value="status" selected>الحالة</option>
-                            <option value="created_at" selected>تاريخ الإضافة</option>
-                            <option value="description">الوصف</option>
-                            <option value="colors">الألوان</option>
-                            <option value="materials">المواد</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                    <button type="button" class="btn btn-primary" onclick="performExport()">تصدير</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 @endsection
+
 @section('js')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -1206,15 +969,6 @@
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.colVis.min.js"></script>
-    <script src="https://cdn.datatables.net/colreorder/1.7.0/js/dataTables.colReorder.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
@@ -1224,7 +978,7 @@
                 allowClear: true
             });
 
-            // Initialize DataTable with basic features only
+            // Initialize DataTable
             $('#productsTable').DataTable({
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
@@ -1237,7 +991,7 @@
                 dom: '<"row"<"col-sm-12"tr>>',
             });
 
-            // Debounce function لمنع طلبات كثيرة
+            // Search functionality
             function debounce(func, wait) {
                 let timeout;
                 return function executedFunction(...args) {
@@ -1250,24 +1004,21 @@
                 };
             }
 
-            // البحث عن طريق الـ Form (يبحث في كل البيانات)
             $('#globalSearch').on('keyup', debounce(function() {
                 const searchValue = $(this).val().trim();
 
-                // إذا كان البحث فارغاً، أزل معامل البحث من الـ URL
                 if (searchValue === '') {
                     const url = new URL(window.location.href);
                     url.searchParams.delete('search');
-                    url.searchParams.delete('page'); // أزل رقم الصفحة للعودة للصفحة الأولى
+                    url.searchParams.delete('page');
                     window.location.href = url.toString();
                     return;
                 }
 
-                // إرسال الفورم للبحث في كل البيانات
                 $('#searchForm').submit();
             }, 500));
 
-            // Clear search when clicking clear button
+            // Clear search
             $(document).on('click', '#clearSearch', function() {
                 $('#globalSearch').val('');
                 $('#searchForm').submit();
@@ -1312,17 +1063,6 @@
                 toggleView(viewType);
             });
 
-            // Quick filter buttons
-            $('.quick-actions .btn').on('click', function() {
-                const action = $(this).attr('onclick');
-                if (action && action.includes('applyFilter')) {
-                    const match = action.match(/applyFilter\('([^']+)',\s*'([^']+)'\)/);
-                    if (match) {
-                        applyFilter(match[1], match[2]);
-                    }
-                }
-            });
-
             // Fill search input with current search value
             @if (request('search'))
                 $('#globalSearch').val('{{ request('search') }}');
@@ -1331,16 +1071,15 @@
 
         // View Toggle Function
         window.toggleView = function(viewType) {
-            $('.view-toggle-btn').removeClass('active').filter(function() {
-                return (viewType === 'grid' && $(this).has('.fa-th-large').length) ||
-                    (viewType === 'table' && $(this).has('.fa-list').length);
-            }).addClass('active');
-
+            $('.view-toggle-btn').removeClass('active');
             $('.view-container').hide();
+
             if (viewType === 'grid') {
                 $('#gridView').show();
+                $('.view-toggle-btn:first').addClass('active');
             } else {
                 $('#tableView').show();
+                $('.view-toggle-btn:last').addClass('active');
                 $('#productsTable').DataTable().columns.adjust().responsive.recalc();
             }
         }
@@ -1348,7 +1087,7 @@
         // Quick Filters Function
         window.applyFilter = function(filter, value) {
             const url = new URL(window.location.href);
-            url.searchParams.delete('page'); // العودة للصفحة الأولى
+            url.searchParams.delete('page');
 
             if (value === 'low') {
                 url.searchParams.set('stock_from', '1');
@@ -1362,7 +1101,6 @@
         }
 
         window.clearFilters = function() {
-            // الحفاظ على البحث الحالي إذا كان موجوداً
             const searchValue = $('#globalSearch').val();
             let url = '{{ route('admin.products.index') }}';
 
@@ -1387,65 +1125,11 @@
             const formData = new FormData($('#filterForm')[0]);
             const params = new URLSearchParams();
 
-            // إضافة البحث الحالي إذا كان موجوداً
+            // Add current search if exists
             const searchValue = $('#globalSearch').val();
             if (searchValue) {
                 params.append('search', searchValue);
             }
-
-            for (let [key, value] of formData.entries()) {
-                if (value) {
-                    params.append(key, value);
-                }
-            }
-
-            window.location.href = '{{ route('admin.products.index') }}?' + params.toString();
-        }
-        // View Toggle Function
-        window.toggleView = function(viewType) {
-            $('.view-toggle-btn').removeClass('active');
-            $('.view-container').hide();
-
-            if (viewType === 'grid') {
-                $('#gridView').show();
-                $('.view-toggle-btn:first').addClass('active');
-            } else {
-                $('#tableView').show();
-                $('.view-toggle-btn:last').addClass('active');
-            }
-        }
-
-        // Quick Filters Function
-        window.applyFilter = function(filter, value) {
-            let url = new URL(window.location.href);
-
-            if (value === 'low') {
-                url.searchParams.set('stock_from', '1');
-                url.searchParams.set('stock_to', '10');
-            } else {
-                url.searchParams.set(filter, value);
-            }
-
-            window.location.href = url.toString();
-        }
-
-        window.clearFilters = function() {
-            window.location.href = '{{ route('admin.products.index') }}';
-        }
-
-        // Advanced Filters Functions
-        window.toggleAdvancedFilters = function() {
-            $('#advancedFilters').toggleClass('show');
-        }
-
-        window.clearAdvancedFilters = function() {
-            $('#filterForm')[0].reset();
-            $('.select2').val(null).trigger('change');
-        }
-
-        window.applyAdvancedFilters = function() {
-            const formData = new FormData($('#filterForm')[0]);
-            const params = new URLSearchParams();
 
             for (let [key, value] of formData.entries()) {
                 if (value) {
@@ -1471,7 +1155,6 @@
             const selectedCount = $('.product-checkbox:checked').length;
             $('#selectedCount').text(selectedCount);
 
-            // Show/hide bulk actions based on selection
             if (selectedCount > 0) {
                 $('#bulkActions').addClass('show');
             } else {
@@ -1486,9 +1169,6 @@
             if (action === 'move_to_category') {
                 $('#bulkActionOptions').show();
                 $('#categoryOptions').show();
-            } else if (action === 'add_to_offer' || action === 'remove_from_offer') {
-                $('#bulkActionOptions').show();
-                $('#offerOptions').show();
             }
         });
 
@@ -1535,21 +1215,6 @@
                         return;
                     }
                     additionalData.category_id = categoryId;
-                    break;
-
-                case 'add_to_offer':
-                case 'remove_from_offer':
-                    const offerId = $('#bulkOfferSelect').val();
-                    if (!offerId) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'عرض مطلوب',
-                            text: 'يرجى اختيار العرض',
-                            confirmButtonText: 'حسناً'
-                        });
-                        return;
-                    }
-                    additionalData.offer_id = offerId;
                     break;
             }
 
@@ -1677,7 +1342,7 @@
                             },
                             body: JSON.stringify({
                                 name: name
-                            })
+                             })
                         })
                         .then(response => response.json())
                         .then(data => {
@@ -1701,24 +1366,13 @@
                 }
             });
         }
-
-        // Export Functions
+        // Export Function
         window.exportProducts = function() {
-            $('#exportModal').modal('show');
-        }
-
-        window.performExport = function() {
-            const type = $('#exportType').val();
-            const columns = $('#exportColumns').val();
             const filters = new URLSearchParams(window.location.search);
-
             let url = '{{ route('admin.products.export') }}?';
-            url += `type=${type}`;
-            url += `&columns=${columns.join(',')}`;
             url += `&${filters.toString()}`;
-
+            
             window.open(url, '_blank');
-            $('#exportModal').modal('hide');
         }
     </script>
 @endsection

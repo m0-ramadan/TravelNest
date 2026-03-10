@@ -15,15 +15,6 @@ class UpdateCartItemRequest extends FormRequest
 {
     return [
         'quantity'             => 'nullable|integer|min:1',
-        'size_id'              => 'nullable|exists:sizes,id',
-        'color_id'             => 'nullable|exists:colors,id',
-        'printing_method_id'   => 'nullable|exists:printing_methods,id',
-        'print_locations'      => 'nullable|array',
-        'print_locations.*'    => 'nullable|exists:print_locations,id',
-        'embroider_locations'  => 'nullable|array',
-        'embroider_locations.*'=> 'exists:print_locations,id',
-        'selected_options'     => 'nullable|array',
-        'design_service_id'    => 'nullable|exists:design_services,id',
         'is_sample'            => 'sometimes|boolean',
     ];
 }

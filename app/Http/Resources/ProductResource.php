@@ -39,8 +39,8 @@ class ProductResource extends JsonResource
             'date_last_updated_to_stock' => $this->date_last_updated_to_stock,
             'expiry_date' => $this->expiry_date,
             'unit_type' => $this->unit_type,
-            'product_size' => $this->product_size,
             'currency'      => $this->currency,
+            'tax_amount'      => $this->tax_amount??0,
 
             // Polymorphic relationship with person
             'person' => [

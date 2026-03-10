@@ -1885,18 +1885,17 @@
 
 @section('content')
 
-
     <!-- Enhanced Hero Section -->
     <section class="hero-section" id="home">
         <div class="container">
             <div class="hero-content">
-                <div class="hero-badge">
+                {{-- <div class="hero-badge">
                     <i class="la la-award"></i>
                     Award-Winning Since 2008
-                </div>
+                </div> --}}
                 <h1 class="hero-title">Luxor and Aswan Travel</h1>
                 <p class="hero-subtitle">Egypt's Premier Luxury Travel Experience</p>
-                <a href="index.html#deals" class="hero-cta">
+                <a href="#deals" class="hero-cta">
                     <i class="la la-compass"></i>
                     Discover Egypt
                 </a>
@@ -2085,42 +2084,6 @@
             <p class="section-subtitle">Discover our most popular tours and create memories that last a lifetime</p>
 
             <div class="deals-grid">
-                <!-- Deal 1 -->
-                <div class="deal-card">
-                    <div class="deal-image">
-                        <div class="deal-badge">Best Seller</div>
-                        <div class="deal-price">From $1280</div>
-                        <a href="Egypt/package/5-Day-Luxor-to-Aswan-Nile-Cruise-From-Cairo-By-Flight.html">
-                            <img src="{{ request()->root() }}/images/15966644721le%20fayan%20nile%20cruise%20ship.png"
-                                alt="5 Day Nile Cruise" class="deal-img" loading="lazy">
-                        </a>
-                    </div>
-                    <div class="deal-content">
-                        <h3 class="deal-title">
-                            <a href="Egypt/package/5-Day-Luxor-to-Aswan-Nile-Cruise-From-Cairo-By-Flight.html">
-                                5 Day Luxor to Aswan Nile Cruise
-                            </a>
-                        </h3>
-                        <div class="deal-meta">
-                            <span><i class="la la-clock"></i> 5 Days</span>
-                            <span><i class="la la-users"></i> Private Tour</span>
-                            <span><i class="la la-plane"></i> Flights Included</span>
-                        </div>
-                        <p class="deal-description">
-                            Experience the magic of ancient Egypt on this luxurious Nile cruise from Luxor to Aswan,
-                            featuring expert guides and premium accommodations.
-                        </p>
-                        <div class="deal-features">
-                            <span class="feature-tag">Luxury Cruise</span>
-                            <span class="feature-tag">All Meals</span>
-                            <span class="feature-tag">Expert Guide</span>
-                        </div>
-                        <a href="Egypt/package/5-Day-Luxor-to-Aswan-Nile-Cruise-From-Cairo-By-Flight.html"
-                            class="deal-btn">
-                            Explore Journey <i class="la la-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
 
                 <!-- Deal 2 -->
                 <div class="deal-card">
@@ -2150,6 +2113,8 @@
                             <span class="feature-tag">Pyramids Tour</span>
                             <span class="feature-tag">Museum Visit</span>
                             <span class="feature-tag">Nile Cruise</span>
+                            <span class="feature-tag">Nile Cruise</span>
+
                         </div>
                         <a href="Egypt/package/7-Day-Cairo-and-Nile-Cruise-by-Flight.html" class="deal-btn">
                             Explore Journey <i class="la la-arrow-right"></i>
@@ -2184,6 +2149,7 @@
                         <div class="deal-features">
                             <span class="feature-tag">Petra Visit</span>
                             <span class="feature-tag">Multi-Country</span>
+                            <span class="feature-tag">VIP Treatment</span>
                             <span class="feature-tag">VIP Treatment</span>
                         </div>
                         <a href="Egypt/package/10-Day-Jordan-Egypt-Travel-Package.html" class="deal-btn">
@@ -2228,75 +2194,7 @@
                     </div>
                 </div>
 
-                <!-- Deal 5 -->
-                <div class="deal-card">
-                    <div class="deal-image">
-                        <div class="deal-price">From $1900</div>
-                        <a href="Egypt/cruise/historia-luxury-nile-cruise.html">
-                            <img src="{{ request()->root() }}/images/16417397840historia1.jpg"
-                                alt="Historia Luxury Cruise" class="deal-img" loading="lazy">
-                        </a>
-                    </div>
-                    <div class="deal-content">
-                        <h3 class="deal-title">
-                            <a href="Egypt/cruise/historia-luxury-nile-cruise.html">
-                                Historia Luxury Nile Cruise
-                            </a>
-                        </h3>
-                        <div class="deal-meta">
-                            <span><i class="la la-calendar"></i> Mon/Fri</span>
-                            <span><i class="la la-star"></i> 5-Star</span>
-                            <span><i class="la la-ship"></i> Modern Luxury</span>
-                        </div>
-                        <p class="deal-description">
-                            Sail aboard one of the Nile's most luxurious vessels with elegant accommodations and
-                            world-class amenities.
-                        </p>
-                        <div class="deal-features">
-                            <span class="feature-tag">5-Star Luxury</span>
-                            <span class="feature-tag">Gourmet Dining</span>
-                            <span class="feature-tag">Spa Services</span>
-                        </div>
-                        <a href="Egypt/cruise/historia-luxury-nile-cruise.html" class="deal-btn">
-                            Explore Journey <i class="la la-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
 
-                <!-- Deal 6 -->
-                <div class="deal-card">
-                    <div class="deal-image">
-                        <div class="deal-price">From $976</div>
-                        <a href="Egypt/cruise/Farah-Nile-Cruise.html">
-                            <img src="{{ request()->root() }}/images/15964574910MS%20Mayfair%20Nile%20Cruise.jpg"
-                                alt="MS Mayfair Cruise" class="deal-img" loading="lazy">
-                        </a>
-                    </div>
-                    <div class="deal-content">
-                        <h3 class="deal-title">
-                            <a href="Egypt/cruise/Farah-Nile-Cruise.html">
-                                MS Mayfair Nile Cruise
-                            </a>
-                        </h3>
-                        <div class="deal-meta">
-                            <span><i class="la la-calendar"></i> Mon/Fri</span>
-                            <span><i class="la la-star"></i> 5-Star</span>
-                            <span><i class="la la-ship"></i> Classic Elegance</span>
-                        </div>
-                        <p class="deal-description">
-                            Experience exceptional service and comfort on this elegant 5-star cruise vessel sailing the
-                            legendary Nile River.
-                        </p>
-                        <div class="deal-features">
-                            <span class="feature-tag">Classic Design</span>
-                            <span class="feature-tag">Exceptional Value</span>
-                            <span class="feature-tag">Professional Service</span>
-                        </div>
-                        <a href="Egypt/cruise/Farah-Nile-Cruise.html" class="deal-btn">
-                            Explore Journey <i class="la la-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
             </div>
         </div>
     </section>

@@ -3,261 +3,156 @@
 @section('title', 'إضافة وسيلة دفع جديدة')
 
 @section('css')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: "Cairo", sans-serif !important;
+        :root {
+            --primary-color: #696cff;
+            --border-color: #dee2e6;
+            --bg-light: #f8f9fa;
+            --text-dark: #2c3e50;
+            --text-muted: #6c757d;
         }
 
         .form-card {
             /* background: white; */
             border-radius: 15px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            padding: 30px;
+            padding: 25px;
         }
 
         .form-header {
-            border-bottom: 2px solid #f8f9fa;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-
-        .step-card {
-            /* background: #f8f9fa; */
-            border-radius: 10px;
-            padding: 25px;
+            border-bottom: 2px solid var(--bg-light);
+            padding-bottom: 15px;
             margin-bottom: 25px;
-            border-left: 4px solid #696cff;
         }
 
-        .step-number {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            background: #696cff;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-left: 15px;
-            float: right;
-        }
-
-        .step-title {
+        .section-title {
             font-size: 18px;
             font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .step-description {
-            color: #6c757d;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        .icon-preview {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            /* background: #f8f9fa; */
-            font-size: 28px;
-            color: #696cff;
-            margin: 10px auto;
-            border: 2px dashed #dee2e6;
-        }
-
-        .icon-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-            gap: 15px;
-            max-height: 200px;
-            overflow-y: auto;
-            padding: 15px;
-            /* background: #f8f9fa; */
-            border-radius: 10px;
-            margin-top: 10px;
-        }
-
-        .icon-item {
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            /* background: white; */
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .icon-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            border-color: #696cff;
-        }
-
-        .icon-item.selected {
-            background: #696cff;
-            color: white;
-            border-color: #696cff;
-        }
-
-        .icon-item i {
-            font-size: 20px;
-        }
-
-        .toggle-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: #426788;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-
-        .toggle-switch {
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
             position: relative;
-            width: 60px;
-            height: 30px;
         }
 
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
+        .section-title::before {
             content: "";
-            height: 22px;
-            width: 22px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
+            position: absolute;
+            right: 0;
+            bottom: -2px;
+            width: 60px;
+            height: 2px;
+            background: var(--primary-color);
         }
 
-        input:checked+.toggle-slider {
-            background-color: #696cff;
-        }
-
-        input:checked+.toggle-slider:before {
-            transform: translateX(30px);
-        }
-
-        .toggle-label {
-            font-weight: 500;
-            color: #2c3e50;
-            flex-grow: 1;
-        }
-
-        .toggle-description {
-            color: #6c757d;
-            font-size: 13px;
-            margin-top: 5px;
-        }
-
-        .key-generator {
+        .image-upload-container {
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            /* background: var(--bg-light); */
+            min-height: 150px;
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
-        .key-generator input {
-            flex-grow: 1;
+        .image-upload-container:hover {
+            border-color: var(--primary-color);
+            background: rgba(105, 108, 255, 0.05);
+        }
+
+        .image-preview {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            padding: 5px;
+            /* background: white; */
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
         }
 
         .preview-card {
-            /* background: #f8f9fa; */
+            /* background: var(--bg-light); */
             border-radius: 12px;
-            padding: 25px;
-            border: 2px dashed #dee2e6;
-            text-align: center;
-            margin-top: 30px;
+            padding: 20px;
+            border: 2px solid var(--border-color);
         }
 
         .preview-icon {
-            font-size: 48px;
-            color: #696cff;
-            margin-bottom: 15px;
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            overflow: hidden;
+            border: 2px solid var(--border-color);
+        }
+
+        .preview-icon img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
 
         .preview-name {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
-            color: #2c3e50;
+            color: var(--text-dark);
             margin-bottom: 10px;
+            text-align: center;
         }
 
         .preview-key {
             /* background: white; */
-            padding: 8px 15px;
+            padding: 5px 12px;
             border-radius: 20px;
             display: inline-block;
-            margin-bottom: 15px;
             font-family: monospace;
-        }
-
-        .preview-status {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            font-size: 14px;
             margin-bottom: 15px;
+            text-align: center;
+            width: 100%;
         }
 
         .status-badge {
-            padding: 5px 15px;
+            padding: 6px 15px;
             border-radius: 20px;
             font-size: 13px;
             font-weight: 600;
+            display: inline-block;
+            margin: 5px;
         }
 
         .status-active {
-            background-color: #d4edda;
+            background: #d4edda;
             color: #155724;
         }
 
         .status-inactive {
-            background-color: #f8d7da;
+            background: #f8d7da;
             color: #721c24;
         }
 
         .type-badge {
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .type-payment {
-            background-color: #e7f5ff;
+            /* background: #e7f5ff; */
             color: #0c63e4;
         }
 
-        .type-method {
-            background-color: #f8f9fa;
-            color: #495057;
+        .form-switch {
+            cursor: pointer;
         }
 
         .required::after {
@@ -266,83 +161,47 @@
         }
 
         .alert-guide {
-            background: #e7f7ff;
-            border-right: 4px solid #696cff;
-            padding: 20px;
+            /* background: #e7f7ff; */
+            border-right: 4px solid var(--primary-color);
             border-radius: 10px;
-            margin-bottom: 25px;
-        }
-
-        .alert-guide h6 {
-            color: #696cff;
-            margin-bottom: 15px;
-        }
-
-        .alert-guide ul {
-            margin-bottom: 0;
-            padding-left: 20px;
-        }
-
-        .alert-guide li {
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .help-text {
-            font-size: 12px;
-            color: #6c757d;
-            margin-top: 5px;
+            margin-bottom: 20px;
         }
 
         @media (max-width: 768px) {
             .form-card {
-                padding: 20px;
+                padding: 15px;
             }
 
-            .key-generator {
-                flex-direction: column;
+            .preview-card {
+                margin-top: 20px;
             }
         }
     </style>
 @endsection
 
 @section('content')
-    <div class="container-xxl flex-grow-1 container-p-y" bis_skin_checked="1">
-        <nav aria-label="breadcrumb">
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item">
-                    <a href="{{ route('admin.index') }}">الرئيسية</a>
-                </li>
-                <li class="breadcrumb-item">
-                    <a href="{{ route('admin.payment-methods.index') }}">وسائل الدفع</a>
-                </li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">الرئيسية</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.payment-methods.index') }}">وسائل الدفع</a></li>
                 <li class="breadcrumb-item active">إضافة جديدة</li>
             </ol>
         </nav>
 
-        <div class="row" bis_skin_checked="1">
-            <div class="col-12" bis_skin_checked="1">
-                <div class="form-card" bis_skin_checked="1">
-                    <div class="form-header" bis_skin_checked="1">
-                        <div class="d-flex justify-content-between align-items-center" bis_skin_checked="1">
-                            <div bis_skin_checked="1">
-                                <h5 class="mb-1">إضافة وسيلة دفع جديدة</h5>
+        <div class="row">
+            <div class="col-12">
+                <div class="form-card">
+                    <div class="form-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1"><i class="fas fa-plus-circle me-2"></i>إضافة وسيلة دفع جديدة</h5>
                                 <p class="text-muted mb-0">أضف وسيلة دفع جديدة للنظام</p>
                             </div>
                             <a href="{{ route('admin.payment-methods.index') }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-right me-2"></i>العودة للقائمة
+                                <i class="fas fa-arrow-right me-2"></i>العودة
                             </a>
                         </div>
-                    </div>
-
-                    <div class="alert-guide" bis_skin_checked="1">
-                        <h6><i class="fas fa-lightbulb me-2"></i>معلومات مهمة:</h6>
-                        <ul>
-                            <li>المعرف (Key) يجب أن يكون فريداً ولا يتكرر</li>
-                            <li>المعرف سيتم استخدامه في الكود البرمجي</li>
-                            <li>يمكنك اختيار أيقونة من القائمة أو كتابة رمز FontAwesome</li>
-                            <li>وسائل الدفع النشطة فقط ستظهر للعملاء</li>
-                        </ul>
                     </div>
 
                     @if ($errors->any())
@@ -353,181 +212,109 @@
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     @endif
 
-                    <form action="{{ route('admin.payment-methods.store') }}" method="POST" id="createForm">
+                    <form action="{{ route('admin.payment-methods.store') }}" method="POST" enctype="multipart/form-data"
+                        id="createForm">
                         @csrf
 
-                        <div class="row" bis_skin_checked="1">
-                            <div class="col-lg-8" bis_skin_checked="1">
-                                <!-- Step 1: Basic Information -->
-                                <div class="step-card" bis_skin_checked="1">
-                                    <div class="step-number" bis_skin_checked="1">1</div>
-                                    <div bis_skin_checked="1">
-                                        <h5 class="step-title">المعلومات الأساسية</h5>
-                                        <p class="step-description">أدخل المعلومات الأساسية لوسيلة الدفع</p>
-                                    </div>
-                                </div>
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <!-- معلومات أساسية -->
+                                <h6 class="section-title">المعلومات الأساسية</h6>
 
-                                <div class="mb-4" bis_skin_checked="1">
+                                <div class="mb-4">
                                     <label for="name" class="form-label required">اسم وسيلة الدفع</label>
                                     <input type="text" class="form-control" id="name" name="name"
-                                        value="{{ old('name') }}"
-                                        placeholder="مثال: بطاقة ائتمان، PayPal، الدفع عند الاستلام" required>
-                                    <div class="help-text" bis_skin_checked="1">الاسم الذي سيظهر للعملاء</div>
+                                        value="{{ old('name') }}" placeholder="مثال: بطاقة ائتمان، PayPal" required>
+                                    <small class="text-muted">الاسم الذي سيظهر للعملاء</small>
                                 </div>
 
-                                <div class="mb-4" bis_skin_checked="1">
+                                <div class="mb-4">
                                     <label for="key" class="form-label required">المعرف (Key)</label>
-                                    <div class="key-generator" bis_skin_checked="1">
+                                    <div class="input-group">
                                         <input type="text" class="form-control" id="key" name="key"
-                                            value="{{ old('key') }}"
-                                            placeholder="مثال: credit-card, paypal, cash-on-delivery" required>
+                                            value="{{ old('key') }}" placeholder="مثال: credit-card, paypal" required>
                                         <button type="button" class="btn btn-outline-secondary" onclick="generateKey()">
                                             <i class="fas fa-sync-alt"></i>
                                         </button>
                                     </div>
-                                    <div class="help-text" bis_skin_checked="1">
-                                        معرف فريد يستخدم في النظام، سيتم توليده تلقائياً من الاسم
-                                    </div>
+                                    <small class="text-muted">معرف فريد يستخدم في النظام</small>
                                 </div>
 
-                                <!-- Step 2: Icon Selection -->
-                                <div class="step-card" bis_skin_checked="1">
-                                    <div class="step-number" bis_skin_checked="1">2</div>
-                                    <div bis_skin_checked="1">
-                                        <h5 class="step-title">الأيقونة</h5>
-                                        <p class="step-description">اختر أيقونة مناسبة لوسيلة الدفع</p>
+                                <!-- رفع الصورة -->
+                                <h6 class="section-title mt-4">صورة الوسيلة</h6>
+
+                                <div class="mb-4">
+                                    <label class="form-label">أيقونة / صورة الوسيلة</label>
+                                    <div class="image-upload-container" id="uploadArea">
+                                        <div class="upload-icon">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                        </div>
+                                        <p class="mb-2">انقر لرفع صورة</p>
+                                        <small class="text-muted">الصيغ المدعومة: JPG, PNG, SVG</small>
+                                        <img id="imagePreview" class="image-preview mt-3" alt="معاينة الصورة">
+                                        <input type="file" id="icon" name="icon" accept="image/*" class="d-none"
+                                            onchange="handlePreviewImage(event)">
+
                                     </div>
+                                    <small class="text-muted">الحجم الموصى به: 100×100 بكسل</small>
                                 </div>
 
-                                <div class="mb-4" bis_skin_checked="1">
-                                    <label class="form-label">اختر أيقونة</label>
+                                <!-- الإعدادات -->
+                                <h6 class="section-title mt-4">الإعدادات</h6>
 
-                                    <div class="mb-3" bis_skin_checked="1">
-                                        <div class="icon-preview" id="iconPreview">
-                                            <i class="fas fa-credit-card"></i>
-                                        </div>
-                                        <input type="hidden" id="selected_icon" name="icon" value="fas fa-credit-card">
-                                    </div>
-
-                                    <input type="text" class="form-control mb-3" id="icon_input"
-                                        placeholder="أو اكتب رمز FontAwesome مثل: fas fa-paypal"
-                                        value="fas fa-credit-card" oninput="updateIconPreview(this.value)">
-
-                                    <label class="form-label mt-4">أيقونات مقترحة:</label>
-                                    <div class="icon-grid" bis_skin_checked="1">
-                                        <div class="icon-item selected" onclick="selectIcon('fas fa-credit-card')">
-                                            <i class="fas fa-credit-card"></i>
-                                        </div>
-                                        <div class="icon-item" onclick="selectIcon('fas fa-money-bill-wave')">
-                                            <i class="fas fa-money-bill-wave"></i>
-                                        </div>
-                                        <div class="icon-item" onclick="selectIcon('fab fa-paypal')">
-                                            <i class="fab fa-paypal"></i>
-                                        </div>
-                                        <div class="icon-item" onclick="selectIcon('fas fa-university')">
-                                            <i class="fas fa-university"></i>
-                                        </div>
-                                        <div class="icon-item" onclick="selectIcon('fas fa-mobile-alt')">
-                                            <i class="fas fa-mobile-alt"></i>
-                                        </div>
-                                        <div class="icon-item" onclick="selectIcon('fas fa-wallet')">
-                                            <i class="fas fa-wallet"></i>
-                                        </div>
-                                        <div class="icon-item" onclick="selectIcon('fas fa-hand-holding-usd')">
-                                            <i class="fas fa-hand-holding-usd"></i>
-                                        </div>
-                                        <div class="icon-item" onclick="selectIcon('fas fa-truck')">
-                                            <i class="fas fa-truck"></i>
-                                        </div>
-                                        <div class="icon-item" onclick="selectIcon('fas fa-qrcode')">
-                                            <i class="fas fa-qrcode"></i>
-                                        </div>
-                                        <div class="icon-item" onclick="selectIcon('fas fa-shield-alt')">
-                                            <i class="fas fa-shield-alt"></i>
-                                        </div>
-                                        <div class="icon-item" onclick="selectIcon('fas fa-globe')">
-                                            <i class="fas fa-globe"></i>
-                                        </div>
-                                        <div class="icon-item" onclick="selectIcon('fas fa-coins')">
-                                            <i class="fas fa-coins"></i>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Step 3: Settings -->
-                                <div class="step-card" bis_skin_checked="1">
-                                    <div class="step-number" bis_skin_checked="1">3</div>
-                                    <div bis_skin_checked="1">
-                                        <h5 class="step-title">الإعدادات</h5>
-                                        <p class="step-description">تحديد إعدادات وسيلة الدفع</p>
-                                    </div>
-                                </div>
-
-                                <div class="mb-4" bis_skin_checked="1">
-                                    <div class="toggle-container" bis_skin_checked="1">
-                                        <label class="toggle-switch">
-                                            <input type="checkbox" id="is_active" name="is_active" value="1"
-                                                checked>
-                                            <span class="toggle-slider"></span>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="is_active" name="is_active"
+                                            value="1" checked>
+                                        <label class="form-check-label" for="is_active">
+                                            <strong>نشط</strong>
+                                            <small class="d-block text-muted">وسائل الدفع النشطة فقط ستظهر للعملاء</small>
                                         </label>
-                                        <div bis_skin_checked="1">
-                                            <div class="toggle-label" bis_skin_checked="1">نشط</div>
-                                            <div class="toggle-description" bis_skin_checked="1">
-                                                وسائل الدفع النشطة فقط ستظهر للعملاء
-                                            </div>
-                                        </div>
                                     </div>
+                                </div>
 
-                                    <div class="toggle-container" bis_skin_checked="1">
-                                        <label class="toggle-switch">
-                                            <input type="checkbox" id="is_payment" name="is_payment" value="1"
-                                                checked>
-                                            <span class="toggle-slider"></span>
+                                <div class="mb-4">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="is_payment" name="is_payment"
+                                            value="1" checked>
+                                        <label class="form-check-label" for="is_payment">
+                                            <strong>طريقة دفع</strong>
+                                            <small class="d-block text-muted">طريقة دفع فعلاً أم طريقة أخرى</small>
                                         </label>
-                                        <div bis_skin_checked="1">
-                                            <div class="toggle-label" bis_skin_checked="1">طريقة دفع</div>
-                                            <div class="toggle-description" bis_skin_checked="1">
-                                                إذا كانت طريقة دفع فعلاً أم طريقة أخرى مثل التحويل البنكي
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="col-lg-4" bis_skin_checked="1">
-                                <!-- Preview Section -->
-                                <div class="preview-card" bis_skin_checked="1">
-                                    <h6 class="mb-3">معاينة وسيلة الدفع</h6>
+                            <div class="col-lg-4">
+                                <!-- معاينة -->
+                                <div class="preview-card">
+                                    <h6 class="mb-3 text-center">معاينة</h6>
 
-                                    <div class="preview-icon" id="previewIcon">
-                                        <i class="fas fa-credit-card"></i>
+                                    <div class="preview-icon">
+                                        <img id="previewImage" src="{{ asset('images/default-payment.png') }}"
+                                            alt="معاينة الأيقونة">
                                     </div>
 
-                                    <div class="preview-name" id="previewName">اسم وسيلة الدفع</div>
+                                    <div class="preview-name" id="previewName">اسم الوسيلة</div>
+                                    <div class="preview-key" id="previewKey">key</div>
 
-                                    <div class="preview-key" id="previewKey">credit-card</div>
-
-                                    <div class="preview-status" bis_skin_checked="1">
+                                    <div class="text-center mt-3">
                                         <span class="status-badge status-active" id="previewStatus">نشط</span>
-                                        <span class="type-badge type-payment" id="previewType">طريقة دفع</span>
+                                        <span class="status-badge type-badge" id="previewType">دفع</span>
                                     </div>
-
-                                    <p class="text-muted mb-0">
-                                        هذه هي معاينة وسيلة الدفع كما ستظهر في النظام
-                                    </p>
                                 </div>
 
-                                <!-- Quick Actions -->
-                                <div class="mt-4" bis_skin_checked="1">
-                                    <div class="d-grid gap-2" bis_skin_checked="1">
+                                <!-- أزرار التحكم -->
+                                <div class="mt-4">
+                                    <div class="d-grid gap-2">
                                         <button type="submit" class="btn btn-primary btn-lg">
-                                            <i class="fas fa-save me-2"></i>حفظ وسيلة الدفع
+                                            <i class="fas fa-save me-2"></i>حفظ
                                         </button>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                                        <button type="button" class="btn btn-outline-danger" onclick="resetForm()">
                                             <i class="fas fa-redo me-2"></i>إعادة تعيين
                                         </button>
                                     </div>
@@ -542,52 +329,45 @@
 @endsection
 
 @section('js')
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        $(document).ready(function() {
+        document.addEventListener('DOMContentLoaded', function() {
             // تحديث المعاينة عند تغيير الاسم
-            $('#name').on('input', function() {
-                $('#previewName').text($(this).val() || 'اسم وسيلة الدفع');
-                if (!$('#key').val()) {
+            const nameInput = document.getElementById('name');
+            const keyInput = document.getElementById('key');
+
+            nameInput.addEventListener('input', function() {
+                document.getElementById('previewName').textContent = this.value || 'اسم الوسيلة';
+                if (!keyInput.value) {
                     generateKey();
                 }
             });
 
-            // تحديث المعاينة عند تغيير الـ Key
-            $('#key').on('input', function() {
-                $('#previewKey').text($(this).val() || 'key');
+            keyInput.addEventListener('input', function() {
+                document.getElementById('previewKey').textContent = this.value || 'key';
             });
 
             // تحديث حالة النشاط
-            $('#is_active').on('change', function() {
-                const isActive = $(this).is(':checked');
-                const badge = $('#previewStatus');
-                badge.removeClass('status-active status-inactive');
-
-                if (isActive) {
-                    badge.addClass('status-active').text('نشط');
-                } else {
-                    badge.addClass('status-inactive').text('غير نشط');
-                }
+            document.getElementById('is_active').addEventListener('change', function() {
+                const badge = document.getElementById('previewStatus');
+                badge.textContent = this.checked ? 'نشط' : 'غير نشط';
+                badge.className = this.checked ? 'status-badge status-active' :
+                    'status-badge status-inactive';
             });
 
             // تحديث نوع وسيلة الدفع
-            $('#is_payment').on('change', function() {
-                const isPayment = $(this).is(':checked');
-                const badge = $('#previewType');
-                badge.removeClass('type-payment type-method');
-
-                if (isPayment) {
-                    badge.addClass('type-payment').text('طريقة دفع');
-                } else {
-                    badge.addClass('type-method').text('طريقة أخرى');
-                }
+            document.getElementById('is_payment').addEventListener('change', function() {
+                document.getElementById('previewType').textContent = this.checked ? 'دفع' : 'أخرى';
             });
 
-            // التحقق من النموذج قبل الإرسال
-            $('#createForm').on('submit', function(e) {
-                if (!$('#name').val() || !$('#key').val()) {
+            // رفع الصورة
+            document.getElementById('uploadArea').addEventListener('click', function() {
+                document.getElementById('icon').click();
+            });
+
+            // التحقق من النموذج
+            document.getElementById('createForm').addEventListener('submit', function(e) {
+                if (!nameInput.value || !keyInput.value) {
                     e.preventDefault();
                     Swal.fire({
                         icon: 'warning',
@@ -601,43 +381,53 @@
         });
 
         function generateKey() {
-            const name = $('#name').val();
+            const name = document.getElementById('name').value;
             if (name) {
                 const key = name
                     .toLowerCase()
-                    .replace(/[^a-z0-9\u0621-\u064A\u0660-\u0669\u0671-\u06D3]/g, '-')
+                    .replace(/[^a-z0-9\u0621-\u064A]/g, '-')
                     .replace(/-+/g, '-')
                     .replace(/^-|-$/g, '');
 
-                $('#key').val(key);
-                $('#previewKey').text(key);
+                document.getElementById('key').value = key;
+                document.getElementById('previewKey').textContent = key;
             }
         }
 
-        function selectIcon(iconClass) {
-            // إزالة التحديد من جميع الأيقونات
-            $('.icon-item').removeClass('selected');
+        function previewImage(event) {
+            const input = event.target;
+            const preview = document.getElementById('imagePreview');
+            const mainPreview = document.getElementById('previewImage');
 
-            // إضافة التحديد للأيقونة المختارة
-            $(`.icon-item[onclick*="${iconClass}"]`).addClass('selected');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
 
-            // تحديث حقل الإدخال والمعاينة
-            $('#icon_input').val(iconClass);
-            $('#selected_icon').val(iconClass);
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    mainPreview.src = e.target.result;
+                }
 
-            // تحديث المعاينة
-            updateIconPreview(iconClass);
+                reader.readAsDataURL(input.files[0]);
+            }
         }
 
-        function updateIconPreview(iconClass) {
-            if (iconClass) {
-                $('#iconPreview').html(`<i class="${iconClass}"></i>`);
-                $('#previewIcon').html(`<i class="${iconClass}"></i>`);
-                $('#selected_icon').val(iconClass);
+        function handlePreviewImage(event) {
+            const input = event.target;
+            const preview = document.getElementById('imagePreview');
+            const mainPreview = document.getElementById('previewImage');
+            const uploadArea = document.getElementById('uploadArea');
 
-                // تحديث التحديد في الأيقونات المقترحة
-                $('.icon-item').removeClass('selected');
-                $(`.icon-item[onclick*="${iconClass}"]`).addClass('selected');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    mainPreview.src = e.target.result;
+                };
+
+                reader.readAsDataURL(input.files[0]);
             }
         }
 
@@ -654,19 +444,11 @@
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // إعادة تعيين النموذج
                     document.getElementById('createForm').reset();
-
-                    // إعادة تعيين الأيقونة
-                    selectIcon('fas fa-credit-card');
-
-                    // إعادة تعيين التبديلات
-                    $('#is_active').prop('checked', true).trigger('change');
-                    $('#is_payment').prop('checked', true).trigger('change');
-
-                    // إعادة تعيين المعاينة
-                    $('#previewName').text('اسم وسيلة الدفع');
-                    $('#previewKey').text('credit-card');
+                    document.getElementById('imagePreview').style.display = 'none';
+                    document.getElementById('previewImage').src = '{{ asset('images/default-payment.png') }}';
+                    document.getElementById('previewName').textContent = 'اسم الوسيلة';
+                    document.getElementById('previewKey').textContent = 'key';
 
                     Swal.fire({
                         icon: 'success',

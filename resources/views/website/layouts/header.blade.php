@@ -50,13 +50,13 @@
                           Destinations
                       </a>
                       <ul class="dropdown-menu">
-                          <li><a class="dropdown-item" href="https://www.luxorandaswan.com/Egypt">
+                          <li><a class="dropdown-item" href="{{ route('website.destinations') }}">
                                   <i class="la la-map-marker"></i> Egypt
                               </a></li>
-                          <li><a class="dropdown-item" href="https://www.luxorandaswan.com/Jordan">
+                          <li><a class="dropdown-item" href="{{ route('website.destinations') }}">
                                   <i class="la la-map-marker"></i> Jordan
                               </a></li>
-                          <li><a class="dropdown-item" href="https://www.luxorandaswan.com/Dubai">
+                          <li><a class="dropdown-item" href="{{ route('website.destinations') }}">
                                   <i class="la la-map-marker"></i> Dubai
                               </a></li>
                           <li><a class="dropdown-item" href="https://www.luxorandaswan.com/Morocco">
@@ -74,7 +74,7 @@
                       </ul>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link" href="multicountries/index.html">
+                      <a class="nav-link" href="{{ route('website.multi_country') }}">
                           <i class="la la-globe-americas"></i>
                           Multi Country
                       </a>

@@ -29,11 +29,11 @@ class BannerItemResource extends JsonResource
             'category_id'   => $this->category_id,
 
             // تاج
-            'tag' => [
-                'text'       => $this->tag_text,
-                'color'      => $this->tag_color,
-                'background' => $this->tag_bg_color,
-            ],
+            // 'tag' => [
+            //     'text'       => $this->tag_text,
+            //     'color'      => $this->tag_color,
+            //     'background' => $this->tag_bg_color,
+            // ],
 
             'is_active'     => $this->is_active,
         ];

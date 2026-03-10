@@ -340,9 +340,9 @@ class RoleController extends Controller
      */
     public function assignIndex(Request $request)
     {
-        if (!auth()->guard('admin')->user()->can('roles.assign')) {
-            abort(403, 'غير مصرح لك بتعيين الرتب');
-        }
+        // if (!auth()->guard('admin')->user()->can('roles.assign')) {
+        //     abort(403, 'غير مصرح لك بتعيين الرتب');
+        // }
 
         $admins = Admin::with('roles')
             ->orderBy('created_at', 'desc')
@@ -358,9 +358,9 @@ class RoleController extends Controller
      */
     public function assignRoles(Request $request)
     {
-        if (!auth()->guard('admin')->user()->can('assign_roles')) {
-            abort(403, 'غير مصرح لك بتعيين الرتب');
-        }
+        // if (!auth()->guard('admin')->user()->can('assign_roles')) {
+        //     abort(403, 'غير مصرح لك بتعيين الرتب');
+        // }
 
         $validator = Validator::make($request->all(), [
             'admin_id' => 'required|exists:admins,id',

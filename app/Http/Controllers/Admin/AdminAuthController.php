@@ -24,7 +24,14 @@ class AdminAuthController extends Controller
 {
   public function __construct()
   {
-    // No middleware applied here to allow access to login and password reset pages
+    // $this->middleware(function ($request, $next) {
+
+    //   if (!auth('admin')->check()) {
+    //     return redirect()->route('admin.login.page');
+    //   }
+
+    //   return $next($request);
+    // });
   }
 
   // public function register()
@@ -35,7 +42,7 @@ class AdminAuthController extends Controller
   public function loginPage()
   {
     if (auth('admin')->check()) {
-      return redirect('/admin');
+      return redirect('/');
     }
     return view('Admin.auth.login');
   }
@@ -46,7 +53,7 @@ class AdminAuthController extends Controller
 
     if (Auth::guard('admin')->attempt($credentials)) {
       $request->session()->regenerate();
-      return redirect()->intended('/admin');
+      return redirect()->intended('/');
     }
 
     return back()->withErrors(['email' => 'يرجى إدخال بريد إلكتروني أو كلمة مرور صحيحة']);
@@ -100,6 +107,10 @@ class AdminAuthController extends Controller
     }
   }
 
+  public function home()
+  {
+    return view('Admin.index');
+  }
 
   public function resetPassword(Request $request)
   {

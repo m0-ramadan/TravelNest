@@ -2,183 +2,433 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Carbon\Carbon;
-use App\Models\Admin;
-use App\Models\Branchs;
-use App\Models\Visitor;
-use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Flasher\Toastr\Laravel\Facade\Toastr;
+use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class AdminController extends Controller
 {
-
-    // public function __construct()
-    // {
-    //     $this->middleware('permission:عرض الإدمن', ['only' => ['index']]);
-    //     $this->middleware('permission:إضافة الإدمن', ['only' => ['create', 'store']]);
-    //     $this->middleware('permission:تعديل الإدمن', ['only' => ['edit', 'update']]);
-    //     $this->middleware('permission:حذف الإدمن', ['only' => ['destroy']]);
-    // }
-
-    public function home()
+    public function __construct()
     {
-        $admins = Admin::all();
-
-        return view('Admin.index', compact('admins','topCustomers'));
+        // $this->middleware('permission:عرض المشرفين')->only(['index', 'show']);
+        // $this->middleware('permission:إضافة مشرف')->only(['create', 'store']);
+        // $this->middleware('permission:تعديل مشرف')->only(['edit', 'update']);
+        // $this->middleware('permission:حذف مشرف')->only(['destroy']);
+        // $this->middleware('permission:تغيير حالة مشرف')->only(['toggleStatus']);
+        // $this->middleware('permission:إعادة تعيين كلمة المرور')->only(['resetPassword']);
     }
-    public function index()
+/**
+ * التحقق من توفر البريد الإلكتروني
+ */
+public function checkEmail(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email'
+    ]);
+
+    $exists = Admin::where('email', $request->email)->exists();
+
+    return response()->json([
+        'available' => !$exists,
+        'message' => $exists ? 'البريد الإلكتروني مستخدم بالفعل' : 'البريد الإلكتروني متاح'
+    ]);
+}
+    /**
+     * عرض قائمة المشرفين
+     */
+    public function index(Request $request)
     {
-        // ---------------------------------------
-        // زيارات آخر 10 أيام
-        // ---------------------------------------
+        if(!Auth::guard('admin')->check()) {
+             return redirect()->route('admin.login.page');
+        }
+        $query = Admin::query();
 
-        $visits = Visitor::selectRaw('DATE(created_at) as date, COUNT(*) as count')
-            ->where('created_at', '>=', Carbon::now()->subDays(10))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->pluck('count', 'date');
-        $topCustomers = \App\Models\Order::select('user_id')->selectRaw('COUNT(*) as orders_count')->with(['user:id,name,image'])->groupBy('user_id')->orderByDesc('orders_count')->take(10)->get();
-
-        $visitsLabels = [];
-        $visitsData = [];
-
-        for ($i = 9; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i)->format('Y-m-d');
-            $visitsLabels[] = Carbon::now()->subDays($i)->format('d M');
-            $visitsData[] = $visits[$date] ?? 0;
+        // البحث
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
         }
 
-        // ---------------------------------------
-        // الدول الأكثر زيارة (Top Countries)
-        // ---------------------------------------
+        // تصفية حسب الحالة
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->status === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
 
-        $countriesData = Visitor::selectRaw('country, COUNT(*) as count')
-            ->whereNotNull('country')
-            ->where('country', '!=', '')
-            ->groupBy('country')
-            ->orderByDesc('count')
-            ->limit(6)
-            ->pluck('count', 'country')
-            ->toArray();
-// dd( $countriesData);
-        // ---------------------------------------
-        // حالة الطلبات (Orders Status)
-        // ---------------------------------------
+        // تصفية حسب الدور
+        if ($request->filled('role')) {
+            $query->role($request->role);
+        }
 
-        $ordersStatus = []; // You can uncomment and use your orders logic when ready
+        // ترتيب
+        $query->orderBy($request->get('sort_by', 'created_at'), $request->get('sort_dir', 'desc'));
 
-        // ---------------------------------------
-        // إرجاع البيانات للصفحة
-        // ---------------------------------------
+        // عدد العناصر لكل صفحة
+        $perPage = $request->get('per_page', 10);
 
-        return view('Admin.index', compact(
-            'visitsLabels',
-            'visitsData',
-            'countriesData',
-            'ordersStatus','topCustomers'
-        ));
+        $admins = $query->with('roles')
+                       ->paginate($perPage)
+                       ->withQueryString();
+
+        // إحصائيات
+        $stats = [
+            'total' => Admin::count(),
+            'active' => Admin::where('is_active', true)->count(),
+            'inactive' => Admin::where('is_active', false)->count(),
+            'super_admins' => Admin::role('super_admin')->count(),
+            'admins' => Admin::role('admin')->count(),
+            'moderators' => Admin::role('editor')->count(),
+        ];
+
+        // الأدوار المتاحة
+        $roles = Role::where('guard_name', 'admin')
+                    ->orderBy('name')
+                    ->get(['id', 'name', 'display_name']);
+
+        return view('Admin.admin.index', compact('admins', 'stats', 'roles'));
     }
 
-    public function create()
-    {
-      //  $branches = Branchs::all();
-        $roles = Role::all();
-
-        return view('Admin.admin.create', compact('branches', 'roles'));
-    }
-
-
+    /**
+     * عرض نموذج إضافة مشرف جديد
+     */
+public function create()
+{
+    $roles = Role::where('guard_name', 'admin')
+                ->orderBy('name')
+                ->get(['id', 'name', 'display_name', 'description']);
+    
+    $permissions = Permission::where('guard_name', 'admin')
+                            ->orderBy('module')
+                            ->orderBy('name')
+                            ->get();
+    
+    return view('Admin.admin.create', compact('roles', 'permissions'));
+}
+    /**
+     * حفظ مشرف جديد
+     */
     public function store(Request $request)
     {
-        try {
-            // التحقق من البيانات
-            $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'branch_id' => 'nullable|exists:branchss,id', // Adjust table name if needed
-                'email' => 'required|string|email|max:255|unique:admins,email',
-                'password' => 'required|string|min:6',
-                'role' => 'required',
-            ], [
-                'name.required' => 'الاسم مطلوب.',
-                'email.required' => 'البريد الإلكتروني مطلوب.',
-                'email.unique' => 'البريد الإلكتروني مستخدم بالفعل.',
-                'password.required' => 'كلمة المرور مطلوبة.',
-                'password.min' => 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.',
-                'role.required' => 'الدور مطلوب.',
-                'role.exists' => 'الدور المحدد غير موجود.',
-            ]);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:admins,email',
+            'phone' => 'nullable|string|unique:admins,phone',
+            'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|exists:roles,id',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'is_active' => 'boolean'
+        ]);
 
-            // إنشاء المسؤول
-            $admin = Admin::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'branch_id' => $validated['branch_id'],
-                'password' => $validated['password'], // Handled by setPasswordAttribute
-            ]);
+        $data = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'password' => Hash::make($request->password),
+            'is_active' => $request->is_active ?? true,
+        ];
 
-            // Assign the role using Spatie
-            $admin->assignRole($validated['role']);
-
-            Log::info('Admin created:', ['admin_id' => $admin->id, 'role' => $validated['role']]);
-            return redirect()->route('admin.admins.index')->with(['success' => 'تم إضافة المسؤول بنجاح']);
-        } catch (\Exception $e) {
-            Log::error('فشل إنشاء المسؤول: ' . $e->getMessage());
-            toastr()->error('حدث خطأ أثناء إضافة المسؤول', 'خطأ');
-            return back()->withInput()->with(['error' => 'فشل إنشاء المسؤول: ' . $e->getMessage()]);
+        // رفع الصورة
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('admins/avatars', 'public');
+            $data['avatar'] = $path;
         }
+
+        $admin = Admin::create($data);
+        
+        // إضافة الدور
+        $role = Role::findById($request->role);
+        $admin->assignRole($role);
+
+        return redirect()->route('admin.admins.index')
+                        ->with('success', 'تم إضافة المشرف بنجاح');
     }
+
+    /**
+     * عرض تفاصيل مشرف
+     */
+    public function show(Admin $admin)
+    {
+        $admin->load('roles', 'permissions');
+            $roles = Role::orderBy('name')
+                ->get(['id', 'name', 'display_name', 'description']);
+        return view('Admin.admin.show', compact('admin','roles'));
+    }
+
+    /**
+     * عرض نموذج تعديل مشرف
+     */
     public function edit(Admin $admin)
     {
-       // $branches = Branchs::all();
-        $roles = Role::all();
-
-        return view('Admin.admin.edit', compact('admin', 'branches', 'roles'));
+        $roles = Role::where('guard_name', 'admin')
+                    ->orderBy('name')
+                    ->get(['id', 'name', 'display_name']);
+        
+        return view('Admin.admin.edit', compact('admin', 'roles'));
     }
 
+    /**
+     * تحديث بيانات مشرف
+     */
     public function update(Request $request, Admin $admin)
     {
-        try {
-            $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'branch_id' => 'nullable|exists:branchss,id', // Adjust table name if needed
-                'email' => 'required|string|email|max:255|unique:admins,email,' . $admin->id,
-                'password' => 'nullable|string|min:6',
-                'role' => 'required|exists:roles,name',
-            ], [
-                'name.required' => 'الاسم مطلوب.',
-                'email.required' => 'البريد الإلكتروني مطلوب.',
-                'email.unique' => 'البريد الإلكتروني مستخدم بالفعل.',
-                'password.min' => 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.',
-                'role.required' => 'الدور مطلوب.',
-                'role.exists' => 'الدور المحدد غير موجود.',
-            ]);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:admins,email,' . $admin->id,
+            'phone' => 'nullable|string|unique:admins,phone,' . $admin->id,
+            'role' => 'required|exists:roles,id',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'is_active' => 'boolean'
+        ]);
 
-            $updateData = [
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'branch_id' => $validated['branch_id'],
-            ];
+        $data = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'is_active' => $request->is_active ?? true,
+        ];
 
-            if (!empty($validated['password'])) {
-                $updateData['password'] = $validated['password']; // Handled by setPasswordAttribute
+        // تحديث الصورة
+        if ($request->hasFile('avatar')) {
+            // حذف الصورة القديمة
+            if ($admin->avatar) {
+                Storage::disk('public')->delete($admin->avatar);
             }
-
-            $admin->update($updateData);
-            $admin->syncRoles($validated['role']);
-
-            return redirect()->route('admin.admins.index')->with(['success' => 'تم تحديث المسؤول بنجاح']);
-        } catch (\Exception $e) {
-            toastr()->error('حدث خطأ أثناء تحديث المسؤول', 'خطأ');
-            return back()->withInput()->with(['error' =>  $e->getMessage()]);
+            
+            $path = $request->file('avatar')->store('admins/avatars', 'public');
+            $data['avatar'] = $path;
         }
+
+        $admin->update($data);
+        
+        // تحديث الدور
+        $admin->syncRoles([$request->role]);
+
+        return redirect()->route('admin.admins.index')
+                        ->with('success', 'تم تحديث بيانات المشرف بنجاح');
     }
+
+    /**
+     * حذف مشرف
+     */
     public function destroy(Admin $admin)
     {
+        // لا يمكن حذف نفسه
+        if ($admin->id === auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يمكنك حذف حسابك الخاص'
+            ], 403);
+        }
+
+        // لا يمكن حذف المشرف الرئيسي
+        if ($admin->isSuperAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يمكن حذف المشرف الرئيسي'
+            ], 403);
+        }
+
+        // حذف الصورة
+        if ($admin->avatar) {
+            Storage::disk('public')->delete($admin->avatar);
+        }
+
         $admin->delete();
-        return redirect()->back()->with(['success' => 'تم حذف المسؤول بنجاح.']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حذف المشرف بنجاح'
+        ]);
+    }
+
+    /**
+     * تغيير حالة المشرف (نشط/غير نشط)
+     */
+    public function toggleStatus(Admin $admin)
+    {
+        // لا يمكن تغيير حالة نفسه
+        if ($admin->id === auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يمكنك تغيير حالة حسابك الخاص'
+            ], 403);
+        }
+
+        // لا يمكن تغيير حالة المشرف الرئيسي
+        if ($admin->isSuperAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يمكن تغيير حالة المشرف الرئيسي'
+            ], 403);
+        }
+
+        $admin->is_active = !$admin->is_active;
+        $admin->save();
+
+        $status = $admin->is_active ? 'تفعيل' : 'تعطيل';
+
+        return response()->json([
+            'success' => true,
+            'message' => "تم {$status} حساب المشرف بنجاح",
+            'status' => $admin->is_active,
+            'status_text' => $admin->is_active ? 'نشط' : 'غير نشط',
+            'badge_class' => $admin->is_active ? 'success' : 'danger'
+        ]);
+    }
+
+    /**
+     * إعادة تعيين كلمة المرور
+     */
+    public function resetPassword(Request $request, Admin $admin)
+    {
+        $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $admin->password = Hash::make($request->password);
+        $admin->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم إعادة تعيين كلمة المرور بنجاح'
+        ]);
+    }
+
+    /**
+     * حذف متعدد للمشرفين
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:admins,id'
+        ]);
+
+        // لا يمكن حذف نفسه
+        if (in_array(auth()->id(), $request->ids)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يمكنك حذف حسابك الخاص'
+            ], 403);
+        }
+
+        $count = 0;
+        foreach ($request->ids as $id) {
+            $admin = Admin::find($id);
+            
+            // لا يمكن حذف المشرف الرئيسي
+            if ($admin && !$admin->isSuperAdmin()) {
+                if ($admin->avatar) {
+                    Storage::disk('public')->delete($admin->avatar);
+                }
+                $admin->delete();
+                $count++;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "تم حذف {$count} مشرفين بنجاح"
+        ]);
+    }
+
+    /**
+     * تغيير حالة متعددة للمشرفين
+     */
+    public function bulkStatus(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:admins,id',
+            'status' => 'required|in:active,inactive'
+        ]);
+
+        // لا يمكن تغيير حالة نفسه
+        if (in_array(auth()->id(), $request->ids)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يمكنك تغيير حالة حسابك الخاص'
+            ], 403);
+        }
+
+        $status = $request->status === 'active';
+        $count = Admin::whereIn('id', $request->ids)
+                     ->where('id', '!=', auth()->id())
+                     ->whereDoesntHave('roles', function($q) {
+                         $q->where('name', 'super_admin');
+                     })
+                     ->update(['is_active' => $status]);
+
+        $statusText = $status ? 'تفعيل' : 'تعطيل';
+
+        return response()->json([
+            'success' => true,
+            'message' => "تم {$statusText} {$count} مشرفين بنجاح"
+        ]);
+    }
+
+    /**
+     * تصدير بيانات المشرفين
+     */
+    public function export(Request $request)
+    {
+        $query = Admin::query();
+
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status === 'active');
+        }
+
+        if ($request->filled('role')) {
+            $query->role($request->role);
+        }
+
+        $admins = $query->with('roles')->get();
+
+        // تنسيق البيانات للتصدير
+        $data = $admins->map(function($admin) {
+            return [
+                'الاسم' => $admin->name,
+                'البريد الإلكتروني' => $admin->email,
+                'الهاتف' => $admin->phone ?? '-',
+                'الدور' => $admin->roles->pluck('display_name')->implode(', '),
+                'الحالة' => $admin->is_active ? 'نشط' : 'غير نشط',
+                'تاريخ الإنشاء' => $admin->created_at->format('Y-m-d'),
+            ];
+        });
+
+        // تصدير CSV
+        $filename = 'admins_export_' . now()->format('Y-m_d') . '.csv';
+        $handle = fopen('php://temp', 'w+');
+        
+        // إضافة BOM لدعم العربية في Excel
+        fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+        
+        // رؤوس الأعمدة
+        fputcsv($handle, array_keys($data->first() ?? []));
+        
+        // البيانات
+        foreach ($data as $row) {
+            fputcsv($handle, $row);
+        }
+        
+        rewind($handle);
+        $content = stream_get_contents($handle);
+        fclose($handle);
+
+        return response($content)
+            ->header('Content-Type', 'text/csv; charset=utf-8')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 }

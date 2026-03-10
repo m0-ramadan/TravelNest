@@ -104,6 +104,66 @@
             flex-grow: 1;
         }
 
+        /* قسم الأكواد التسلسلية */
+        .serials-section {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #d4edda;
+            border-radius: 8px;
+            background: #f0fff4;
+        }
+
+        .serials-section h4 {
+            color: #155724;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-bottom: 2px solid #c3e6cb;
+            padding-bottom: 8px;
+        }
+
+        .serials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .serial-item {
+            background: white;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #155724;
+            direction: ltr;
+            text-align: left;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .serial-item i {
+            color: #28a745;
+            margin-left: 5px;
+        }
+
+        .provider-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .provider-like4app {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .provider-internal {
+            background: #28a745;
+            color: white;
+        }
+
         .items-table {
             width: 100%;
             border-collapse: collapse;
@@ -142,6 +202,15 @@
             font-size: 12px;
             color: #666;
             margin-top: 5px;
+        }
+
+        .external-id {
+            font-size: 11px;
+            color: #696cff;
+            font-family: monospace;
+            direction: ltr;
+            display: inline-block;
+            margin-top: 3px;
         }
 
         .summary-section {
@@ -242,6 +311,20 @@
             font-size: 16px;
         }
 
+        .transaction-details {
+            background: #e8f4fd;
+            border: 1px solid #b8daff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .transaction-details h4 {
+            color: #004085;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
         @media print {
             body {
                 padding: 0;
@@ -259,6 +342,10 @@
             .summary-table {
                 page-break-inside: avoid;
             }
+
+            .serials-section {
+                page-break-inside: avoid;
+            }
         }
 
         @media (max-width: 768px) {
@@ -273,6 +360,10 @@
             .items-table th,
             .items-table td {
                 padding: 8px;
+            }
+
+            .serials-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -336,8 +427,16 @@
             <div class="invoice-title">
                 <h1>فاتورة بيع</h1>
                 <div class="order-number">رقم الطلب: {{ $order->order_number }}</div>
-                <div class="status-badge status-{{ $order->status }}">
-                    {{ $order->status_label }}
+                <div>
+                    <span class="status-badge status-{{ $order->status }}">
+                        {{ $order->status_label }}
+                    </span>
+                    @if ($order->provider)
+                        <span class="provider-badge provider-{{ $order->provider }}">
+                            <i class="fas fa-{{ $order->provider == 'like4app' ? 'cloud' : 'box' }}"></i>
+                            {{ $order->provider == 'like4app' ? 'لايك كارد' : 'داخلي' }}
+                        </span>
+                    @endif
                 </div>
             </div>
         </div>
@@ -354,15 +453,11 @@
                     </div>
                     <div class="info-row">
                         <span class="info-label">البريد:</span>
-                        <span class="info-value">{{ $order->customer_email }}</span>
+                        <span class="info-value">{{ $order->customer_email ?? '--' }}</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">الهاتف:</span>
-                        <span class="info-value">{{ $order->customer_phone }}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">العنوان:</span>
-                        <span class="info-value">{{ $order->shipping_address }}</span>
+                        <span class="info-value">{{ $order->customer_phone ?? '--' }}</span>
                     </div>
                 </div>
 
@@ -401,8 +496,37 @@
                         <span class="info-value">{{ $order->created_at->translatedFormat('d M Y - h:i A') }}</span>
                     </div>
                     <div class="info-row">
+                        <span class="info-label">آخر تحديث:</span>
+                        <span class="info-value">{{ $order->updated_at->translatedFormat('d M Y - h:i A') }}</span>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h4><i class="fas fa-credit-card me-2"></i>معلومات الدفع</h4>
+                    <div class="info-row">
                         <span class="info-label">طريقة الدفع:</span>
-                        <span class="info-value">{{ $order->payment_method }}</span>
+                        <span class="info-value">
+                            @switch($order->payment_method)
+                                @case('cash')
+                                    نقداً
+                                @break
+
+                                @case('credit_card')
+                                    بطاقة ائتمان
+                                @break
+
+                                @case('bank_transfer')
+                                    تحويل بنكي
+                                @break
+
+                                @case('wallet')
+                                    محفظة إلكترونية
+                                @break
+
+                                @default
+                                    {{ $order->payment_method ?? '--' }}
+                            @endswitch
+                        </span>
                     </div>
                     @if ($order->transaction_id)
                         <div class="info-row">
@@ -410,9 +534,42 @@
                             <span class="info-value">{{ $order->transaction_id }}</span>
                         </div>
                     @endif
+                    @if ($order->provider_order_id)
+                        <div class="info-row">
+                            <span class="info-label">رقم طلب خارجي:</span>
+                            <span class="info-value" dir="ltr">{{ $order->provider_order_id }}</span>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
+
+        <!-- معلومات لايك كارد الإضافية (إذا وجدت) -->
+        @if ($order->provider == 'like4app' && ($order->serial_codes || $order->provider_response))
+            <div class="transaction-details">
+                <h4><i class="fas fa-cloud"></i> تفاصيل طلب لايك كارد</h4>
+
+                @if ($order->serial_codes && count($order->serial_codes) > 0)
+                    <div style="margin-bottom: 15px;">
+                        <strong style="color: #004085; display: block; margin-bottom: 10px;">جميع الأكواد التسلسلية
+                            للطلب:</strong>
+                        <div class="serials-grid">
+                            @foreach ($order->serial_codes as $code)
+                                @if (is_array($code) && isset($code['serial_code']))
+                                    <div class="serial-item">
+                                        <i class="fas fa-barcode"></i> {{ $code['serial_code'] }}
+                                    </div>
+                                @elseif(is_string($code))
+                                    <div class="serial-item">
+                                        <i class="fas fa-barcode"></i> {{ $code }}
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            </div>
+        @endif
 
         <!-- قائمة المنتجات -->
         <div class="items-section">
@@ -424,7 +581,7 @@
                 <thead>
                     <tr>
                         <th width="5%">#</th>
-                        <th width="40%">المنتج</th>
+                        <th width="35%">المنتج</th>
                         <th width="15%">السعر</th>
                         <th width="10%">الكمية</th>
                         <th width="15%">المجموع</th>
@@ -436,14 +593,27 @@
                             <td>{{ $index + 1 }}</td>
                             <td>
                                 <div class="product-name">{{ $item->product->name ?? 'منتج محذوف' }}</div>
-                                @if ($item->color || $item->size)
+                                @if ($item->product && $item->product->external_id)
+                                    <div class="external-id">
+                                        <i class="fas fa-cloud"></i> رقم خارجي: {{ $item->product->external_id }}
+                                    </div>
+                                @endif
+                                @if ($item->color || $item->size || $item->is_sample)
                                     <div class="product-details">
                                         @if ($item->color)
-                                            لون: {{ $item->color->name }}
+                                            <span>لون: {{ $item->color->name }}</span>
                                         @endif
                                         @if ($item->size)
-                                            | مقاس: {{ $item->size->name }}
+                                            <span> | مقاس: {{ $item->size->name }}</span>
                                         @endif
+                                        @if ($item->is_sample)
+                                            <span> | <i class="fas fa-flask"></i> عينة</span>
+                                        @endif
+                                    </div>
+                                @endif
+                                @if ($item->note)
+                                    <div class="product-details">
+                                        <i class="fas fa-sticky-note"></i> {{ $item->note }}
                                     </div>
                                 @endif
                             </td>
@@ -451,6 +621,32 @@
                             <td>{{ $item->quantity }}</td>
                             <td>{{ number_format($item->total_price, 2) }} ج.م</td>
                         </tr>
+
+                        <!-- الأكواد التسلسلية للمنتج (تظهر تحت المنتج) -->
+                        @if ($item->serial_codes && count($item->serial_codes) > 0)
+                            <tr style="background: #f8f9fa;">
+                                <td colspan="5" style="padding: 10px 20px;">
+                                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                        <span style="color: #28a745; font-weight: 600;">
+                                            <i class="fas fa-barcode"></i> الأكواد التسلسلية:
+                                        </span>
+                                        @foreach ($item->serial_codes as $code)
+                                            @if (is_array($code) && isset($code['serial_number']))
+                                                <span
+                                                    style="background: #e9ecef; padding: 3px 10px; border-radius: 15px; font-family: monospace; font-size: 12px; direction: ltr;">
+                                                    {{ $code['serial_number'] }}
+                                                </span>
+                                            @elseif(is_string($code))
+                                                <span
+                                                    style="background: #e9ecef; padding: 3px 10px; border-radius: 15px; font-family: monospace; font-size: 12px; direction: ltr;">
+                                                    {{ $code }}
+                                                </span>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </td>
+                            </tr>
+                        @endif
                     @endforeach
                 </tbody>
             </table>
@@ -471,12 +667,6 @@
                     <td class="summary-label">المجموع الجزئي:</td>
                     <td class="summary-value">{{ number_format($order->subtotal, 2) }} ج.م</td>
                 </tr>
-                @if ($order->shipping_amount > 0)
-                    <tr>
-                        <td class="summary-label">تكلفة الشحن:</td>
-                        <td class="summary-value">{{ number_format($order->shipping_amount, 2) }} ج.م</td>
-                    </tr>
-                @endif
                 @if ($order->discount_amount > 0)
                     <tr>
                         <td class="summary-label">الخصم:</td>
@@ -495,6 +685,29 @@
                 </tr>
             </table>
         </div>
+
+        <!-- ملخص الأكواد التسلسلية (إذا لم تظهر مع المنتجات) -->
+        @if (
+            $order->serial_codes &&
+                count($order->serial_codes) > 0 &&
+                !$order->items->pluck('serial_codes')->flatten()->count())
+            <div class="serials-section">
+                <h4><i class="fas fa-barcode"></i> الأكواد التسلسلية للطلب</h4>
+                <div class="serials-grid">
+                    @foreach ($order->serial_codes as $code)
+                        @if (is_array($code) && isset($code['serial_code']))
+                            <div class="serial-item">
+                                <i class="fas fa-barcode"></i> {{ $code['serial_number'] }}
+                            </div>
+                        @elseif(is_string($code))
+                            <div class="serial-item">
+                                <i class="fas fa-barcode"></i> {{ $code }}
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+        @endif
 
         <!-- تذييل الفاتورة -->
         <div class="footer">

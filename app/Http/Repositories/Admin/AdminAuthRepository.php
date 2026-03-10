@@ -18,7 +18,7 @@ public function register(){
 
 public function loginPage(){
   if (auth('admin')->check()) {
-    return redirect('/admin');
+    return redirect('/');
 }
     return view('Admin.auth.login');
 
@@ -29,7 +29,7 @@ public function login($request){
   $credintials= $request->only('email','password');
   if(Auth::guard('admin')->attempt($credintials)){
 
-    return redirect('/admin');
+    return redirect('/');
 
   }  else{
     return back()->withErrors('please inter avalid data');

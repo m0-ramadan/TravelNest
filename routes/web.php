@@ -22,6 +22,19 @@ Route::middleware([])->name('website.')->group(function () {
         return view('website.pages.home');
     })->name('home');
 
+
+    Route::get('/multi-country', function () {
+        return view('website.pages.multi-country');
+    })->name('multi_country');
+
+    Route::get('/destinations', function () {
+        return view('website.pages.destinations.index');
+    })->name('destinations');
+
+    Route::get('/blogs', function () {
+        return view('website.pages.blogs.index');
+    })->name('blogs.index');
+
     //trips
     Route::prefix('trips')->name('trips.')->group(function () {
         Route::get('/', function () {

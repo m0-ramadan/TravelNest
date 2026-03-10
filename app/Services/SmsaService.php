@@ -97,7 +97,7 @@ class SmsaService
             "CODAmount" => 10, // order items number
             "Parcels" => 1, //Count of boxes // calcParcels from eng ashraf
             "ShipDate" => "2021-01-01T10:40:53", // now
-            "ShipmentCurrency" => "SAR",
+            "ShipmentCurrency" => "EGP",
             "SMSARetailID" => "0", // ignore for now
             "WaybillType" => "PDF", // fixed
             "Weight" => 3, // calcWeight from eng ashraf

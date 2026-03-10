@@ -18,11 +18,11 @@ class CategoryWithProductResource extends JsonResource
             'parent'      => $this->whenLoaded('parent', fn() => new self($this->parent)),
             'children'    => self::collection(CategoryResource::collection($this->children)),
             'order'       => $this->order,
-            'image'       => $this->image,
+            'image'       => $this->image ? get_user_image($this->image) : null,
             'sub_image' => $this->sub_image,
             'is_parent'   => $this->isParent(),
             'products'    => ProductResource::collection($this->products),
-            'category_banners' => BannerItemResource::collection($this->categoryBanners),
+            'category_banners' => $this->categoryBanners ? BannerItemResource::collection($this->categoryBanners) : null,
         ];
     }
 }

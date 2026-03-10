@@ -51,7 +51,8 @@
                     </li>
                     <li><a href="en/travel-tips.html"><i class="las la-chevron-right mr-1"></i>Travel Tips</a>
                     </li>
-                    <li><a href="blog.html"><i class="las la-chevron-right mr-1"></i>Blog</a></li>
+                    <li><a href="{{ route('website.blogs.index') }}"><i class="las la-chevron-right mr-1"></i>Blog</a>
+                    </li>
                 </ul>
             </div>
 

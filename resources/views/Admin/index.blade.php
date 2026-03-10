@@ -44,7 +44,7 @@
         <div class="row">
             <div class="col-xl-12 mb-4 col-lg-5 col-12">
 
-                صباح الخير يا {{ auth()->user()->name }}
+                صباح الخير يا {{ auth()->guard('admin')->user()->name }}
                 😍
             </div>
 
@@ -440,7 +440,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($topCustomers as $row)
+                                    {{-- @foreach ($topCustomers as $row)
                                         <tr>
                                             <td class="pt-2">
                                                 <div class="d-flex justify-content-start align-items-center mt-lg-4">
@@ -461,7 +461,7 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    @endforeach --}}
                                 </tbody>
 
                             </table>

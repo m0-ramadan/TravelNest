@@ -126,6 +126,25 @@
             flex-grow: 1;
         }
 
+        .provider-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .provider-like4app {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .provider-internal {
+            background: #28a745;
+            color: white;
+        }
+
         .product-item {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 10px;
@@ -181,6 +200,54 @@
 
         .detail-value {
             color: rgba(255, 255, 255, 0.9);
+        }
+
+        .serials-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .serials-title {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .serials-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .serial-code {
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            color: #28a745;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-family: monospace;
+            direction: ltr;
+        }
+
+        .provider-data-box {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            direction: ltr;
+            text-align: left;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #20c997;
         }
 
         .summary-card {
@@ -361,6 +428,24 @@
             color: white;
         }
 
+        .copy-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 8px;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
         @media (max-width: 768px) {
             .action-buttons {
                 position: relative;
@@ -407,7 +492,7 @@
                 <li class="breadcrumb-item">
                     <a href="{{ route('admin.orders.index') }}">الطلبات</a>
                 </li>
-                <li class="breadcrumb-item active">تفاصيل</li>
+                <li class="breadcrumb-item active">تفاصيل الطلب #{{ $order->order_number }}</li>
             </ol>
         </nav>
 
@@ -433,6 +518,10 @@
                             <div class="d-flex justify-content-center align-items-center gap-3 mb-3" bis_skin_checked="1">
                                 <span class="badge-status status-{{ $order->status }}">
                                     {{ $order->status_label }}
+                                </span>
+                                <span class="provider-badge provider-{{ $order->provider ?? 'internal' }}">
+                                    <i class="fas fa-{{ $order->provider == 'like4app' ? 'cloud' : 'box' }} me-1"></i>
+                                    {{ $order->provider_label ?? ($order->provider == 'like4app' ? 'لايك كارد' : 'داخلي') }}
                                 </span>
                                 <span class="text-white opacity-75">
                                     <i class="far fa-clock me-2"></i>
@@ -468,27 +557,37 @@
                                     <div class="info-row" bis_skin_checked="1">
                                         <div class="info-label" bis_skin_checked="1">البريد الإلكتروني:</div>
                                         <div class="info-value" bis_skin_checked="1">
-                                            <a href="mailto:{{ $order->customer_email }}" class="text-decoration-none">
-                                                {{ $order->customer_email }}
-                                            </a>
+                                            @if ($order->customer_email)
+                                                <a href="mailto:{{ $order->customer_email }}" class="text-decoration-none">
+                                                    {{ $order->customer_email }}
+                                                </a>
+                                            @else
+                                                <span class="text-muted">--</span>
+                                            @endif
                                         </div>
                                     </div>
 
                                     <div class="info-row" bis_skin_checked="1">
                                         <div class="info-label" bis_skin_checked="1">رقم الهاتف:</div>
                                         <div class="info-value" bis_skin_checked="1">
-                                            <a href="tel:{{ $order->customer_phone }}" class="text-decoration-none">
-                                                {{ $order->customer_phone }}
-                                            </a>
+                                            @if ($order->customer_phone)
+                                                <a href="tel:{{ $order->customer_phone }}" class="text-decoration-none">
+                                                    {{ $order->customer_phone }}
+                                                </a>
+                                            @else
+                                                <span class="text-muted">--</span>
+                                            @endif
                                         </div>
                                     </div>
 
-                                    <div class="info-row" bis_skin_checked="1">
-                                        <div class="info-label" bis_skin_checked="1">عنوان الشحن:</div>
-                                        <div class="info-value" bis_skin_checked="1">
-                                            {{ $order->shipping_address }}
+                                    @if ($order->user)
+                                        <div class="info-row" bis_skin_checked="1">
+                                            <div class="info-label" bis_skin_checked="1">معرف المستخدم:</div>
+                                            <div class="info-value" bis_skin_checked="1">
+                                                {{ $order->user_id }} ({{ $order->user->name }})
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endif
 
                                     @if ($order->notes)
                                         <div class="info-row" bis_skin_checked="1">
@@ -500,6 +599,67 @@
                                     @endif
                                 </div>
 
+                                <!-- معلومات لايك كارد (إذا وجدت) -->
+                                @if ($order->provider == 'like4app' || $order->provider_order_id || $order->provider_response)
+                                    <div class="info-section" bis_skin_checked="1">
+                                        <h6><i class="fas fa-cloud me-2"></i>معلومات لايك كارد</h6>
+
+                                        @if ($order->provider_order_id)
+                                            <div class="info-row" bis_skin_checked="1">
+                                                <div class="info-label" bis_skin_checked="1">رقم طلب لايك كارد:</div>
+                                                <div class="info-value" bis_skin_checked="1">
+                                                    <span dir="ltr">{{ $order->provider_order_id }}</span>
+                                                    <button class="copy-btn"
+                                                        onclick="copyToClipboard('{{ $order->provider_order_id }}')">
+                                                        <i class="far fa-copy"></i> نسخ
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if ($order->transaction_id)
+                                            <div class="info-row" bis_skin_checked="1">
+                                                <div class="info-label" bis_skin_checked="1">رقم المعاملة:</div>
+                                                <div class="info-value" bis_skin_checked="1">{{ $order->transaction_id }}
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if ($order->serial_codes && count($order->serial_codes) > 0)
+                                            <div class="info-row" bis_skin_checked="1">
+                                                <div class="info-label" bis_skin_checked="1">جميع الأكواد:</div>
+                                                <div class="info-value" bis_skin_checked="1">
+                                                    <div class="serials-list">
+                                                        @foreach ($order->serial_codes as $code)
+                                                            @if (is_array($code) && isset($code['serial_number']))
+                                                                <span
+                                                                    class="serial-code">{{ $code['serial_number'] }}</span>
+                                                            @elseif(is_string($code))
+                                                                <span class="serial-code">{{ $code }}</span>
+                                                            @endif
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if ($order->provider_response)
+                                            <div class="info-row" bis_skin_checked="1">
+                                                <div class="info-label" bis_skin_checked="1">استجابة API:</div>
+                                                <div class="info-value" bis_skin_checked="1">
+                                                    <button class="copy-btn" onclick="toggleProviderResponse()">
+                                                        <i class="far fa-eye"></i> عرض/إخفاء
+                                                    </button>
+                                                    <div id="providerResponse" style="display: none;"
+                                                        class="provider-data-box">
+                                                        {{ json_encode($order->provider_response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
+
                                 <!-- المنتجات -->
                                 <div class="info-section" bis_skin_checked="1">
                                     <h6><i class="fas fa-shopping-cart me-2"></i>المنتجات ({{ $order->items->count() }})
@@ -510,6 +670,12 @@
                                             <div class="product-header" bis_skin_checked="1">
                                                 <div class="product-name" bis_skin_checked="1">
                                                     {{ $item->product->name ?? 'منتج محذوف' }}
+                                                    @if ($item->product && $item->product->external_id)
+                                                        <span class="provider-badge provider-like4app"
+                                                            style="margin-right: 8px; font-size: 10px;">
+                                                            <i class="fas fa-cloud"></i> لايك كارد
+                                                        </span>
+                                                    @endif
                                                 </div>
                                                 <div class="product-price" bis_skin_checked="1">
                                                     {{ number_format($item->total_price, 2) }} ج.م
@@ -529,25 +695,19 @@
                                                         ج.م</span>
                                                 </div>
 
-                                                @if ($item->color)
+                                                @if ($item->product && $item->product->external_id)
                                                     <div class="detail-item" bis_skin_checked="1">
-                                                        <span class="detail-label">اللون:</span>
-                                                        <span class="detail-value">{{ $item->color->name }}</span>
+                                                        <span class="detail-label">الرقم الخارجي:</span>
+                                                        <span class="detail-value"
+                                                            dir="ltr">{{ $item->product->external_id }}</span>
                                                     </div>
                                                 @endif
 
-                                                @if ($item->size)
+                                                @if ($item->is_sample)
                                                     <div class="detail-item" bis_skin_checked="1">
-                                                        <span class="detail-label">المقاس:</span>
-                                                        <span class="detail-value">{{ $item->size->name }}</span>
-                                                    </div>
-                                                @endif
-
-                                                @if ($item->printingMethod)
-                                                    <div class="detail-item" bis_skin_checked="1">
-                                                        <span class="detail-label">طريقة الطباعة:</span>
-                                                        <span
-                                                            class="detail-value">{{ $item->printingMethod->name }}</span>
+                                                        <span class="detail-label">نوع المنتج:</span>
+                                                        <span class="detail-value text-warning"><i
+                                                                class="fas fa-flask me-1"></i>عينة</span>
                                                     </div>
                                                 @endif
 
@@ -558,6 +718,63 @@
                                                     </div>
                                                 @endif
                                             </div>
+
+                                            <!-- الأكواد التسلسلية للمنتج -->
+                                            @if ($item->serial_codes && count($item->serial_codes) > 0)
+                                                <div class="serials-section">
+                                                    <div class="serials-title">
+                                                        <i class="fas fa-barcode"></i>
+                                                        الأكواد التسلسلية للمنتج
+                                                        <button class="copy-btn"
+                                                            onclick="copySerials({{ $item->id }})">
+                                                            <i class="far fa-copy"></i> نسخ الكل
+                                                        </button>
+                                                    </div>
+
+                                                    <div class="serials-list" id="serials-{{ $item->id }}">
+                                                        @foreach ($item->serial_codes as $code)
+                                                            @if (is_array($code))
+                                                                @if (!empty($code['serial_number']))
+                                                                    <span class="serial-code">
+                                                                        Serial Number: {{ $code['serial_number'] }}
+                                                                    </span>
+                                                                @endif
+
+                                                                @if (!empty($code['voucher_code']))
+                                                                    <span class="serial-code">
+                                                                        قسيمة الشراء: {{ $code['voucher_code'] }}
+                                                                    </span>
+                                                                @endif
+
+                                                                @if (!empty($code['valid_to']))
+                                                                    <span class="serial-code">
+                                                                        صالح حتى: {{ $code['valid_to'] }}
+                                                                    </span>
+                                                                @endif
+                                                            @elseif(is_string($code))
+                                                                <span class="serial-code">{{ $code }}</span>
+                                                            @endif
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endif
+                                            <!-- Provider data للمنتج -->
+                                            @if ($item->provider_data)
+                                                <div class="serials-section">
+                                                    <div class="serials-title">
+                                                        <i class="fas fa-database"></i>
+                                                        بيانات المزود
+                                                        <button class="copy-btn"
+                                                            onclick="toggleItemProviderData({{ $item->id }})">
+                                                            <i class="far fa-eye"></i> عرض
+                                                        </button>
+                                                    </div>
+                                                    <div id="item-provider-{{ $item->id }}" style="display: none;"
+                                                        class="provider-data-box">
+                                                        {{ json_encode($item->provider_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}
+                                                    </div>
+                                                </div>
+                                            @endif
 
                                             @if ($item->product)
                                                 <div class="mt-2" bis_skin_checked="1">
@@ -581,13 +798,6 @@
                                         <span class="summary-label">المجموع الجزئي:</span>
                                         <span class="summary-value">
                                             {{ number_format($order->subtotal, 2) }} ج.م
-                                        </span>
-                                    </div>
-
-                                    <div class="summary-row" bis_skin_checked="1">
-                                        <span class="summary-label">الشحن:</span>
-                                        <span class="summary-value">
-                                            {{ number_format($order->shipping_amount, 2) }} ج.م
                                         </span>
                                     </div>
 
@@ -618,7 +828,28 @@
 
                                     <div class="summary-row" bis_skin_checked="1">
                                         <span class="summary-label">طريقة الدفع:</span>
-                                        <span class="summary-value">{{ $order->payment_method }}</span>
+                                        <span class="summary-value">
+                                            @switch($order->payment_method)
+                                                @case('cash')
+                                                    نقداً
+                                                @break
+
+                                                @case('credit_card')
+                                                    بطاقة ائتمان
+                                                @break
+
+                                                @case('bank_transfer')
+                                                    تحويل بنكي
+                                                @break
+
+                                                @case('wallet')
+                                                    محفظة إلكترونية
+                                                @break
+
+                                                @default
+                                                    {{ $order->payment_method ?? '--' }}
+                                            @endswitch
+                                        </span>
                                     </div>
 
                                     @if ($order->transaction_id)
@@ -627,7 +858,65 @@
                                             <span class="summary-value">{{ $order->transaction_id }}</span>
                                         </div>
                                     @endif
+
+                                    @if ($order->provider_order_id)
+                                        <div class="summary-row" bis_skin_checked="1">
+                                            <span class="summary-label">رقم طلب خارجي:</span>
+                                            <span class="summary-value"
+                                                dir="ltr">{{ $order->provider_order_id }}</span>
+                                        </div>
+                                    @endif
+
+                                    <div class="summary-row" bis_skin_checked="1">
+                                        <span class="summary-label">تاريخ الإنشاء:</span>
+                                        <span class="summary-value">{{ $order->created_at->format('Y-m-d') }}</span>
+                                    </div>
+
+                                    @if ($order->updated_at != $order->created_at)
+                                        <div class="summary-row" bis_skin_checked="1">
+                                            <span class="summary-label">آخر تحديث:</span>
+                                            <span
+                                                class="summary-value">{{ $order->updated_at->format('Y-m-d H:i') }}</span>
+                                        </div>
+                                    @endif
                                 </div>
+
+                                <!-- صورة إثبات الدفع -->
+                                @if ($order->image)
+                                    <div class="info-section mt-4" bis_skin_checked="1">
+                                        <h6><i class="fas fa-receipt me-2"></i>إثبات الدفع</h6>
+
+                                        <div class="text-center" bis_skin_checked="1">
+                                            <a href="{{ $order->image_url }}" data-fancybox="payment-proof"
+                                                data-caption="إثبات الدفع - الطلب #{{ $order->order_number }}">
+                                                <img src="{{ $order->image_url }}"
+                                                    alt="إثبات الدفع للطلب {{ $order->order_number }}"
+                                                    class="img-fluid rounded"
+                                                    style="max-height: 200px; cursor: pointer; border: 2px solid rgba(255, 255, 255, 0.1);">
+                                            </a>
+
+                                            <div class="mt-3" bis_skin_checked="1">
+                                                <a href="{{ $order->image_url }}"
+                                                    class="btn btn-sm btn-outline-primary me-2"
+                                                    download="payment_proof_{{ $order->order_number }}">
+                                                    <i class="fas fa-download me-1"></i>تحميل الصورة
+                                                </a>
+
+                                                @if ($order->status_payment)
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check-circle me-1"></i>
+                                                        تم التحقق من الدفع
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-clock me-1"></i>
+                                                        قيد المراجعة
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
 
                                 <!-- تغيير حالة الطلب -->
                                 <div class="info-section mt-4" bis_skin_checked="1">
@@ -643,11 +932,6 @@
                                             class="status-btn {{ $order->status == 'processing' ? 'active' : '' }}"
                                             onclick="updateStatus('processing')">
                                             تحت المعالجة
-                                        </button>
-                                        <button type="button"
-                                            class="status-btn {{ $order->status == 'shipped' ? 'active' : '' }}"
-                                            onclick="updateStatus('shipped')">
-                                            تم الشحن
                                         </button>
                                         <button type="button"
                                             class="status-btn {{ $order->status == 'delivered' ? 'active' : '' }}"
@@ -853,12 +1137,59 @@
             });
         }
 
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'تم النسخ',
+                    text: 'تم نسخ النص إلى الحافظة',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }, function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: 'حدث خطأ أثناء النسخ',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            });
+        }
+
+        function copySerials(itemId) {
+            const serials = [];
+            $(`#serials-${itemId} .serial-code`).each(function() {
+                serials.push($(this).text());
+            });
+
+            copyToClipboard(serials.join('\n'));
+        }
+
+        function toggleProviderResponse() {
+            $('#providerResponse').slideToggle(300);
+        }
+
+        function toggleItemProviderData(itemId) {
+            $(`#item-provider-${itemId}`).slideToggle(300);
+        }
+
         // رسائل التنبيه من الجلسة
         @if (session('success'))
             Swal.fire({
                 icon: 'success',
                 title: 'نجاح',
                 text: "{{ session('success') }}",
+                timer: 2000,
+                showConfirmButton: false
+            });
+        @endif
+
+        @if (session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: "{{ session('error') }}",
                 timer: 2000,
                 showConfirmButton: false
             });

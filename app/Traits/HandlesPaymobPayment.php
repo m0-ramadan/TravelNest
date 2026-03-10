@@ -47,7 +47,7 @@ trait HandlesPaymobPayment
      */
     private function paymobAuthenticate(): array
     {
-        $response = Http::post('https://ksa.paymob.com/api/auth/tokens', [
+        $response = Http::post('https://accept.paymob.com/api/auth/tokens', [
             'username' => config('services.paymob.username'),
             'password' => config('services.paymob.password'),
         ]);
@@ -75,9 +75,9 @@ trait HandlesPaymobPayment
 
         $response = Http::withToken($token)
             ->asForm()
-            ->post('https://ksa.paymob.com/api/ecommerce/payment-links', [
+            ->post('https://accept.paymob.com/api/ecommerce/payment-links', [
                 'amount_cents'     => $amountInCents,
-                'currency'         => 'SAR',
+                'currency'         => 'EGP',
                 'reference_id'     => $order->order_number,
                 'payment_methods'  => [config('services.paymob.integration_id')],
                 'full_name'        => $order->customer_name,

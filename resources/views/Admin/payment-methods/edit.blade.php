@@ -5,301 +5,493 @@
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            /* --primary-color: #FF6B35; */
+            /* --primary-hover: #E55A2B; */
+            --secondary-color: #426788;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-color: #dee2e6;
+            --text-dark: #2c3e50;
+            --text-muted: #6c757d;
+        }
+
         body {
-            font-family: "Cairo", sans-serif !important;
+            font-family: "Cairo", sans-serif;
+            /* background-color: #f5f7fb; */
         }
 
         .form-card {
-            /* background: white; */
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            /* background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%); */
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
             padding: 30px;
+            border: 1px solid rgba(255, 107, 53, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
         }
 
         .form-header {
-            border-bottom: 2px solid #f8f9fa;
+            border-bottom: 1px solid rgba(255, 107, 53, 0.2);
             padding-bottom: 20px;
             margin-bottom: 30px;
+            position: relative;
+        }
+
+        .form-header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            right: 0;
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(to left, var(--primary-color), transparent);
         }
 
         .info-card {
-            background: #63707e;
+            background: linear-gradient(135deg, rgba(66, 103, 136, 0.1) 0%, rgba(255, 107, 53, 0.05) 100%);
             border-radius: 12px;
             padding: 25px;
             margin-bottom: 30px;
-            border-left: 4px solid #696cff;
+            border-right: 4px solid var(--primary-color);
+            border: 1px solid rgba(66, 103, 136, 0.1);
         }
 
         .info-row {
             display: flex;
             align-items: center;
             margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(66, 103, 136, 0.1);
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
         }
 
         .info-label {
-            min-width: 120px;
+            min-width: 140px;
             font-weight: 600;
-            color: #495057;
-        }
-
-        .info-value {
-            color: #2c3e50;
-            font-weight: 500;
-        }
-
-        .icon-preview {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            background: #f8f9fa;
-            font-size: 28px;
-            color: #696cff;
-            margin: 10px auto;
-            border: 2px solid #dee2e6;
-        }
-
-        .icon-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-            gap: 15px;
-            max-height: 200px;
-            overflow-y: auto;
-            padding: 15px;
-            background: #676f77;
-            border-radius: 10px;
-            margin-top: 10px;
-        }
-
-        .icon-item {
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            background: rgb(88, 76, 76);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .icon-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            border-color: #696cff;
-        }
-
-        .icon-item.selected {
-            background: #696cff;
-            color: white;
-            border-color: #696cff;
-        }
-
-        .icon-item i {
-            font-size: 20px;
-        }
-
-        .toggle-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: #302e4a;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-
-        .toggle-switch {
-            position: relative;
-            width: 60px;
-            height: 30px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked+.toggle-slider {
-            background-color: #696cff;
-        }
-
-        input:checked+.toggle-slider:before {
-            transform: translateX(30px);
-        }
-
-        .toggle-label {
-            font-weight: 500;
-            color: #2c3e50;
-            flex-grow: 1;
-        }
-
-        .toggle-description {
-            color: #6c757d;
-            font-size: 13px;
-            margin-top: 5px;
-        }
-
-        .required::after {
-            content: " *";
-            color: #dc3545;
-        }
-
-        .alert-guide {
-            /* background: #e7f7ff; */
-            border-right: 4px solid #696cff;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-        }
-
-        .alert-guide h6 {
-            color: #696cff;
-            margin-bottom: 15px;
-        }
-
-        .alert-guide ul {
-            margin-bottom: 0;
-            padding-left: 20px;
-        }
-
-        .alert-guide li {
-            margin-bottom: 8px;
+            color: var(--secondary-color);
             font-size: 14px;
         }
 
-        .help-text {
-            font-size: 12px;
-            color: #6c757d;
-            margin-top: 5px;
+        .info-value {
+            /* color: var(--text-dark); */
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(255, 107, 53, 0.3);
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+            font-size: 20px;
+        }
+
+        .image-upload-container {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            /* background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); */
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-upload-container:hover {
+            border-color: var(--primary-color);
+            /* background: linear-gradient(135deg, #fff8f6 0%, #fff0ed 100%); */
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.15);
+        }
+
+        .image-upload-container.active {
+            border-color: var(--primary-color);
+            /* background: linear-gradient(135deg, #fff0ed 0%, #ffe8e0 100%); */
+        }
+
+        .image-preview {
+            max-width: 120px;
+            max-height: 120px;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            padding: 8px;
+            /* background: white; */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            object-fit: cover;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .image-upload-container:hover .upload-icon {
+            transform: scale(1.1);
         }
 
         .preview-card {
-            background: #302e4a;
+            /* background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%); */
             border-radius: 12px;
             padding: 25px;
-            border: 2px solid #dee2e6;
-            text-align: center;
+            border: 1px solid rgba(66, 103, 136, 0.2);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 20px;
+        }
+
+        .preview-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 4px;
+            /* background: linear-gradient(to left, var(--primary-color), var(--secondary-color)); */
+            border-radius: 12px 12px 0 0;
         }
 
         .preview-icon {
-            font-size: 48px;
-            color: #696cff;
-            margin-bottom: 15px;
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            /* background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 107, 53, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+        }
+
+        .preview-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
         }
 
         .preview-name {
             font-size: 20px;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 10px;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 12px;
+            text-align: center;
+            line-height: 1.4;
         }
 
         .preview-key {
-            background: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-bottom: 15px;
-            font-family: monospace;
-        }
-
-        .preview-status {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 15px;
+            /* background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); */
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-family: 'Cairo', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid rgba(66, 103, 136, 0.1);
+            color: var(--secondary-color);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .status-badge {
-            padding: 5px 15px;
-            border-radius: 20px;
+            padding: 8px 20px;
+            border-radius: 25px;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin: 5px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
         }
 
         .status-active {
-            background-color: #d4edda;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
             color: #155724;
+            border: 1px solid #c3e6cb;
         }
 
         .status-inactive {
-            background-color: #f8d7da;
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
             color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
         .type-badge {
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 13px;
+            background: linear-gradient(135deg, #e7f5ff 0%, #d0ebff 100%);
+            color: #0c63e4;
+            border: 1px solid #d0ebff;
+        }
+
+        .form-control {
+            border: 1px solid rgba(66, 103, 136, 0.2);
+            border-radius: 10px;
+            padding: 12px 15px;
+            font-family: "Cairo", sans-serif;
+            transition: all 0.3s;
+            /* background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%); */
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(255, 107, 53, 0.25);
+            background: linear-gradient(135deg, #fff8f6 0%, #ffffff 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-family: "Cairo", sans-serif;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #20c997, #28a745);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-outline-secondary {
+            border: 2px solid var(--secondary-color);
+            color: var(--secondary-color);
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-family: "Cairo", sans-serif;
+            transition: all 0.3s;
+        }
+
+        .btn-outline-secondary:hover {
+            background: var(--secondary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(66, 103, 136, 0.3);
+        }
+
+        .btn-outline-danger {
+            border: 2px solid var(--danger-color);
+            color: var(--danger-color);
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-family: "Cairo", sans-serif;
+            transition: all 0.3s;
+        }
+
+        .btn-outline-danger:hover {
+            background: var(--danger-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-outline-info {
+            border: 2px solid var(--info-color);
+            color: var(--info-color);
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-family: "Cairo", sans-serif;
+            transition: all 0.3s;
+        }
+
+        .btn-outline-info:hover {
+            background: var(--info-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .form-switch .form-check-input:focus {
+            box-shadow: 0 0 0 0.25rem rgba(255, 107, 53, 0.25);
+        }
+
+        .required::after {
+            content: " *";
+            color: var(--danger-color);
+            font-weight: bold;
+        }
+
+        .alert-guide {
+            background: linear-gradient(135deg, #e7f7ff 0%, #d0ebff 100%);
+            border-right: 4px solid var(--primary-color);
+            border-radius: 12px;
+            margin-bottom: 25px;
+            padding: 20px;
+            border-left: none;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 1px solid #c3e6cb;
+            border-radius: 12px;
+            border-right: 4px solid var(--success-color);
+        }
+
+        .alert-danger {
+            /* background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%); */
+            border: 1px solid #f5c6cb;
+            border-radius: 12px;
+            border-right: 4px solid var(--danger-color);
+        }
+
+        .breadcrumb {
+            /* background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); */
+            border-radius: 10px;
+            padding: 15px 20px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 107, 53, 0.1);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--primary-color);
             font-weight: 600;
         }
 
-        .type-payment {
-            background-color: #e7f5ff;
-            color: #0c63e4;
+        .breadcrumb-item a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: all 0.3s;
+            font-weight: 500;
         }
 
-        .type-method {
-            background-color: #f8f9fa;
-            color: #495057;
+        .breadcrumb-item a:hover {
+            color: var(--primary-color);
+            transform: translateX(-3px);
+        }
+
+        .input-group {
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .input-group .form-control {
+            border: 1px solid rgba(66, 103, 136, 0.2);
+            border-right: none;
+        }
+
+        .input-group .btn {
+            background: linear-gradient(135deg, var(--secondary-color), #3a5d7a);
+            border: 1px solid rgba(66, 103, 136, 0.2);
+            border-left: none;
+            /* color: white; */
+            transition: all 0.3s;
+        }
+
+        .input-group .btn:hover {
+            background: linear-gradient(135deg, #3a5d7a, var(--secondary-color));
+            transform: none;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 5px;
+            font-weight: 400;
+        }
+
+        @media (max-width: 768px) {
+            .form-card {
+                padding: 20px;
+            }
+
+            .preview-card {
+                margin-top: 30px;
+                position: static;
+            }
+
+            .section-title {
+                font-size: 16px;
+            }
+
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .info-label {
+                min-width: auto;
+            }
         }
     </style>
 @endsection
 
 @section('content')
-    <div class="container-xxl flex-grow-1 container-p-y" bis_skin_checked="1">
-        <nav aria-label="breadcrumb">
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item">
-                    <a href="{{ route('admin.index') }}">الرئيسية</a>
-                </li>
-                <li class="breadcrumb-item">
-                    <a href="{{ route('admin.payment-methods.index') }}">وسائل الدفع</a>
-                </li>
-                <li class="breadcrumb-item active">تعديل</li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">الرئيسية</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.payment-methods.index') }}">وسائل الدفع</a></li>
+                <li class="breadcrumb-item active">تعديل: {{ $paymentMethod->name }}</li>
             </ol>
         </nav>
 
-        <div class="row" bis_skin_checked="1">
-            <div class="col-12" bis_skin_checked="1">
-                <div class="form-card" bis_skin_checked="1">
-                    <div class="form-header" bis_skin_checked="1">
-                        <div class="d-flex justify-content-between align-items-center" bis_skin_checked="1">
-                            <div bis_skin_checked="1">
-                                <h5 class="mb-1">تعديل وسيلة الدفع</h5>
+        <div class="row">
+            <div class="col-12">
+                <div class="form-card">
+                    <div class="form-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1" style="color: var(--secondary-color);">
+                                    <i class="fas fa-edit me-2" style="color: var(--primary-color);"></i>
+                                    تعديل وسيلة الدفع
+                                </h5>
                                 <p class="text-muted mb-0">ID: #{{ $paymentMethod->id }}</p>
                             </div>
-                            <div class="btn-group" bis_skin_checked="1">
+                            <div class="btn-group">
                                 <a href="{{ route('admin.payment-methods.show', $paymentMethod) }}"
                                     class="btn btn-outline-info">
                                     <i class="fas fa-eye me-2"></i>عرض
@@ -311,36 +503,46 @@
                         </div>
                     </div>
 
-                    <!-- Payment Method Info -->
-                    <div class="info-card" bis_skin_checked="1">
-                        <h6 class="mb-3">معلومات وسيلة الدفع</h6>
-                        <div class="info-row" bis_skin_checked="1">
-                            <div class="info-label" bis_skin_checked="1">تاريخ الإضافة:</div>
-                            <div class="info-value" bis_skin_checked="1">
+                    <!-- معلومات وسيلة الدفع -->
+                    <div class="info-card">
+                        <h6 class="mb-3" style="color: var(--secondary-color);">
+                            <i class="fas fa-info-circle me-2"></i>
+                            معلومات وسيلة الدفع
+                        </h6>
+                        <div class="info-row">
+                            <div class="info-label">تاريخ الإضافة:</div>
+                            <div class="info-value">
                                 {{ $paymentMethod->created_at->translatedFormat('d M Y - h:i A') }}
                             </div>
                         </div>
-                        <div class="info-row" bis_skin_checked="1">
-                            <div class="info-label" bis_skin_checked="1">آخر تحديث:</div>
-                            <div class="info-value" bis_skin_checked="1">
+                        <div class="info-row">
+                            <div class="info-label">آخر تحديث:</div>
+                            <div class="info-value">
                                 {{ $paymentMethod->updated_at->translatedFormat('d M Y - h:i A') }}
                             </div>
                         </div>
-                        <div class="info-row" bis_skin_checked="1">
-                            <div class="info-label" bis_skin_checked="1">الحالة الحالية:</div>
-                            <div class="info-value" bis_skin_checked="1">
+                        <div class="info-row">
+                            <div class="info-label">الحالة الحالية:</div>
+                            <div class="info-value">
                                 @if ($paymentMethod->is_active)
-                                    <span class="status-badge status-active">نشط</span>
+                                    <span class="status-badge status-active">
+                                        <i class="fas fa-check-circle"></i> نشط
+                                    </span>
                                 @else
-                                    <span class="status-badge status-inactive">غير نشط</span>
+                                    <span class="status-badge status-inactive">
+                                        <i class="fas fa-times-circle"></i> غير نشط
+                                    </span>
                                 @endif
                             </div>
                         </div>
                     </div>
 
-                    <div class="alert-guide" bis_skin_checked="1">
-                        <h6><i class="fas fa-lightbulb me-2"></i>نصائح للتعديل:</h6>
-                        <ul>
+                    <div class="alert-guide">
+                        <h6 style="color: var(--secondary-color);">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            نصائح للتعديل:
+                        </h6>
+                        <ul class="mb-0">
                             <li>يمكنك تعديل أي معلومات عن وسيلة الدفع</li>
                             <li>المعرف (Key) يجب أن يكون فريداً ولا يتكرر</li>
                             <li>تغيير الحالة سيؤثر على ظهور وسيلة الدفع للعملاء</li>
@@ -349,183 +551,162 @@
                     </div>
 
                     @if (session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
                             <i class="fas fa-check-circle me-2"></i>
                             {{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     @endif
 
                     @if ($errors->any())
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
                             <i class="fas fa-exclamation-circle me-2"></i>
                             <ul class="mb-0">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     @endif
 
                     <form action="{{ route('admin.payment-methods.update', $paymentMethod) }}" method="POST"
-                        id="editForm">
+                        enctype="multipart/form-data" id="editForm">
                         @csrf
                         @method('PUT')
 
-                        <div class="row" bis_skin_checked="1">
-                            <div class="col-lg-8" bis_skin_checked="1">
-                                <!-- Basic Information -->
-                                <div class="mb-4" bis_skin_checked="1">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <!-- معلومات أساسية -->
+                                <h6 class="section-title">
+                                    <i class="fas fa-info-circle"></i>
+                                    المعلومات الأساسية
+                                </h6>
+
+                                <div class="mb-4">
                                     <label for="name" class="form-label required">اسم وسيلة الدفع</label>
                                     <input type="text" class="form-control" id="name" name="name"
                                         value="{{ old('name', $paymentMethod->name) }}" required>
-                                    <div class="help-text" bis_skin_checked="1">الاسم الذي سيظهر للعملاء</div>
+                                    <div class="help-text">الاسم الذي سيظهر للعملاء</div>
                                 </div>
 
-                                <div class="mb-4" bis_skin_checked="1">
+                                <div class="mb-4">
                                     <label for="key" class="form-label required">المعرف (Key)</label>
                                     <input type="text" class="form-control" id="key" name="key"
                                         value="{{ old('key', $paymentMethod->key) }}" required>
-                                    <div class="help-text" bis_skin_checked="1">
-                                        معرف فريد يستخدم في النظام
-                                    </div>
+                                    <div class="help-text">معرف فريد يستخدم في النظام</div>
                                 </div>
 
-                                <!-- Icon Selection -->
-                                <div class="mb-4" bis_skin_checked="1">
-                                    <label class="form-label">الأيقونة</label>
+                                <!-- رفع الصورة -->
+                                <h6 class="section-title mt-4">
+                                    <i class="fas fa-image"></i>
+                                    صورة الوسيلة
+                                </h6>
 
-                                    <div class="mb-3" bis_skin_checked="1">
-                                        <div class="icon-preview" id="iconPreview">
-                                            <i
-                                                class="{{ old('icon', $paymentMethod->icon) ?: 'fas fa-credit-card' }}"></i>
+                                <div class="mb-4">
+                                    <label class="form-label">أيقونة / صورة الوسيلة</label>
+                                    <div class="image-upload-container" id="uploadArea">
+                                        <div class="upload-icon">
+                                            <i class="fas fa-cloud-upload-alt"></i>
                                         </div>
-                                        <input type="hidden" id="selected_icon" name="icon"
-                                            value="{{ old('icon', $paymentMethod->icon) ?: 'fas fa-credit-card' }}">
+                                        <p class="mb-2" style="color: var(--secondary-color); font-weight: 600;">
+                                            انقر لرفع صورة
+                                        </p>
+                                        <small class="text-muted">الصيغ المدعومة: JPG, PNG, SVG</small>
+
+                                        @if ($paymentMethod->icon)
+                                            <img id="imagePreview" class="image-preview mt-3"
+                                                src="{{ Storage::url($paymentMethod->icon) }}" alt="معاينة الصورة"
+                                                style="display: block;">
+                                        @else
+                                            <img id="imagePreview" class="image-preview mt-3" alt="معاينة الصورة">
+                                        @endif
+
+                                        <input type="file" id="icon" name="icon" accept="image/*"
+                                            class="d-none" onchange="handlePreviewImage(event)">
+
                                     </div>
-
-                                    <input type="text" class="form-control mb-3" id="icon_input"
-                                        placeholder="أو اكتب رمز FontAwesome مثل: fas fa-paypal"
-                                        value="{{ old('icon', $paymentMethod->icon) ?: 'fas fa-credit-card' }}"
-                                        oninput="updateIconPreview(this.value)">
-
-                                    <label class="form-label mt-4">أيقونات مقترحة:</label>
-                                    <div class="icon-grid" bis_skin_checked="1">
-                                        <div class="icon-item {{ (old('icon', $paymentMethod->icon) ?: 'fas fa-credit-card') == 'fas fa-credit-card' ? 'selected' : '' }}"
-                                            onclick="selectIcon('fas fa-credit-card')">
-                                            <i class="fas fa-credit-card"></i>
-                                        </div>
-                                        <div class="icon-item {{ (old('icon', $paymentMethod->icon) ?: 'fas fa-credit-card') == 'fas fa-money-bill-wave' ? 'selected' : '' }}"
-                                            onclick="selectIcon('fas fa-money-bill-wave')">
-                                            <i class="fas fa-money-bill-wave"></i>
-                                        </div>
-                                        <div class="icon-item {{ (old('icon', $paymentMethod->icon) ?: 'fas fa-credit-card') == 'fab fa-paypal' ? 'selected' : '' }}"
-                                            onclick="selectIcon('fab fa-paypal')">
-                                            <i class="fab fa-paypal"></i>
-                                        </div>
-                                        <div class="icon-item {{ (old('icon', $paymentMethod->icon) ?: 'fas fa-credit-card') == 'fas fa-university' ? 'selected' : '' }}"
-                                            onclick="selectIcon('fas fa-university')">
-                                            <i class="fas fa-university"></i>
-                                        </div>
-                                        <div class="icon-item {{ (old('icon', $paymentMethod->icon) ?: 'fas fa-credit-card') == 'fas fa-mobile-alt' ? 'selected' : '' }}"
-                                            onclick="selectIcon('fas fa-mobile-alt')">
-                                            <i class="fas fa-mobile-alt"></i>
-                                        </div>
-                                        <div class="icon-item {{ (old('icon', $paymentMethod->icon) ?: 'fas fa-credit-card') == 'fas fa-wallet' ? 'selected' : '' }}"
-                                            onclick="selectIcon('fas fa-wallet')">
-                                            <i class="fas fa-wallet"></i>
-                                        </div>
-                                        <div class="icon-item {{ (old('icon', $paymentMethod->icon) ?: 'fas fa-credit-card') == 'fas fa-hand-holding-usd' ? 'selected' : '' }}"
-                                            onclick="selectIcon('fas fa-hand-holding-usd')">
-                                            <i class="fas fa-hand-holding-usd"></i>
-                                        </div>
-                                        <div class="icon-item {{ (old('icon', $paymentMethod->icon) ?: 'fas fa-credit-card') == 'fas fa-truck' ? 'selected' : '' }}"
-                                            onclick="selectIcon('fas fa-truck')">
-                                            <i class="fas fa-truck"></i>
-                                        </div>
-                                        <div class="icon-item {{ (old('icon', $paymentMethod->icon) ?: 'fas fa-credit-card') == 'fas fa-qrcode' ? 'selected' : '' }}"
-                                            onclick="selectIcon('fas fa-qrcode')">
-                                            <i class="fas fa-qrcode"></i>
-                                        </div>
-                                        <div class="icon-item {{ (old('icon', $paymentMethod->icon) ?: 'fas fa-credit-card') == 'fas fa-shield-alt' ? 'selected' : '' }}"
-                                            onclick="selectIcon('fas fa-shield-alt')">
-                                            <i class="fas fa-shield-alt"></i>
-                                        </div>
-                                        <div class="icon-item {{ (old('icon', $paymentMethod->icon) ?: 'fas fa-credit-card') == 'fas fa-globe' ? 'selected' : '' }}"
-                                            onclick="selectIcon('fas fa-globe')">
-                                            <i class="fas fa-globe"></i>
-                                        </div>
-                                        <div class="icon-item {{ (old('icon', $paymentMethod->icon) ?: 'fas fa-credit-card') == 'fas fa-coins' ? 'selected' : '' }}"
-                                            onclick="selectIcon('fas fa-coins')">
-                                            <i class="fas fa-coins"></i>
-                                        </div>
-                                    </div>
+                                    <div class="help-text">الحجم الموصى به: 100×100 بكسل</div>
                                 </div>
 
-                                <!-- Settings -->
-                                <div class="mb-4" bis_skin_checked="1">
-                                    <div class="toggle-container" bis_skin_checked="1">
-                                        <label class="toggle-switch">
-                                            <input type="checkbox" id="is_active" name="is_active" value="1"
-                                                {{ old('is_active', $paymentMethod->is_active) ? 'checked' : '' }}>
-                                            <span class="toggle-slider"></span>
+                                <!-- الإعدادات -->
+                                <h6 class="section-title mt-4">
+                                    <i class="fas fa-cog"></i>
+                                    الإعدادات
+                                </h6>
+
+                                <div class="mb-4">
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="is_active" name="is_active"
+                                            value="1"
+                                            {{ old('is_active', $paymentMethod->is_active) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="is_active">
+                                            <strong style="color: var(--secondary-color);">نشط</strong>
+                                            <small class="d-block text-muted">وسائل الدفع النشطة فقط ستظهر للعملاء</small>
                                         </label>
-                                        <div bis_skin_checked="1">
-                                            <div class="toggle-label" bis_skin_checked="1">نشط</div>
-                                            <div class="toggle-description" bis_skin_checked="1">
-                                                وسائل الدفع النشطة فقط ستظهر للعملاء
-                                            </div>
-                                        </div>
                                     </div>
 
-                                    <div class="toggle-container" bis_skin_checked="1">
-                                        <label class="toggle-switch">
-                                            <input type="checkbox" id="is_payment" name="is_payment" value="1"
-                                                {{ old('is_payment', $paymentMethod->is_payment) ? 'checked' : '' }}>
-                                            <span class="toggle-slider"></span>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="is_payment"
+                                            name="is_payment" value="1"
+                                            {{ old('is_payment', $paymentMethod->is_payment) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="is_payment">
+                                            <strong style="color: var(--secondary-color);">طريقة دفع</strong>
+                                            <small class="d-block text-muted">طريقة دفع فعلاً أم طريقة أخرى</small>
                                         </label>
-                                        <div bis_skin_checked="1">
-                                            <div class="toggle-label" bis_skin_checked="1">طريقة دفع</div>
-                                            <div class="toggle-description" bis_skin_checked="1">
-                                                إذا كانت طريقة دفع فعلاً أم طريقة أخرى مثل التحويل البنكي
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="col-lg-4" bis_skin_checked="1">
-                                <!-- Preview Section -->
-                                <div class="preview-card" bis_skin_checked="1">
-                                    <h6 class="mb-3">معاينة وسيلة الدفع</h6>
+                            <div class="col-lg-4">
+                                <!-- معاينة -->
+                                <div class="preview-card">
+                                    <h6 class="mb-3 text-center" style="color: var(--secondary-color); font-weight: 700;">
+                                        <i class="fas fa-eye me-2"></i>
+                                        معاينة وسيلة الدفع
+                                    </h6>
 
-                                    <div class="preview-icon" id="previewIcon">
-                                        <i class="{{ old('icon', $paymentMethod->icon) ?: 'fas fa-credit-card' }}"></i>
+                                    <div class="preview-icon">
+                                        @if ($paymentMethod->icon)
+                                            <img id="previewImage" src="{{ Storage::url($paymentMethod->icon) }}"
+                                                alt="معاينة الأيقونة">
+                                        @else
+                                            <img id="previewImage" src="{{ asset('images/default-payment.png') }}"
+                                                alt="معاينة الأيقونة">
+                                        @endif
                                     </div>
 
-                                    <div class="preview-name" id="previewName">{{ old('name', $paymentMethod->name) }}
+                                    <div class="preview-name" id="previewName">
+                                        {{ old('name', $paymentMethod->name) }}
                                     </div>
 
-                                    <div class="preview-key" id="previewKey">{{ old('key', $paymentMethod->key) }}</div>
+                                    <div class="preview-key" id="previewKey">
+                                        {{ old('key', $paymentMethod->key) }}
+                                    </div>
 
-                                    <div class="preview-status" bis_skin_checked="1">
+                                    <div class="text-center mt-3">
                                         <span
                                             class="status-badge {{ old('is_active', $paymentMethod->is_active) ? 'status-active' : 'status-inactive' }}"
                                             id="previewStatus">
-                                            {{ old('is_active', $paymentMethod->is_active) ? 'نشط' : 'غير نشط' }}
+                                            @if (old('is_active', $paymentMethod->is_active))
+                                                <i class="fas fa-check-circle"></i> نشط
+                                            @else
+                                                <i class="fas fa-times-circle"></i> غير نشط
+                                            @endif
                                         </span>
-                                        <span
-                                            class="type-badge {{ old('is_payment', $paymentMethod->is_payment) ? 'type-payment' : 'type-method' }}"
-                                            id="previewType">
-                                            {{ old('is_payment', $paymentMethod->is_payment) ? 'طريقة دفع' : 'طريقة أخرى' }}
+                                        <span class="status-badge type-badge" id="previewType">
+                                            @if (old('is_payment', $paymentMethod->is_payment))
+                                                <i class="fas fa-credit-card"></i> دفع
+                                            @else
+                                                <i class="fas fa-exchange-alt"></i> أخرى
+                                            @endif
                                         </span>
                                     </div>
                                 </div>
 
-                                <!-- Quick Actions -->
-                                <div class="mt-4" bis_skin_checked="1">
-                                    <div class="d-grid gap-2" bis_skin_checked="1">
+                                <!-- أزرار التحكم -->
+                                <div class="mt-4">
+                                    <div class="d-grid gap-2">
                                         <button type="submit" class="btn btn-success btn-lg">
                                             <i class="fas fa-save me-2"></i>حفظ التعديلات
                                         </button>
@@ -554,82 +735,147 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        $(document).ready(function() {
+        document.addEventListener('DOMContentLoaded', function() {
             // تحديث المعاينة عند تغيير الاسم
-            $('#name').on('input', function() {
-                $('#previewName').text($(this).val() || '{{ $paymentMethod->name }}');
+            const nameInput = document.getElementById('name');
+            const keyInput = document.getElementById('key');
+
+            nameInput.addEventListener('input', function() {
+                document.getElementById('previewName').textContent = this.value ||
+                    '{{ $paymentMethod->name }}';
             });
 
-            // تحديث المعاينة عند تغيير الـ Key
-            $('#key').on('input', function() {
-                $('#previewKey').text($(this).val() || '{{ $paymentMethod->key }}');
+            keyInput.addEventListener('input', function() {
+                document.getElementById('previewKey').textContent = this.value ||
+                    '{{ $paymentMethod->key }}';
             });
 
             // تحديث حالة النشاط
-            $('#is_active').on('change', function() {
-                const isActive = $(this).is(':checked');
-                const badge = $('#previewStatus');
-                badge.removeClass('status-active status-inactive');
-
-                if (isActive) {
-                    badge.addClass('status-active').text('نشط');
+            document.getElementById('is_active').addEventListener('change', function() {
+                const badge = document.getElementById('previewStatus');
+                badge.className = this.checked ? 'status-badge status-active' :
+                    'status-badge status-inactive';
+                if (this.checked) {
+                    badge.innerHTML = '<i class="fas fa-check-circle"></i> نشط';
                 } else {
-                    badge.addClass('status-inactive').text('غير نشط');
+                    badge.innerHTML = '<i class="fas fa-times-circle"></i> غير نشط';
                 }
             });
 
             // تحديث نوع وسيلة الدفع
-            $('#is_payment').on('change', function() {
-                const isPayment = $(this).is(':checked');
-                const badge = $('#previewType');
-                badge.removeClass('type-payment type-method');
-
-                if (isPayment) {
-                    badge.addClass('type-payment').text('طريقة دفع');
+            document.getElementById('is_payment').addEventListener('change', function() {
+                const badge = document.getElementById('previewType');
+                if (this.checked) {
+                    badge.innerHTML = '<i class="fas fa-credit-card"></i> دفع';
                 } else {
-                    badge.addClass('type-method').text('طريقة أخرى');
+                    badge.innerHTML = '<i class="fas fa-exchange-alt"></i> أخرى';
                 }
             });
 
-            // التحقق من النموذج قبل الإرسال
-            $('#editForm').on('submit', function(e) {
-                if (!$('#name').val() || !$('#key').val()) {
+            // رفع الصورة
+            const uploadArea = document.getElementById('uploadArea');
+            uploadArea.addEventListener('click', function() {
+                document.getElementById('icon').click();
+            });
+
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('active');
+            });
+
+            uploadArea.addEventListener('dragleave', function() {
+                this.classList.remove('active');
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('active');
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const input = document.getElementById('icon');
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    input.files = dataTransfer.files;
+                    previewImage({
+                        target: input
+                    });
+                }
+            });
+
+            // التحقق من النموذج
+            document.getElementById('editForm').addEventListener('submit', function(e) {
+                if (!nameInput.value || !keyInput.value) {
                     e.preventDefault();
                     Swal.fire({
                         icon: 'warning',
                         title: 'بيانات ناقصة',
                         text: 'يرجى ملء جميع الحقول المطلوبة',
-                        timer: 1500,
+                        confirmButtonColor: 'var(--primary-color)',
+                        timer: 2000,
                         showConfirmButton: false
                     });
                 }
             });
+
+            // تأثيرات عند التركيز
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.style.transform = 'translateY(-2px)';
+                });
+
+                input.addEventListener('blur', function() {
+                    this.parentElement.style.transform = 'translateY(0)';
+                });
+            });
         });
 
-        function selectIcon(iconClass) {
-            // إزالة التحديد من جميع الأيقونات
-            $('.icon-item').removeClass('selected');
+        function previewImage(event) {
+            const input = event.target;
+            const preview = document.getElementById('imagePreview');
+            const mainPreview = document.getElementById('previewImage');
+            const uploadArea = document.getElementById('uploadArea');
 
-            // إضافة التحديد للأيقونة المختارة
-            $(`.icon-item[onclick*="${iconClass}"]`).addClass('selected');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
 
-            // تحديث حقل الإدخال والمعاينة
-            $('#icon_input').val(iconClass);
-            $('#selected_icon').val(iconClass);
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    mainPreview.src = e.target.result;
+                    uploadArea.style.background = 'linear-gradient(135deg, #fff0ed 0%, #ffe8e0 100%)';
 
-            // تحديث المعاينة
-            updateIconPreview(iconClass);
+                    // تأثير ظهور الصورة
+                    preview.style.opacity = '0';
+                    preview.style.transform = 'scale(0.8)';
+
+                    setTimeout(() => {
+                        preview.style.opacity = '1';
+                        preview.style.transform = 'scale(1)';
+                        preview.style.transition = 'all 0.3s ease';
+                    }, 10);
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }
         }
 
-        function updateIconPreview(iconClass) {
-            if (iconClass) {
-                $('#iconPreview').html(`<i class="${iconClass}"></i>`);
-                $('#previewIcon').html(`<i class="${iconClass}"></i>`);
-                $('#selected_icon').val(iconClass);
+        function handlePreviewImage(event) {
+            const input = event.target;
+            const preview = document.getElementById('imagePreview');
+            const mainPreview = document.getElementById('previewImage');
+            const uploadArea = document.getElementById('uploadArea');
 
-                // تحديث التحديد في الأيقونات المقترحة
-                $('.icon-item').removeClass('selected');
-                $(`.icon-item[onclick*="${iconClass}"]`).addClass('selected');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    mainPreview.src = e.target.result;
+                };
+
+                reader.readAsDataURL(input.files[0]);
             }
         }
 
@@ -639,11 +885,15 @@
                 text: 'سيتم حذف وسيلة الدفع "{{ $paymentMethod->name }}" نهائياً',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
+                confirmButtonColor: 'var(--danger-color)',
+                cancelButtonColor: 'var(--secondary-color)',
                 confirmButtonText: 'نعم، احذف',
                 cancelButtonText: 'إلغاء',
-                reverseButtons: true
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'btn-danger',
+                    cancelButton: 'btn-outline-secondary'
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
                     document.getElementById('deleteForm').submit();
@@ -657,6 +907,7 @@
                 icon: 'success',
                 title: 'نجاح',
                 text: "{{ session('success') }}",
+                confirmButtonColor: 'var(--primary-color)',
                 timer: 2000,
                 showConfirmButton: false
             });

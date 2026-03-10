@@ -25,20 +25,11 @@ class OrderResource extends JsonResource
             // معلومات العميل (اختياري)
             'customer' => [
                 'name'  => $this->customer_name,
-                'phone' => $this->customer_phone,
-                'email' => $this->customer_email,
+                'phone' => $this->customer_phone?? null,
+                'email' => $this->customer_email?? null,
             ],
 
-            // عنوان الشحن
-            'address' => $this->whenLoaded('address', fn() => [
-                'city'       => $this->address?->city?->name ?? null,
-                'area'       => $this->address?->area ?? null,
-                'street'     => $this->address?->street ?? null,
-                'building'   => $this->address?->building ?? null,
-                'floor'      => $this->address?->floor ?? null,
-                'apartment'  => $this->address?->apartment ?? null,
-                'full_address' => $this->address?->full_address ?? null,
-            ]),
+     
         ];
     }
 }

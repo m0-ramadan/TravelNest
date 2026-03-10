@@ -7,7 +7,30 @@
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <!-- تنسيق خاص لمعالجة الأخطاء -->
+    <style>
+        /* تنسيق للصور الفاشلة */
+        img.img-error {
+            opacity: 0.7;
+            border: 2px dashed #ccc !important;
+            background-color: #f8f9fa !important;
+            padding: 10px !important;
+        }
+
+        /* تحسين الأداء للـ animations */
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
     <title>
         @yield('title')
     </title>
@@ -69,6 +92,20 @@
     <!-- Core JS -->
     @include('Admin.layout.js')
     @yield('js')
+    <script>
+        // ✅ حل إسعافي: لو أي Swal اتعملت بدون نصوص للأزرار، نركّب نصوص افتراضية
+        if (window.Swal && typeof Swal.fire === 'function') {
+            const __fire = Swal.fire.bind(Swal);
+            Swal.fire = function(opts, ...rest) {
+                if (opts && typeof opts === 'object') {
+                    if (!opts.confirmButtonText) opts.confirmButtonText = 'موافق';
+                    if (opts.showCancelButton && !opts.cancelButtonText) opts.cancelButtonText = 'إلغاء';
+                    if (opts.showDenyButton && !opts.denyButtonText) opts.denyButtonText = 'لا';
+                }
+                return __fire(opts, ...rest);
+            };
+        }
+    </script>
 </body>
 
 </html>

@@ -39,11 +39,14 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            //  \App\Http\Middleware\LogVisitor::class,
+             \App\Http\Middleware\LogVisitor::class,
+        \App\Http\Middleware\SetLocale::class,
 
         ],
 
         'api' => [
+                    \App\Http\Middleware\SetLocale::class,
+
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
@@ -75,7 +78,7 @@ class Kernel extends HttpKernel
         'api.key' => \App\Http\Middleware\ApiKeyMiddleware::class,
         // 'api.cors' => \App\Http\Middleware\Cors::class,
         //  'permission' => \App\Http\Middleware\CheckPermission::class,
-        // 'permission' => PermissionMiddleware::class,
-        // 'role' => RoleMiddleware::class, // Optional
+        'permission' => PermissionMiddleware::class,
+        'role' => RoleMiddleware::class, // Optional
     ];
 }

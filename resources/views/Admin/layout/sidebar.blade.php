@@ -59,7 +59,7 @@
                <ul class="menu-sub">
 
                    <li class="menu-item ">
-                       <a href="#/admin/admins" class="menu-link">
+                       <a href="{{ route('admin.admins.index') }}" class="menu-link">
                            <div>مديرين الموقع</div>
                        </a>
                    </li>
@@ -105,6 +105,21 @@
            </li>
 
            <li class="menu-item">
+               <a href="{{ route('admin.languages.index') }}" class="menu-link">
+                   <i class="menua-icon ti ti-language"></i>
+                   <div>اللغات</div>
+               </a>
+           </li>
+
+           {{-- <li class="menu-item">
+               <a href="#" class="menu-link">
+                   <i class="menua-icon ti ti-wallet"></i>
+                   <div>المحافظ</div>
+               </a>
+           </li> --}}
+
+
+           <li class="menu-item">
                <a href="{{ route('admin.products.index') }}" class="menu-link">
                    <i class="menua-icon ti ti-shopping-bag"></i>
                    <div>المنتجات</div>
@@ -142,12 +157,12 @@
                </a>
            </li> --}}
 
-           <li class="menu-item ">
+           {{-- <li class="menu-item ">
                <a href="{{ route('admin.coupons.index') }}" class="menu-link">
                    <i class="menu-icon ti ti-discount"></i>
                    <div>الكوبونات</div>
                </a>
-           </li>
+           </li> --}}
            <li class="menu-item">
                <a href="{{ route('admin.articles.index') }}" class="menu-link">
                    <i class="menu-icon ti ti-article"></i>
@@ -157,9 +172,15 @@
 
 
            <li class="menu-item ">
-               <a href="#/admin/contact-us" class="menu-link">
+               <a href="{{ route('admin.contact-us.index') }}" class="menu-link">
                    <i class="menu-icon ti ti-messages"></i>
                    <div>تواصل معنا</div>
+               </a>
+           </li>
+           <li class="menu-item ">
+               <a href="{{ route('admin.ads.index') }}" class="menu-link">
+                   <i class="menu-icon ti ti-gift"></i>
+                   <div>الإعانات</div>
                </a>
            </li>
 
@@ -207,68 +228,52 @@
            </li>
 
 
-           <li class="menu-item">
+           <li class="menu-item {{ request()->routeIs('admin.settings.*') ? 'active open' : '' }}">
                <a href="javascript:void(0);" class="menu-link menu-toggle">
                    <i class="menu-icon tf-icons ti ti-settings"></i>
                    <div>الإعدادات</div>
                </a>
 
                <ul class="menu-sub">
-                   {{-- <li class="menu-item">
-                       <a href="#/admin/settings/languages" class="menu-link">
-                           <div>اللغات</div>
-                       </a>
-                   </li> --}}
 
-                   {{-- <li class="menu-item">
-                       <a href="#/admin/settings/api" class="menu-link">
-                           <div>واجهة الـ API</div>
+                   {{-- الصفحة الرئيسية للإعدادات --}}
+                   <li class="menu-item {{ request()->routeIs('admin.settings.index') ? 'active' : '' }}">
+                       <a href="{{ route('admin.settings.index') }}" class="menu-link">
+                           <div>لوحة الإعدادات</div>
                        </a>
-                   </li> --}}
-                   {{-- 
-                   <li class="menu-item">
-                       <a href="#/admin/settings/pages/Orders" class="menu-link">
-                           <div>الطلبات</div>
-                       </a>
-                   </li> --}}
+                   </li>
 
-                   <li class="menu-item">
-                       <a href="#/admin/settings/pages/SMTP" class="menu-link">
+                   {{-- SMTP --}}
+                   <li class="menu-item {{ request()->routeIs('admin.settings.smtp*') ? 'active' : '' }}">
+                       <a href="{{ route('admin.settings.smtp') }}" class="menu-link">
                            <div>إعدادات البريد (SMTP)</div>
                        </a>
                    </li>
 
-                   <li class="menu-item">
-                       <a href="#/admin/settings/pages/General" class="menu-link">
+                   {{-- General --}}
+                   <li class="menu-item {{ request()->routeIs('admin.settings.general*') ? 'active' : '' }}">
+                       <a href="{{ route('admin.settings.general') }}" class="menu-link">
                            <div>الإعدادات العامة</div>
                        </a>
                    </li>
 
-                   {{-- <li class="menu-item">
-                       <a href="#/admin/settings/pages/Payment" class="menu-link">
-                           <div>وسائل الدفع</div>
-                       </a>
-                   </li> --}}
-
-                   <li class="menu-item">
-                       <a href="{{ route('admin.social-media.index') }}" class="menu-link">
+                   {{-- Communication --}}
+                   <li class="menu-item {{ request()->routeIs('admin.settings.communication*') ? 'active' : '' }}">
+                       <a href="{{ route('admin.settings.communication') }}" class="menu-link">
                            <div>إعدادات التواصل</div>
                        </a>
                    </li>
 
-                   {{-- <li class="menu-item">
-                       <a href="#/admin/settings/pages/Realtime" class="menu-link">
-                           <div>التحديث اللحظي (Realtime)</div>
-                       </a>
-                   </li> --}}
-
-                   <li class="menu-item">
-                       <a href="#/admin/settings/pages/Files" class="menu-link">
+                   {{-- File Manager --}}
+                   <li class="menu-item {{ request()->routeIs('admin.settings.files*') ? 'active' : '' }}">
+                       <a href="{{ route('admin.settings.files') }}" class="menu-link">
                            <div>إدارة الملفات</div>
                        </a>
                    </li>
+
                </ul>
            </li>
+
 
 
        </ul>

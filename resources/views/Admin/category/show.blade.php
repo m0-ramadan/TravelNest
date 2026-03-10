@@ -544,9 +544,7 @@
                                     <img src="{{ get_user_image($category->image) }} " alt="صورة القسم">
                                     <div class="image-label" bis_skin_checked="1">صورة القسم</div>
                                 </a>
-                            @endif
-
-                            @if ($category->sub_image)
+                            @elseif ($category->sub_image)
                                 <a href="{{ get_user_image($category->sub_image) }} " class="image-item"
                                     data-fancybox="gallery">
                                     <img src="{{ get_user_image($category->sub_image) }} " alt="صورة فرعية">
@@ -562,27 +560,131 @@
                     <h5><i class="fas fa-search"></i> إعدادات SEO</h5>
                     <div class="seo-preview" bis_skin_checked="1">
                         <div class="title" bis_skin_checked="1">
-                            {{ $category->meta_title ?: $category->name }}
+                            {{ old('meta_title.ar', $category->meta_title['ar'] ?? '') }}
                         </div>
                         <div class="url" bis_skin_checked="1">
                             {{ url('/categories/' . $category->slug) }}
                         </div>
                         <div class="description" bis_skin_checked="1">
-                            {{ $category->meta_description ?: ($category->description ?: 'لا يوجد وصف متاح') }}
+                            {{ old('meta_description.ar', $category->meta_description['ar'] ?? '') }}
                         </div>
                     </div>
 
-                    @if ($category->meta_keywords)
-                        <div class="mt-3" bis_skin_checked="1">
+                    @php
+                        $locale = app()->getLocale();
+                        $keywords = $category->meta_keywords[$locale] ?? '';
+                    @endphp
+
+                    @if ($keywords)
+                        <div class="mt-3">
                             <h6 class="mb-2">الكلمات المفتاحية</h6>
-                            <div class="d-flex flex-wrap gap-2" bis_skin_checked="1">
-                                @foreach (explode(',', $category->meta_keywords) as $keyword)
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (explode(',', $keywords) as $keyword)
                                     <span class="badge bg-secondary">{{ trim($keyword) }}</span>
                                 @endforeach
                             </div>
                         </div>
                     @endif
+
                 </div>
+
+                {{-- Sub Categories --}}
+                @if ($category->children->isNotEmpty())
+                    <div class="info-card">
+                        <h5><i class="fas fa-sitemap"></i> الأقسام الفرعية ({{ $category->children_count }})</h5>
+
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>اسم القسم</th>
+                                        <th>Slug</th>
+                                        <th>عدد المنتجات</th>
+                                        <th>الحالة</th>
+                                        <th>إجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($category->children as $child)
+                                        <tr>
+                                            <td>{{ $child->id }}</td>
+                                            <td>{{ $child->name }}</td>
+                                            <td>{{ $child->slug }}</td>
+                                            <td>{{ $child->products_count }}</td>
+                                            <td>
+                                                @if ($child->status_id == 1)
+                                                    <span class="badge bg-success">نشط</span>
+                                                @else
+                                                    <span class="badge bg-secondary">غير نشط</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <a class="btn btn-sm btn-primary"
+                                                    href="{{ route('admin.categories.show', $child->id) }}">
+                                                    عرض
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
+                {{-- Products --}}
+                @if ($category->products->isNotEmpty())
+                    <div class="info-card">
+                        <h5><i class="fas fa-box"></i> المنتجات ({{ $category->products_count }})</h5>
+
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>اسم المنتج</th>
+                                        <th>السعر</th>
+                                        <th>المخزون</th>
+                                        <th>الحالة</th>
+                                        <th>إجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($category->products->take(10) as $product)
+                                        <tr>
+                                            <td>{{ $product->id }}</td>
+                                            <td>{{ $product->name }}</td>
+                                            <td>{{ $product->price }}</td>
+                                            <td>{{ $product->stock }}</td>
+                                            <td>
+                                                @if ($product->status_id == 1)
+                                                    <span class="badge bg-success">نشط</span>
+                                                @else
+                                                    <span class="badge bg-secondary">غير نشط</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <a class="btn btn-sm btn-info"
+                                                    href="{{ route('admin.products.show', $product->id) }}">
+                                                    عرض
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @if ($category->products->count() > 10)
+                            <div class="mt-3">
+                                <a href="{{ route('admin.products.index', ['category_id' => $category->id]) }}"
+                                    class="btn btn-outline-light">
+                                    عرض كل منتجات القسم
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                @endif
             </div>
 
             <!-- Right Column - Hierarchy & Activity -->
@@ -729,7 +831,7 @@
                 </div>
 
                 <!-- QR Code (Optional) -->
-                <div class="info-card" bis_skin_checked="1">
+                {{-- <div class="info-card" bis_skin_checked="1">
                     <h5><i class="fas fa-qrcode"></i> رمز QR</h5>
                     <div class="text-center" bis_skin_checked="1">
                         <div class="qr-code mb-3" id="qrCode" bis_skin_checked="1">
@@ -742,7 +844,7 @@
                             <i class="fas fa-sync-alt me-1"></i> إنشاء رمز QR
                         </button>
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>

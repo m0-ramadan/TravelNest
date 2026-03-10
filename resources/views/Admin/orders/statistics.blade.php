@@ -549,7 +549,6 @@
                             $statusLabels = [
                                 'pending' => 'قيد الانتظار',
                                 'processing' => 'تحت المعالجة',
-                                'shipped' => 'تم الشحن',
                                 'delivered' => 'تم التسليم',
                                 'cancelled' => 'ملغي',
                                 'refunded' => 'مسترجع',
@@ -651,7 +650,7 @@
         function loadCharts() {
             // بيانات مخطط الحالة
             const statusData = {
-                labels: ['قيد الانتظار', 'تحت المعالجة', 'تم الشحن', 'تم التسليم', 'ملغي'],
+                labels: ['قيد الانتظار', 'تحت المعالجة','تم التسليم', 'ملغي'],
                 datasets: [{
                     data: [
                         {{ $stats['status_counts']['pending'] ?? 0 }},

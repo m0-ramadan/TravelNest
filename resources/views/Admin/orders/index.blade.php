@@ -83,6 +83,26 @@
             border: 1px solid rgba(173, 181, 189, 0.3);
         }
 
+        .provider-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .provider-like4app {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .provider-internal {
+            background: #28a745;
+            color: white;
+        }
+
         .stats-card {
             background: var(--dark-card);
             border-radius: 12px;
@@ -237,6 +257,10 @@
             font-weight: 600;
             color: rgba(255, 255, 255, 0.9);
             font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .order-date {
@@ -246,7 +270,7 @@
 
         .order-details {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             margin-bottom: 15px;
         }
@@ -260,17 +284,47 @@
         .detail-label {
             font-weight: 600;
             color: rgba(255, 255, 255, 0.8);
-            min-width: 80px;
+            min-width: 90px;
         }
 
         .detail-value {
             color: rgba(255, 255, 255, 0.9);
         }
 
+        .serials-preview {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .serial-badge {
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            color: #28a745;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-family: monospace;
+            direction: ltr;
+        }
+
+        .more-serials {
+            color: var(--primary-color);
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .more-serials:hover {
+            text-decoration: underline;
+        }
+
         .order-actions {
             display: flex;
             gap: 10px;
             margin-top: 15px;
+            flex-wrap: wrap;
         }
 
         .empty-state {
@@ -406,6 +460,26 @@
             color: white;
         }
 
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
         @media (max-width: 768px) {
             .order-header-info {
                 flex-direction: column;
@@ -499,10 +573,6 @@
                 onclick="filterByStatus('processing')">
                 <i class="fas fa-cog me-2"></i>تحت المعالجة
             </button>
-            <button class="status-filter-btn {{ request('status') == 'shipped' ? 'active' : '' }}"
-                onclick="filterByStatus('shipped')">
-                <i class="fas fa-truck me-2"></i>تم الشحن
-            </button>
             <button class="status-filter-btn {{ request('status') == 'delivered' ? 'active' : '' }}"
                 onclick="filterByStatus('delivered')">
                 <i class="fas fa-check-circle me-2"></i>تم التسليم
@@ -578,12 +648,22 @@
                         value="{{ request('amount_to') }}">
                 </div>
 
-                <button class="btn btn-primary" onclick="applyFilters()">
-                    <i class="fas fa-filter me-2"></i>تطبيق الفلاتر
-                </button>
-                <button class="btn btn-outline-secondary" onclick="resetFilters()">
-                    <i class="fas fa-redo me-2"></i>إعادة تعيين
-                </button>
+                <select class="form-select" id="providerFilter">
+                    <option value="">جميع المصادر</option>
+                    <option value="like4app" {{ request('provider') == 'like4app' ? 'selected' : '' }}>لايك كارد</option>
+                    <option value="internal" {{ request('provider') == 'internal' ? 'selected' : '' }}>داخلي</option>
+                </select>
+            </div>
+
+            <div class="filter-row" bis_skin_checked="1">
+                <div class="d-flex gap-2 w-100 justify-content-end">
+                    <button class="btn btn-primary" onclick="applyFilters()">
+                        <i class="fas fa-filter me-2"></i>تطبيق الفلاتر
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="resetFilters()">
+                        <i class="fas fa-redo me-2"></i>إعادة تعيين
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -601,7 +681,7 @@
                                 <a href="{{ route('admin.orders.statistics') }}" class="btn btn-light">
                                     <i class="fas fa-chart-bar me-2"></i>الإحصائيات
                                 </a>
-                                <a href="#" class="btn btn-light">
+                                <a href="{{ route('admin.orders.create') }}" class="btn btn-light">
                                     <i class="fas fa-plus me-2"></i>إضافة طلب جديد
                                 </a>
                             </div>
@@ -625,12 +705,17 @@
                                 <div class="order-item {{ $order->status }}" bis_skin_checked="1">
                                     <div class="order-header-info" bis_skin_checked="1">
                                         <div class="order-title" bis_skin_checked="1">
-                                            <div class="d-flex align-items-center gap-3" bis_skin_checked="1">
-                                                <span>الطلب #{{ $order->order_number }}</span>
-                                                <span class="badge-status status-{{ $order->status }}">
-                                                    {{ $order->status_label }}
+                                            <span>الطلب #{{ $order->order_number }}</span>
+                                            <span class="badge-status status-{{ $order->status }}">
+                                                {{ $order->status_label }}
+                                            </span>
+                                            @if ($order->provider)
+                                                <span class="provider-badge provider-{{ $order->provider }}">
+                                                    <i
+                                                        class="fas fa-{{ $order->provider == 'like4app' ? 'cloud' : 'box' }}"></i>
+                                                    {{ $order->provider == 'like4app' ? 'لايك كارد' : 'داخلي' }}
                                                 </span>
-                                            </div>
+                                            @endif
                                         </div>
                                         <div class="order-date" bis_skin_checked="1">
                                             <i class="far fa-clock me-1"></i>
@@ -659,14 +744,26 @@
                                         <div class="detail-item" bis_skin_checked="1">
                                             <span class="detail-label">طريقة الدفع:</span>
                                             <span class="detail-value">
-                                                {{ $order->payment_method }}
-                                            </span>
-                                        </div>
+                                                @switch($order->payment_method)
+                                                    @case('cash')
+                                                        نقداً
+                                                    @break
 
-                                        <div class="detail-item" bis_skin_checked="1">
-                                            <span class="detail-label">العنوان:</span>
-                                            <span class="detail-value">
-                                                {{ Str::limit($order->shipping_address, 40) }}
+                                                    @case('credit_card')
+                                                        بطاقة ائتمان
+                                                    @break
+
+                                                    @case('bank_transfer')
+                                                        تحويل بنكي
+                                                    @break
+
+                                                    @case('wallet')
+                                                        محفظة إلكترونية
+                                                    @break
+
+                                                    @default
+                                                        {{ $order->payment_method ?? '--' }}
+                                                @endswitch
                                             </span>
                                         </div>
 
@@ -680,10 +777,60 @@
                                         <div class="detail-item" bis_skin_checked="1">
                                             <span class="detail-label">الهاتف:</span>
                                             <span class="detail-value">
-                                                {{ $order->customer_phone }}
+                                                {{ $order->customer_phone ?? '--' }}
                                             </span>
                                         </div>
+
+                                        @if ($order->provider_order_id)
+                                            <div class="detail-item" bis_skin_checked="1">
+                                                <span class="detail-label">رقم خارجي:</span>
+                                                <span class="detail-value" dir="ltr">
+                                                    {{ Str::limit($order->provider_order_id, 15) }}
+                                                </span>
+                                            </div>
+                                        @endif
                                     </div>
+
+                                    <!-- عرض الأكواد التسلسلية -->
+                                    @php
+                                        $allSerials = [];
+                                        foreach ($order->items as $item) {
+                                            if ($item->serial_codes && is_array($item->serial_codes)) {
+                                                foreach ($item->serial_codes as $code) {
+                                                    if (is_array($code) && isset($code['serial_code'])) {
+                                                        $allSerials[] = $code['serial_code'];
+                                                    } elseif (is_string($code)) {
+                                                        $allSerials[] = $code;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        if (empty($allSerials) && $order->serial_codes) {
+                                            foreach ($order->serial_codes as $code) {
+                                                if (is_array($code) && isset($code['serial_code'])) {
+                                                    $allSerials[] = $code['serial_code'];
+                                                } elseif (is_string($code)) {
+                                                    $allSerials[] = $code;
+                                                }
+                                            }
+                                        }
+                                    @endphp
+
+                                    @if (!empty($allSerials))
+                                        <div class="serials-preview">
+                                            <i class="fas fa-barcode" style="color: #28a745;"></i>
+                                            <span style="color: rgba(255,255,255,0.7); font-size: 12px;">الأكواد:</span>
+                                            @foreach (array_slice($allSerials, 0, 3) as $code)
+                                                <span class="serial-badge">{{ $code }}</span>
+                                            @endforeach
+                                            @if (count($allSerials) > 3)
+                                                <span class="more-serials"
+                                                    onclick="showAllSerials({{ $order->id }}, {{ json_encode($allSerials) }})">
+                                                    +{{ count($allSerials) - 3 }} أخرى
+                                                </span>
+                                            @endif
+                                        </div>
+                                    @endif
 
                                     <div class="order-actions" bis_skin_checked="1">
                                         <a href="{{ route('admin.orders.show', $order->id) }}"
@@ -710,7 +857,6 @@
                                 <div class="m-3">
                                     <nav>
                                         <ul class="pagination">
-                                            {{-- Previous Page Link --}}
                                             @if ($orders->onFirstPage())
                                                 <li class="page-item disabled" aria-disabled="true">
                                                     <span class="page-link waves-effect" aria-hidden="true">‹</span>
@@ -722,7 +868,6 @@
                                                 </li>
                                             @endif
 
-                                            {{-- Pagination Elements --}}
                                             @foreach ($orders->links()->elements[0] as $page => $url)
                                                 @if ($page == $orders->currentPage())
                                                     <li class="page-item active" aria-current="page">
@@ -736,7 +881,6 @@
                                                 @endif
                                             @endforeach
 
-                                            {{-- Next Page Link --}}
                                             @if ($orders->hasMorePages())
                                                 <li class="page-item">
                                                     <a class="page-link waves-effect" href="{{ $orders->nextPageUrl() }}"
@@ -801,7 +945,8 @@
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'تم الحذف',
-                                    text: response.success,
+                                    text: response.message ||
+                                        'تم حذف الطلب بنجاح',
                                     timer: 1500,
                                     showConfirmButton: false
                                 }).then(() => {
@@ -870,22 +1015,22 @@
                 date_to: $('#dateTo').val(),
                 payment_method: $('#paymentMethodFilter').val(),
                 amount_from: $('#amountFrom').val(),
-                amount_to: $('#amountTo').val()
+                amount_to: $('#amountTo').val(),
+                provider: $('#providerFilter').val()
             };
 
             updateUrl(params);
         }
 
         function resetFilters() {
-            // مسح جميع الحقول
             $('#searchInput').val('');
             $('#dateFrom').val('');
             $('#dateTo').val('');
             $('#paymentMethodFilter').val('');
             $('#amountFrom').val('');
             $('#amountTo').val('');
+            $('#providerFilter').val('');
 
-            // إعادة تحميل الصفحة بدون فلتر
             window.location.href = "{{ route('admin.orders.index') }}";
         }
 
@@ -893,7 +1038,6 @@
             const url = new URL(window.location.href);
             const searchParams = new URLSearchParams(url.search);
 
-            // تحديث جميع الباراميترات
             Object.keys(params).forEach(key => {
                 if (params[key] === null || params[key] === '') {
                     searchParams.delete(key);
@@ -902,10 +1046,26 @@
                 }
             });
 
-            // إعادة التوجيه إلى الصفحة الأولى مع الباراميترات الجديدة
             searchParams.set('page', '1');
             url.search = searchParams.toString();
             window.location.href = url.toString();
+        }
+
+        function showAllSerials(orderId, serials) {
+            let serialsList = '';
+            serials.forEach(serial => {
+                serialsList +=
+                    `<div style="background: #2b3b4c; padding: 8px 15px; border-radius: 5px; margin-bottom: 5px; direction: ltr; text-align: left; font-family: monospace; border: 1px solid rgba(40,167,69,0.3);">${serial}</div>`;
+            });
+
+            Swal.fire({
+                title: 'الأكواد التسلسلية',
+                html: `<div style="max-height: 400px; overflow-y: auto;">${serialsList}</div>`,
+                background: '#1e1e2d',
+                color: '#fff',
+                confirmButtonColor: '#696cff',
+                confirmButtonText: 'إغلاق'
+            });
         }
     </script>
 @endsection

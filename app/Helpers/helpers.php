@@ -199,3 +199,93 @@ if (!function_exists('permission_badge_class')) {
         return \App\Helpers\PermissionHelper::getPermissionBadgeClass($permissionName);
     }
 }
+
+
+
+if (!function_exists('formatBytes')) {
+    /**
+     * Format bytes to human readable format.
+     */
+    function formatBytes($bytes, $precision = 2)
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+        
+        $bytes /= pow(1024, $pow);
+        
+        return round($bytes, $precision) . ' ' . $units[$pow];
+    }
+}
+
+if (!function_exists('getFileIcon')) {
+    /**
+     * Get icon class for file type.
+     */
+    function getFileIcon($extension)
+    {
+        $icons = [
+            'jpg' => 'fas fa-image',
+            'jpeg' => 'fas fa-image',
+            'png' => 'fas fa-image',
+            'gif' => 'fas fa-image',
+            'bmp' => 'fas fa-image',
+            'svg' => 'fas fa-image',
+            
+            'pdf' => 'fas fa-file-pdf',
+            'doc' => 'fas fa-file-word',
+            'docx' => 'fas fa-file-word',
+            'txt' => 'fas fa-file-alt',
+            'rtf' => 'fas fa-file-alt',
+            
+            'mp4' => 'fas fa-file-video',
+            'avi' => 'fas fa-file-video',
+            'mov' => 'fas fa-file-video',
+            'wmv' => 'fas fa-file-video',
+            
+            'mp3' => 'fas fa-file-audio',
+            'wav' => 'fas fa-file-audio',
+            'ogg' => 'fas fa-file-audio',
+            
+            'zip' => 'fas fa-file-archive',
+            'rar' => 'fas fa-file-archive',
+            '7z' => 'fas fa-file-archive',
+            
+            'xls' => 'fas fa-file-excel',
+            'xlsx' => 'fas fa-file-excel',
+            
+            'ppt' => 'fas fa-file-powerpoint',
+            'pptx' => 'fas fa-file-powerpoint',
+        ];
+        
+        return $icons[$extension] ?? 'fas fa-file';
+    }
+}
+
+if (!function_exists('getFileType')) {
+    /**
+     * Get file type category.
+     */
+    function getFileType($extension)
+    {
+        $types = [
+            'image' => ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'],
+            'document' => ['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt'],
+            'video' => ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv'],
+            'audio' => ['mp3', 'wav', 'ogg', 'm4a', 'flac'],
+            'archive' => ['zip', 'rar', '7z', 'tar', 'gz'],
+            'spreadsheet' => ['xls', 'xlsx', 'csv', 'ods'],
+            'presentation' => ['ppt', 'pptx', 'odp'],
+        ];
+        
+        foreach ($types as $type => $extensions) {
+            if (in_array(strtolower($extension), $extensions)) {
+                return $type;
+            }
+        }
+        
+        return 'other';
+    }
+}
