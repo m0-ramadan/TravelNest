@@ -79,7 +79,7 @@ Route::prefix('admin')->as('admin.')->middleware('auth:admin')->group(function (
     Route::resources([
         'admins' => AdminController::class,
         // 'permissions' => PermissionsController::class,
-        'roles' => RolesController::class,
+      //  'roles' => RolesController::class,
         'countries' => CountryController::class,
         'contactus' => ContactUsController::class,
         'faqs' => FaqController::class,
