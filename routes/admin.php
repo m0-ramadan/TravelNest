@@ -377,11 +377,10 @@ Route::prefix('admin')->as('admin.')->middleware('auth:admin')->group(function (
     // Routes for AI-powered articles
 
     Route::prefix('articles')->name('articles.')->group(function () {
-        Route::get('/create-with-ai', [ArticleController::class, 'create'])->name('create');
-        Route::post('/store-with-ai', [ArticleController::class, 'storeWithAI'])->name('store-with-ai');
-        Route::post('/ai-enhance', [ArticleController::class, 'enhanceWithAI'])->name('ai-enhance');
-        Route::post('/ai-generate', [ArticleController::class, 'generateWithAI'])->name('ai-generate');
-
+    Route::get('/create-with-ai', [ArticleController::class, 'create'])->name('create-with-ai');
+    Route::post('/store-with-ai', [ArticleController::class, 'storeWithAI'])->name('store-with-ai');
+    Route::post('/ai-enhance', [ArticleController::class, 'enhanceWithAI'])->name('ai-enhance');
+    Route::post('/ai-generate', [ArticleController::class, 'generateWithAI'])->name('ai-generate');
         // إضافة الرو routes الجديدة للذكاء الاصطناعي
         Route::post('/ai-generate-full', [ArticleController::class, 'generateFullArticle'])->name('ai-generate-full');
         Route::post('/ai-generate-title', [ArticleController::class, 'generateTitle'])->name('ai-generate-title');
@@ -396,7 +395,7 @@ Route::prefix('admin')->as('admin.')->middleware('auth:admin')->group(function (
         Route::post('/ai-enhance-text', [ArticleController::class, 'enhanceText'])->name('ai-enhance-text');
 
         // المقالات
-        //Route::resource('/', ArticleController::class);
+        Route::resource('/', ArticleController::class);
         Route::post('/bulk-actions', [ArticleController::class, 'bulkActions'])->name('bulk-actions');
         Route::patch('/{article}/toggle-status', [ArticleController::class, 'toggleStatus'])->name('toggle-status');
         Route::patch('/{article}/toggle-featured', [ArticleController::class, 'toggleFeatured'])->name('toggle-featured');
