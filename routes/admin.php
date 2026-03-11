@@ -396,7 +396,7 @@ Route::prefix('admin')->as('admin.')->middleware('auth:admin')->group(function (
         Route::post('/ai-enhance-text', [ArticleController::class, 'enhanceText'])->name('ai-enhance-text');
 
         // المقالات
-        Route::resource('/', ArticleController::class);
+        //Route::resource('/', ArticleController::class);
         Route::post('/bulk-actions', [ArticleController::class, 'bulkActions'])->name('bulk-actions');
         Route::patch('/{article}/toggle-status', [ArticleController::class, 'toggleStatus'])->name('toggle-status');
         Route::patch('/{article}/toggle-featured', [ArticleController::class, 'toggleFeatured'])->name('toggle-featured');
