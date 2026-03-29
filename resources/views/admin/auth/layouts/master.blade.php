@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="ar" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" dir="rtl"
-    data-theme="theme-default" data-assets-path="#"
-    data-template="vertical-menu-template-no-customizer">
+    data-theme="theme-default" data-assets-path="#" data-template="vertical-menu-template-no-customizer">
 
 <head>
     <meta charset="utf-8" />
@@ -13,7 +12,7 @@
     </title>
 
     <meta name="description" content="" />
-    @include('Admin.layout.css')
+    @include('admin.layout.css')
     <!-- Page -->
     <link rel="stylesheet" href="{{ asset('dashboard/assets/vendor/css/pages/page-auth.css') }}" />
 </head>
@@ -25,7 +24,7 @@
     <!-- / Content -->
 
     <!-- Core JS -->
-    @include('Admin.layout.js')
+    @include('admin.layout.js')
 </body>
 
 </html>
