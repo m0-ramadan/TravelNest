@@ -27,12 +27,12 @@ class HomeController extends Controller
 
             $subCategoriesLimit = $request->input('categories_limit', 5);
 
-            $sub_categories = Category::where('status_id', 1)
-                ->whereHas('products', function ($q) {
-                    $q->where('status_id', 1);
-                })
-                ->orderBy('order', 'asc')
-                ->paginate($subCategoriesLimit);
+            // $sub_categories = Category::where('status_id', 1)
+            //     ->whereHas('products', function ($q) {
+            //         $q->where('status_id', 1);
+            //     })
+            //     ->orderBy('order', 'asc')
+            //     ->paginate($subCategoriesLimit);
 
 
             // ============================

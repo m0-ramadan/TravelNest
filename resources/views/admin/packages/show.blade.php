@@ -1,0 +1,177 @@
+@extends('admin.layout.master')
+
+@section('title', 'عرض الباقة')
+
+@section('css')
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --dark-bg: #1e1e2d;
+            --dark-card: #2b3b4c;
+        }
+
+        body {
+            font-family: "Cairo", sans-serif !important;
+            background: var(--dark-bg);
+            color: #fff;
+        }
+
+        .profile-card {
+            background: var(--dark-card);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, .3);
+            border: 1px solid rgba(255, 255, 255, .1);
+        }
+
+        .profile-header {
+            background: var(--primary-gradient);
+            color: #fff;
+            padding: 30px;
+        }
+
+        .profile-body {
+            padding: 30px;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 15px;
+        }
+
+        .info-label {
+            color: rgba(255, 255, 255, .65);
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #fff;
+            font-weight: 600;
+        }
+    </style>
+@endsection
+
+@section('content')
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">الرئيسية</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.packages.index') }}">الباقات</a></li>
+                <li class="breadcrumb-item active">عرض الباقة</li>
+            </ol>
+        </nav>
+
+        <div class="profile-card">
+            <div class="profile-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-1">{{ $package->name ?? 'بدون اسم' }}</h4>
+                    <small class="opacity-75">{{ $package->slug ?? '-' }}</small>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('admin.packages.edit', $package) }}" class="btn btn-light">تعديل</a>
+                    <a href="{{ route('admin.packages.index') }}" class="btn btn-outline-light">رجوع</a>
+                </div>
+            </div>
+
+            <div class="profile-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-label">التصنيف</div>
+                            <div class="info-value">{{ $package->category->name ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-label">الوجهة</div>
+                            <div class="info-value">{{ $package->destination->name ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-label">العملة</div>
+                            <div class="info-value">{{ $package->currency->code ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-label">عدد الأيام</div>
+                            <div class="info-value">{{ $package->duration_days ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-label">السعر الأساسي</div>
+                            <div class="info-value">{{ number_format($package->base_price ?? 0, 2) }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-label">الحالة</div>
+                            <div class="info-value">{{ $package->is_active ?? true ? 'مفعلة' : 'غير مفعلة' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">مميزة</div>
+                            <div class="info-value">{{ $package->is_featured ?? false ? 'نعم' : 'لا' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">الترتيب</div>
+                            <div class="info-value">{{ $package->sort_order ?? 0 }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="info-box">
+                            <div class="info-label">الوصف المختصر</div>
+                            <div class="info-value">{{ $package->short_description ?: '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="info-box">
+                            <div class="info-label">الوصف الكامل</div>
+                            <div class="info-value">{{ $package->description ?: '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">Meta Title</div>
+                            <div class="info-value">{{ $package->seo_title ?: '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">Meta Description</div>
+                            <div class="info-value">{{ $package->seo_description ?: '-' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (Route::has('admin.package-prices.by-package'))
+                    <div class="mt-3">
+                        <a href="{{ route('admin.package-prices.by-package', $package) }}" class="btn btn-primary">
+                            عرض أسعار الباقة
+                        </a>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+@endsection

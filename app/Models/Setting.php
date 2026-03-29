@@ -2,21 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
 {
-    use HasFactory;
-    protected $table = 'settings';
-
-    protected $fillable = [
-        'key',
-        'value',
-    ];
+    protected $fillable = ['group', 'key', 'value', 'type', 'is_public'];
 
     protected $casts = [
-        'value' => 'string',
+        'is_public' => 'boolean',
     ];
-    public $timestamps = false; // غيرها true لو عندك created_at & updated_at
 }

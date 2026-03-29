@@ -2,92 +2,97 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\Country\CreateCountryRequest;
-use App\Http\Requests\Admin\Country\UpdateCountryRequest;
-use Flasher\Toastr\Prime\ToastrInterface;
-use Flasher\Toastr\Laravel\Facade\Toastr;
-
-
-
-
 use App\Models\Country;
+use App\Traits\UploadFileTrait;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class CountryController extends Controller
 {
-    protected $countryInterface;
+    use UploadFileTrait;
 
-    // public function __construct()
-    // {
-    //     // Ensure auth:admin middleware is applied
-    //     //  $this->middleware('auth:admin');
-    //     // Apply Spatie permission middleware
-    //     $this->middleware('permission:عرض الدول', ['only' => ['index']]);
-    //     $this->middleware('permission:إضافة دولة', ['only' => ['create', 'store']]);
-    //     $this->middleware('permission:تعديل الدول', ['only' => ['edit', 'update']]);
-    //     $this->middleware('permission:حذف الدول', ['only' => ['destroy']]);
-    // }
-
-    public function index()
+    public function index(Request $request)
     {
-        $countries = Country::orderBy('item_order')->get();
-        return view('Admin.country.index', compact('countries'));
-    }
+        $countries = Country::query()
+            ->when($request->filled('q'), function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->q . '%');
+            })
+            ->latest()
+            ->paginate($this->perPage($request));
 
+        return $this->view('admin.countries.index', [
+            'countries' => $countries
+        ]);
+    }
 
     public function create()
     {
-
-        return view('Admin.country.create');
+        return $this->view('admin.countries.create');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        Country::create([
-            'country'                => $request->country,
-            'country_ar'            => $request->country_ar,
-            'message'                => $request->message,
-            'collection_commission'  => $request->collection_commission,
+        $data = $request->validate([
+            'code'        => ['nullable', 'string'],
+            'name'        => ['nullable', 'string'],
+            'slug'        => ['nullable', 'string'],
+            'flag'        => ['nullable', 'image'],
+            'is_active'   => ['nullable', 'boolean'],
+            'sort_order'  => ['nullable', 'integer'],
+            'is_featured' => ['nullable', 'boolean'],
         ]);
-        toastr()->success('success', 'sucessfully added');
-        return redirect()->route('admin.country.index');
-    }
 
-    public function edit($id)
-    {
-        $country = Country::find($id);
-        return view('Admin.country.edit', compact('country'));
-    }
-
-    public function update(Request $request)
-    {
-
-
-        $country = Country::find($request->id);
-
-
-        $country->update([
-            'country'                 => $request->country,
-            'country_ar'              => $request->country_ar,
-            'message'                => $request->message,
-            'collection_commission'  => $request->collection_commission,
-
-        ]);
-        toastr()->success('success', 'sucessfully updated');
-        return redirect()->route('admin.country.index');
-    }
-
-    public function destroy($id)
-    {
-
-        $country = Country::find($id);
-        if ($country) {
-            $country->delete();
-            Toastr::addSuccess('Deleted successfully');
-            return redirect()->route('admin.country.index');
+        if ($request->hasFile('flag')) {
+            $data['flag'] = $this->uploadImage('countries', $request->file('flag'));
         }
-        toastr()->success('not found');
-        return redirect()->route('admin.country.index');
+
+        $data['is_active'] = $request->boolean('is_active');
+        $data['is_featured'] = $request->boolean('is_featured');
+
+        Country::create($data);
+
+        return $this->success('admin.countries.index', 'Country created.');
+    }
+
+    public function show(Country $country)
+    {
+        return $this->view('admin.countries.show', compact('country'));
+    }
+
+    public function edit(Country $country)
+    {
+        return $this->view('admin.countries.edit', compact('country'));
+    }
+
+    public function update(Request $request, Country $country): RedirectResponse
+    {
+        $data = $request->validate([
+            'code'        => ['nullable', 'string'],
+            'name'        => ['nullable', 'string'],
+            'slug'        => ['nullable', 'string'],
+            'flag'        => ['nullable', 'image'],
+            'is_active'   => ['nullable', 'boolean'],
+            'sort_order'  => ['nullable', 'integer'],
+            'is_featured' => ['nullable', 'boolean'],
+        ]);
+
+        if ($request->hasFile('flag')) {
+            $data['flag'] = $this->uploadImage('countries', $request->file('flag'));
+        }
+
+        $data['is_active'] = $request->boolean('is_active');
+        $data['is_featured'] = $request->boolean('is_featured');
+
+        $country->update($data);
+
+        return $this->success('admin.countries.index', 'Country updated.');
+    }
+
+    public function destroy(Country $country): RedirectResponse
+    {
+        $country->delete();
+
+        return $this->success('admin.countries.index', 'Country deleted.');
     }
 }

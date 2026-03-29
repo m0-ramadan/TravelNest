@@ -209,13 +209,13 @@ if (!function_exists('formatBytes')) {
     function formatBytes($bytes, $precision = 2)
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        
+
         $bytes = max($bytes, 0);
         $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
         $pow = min($pow, count($units) - 1);
-        
+
         $bytes /= pow(1024, $pow);
-        
+
         return round($bytes, $precision) . ' ' . $units[$pow];
     }
 }
@@ -233,33 +233,33 @@ if (!function_exists('getFileIcon')) {
             'gif' => 'fas fa-image',
             'bmp' => 'fas fa-image',
             'svg' => 'fas fa-image',
-            
+
             'pdf' => 'fas fa-file-pdf',
             'doc' => 'fas fa-file-word',
             'docx' => 'fas fa-file-word',
             'txt' => 'fas fa-file-alt',
             'rtf' => 'fas fa-file-alt',
-            
+
             'mp4' => 'fas fa-file-video',
             'avi' => 'fas fa-file-video',
             'mov' => 'fas fa-file-video',
             'wmv' => 'fas fa-file-video',
-            
+
             'mp3' => 'fas fa-file-audio',
             'wav' => 'fas fa-file-audio',
             'ogg' => 'fas fa-file-audio',
-            
+
             'zip' => 'fas fa-file-archive',
             'rar' => 'fas fa-file-archive',
             '7z' => 'fas fa-file-archive',
-            
+
             'xls' => 'fas fa-file-excel',
             'xlsx' => 'fas fa-file-excel',
-            
+
             'ppt' => 'fas fa-file-powerpoint',
             'pptx' => 'fas fa-file-powerpoint',
         ];
-        
+
         return $icons[$extension] ?? 'fas fa-file';
     }
 }
@@ -279,13 +279,30 @@ if (!function_exists('getFileType')) {
             'spreadsheet' => ['xls', 'xlsx', 'csv', 'ods'],
             'presentation' => ['ppt', 'pptx', 'odp'],
         ];
-        
+
         foreach ($types as $type => $extensions) {
             if (in_array(strtolower($extension), $extensions)) {
                 return $type;
             }
         }
-        
+
         return 'other';
+    }
+}
+
+if (!function_exists('greeting')) {
+    function greeting(): string
+    {
+        $hour = (int) now()->format('H');
+
+        if ($hour >= 5 && $hour < 12) {
+            return 'صباح الخير 🌅';
+        } elseif ($hour >= 12 && $hour < 17) {
+            return 'مساء الخير ☀️';
+        } elseif ($hour >= 17 && $hour < 21) {
+            return 'مساء الخير 🌆';
+        } else {
+            return 'تصبح على خير 🌙';
+        }
     }
 }

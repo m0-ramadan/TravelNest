@@ -1881,10 +1881,58 @@
             }
         }
     </style>
+
+    <style>
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+            backdrop-filter: blur(30px);
+            background: rgba(0, 0, 0, 0.5);
+
+            display: flex;
+            /* مهم */
+            justify-content: center;
+            align-items: center;
+
+            z-index: 999999;
+        }
+
+        /* Box */
+        .loader-box {
+            text-align: center;
+            color: #fff;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
 @endsection
 
 @section('content')
-
+    <div id="loading-overlay">
+        <div class="loader-box">
+            <div class="spinner"></div>
+            <p>جاري التحديث...</p>
+        </div>
+    </div>
     <!-- Enhanced Hero Section -->
     <section class="hero-section" id="home">
         <div class="container">
@@ -1893,8 +1941,12 @@
                     <i class="la la-award"></i>
                     Award-Winning Since 2008
                 </div> --}}
-                <h1 class="hero-title">Luxor and Aswan Travel</h1>
-                <p class="hero-subtitle">Egypt's Premier Luxury Travel Experience</p>
+                <h1 class="hero-title">Etro Tours</h1>
+                <p class="hero-subtitle">
+                    Discover Egypt like never before with Etro Tours — your trusted partner for unforgettable travel
+                    experiences,
+                    luxury services, and personalized journeys across Egypt.
+                </p>
                 <a href="#deals" class="hero-cta">
                     <i class="la la-compass"></i>
                     Discover Egypt
@@ -2824,5 +2876,14 @@
             // Optional: Track WhatsApp clicks for analytics
             console.log('WhatsApp contact initiated');
         });
+    </script>
+    <script>
+        function showLoader() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+
+        function hideLoader() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
     </script>
 @endsection

@@ -2,83 +2,72 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Destination;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Models\Region;
-use App\Models\Country;
-use App\Http\Requests\Admin\Region\CreateRegionRequest;
-use App\Http\Requests\Admin\Region\UpdateRegionRequest;
-use Flasher\Toastr\Prime\ToastrInterface;
-use Flasher\Toastr\Laravel\Facade\Toastr;
-
+use Illuminate\View\View;
 
 class RegionController extends Controller
 {
-
-
-    public function index()
+    public function index(Request $request): View
     {
-        $regions = Region::get();
-        return view('Admin.region.index', compact('regions'));
+        $regions = Destination::query()
+            ->when($request->filled('q'), fn($q) => $q->where('name', 'like', '%' . $request->string('q') . '%'))
+            ->latest()
+            ->paginate($this->perPage($request));
+
+        return $this->view('admin.regions.index', ['regions' => $regions]);
     }
 
-
-    public function create()
+    public function create(): View
     {
-        $countries = Country::get();
-        return view('Admin.region.create', compact('countries'));
+        return $this->view('admin.regions.create');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-
-        Region::create([
-            'region_ar' => $request->region_ar,
-            'country_id' => $request->country,
-            'key' => $request->key
-
-        ]);
-        toastr::success('success', 'sucessfully added');
-        return redirect()->route('admin.region.index');
-
-    }
-
-    public function edit($id)
-    {
-
-        $countries = Country::get();
-        $region = Region::find($id);
-        return view('Admin.region.edit', compact('region', 'countries'));
-
-    }
-
-    public function update(Request $request)
-    {
-
-        $region = Region::find($request->id);
-        $region->update([
-            'region_ar' => $request->region_ar,
-            'country_id' => $request->country,
-            'key' => $request->key
-
+        $data = $request->validate([
+            'country_id' => ['nullable', 'integer'],
+            'name' => ['nullable', 'string'],
+            'slug' => ['nullable', 'string'],
+            'is_active' => ['nullable', 'boolean'],
+            'sort_order' => ['nullable', 'integer'],
         ]);
 
-        toastr::success('success', 'sucessfully updated');
-        return redirect()->route('admin.region.index');
+        Destination::create($data);
 
+        return $this->success('admin.regions.index', 'Region created.');
     }
 
-    public function destroy($id)
+    public function show(Destination $region): View
     {
-        $region = Region::find($id);
-        if ($region) {
-            $region->delete();
-            toastr::success('success', 'sucessfully updated');
-            return redirect()->route('admin.region.index');
-        }
-        toastr::error('error', 'not found');
-        return redirect()->route('admin.region.index');
-
+        return $this->view('admin.regions.show', compact('region'));
     }
 
+    public function edit(Destination $region): View
+    {
+        return $this->view('admin.regions.edit', compact('region'));
+    }
+
+    public function update(Request $request, Destination $region): RedirectResponse
+    {
+        $data = $request->validate([
+            'country_id' => ['nullable', 'integer'],
+            'name' => ['nullable', 'string'],
+            'slug' => ['nullable', 'string'],
+            'is_active' => ['nullable', 'boolean'],
+            'sort_order' => ['nullable', 'integer'],
+        ]);
+
+        $region->update($data);
+
+        return $this->success('admin.regions.index', 'Region updated.');
+    }
+
+    public function destroy(Destination $region): RedirectResponse
+    {
+        $region->delete();
+
+        return $this->success('admin.regions.index', 'Region deleted.');
+    }
 }

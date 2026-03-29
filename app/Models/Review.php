@@ -3,22 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Review extends Model
 {
-    protected $fillable = ['product_id', 'user_id', 'rating', 'comment'];
-
-    protected $casts = [
-        'rating' => 'integer',
+    protected $fillable = [
+        'client_id', 'package_id', 'rating', 'title', 'content', 'pros', 'cons',
+        'travel_date', 'images', 'is_approved', 'helpful_count',
     ];
 
-    public function product()
-    {
-        return $this->belongsTo(Product::class);
-    }
+    protected $casts = [
+        'rating' => 'decimal:1',
+        'travel_date' => 'date',
+        'images' => 'array',
+        'is_approved' => 'boolean',
+    ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+    public function client(): BelongsTo { return $this->belongsTo(User::class, 'client_id'); }
+    public function package(): BelongsTo { return $this->belongsTo(Package::class); }
 }

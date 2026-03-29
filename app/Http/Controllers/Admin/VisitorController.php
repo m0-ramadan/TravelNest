@@ -2,50 +2,36 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Carbon\Carbon;
-use App\Models\Order;
 use App\Models\Visitor;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
 
 class VisitorController extends Controller
 {
-     public function chartData(Request $request)
+    public function chartData(): JsonResponse
     {
-        $year = $request->get('year', Carbon::now()->year);
+        $labels = [];
+        $values = [];
 
-        $data = Visitor::selectRaw('country, COUNT(*) as total')
-            ->whereYear('created_at', $year)
-            ->groupBy('country')
-            ->orderByDesc('total')
-            ->take(10) // أشهر 10 دول فقط
-            ->get();
+        foreach (range(6, 0) as $daysAgo) {
+            $date = Carbon::now()->subDays($daysAgo)->toDateString();
+            $labels[] = $date;
+            $values[] = Visitor::whereDate('created_at', $date)->count();
+        }
 
+        return response()->json(compact('labels', 'values'));
+    }
+
+    public function quickStats(): JsonResponse
+    {
         return response()->json([
-            'countries' => $data->pluck('country'),
-            'count' => $data->pluck('total')
+            'visitors_today' => Visitor::whereDate('created_at', today())->count(),
+            'visitors_total' => Visitor::count(),
         ]);
     }
-    public function ordersStats($year)
-{
-    $data = Order::selectRaw('MONTH(created_at) as month, COUNT(*) as total')
-        ->whereYear('created_at', $year)
-        ->groupBy('month')
-        ->orderBy('month')
-        ->get();
 
-    // تجهيز البيانات للشارت
-    $months = range(1, 12);
-    $result = [];
-
-    foreach ($months as $m) {
-        $result[] = [
-            'month' => date("M", mktime(0, 0, 0, $m, 1)),
-            'total' => (int)($data->firstWhere('month', $m)->total ?? 0),
-        ];
+    public function ordersStats(int $year): JsonResponse
+    {
+        return response()->json(['year' => $year, 'months' => []]);
     }
-
-   // return response()->json($result);
-}
-
 }

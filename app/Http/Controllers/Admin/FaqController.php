@@ -2,62 +2,77 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Models\Faq;
-use App\Http\Requests\Admin\Faq\StoreFaqRequest;
-use App\Http\Requests\Admin\Faq\UpdateFaqRequest;
-use Flasher\Toastr\Laravel\Facade\Toastr;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class FaqController extends Controller
 {
-    
+    public function index(Request $request): View
+    {
+        $faqs = Faq::query()
+            ->when($request->filled('q'), fn ($q) => $q->where('id', 'like', '%' . $request->string('q') . '%'))
+            ->latest()
+            ->paginate($this->perPage($request));
 
-    
-    public function index(){
-        $faqs=Faq::orderBy('item_order')->get();
-        return view('Admin.faq.index',compact('faqs'));
+        return $this->view('admin.faqs.index', ['faqs' => $faqs]);
     }
 
-
-    public function create(){
-        return view('Admin.faq.create');
+    public function create(): View
+    {
+        return $this->view('admin.faqs.create');
     }
 
-    public function store( StoreFaqRequest $request){
-        Faq::create([
-            'question'=> $request->question,
-            'answer'  => $request->answer,
-            'item_order' => $request->item_order,
-           ]);
-           toastr::success('success','sucessfully added');
-           return redirect()->route('admin.faq.index');
+    public function store(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'category_id' => ['nullable', 'integer'],
+            'question' => ['nullable', 'string'],
+            'answer' => ['nullable', 'string'],
+            'context_type' => ['nullable', 'string'],
+            'context_id' => ['nullable', 'integer'],
+            'is_active' => ['nullable', 'boolean'],
+            'sort_order' => ['nullable', 'integer'],
+        ]);
+
+        Faq::create($data);
+
+        return $this->success('admin.faqs.index', 'Faq created.');
     }
 
-    public function edit($id){
-        $faq=Faq::find($id);
-        return view('Admin.faq.edit',compact('faq'));
+    public function show(Faq $faq): View
+    {
+        return $this->view('admin.faqs.show', compact('faq'));
     }
 
-    public function update(UpdateFaqRequest $request){
-        $faq=Faq::find($request->id);
-        $faq->update([
-            'question'=> $request->question,
-            'answer'  => $request->answer,
-            'item_order' => $request->item_order,
-           ]);
-           toastr::success('success','sucessfully updated');
-           return redirect()->route('admin.faq.index');
+    public function edit(Faq $faq): View
+    {
+        return $this->view('admin.faqs.edit', compact('faq'));
     }
 
-    public function destroy($id){
-        $faq=Faq::find($id);
-        if($faq){
-            $faq->delete();
-            toastr::success('success','sucessfully updated');
-            return redirect()->route('admin.faq.index');
-        }
-        toastr::error('error','not found');
-            return redirect()->route('admin.faq.index');
+    public function update(Request $request, Faq $faq): RedirectResponse
+    {
+        $data = $request->validate([
+            'category_id' => ['nullable', 'integer'],
+            'question' => ['nullable', 'string'],
+            'answer' => ['nullable', 'string'],
+            'context_type' => ['nullable', 'string'],
+            'context_id' => ['nullable', 'integer'],
+            'is_active' => ['nullable', 'boolean'],
+            'sort_order' => ['nullable', 'integer'],
+        ]);
+
+        $faq->update($data);
+
+        return $this->success('admin.faqs.index', 'Faq updated.');
     }
+
+    public function destroy(Faq $faq): RedirectResponse
+    {
+        $faq->delete();
+
+        return $this->success('admin.faqs.index', 'Faq deleted.');
+    }
+
 }

@@ -2,413 +2,100 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use App\Models\Admin;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
-    /**
-     * عرض قائمة جميع الرتب
-     */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
-        // التحقق من الصلاحية
-        if (!auth()->guard('admin')->user()->can('roles.view')) {
-            abort(403, 'غير مصرح لك بعرض الرتب');
-        }
-
-        $query = Role::withCount(['users', 'permissions']);
-
-        // البحث
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('display_name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
-
-        $roles = $query->orderBy('created_at', 'desc')->paginate(15);
-
-        // إحصائيات
-        $stats = [
-            'total' => Role::count(),
-            'super_admins' => Role::where('name', 'super_admin')->count(),
-            'admins' => Role::where('name', 'admin')->count(),
-            'editors' => Role::where('name', 'editor')->count(),
-            'viewers' => Role::where('name', 'viewer')->count(),
-        ];
-
-        return view('Admin.roles.index', compact('roles', 'stats'));
+        $roles = Role::latest()->paginate($this->perPage($request));
+        return $this->view('admin.roles.index', compact('roles'));
     }
 
-    /**
-     * عرض نموذج إنشاء رتبة جديدة
-     */
-    public function create()
+    public function create(): View
     {
-        if (!auth()->guard('admin')->user()->can('roles.create')) {
-            abort(403, 'غير مصرح لك بإنشاء رتب');
-        }
-
-        $permissions = Permission::orderBy('module')->orderBy('name')->get();
-        $modules = Permission::distinct()->pluck('module')->filter()->values();
-
-        return view('Admin.roles.create', compact('permissions', 'modules'));
+        $permissions = Permission::orderBy('name')->get();
+        return $this->view('admin.roles.create', compact('permissions'));
     }
 
-    /**
-     * حفظ رتبة جديدة
-     */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        if (!auth()->guard('admin')->user()->can('roles.create')) {
-            abort(403, 'غير مصرح لك بإنشاء رتب');
-        }
-
-        $validator = Validator::make($request->all(), [
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                'unique:roles,name',
-                'regex:/^[a-z_]+$/'
-            ],
-            'display_name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:500',
-            'permissions' => 'nullable|array',
-            'permissions.*' => 'exists:permissions,id'
-        ], [
-            'name.regex' => 'اسم الرتبة يجب أن يحتوي على أحرف صغيرة وشرطات سفلية فقط',
-            'name.unique' => 'هذا الاسم مستخدم بالفعل لرتبة أخرى'
+        $data = $request->validate([
+            'name' => ['required', 'string', 'unique:roles,name'],
+            'permissions' => ['nullable', 'array'],
         ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
+        $role = Role::create(['name' => $data['name'], 'guard_name' => 'admin']);
+        $role->syncPermissions($data['permissions'] ?? []);
 
-        DB::beginTransaction();
-
-        try {
-            // إنشاء الرتبة
-            $role = Role::create([
-                'name' => $request->name,
-                'display_name' => $request->display_name,
-                'description' => $request->description,
-            ]);
-
-            // ربط الصلاحيات
-            if ($request->has('permissions')) {
-                $permissions = Permission::whereIn('id', $request->permissions)->pluck('name')->toArray();
-                $role->syncPermissions($permissions);
-            }
-
-            DB::commit();
-
-            return redirect()->route('admin.roles.index')
-                ->with('success', 'تم إنشاء الرتبة بنجاح');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()
-                ->with('error', 'حدث خطأ أثناء إنشاء الرتبة: ' . $e->getMessage())
-                ->withInput();
-        }
+        return $this->success('admin.roles.index', 'Role created.');
     }
 
-    /**
-     * عرض تفاصيل رتبة معينة
-     */
-    public function show($id)
+    public function show(Role $role): View
     {
-        if (!auth()->guard('admin')->user()->can('roles.view')) {
-            abort(403, 'غير مصرح لك بعرض الرتب');
-        }
-
-        $role = Role::with(['permissions', 'users' => function ($query) {
-            $query->orderBy('created_at', 'desc')->limit(10);
-        }])->findOrFail($id);
-
-        $permissionsByModule = $role->permissions->groupBy('module');
-
-        return view('Admin.roles.show', compact('role', 'permissionsByModule'));
+        return $this->view('admin.roles.show', compact('role'));
     }
 
-    /**
-     * عرض نموذج تعديل رتبة
-     */
-    public function edit($id)
+    public function edit(Role $role): View
     {
-        if (!auth()->guard('admin')->user()->can('roles.edit')) {
-            abort(403, 'غير مصرح لك بتعديل الرتب');
-        }
-
-        $role = Role::findOrFail($id);
-
-        // منع تعديل الرتب المحمية
-        if ($this->isProtectedRole($role)) {
-            return redirect()->route('admin.roles.index')
-                ->with('error', 'لا يمكن تعديل هذه الرتبة لأنها محمية');
-        }
-
-        $permissions = Permission::orderBy('module')->orderBy('name')->get();
-        $modules = Permission::distinct()->pluck('module')->filter()->values();
-        $selectedPermissions = $role->permissions->pluck('id')->toArray();
-
-        return view('Admin.roles.edit', compact('role', 'permissions', 'modules', 'selectedPermissions'));
+        $permissions = Permission::orderBy('name')->get();
+        return $this->view('admin.roles.edit', compact('role', 'permissions'));
     }
 
-    /**
-     * تحديث الرتبة
-     */
-    public function update(Request $request, $id)
+    public function update(Request $request, Role $role): RedirectResponse
     {
-        if (!auth()->guard('admin')->user()->can('roles.edit')) {
-            abort(403, 'غير مصرح لك بتعديل الرتب');
-        }
-
-        $role = Role::findOrFail($id);
-
-        // منع تعديل الرتب المحمية
-        if ($this->isProtectedRole($role)) {
-            return redirect()->route('admin.roles.index')
-                ->with('error', 'لا يمكن تعديل هذه الرتبة لأنها محمية');
-        }
-
-        $validator = Validator::make($request->all(), [
-            'display_name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:500',
-            'permissions' => 'nullable|array',
-            'permissions.*' => 'exists:permissions,id'
+        $data = $request->validate([
+            'name' => ['required', 'string', 'unique:roles,name,' . $role->id],
+            'permissions' => ['nullable', 'array'],
         ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
+        $role->update(['name' => $data['name']]);
+        $role->syncPermissions($data['permissions'] ?? []);
 
-        DB::beginTransaction();
-
-        try {
-            // تحديث الرتبة
-            $role->update([
-                'display_name' => $request->display_name,
-                'description' => $request->description,
-            ]);
-
-            // تحديث الصلاحيات
-            if ($request->has('permissions')) {
-                $permissions = Permission::whereIn('id', $request->permissions)->pluck('name')->toArray();
-                $role->syncPermissions($permissions);
-            } else {
-                $role->syncPermissions([]);
-            }
-
-            DB::commit();
-
-            return redirect()->route('admin.roles.index')
-                ->with('success', 'تم تحديث الرتبة بنجاح');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()
-                ->with('error', 'حدث خطأ أثناء تحديث الرتبة: ' . $e->getMessage())
-                ->withInput();
-        }
+        return $this->success('admin.roles.index', 'Role updated.');
     }
 
-    /**
-     * حذف رتبة
-     */
-    public function destroy($id)
+    public function destroy(Role $role): RedirectResponse
     {
-        if (!auth()->guard('admin')->user()->can('delete_roles')) {
-            abort(403, 'غير مصرح لك بحذف الرتب');
-        }
-
-        $role = Role::findOrFail($id);
-
-        // منع حذف الرتب المحمية
-        if ($this->isProtectedRole($role)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'لا يمكن حذف هذه الرتبة لأنها محمية'
-            ], 403);
-        }
-
-        // التحقق من وجود مستخدمين مرتبطين بالرتبة
-        if ($role->users()->count() > 0) {
-            return response()->json([
-                'success' => false,
-                'message' => 'لا يمكن حذف الرتبة لأنها مرتبطة بمستخدمين'
-            ], 400);
-        }
-
-        try {
-            $role->delete();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'تم حذف الرتبة بنجاح'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'حدث خطأ أثناء حذف الرتبة: ' . $e->getMessage()
-            ], 500);
-        }
+        $role->delete();
+        return $this->success('admin.roles.index', 'Role deleted.');
     }
 
-    /**
-     * عرض صفحة إدارة صلاحيات الرتبة
-     */
-    public function permissions($id)
+    public function permissions(Role $role): View
     {
-        if (!auth()->guard('admin')->user()->can('roles.edit')) {
-            abort(403, 'غير مصرح لك بتعديل صلاحيات الرتب');
-        }
-
-        $role = Role::findOrFail($id);
-
-        // منع تعديل الرتب المحمية
-        if ($this->isProtectedRole($role)) {
-            return redirect()->route('admin.roles.index')
-                ->with('error', 'لا يمكن تعديل صلاحيات هذه الرتبة لأنها محمية');
-        }
-
-        $permissions = Permission::orderBy('module')->orderBy('name')->get();
-        $modules = Permission::distinct()->pluck('module')->filter()->values();
-        $selectedPermissions = $role->permissions->pluck('id')->toArray();
-
-        return view('Admin.roles.permissions', compact('role', 'permissions', 'modules', 'selectedPermissions'));
+        $permissions = Permission::orderBy('name')->get();
+        return $this->view('admin.roles.permissions', compact('role', 'permissions'));
     }
 
-    /**
-     * مزامنة صلاحيات الرتبة
-     */
-    public function syncPermissions(Request $request, $id)
+    public function syncPermissions(Request $request, Role $role): RedirectResponse
     {
-        if (!auth()->guard('admin')->user()->can('roles.edit')) {
-            abort(403, 'غير مصرح لك بتعديل صلاحيات الرتب');
-        }
-
-        $role = Role::findOrFail($id);
-
-        // منع تعديل الرتب المحمية
-        if ($this->isProtectedRole($role)) {
-            return redirect()->back()
-                ->with('error', 'لا يمكن تعديل صلاحيات هذه الرتبة لأنها محمية');
-        }
-
-        $validator = Validator::make($request->all(), [
-            'permissions' => 'nullable|array',
-            'permissions.*' => 'exists:permissions,id'
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        try {
-            if ($request->has('permissions')) {
-                $permissions = Permission::whereIn('id', $request->permissions)->pluck('name')->toArray();
-                $role->syncPermissions($permissions);
-            } else {
-                $role->syncPermissions([]);
-            }
-
-            return redirect()->route('admin.roles.show', $role)
-                ->with('success', 'تم تحديث صلاحيات الرتبة بنجاح');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'حدث خطأ أثناء تحديث الصلاحيات: ' . $e->getMessage())
-                ->withInput();
-        }
+        $role->syncPermissions($request->input('permissions', []));
+        return back()->with('success', 'Permissions synced.');
     }
 
-    /**
-     * عرض صفحة تعيين الرتب للمستخدمين
-     */
-    public function assignIndex(Request $request)
+    public function assignIndex(): View
     {
-        // if (!auth()->guard('admin')->user()->can('roles.assign')) {
-        //     abort(403, 'غير مصرح لك بتعيين الرتب');
-        // }
-
-        $admins = Admin::with('roles')
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
-
         $roles = Role::orderBy('name')->get();
+        $admins = Admin::orderBy('name')->get();
 
-        return view('Admin.roles.assign', compact('admins', 'roles'));
+        return $this->view('admin.roles.assign', compact('roles', 'admins'));
     }
 
-    /**
-     * تعيين الرتب للمستخدمين
-     */
-    public function assignRoles(Request $request)
+    public function assignRoles(Request $request): RedirectResponse
     {
-        // if (!auth()->guard('admin')->user()->can('assign_roles')) {
-        //     abort(403, 'غير مصرح لك بتعيين الرتب');
-        // }
-
-        $validator = Validator::make($request->all(), [
-            'admin_id' => 'required|exists:admins,id',
-            'roles' => 'nullable|array',
-            'roles.*' => 'exists:roles,id'
+        $data = $request->validate([
+            'admin_id' => ['required', 'integer', 'exists:admins,id'],
+            'roles' => ['nullable', 'array'],
         ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
+        $admin = Admin::findOrFail($data['admin_id']);
+        $admin->syncRoles($data['roles'] ?? []);
 
-        try {
-            $admin = Admin::findOrFail($request->admin_id);
-
-            // منع إزالة دور المشرف الرئيسي إذا كان المستخدم هو المشرف الرئيسي الوحيد
-            if ($admin->hasRole('super_admin')) {
-                $superAdminCount = Admin::role('super_admin')->count();
-
-                if ($superAdminCount <= 1 && !in_array('super_admin', $request->roles ?? [])) {
-                    return redirect()->back()
-                        ->with('error', 'لا يمكن إزالة دور المشرف الرئيسي لأنه المشرف الوحيد في النظام');
-                }
-            }
-
-            if ($request->has('roles')) {
-                $roleNames = Role::whereIn('id', $request->roles)->pluck('name')->toArray();
-                $admin->syncRoles($roleNames);
-            } else {
-                $admin->syncRoles([]);
-            }
-
-            return redirect()->route('admin.roles.assign.index')
-                ->with('success', 'تم تحديث رتب المستخدم بنجاح');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'حدث خطأ أثناء تحديث الرتب: ' . $e->getMessage())
-                ->withInput();
-        }
-    }
-
-    /**
-     * التحقق مما إذا كانت الرتبة محمية
-     */
-    private function isProtectedRole(Role $role): bool
-    {
-        $protectedRoles = ['super_admin', 'admin'];
-        return in_array($role->name, $protectedRoles);
+        return back()->with('success', 'Roles assigned.');
     }
 }

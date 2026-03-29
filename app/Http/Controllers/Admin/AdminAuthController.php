@@ -2,141 +2,91 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Carbon\Carbon;
 use App\Models\Admin;
-use Illuminate\Support\Str;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use App\Mail\Website\OtpMail;
-use App\Models\OtpVerification;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Auth\Events\PasswordReset;
-use App\Http\Requests\Admin\AdminLoginRequest;
-use App\Http\Requests\Admin\Auth\SendOtpRequest;
+use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class AdminAuthController extends Controller
 {
-  public function __construct()
-  {
-    // $this->middleware(function ($request, $next) {
-
-    //   if (!auth('admin')->check()) {
-    //     return redirect()->route('admin.login.page');
-    //   }
-
-    //   return $next($request);
-    // });
-  }
-
-  // public function register()
-  // {
-  //   return $this->adminAuthInterface->register();
-  // }
-
-  public function loginPage()
-  {
-    if (auth('admin')->check()) {
-      return redirect('/');
-    }
-    return view('Admin.auth.login');
-  }
-
-  public function login(AdminLoginRequest $request)
-  {
-    $credentials = $request->only('email', 'password');
-
-    if (Auth::guard('admin')->attempt($credentials)) {
-      $request->session()->regenerate();
-      return redirect()->intended('/');
+    public function home(): View
+    {
+        return $this->view('admin.dashboard');
     }
 
-    return back()->withErrors(['email' => 'يرجى إدخال بريد إلكتروني أو كلمة مرور صحيحة']);
-  }
-
-  public function logout(Request $request)
-  {
-    Auth::logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
-    return redirect()->route('admin.login.page');
-  }
-
-  public function showForgotPasswordForm()
-  {
-    return view('Admin.auth.forgot-password');
-  }
-
-  public function showResetPasswordForm($token, Request $request)
-  {
-    return view('Admin.auth.reset-password', ['token' => $token, 'email' => $request->email]);
-  }
-
-
-
-
-  public function sendResetOtp(SendOtpRequest $request)
-  {
-    try {
-
-      $email = $request->email;
-
-
-      OtpVerification::where('email', $email)->delete();
-
-      $otp = (string) random_int(100000, 999999);
-
-      OtpVerification::create([
-        'email'      => $email,
-        'otp'        => Hash::make($otp),
-        'expires_at' => Carbon::now()->addMinutes(5),
-      ]);
-
-      Mail::to($email)->send(new OtpMail($otp));
-
-      return back()->with('status', 'تم إرسال رمز التحقق (OTP) إلى بريدك الإلكتروني بنجاح ✔');
-    } catch (\Exception $e) {
-      return back()->withErrors([
-        'email' => 'حدث خطأ أثناء إرسال OTP: ' . $e->getMessage()
-      ]);
-    }
-  }
-
-  public function home()
-  {
-    return view('Admin.index');
-  }
-
-  public function resetPassword(Request $request)
-  {
-
-    $request->validate([
-      'token' => 'required',
-      'email' => 'required|email|exists:admins,email',
-      'password' => 'required|min:8|confirmed',
-    ]);
-
-    $reset = DB::table('password_resets')
-      ->where('email', $request->email)
-      ->where('token', $request->token)
-      ->first();
-
-    if (!$reset) {
-      return back()->withErrors(['email' => 'الرمز غير صالح أو منتهي']);
+    public function loginPage(): View
+    {
+        return $this->view('admin.auth.login');
     }
 
-    // تحديث الباسورد
-    $admin = Admin::where('email', $request->email)->first();
-    $admin->password = $request->password;
-    $admin->save();
-    // امسح التوكن بعد الاستخدام
-    DB::table('password_resets')->where('email', $request->email)->delete();
+    public function login(Request $request): RedirectResponse
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+        ]);
 
-    return redirect()->route('admin.login')->with('status', 'تم تغيير كلمة المرور بنجاح ✅');
-  }
+        if (! Auth::guard('admin')->attempt($credentials, $request->boolean('remember'))) {
+            return back()->withErrors(['email' => 'Invalid credentials.'])->withInput();
+        }
+
+        $request->session()->regenerate();
+
+        return redirect()->route('admin.index')->with('success', 'Welcome back.');
+    }
+
+    public function logout(Request $request): RedirectResponse
+    {
+        Auth::guard('admin')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('admin.login.page')->with('success', 'Logged out successfully.');
+    }
+
+    public function showForgotPasswordForm(): View
+    {
+        return $this->view('admin.auth.forgot-password');
+    }
+
+    public function sendResetOtp(Request $request): RedirectResponse
+    {
+        $data = $request->validate(['email' => ['required', 'email']]);
+        $admin = Admin::where('email', $data['email'])->first();
+
+        if (! $admin) {
+            return back()->withErrors(['email' => 'Admin not found.']);
+        }
+
+        $token = Str::random(64);
+        $admin->update(['remember_token' => Hash::make($token)]);
+
+        return redirect()->route('admin.password.reset', ['token' => $token, 'email' => $admin->email])
+            ->with('success', 'Reset token created. Connect mail sending here.');
+    }
+
+    public function showResetPasswordForm(string $token): View
+    {
+        return $this->view('admin.auth.reset-password', compact('token'));
+    }
+
+    public function resetPassword(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'token' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'confirmed', 'min:8'],
+        ]);
+
+        $admin = Admin::where('email', $data['email'])->firstOrFail();
+        $admin->update([
+            'password' => Hash::make($data['password']),
+            'remember_token' => Str::random(60),
+        ]);
+
+        return redirect()->route('admin.login.page')->with('success', 'Password reset successfully.');
+    }
 }

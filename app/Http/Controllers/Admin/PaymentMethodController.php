@@ -2,146 +2,81 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use App\Models\PaymentMethod;
-use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class PaymentMethodController extends Controller
 {
-    public function index()
+    public function index(Request $request): View
     {
-        $paymentMethods = PaymentMethod::latest()->paginate(10);
-        return view('Admin.payment-methods.index', compact('paymentMethods'));
+        $payment_methods = PaymentMethod::query()
+            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%' . $request->string('q') . '%'))
+            ->latest()
+            ->paginate($this->perPage($request));
+
+        return $this->view('admin.payment-methods.index', ['payment_methods' => $payment_methods]);
     }
 
-    public function create()
+    public function create(): View
     {
-        return view('Admin.payment-methods.create');
+        return $this->view('admin.payment-methods.create');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'key' => 'required|string|max:255|unique:payment_methods,key',
-            'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'is_active' => 'boolean',
-            'is_payment' => 'boolean',
+        $data = $request->validate([
+            'name' => ['nullable', 'string'],
+            'code' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
+            'image' => ['nullable', 'string'],
+            'is_active' => ['nullable', 'boolean'],
+            'sort_order' => ['nullable', 'integer'],
         ]);
 
-        // معالجة رفع الصورة
-        if ($request->hasFile('icon')) {
-            $fileName = time() . '_' . $request->icon->getClientOriginalName();
-            $request->icon->storeAs('payment-methods', $fileName, 'public');
-            $validated['icon'] = $fileName;
-        }
+        PaymentMethod::create($data);
 
-        // تعيين القيم الافتراضية
-        $validated['is_active'] = $request->has('is_active');
-        $validated['is_payment'] = $request->has('is_payment');
-
-        PaymentMethod::create($validated);
-
-        return redirect()->route('admin.payment-methods.index')
-            ->with('success', 'تم إضافة وسيلة الدفع بنجاح.');
+        return $this->success('admin.payment-methods.index', 'PaymentMethod created.');
     }
 
-    public function show(PaymentMethod $paymentMethod)
+    public function show(PaymentMethod $paymentMethod): View
     {
-        return view('Admin.payment-methods.show', compact('paymentMethod'));
+        return $this->view('admin.payment-methods.show', compact('paymentMethod'));
     }
 
-    public function edit(PaymentMethod $paymentMethod)
+    public function edit(PaymentMethod $paymentMethod): View
     {
-        return view('Admin.payment-methods.edit', compact('paymentMethod'));
+        return $this->view('admin.payment-methods.edit', compact('paymentMethod'));
     }
 
-
-    /**
-     * Update the specified payment method in storage.
-     */
-    public function update(Request $request, PaymentMethod $paymentMethod)
+    public function update(Request $request, PaymentMethod $paymentMethod): RedirectResponse
     {
-        // التحقق من صحة البيانات
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'key' => 'required|string|max:255|unique:payment_methods,key,' . $paymentMethod->id,
-            'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
-            'is_active' => 'boolean',
-            'is_payment' => 'boolean',
+        $data = $request->validate([
+            'name' => ['nullable', 'string'],
+            'code' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
+            'image' => ['nullable', 'string'],
+            'is_active' => ['nullable', 'boolean'],
+            'sort_order' => ['nullable', 'integer'],
         ]);
 
-        try {
-            // معالجة رفع الصورة الجديدة
-            if ($request->hasFile('icon')) {
-                // حذف الصورة القديمة إذا كانت موجودة
-                if ($paymentMethod->icon && Storage::disk('public')->exists('payment-methods/' . $paymentMethod->icon)) {
-                    Storage::disk('public')->delete('payment-methods/' . $paymentMethod->icon);
-                }
+        $paymentMethod->update($data);
 
-                // رفع الصورة الجديدة
-                $fileName = time() . '_' . uniqid() . '.' . $request->icon->getClientOriginalExtension();
-                $request->icon->storeAs('payment-methods', $fileName, 'public');
-                $validated['icon'] = $fileName;
-            } else {
-                // الاحتفاظ بالصورة القديمة إذا لم يتم رفع صورة جديدة
-                unset($validated['icon']);
-            }
-
-            // تحديث وسيلة الدفع
-            $paymentMethod->update($validated);
-
-            return redirect()->route('admin.payment-methods.index')
-                ->with('success', 'تم تحديث وسيلة الدفع بنجاح.');
-        } catch (\Exception $e) {
-            Log::error('Error updating payment method: ' . $e->getMessage());
-
-            return back()
-                ->withInput()
-                ->with('error', 'حدث خطأ أثناء تحديث وسيلة الدفع.');
-        }
+        return $this->success('admin.payment-methods.index', 'PaymentMethod updated.');
     }
 
-
-    public function destroy(PaymentMethod $paymentMethod)
+    public function destroy(PaymentMethod $paymentMethod): RedirectResponse
     {
         $paymentMethod->delete();
 
-        return redirect()->route('admin.payment-methods.index')
-            ->with('success', 'تم حذف وسيلة الدفع بنجاح.');
+        return $this->success('admin.payment-methods.index', 'PaymentMethod deleted.');
     }
 
-    // public function toggleStatus(PaymentMethod $paymentMethod)
-    // {
-    //     $paymentMethod->update(['is_active' => !$paymentMethod->is_active]);
-
-    //     return redirect()->back()->with('success', 'تم تغيير الحالة بنجاح');
-    // }
-    /**
-     * Toggle payment method status (active/inactive)
-     */
-    public function toggleStatus(PaymentMethod $paymentMethod)
+    public function toggleStatus(PaymentMethod $paymentMethod): RedirectResponse
     {
-        try {
-            $paymentMethod->update([
-                'is_active' => !$paymentMethod->is_active
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'تم تغيير الحالة بنجاح',
-                'is_active' => $paymentMethod->is_active
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error toggling payment method status: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'حدث خطأ أثناء تغيير الحالة'
-            ], 500);
-        }
+        $paymentMethod->update(['is_active' => ! (bool) $paymentMethod->is_active]);
+        return back()->with('success', 'Payment method status updated.');
     }
+
 }
