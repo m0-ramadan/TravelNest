@@ -1,4 +1,4 @@
-@extends('Admin.auth.layouts.master')
+@extends('admin.auth.layouts.master')
 
 @section('styles')
     <!-- إضافة دعم RTL للـ Bootstrap إذا لم يكن موجوداً بالفعل -->

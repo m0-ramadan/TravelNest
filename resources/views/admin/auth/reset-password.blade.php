@@ -1,4 +1,4 @@
-@extends('Admin.auth.layouts.master')
+@extends('admin.auth.layouts.master')
 @section('content')
     <form class="theme-form login-form" action="{{ route('admin.password.update') }}" method="post">
         @csrf
