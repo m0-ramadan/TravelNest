@@ -306,7 +306,7 @@ if (!function_exists('greeting')) {
         }
     }
     if (!function_exists('adminTrans')) {
-        function adminTrans($value, array $preferred = ['Ar', 'En'])
+        function adminTrans($value, array $preferred = ['Ar', 'en'])
         {
             if (!is_array($value)) {
                 return (string) ($value ?? '');
