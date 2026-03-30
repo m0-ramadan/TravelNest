@@ -1,6 +1,6 @@
 @php
     if (!function_exists('adminTrans')) {
-        function adminTrans($value, array $preferred = ['ar', 'en'])
+        function adminTrans($value, array $preferred = ['Ar', 'En'])
         {
             if (!is_array($value)) {
                 return (string) ($value ?? '');
@@ -438,10 +438,10 @@
             });
 
             const metaDescription = await postAi(
-            '{{ route('admin.articles.ai.generate-meta-description') }}', {
-                title: document.getElementById('title').value,
-                content: getContent()
-            });
+                '{{ route('admin.articles.ai.generate-meta-description') }}', {
+                    title: document.getElementById('title').value,
+                    content: getContent()
+                });
 
             if (metaTitle?.meta_title) document.getElementById('seo_title').value = metaTitle.meta_title;
             if (metaDescription?.meta_description) document.getElementById('seo_description').value =
