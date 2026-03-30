@@ -35,13 +35,32 @@ class DestinationController extends Controller
 
     public function create(): View
     {
-        $countries = Country::with('cities')
-            ->where('is_active', true)
+        $countries = Country::with(['cities' => function ($q) {
+            $q->select('id', 'country_id', 'name')->orderBy('id');
+        }])
+            ->select('id', 'name')
+            ->orderBy('id')
+            ->get()
+            ->map(function ($country) {
+                return [
+                    'id' => $country->id,
+                    'name' => adminTrans($country->name),
+                    'cities' => $country->cities->map(function ($city) {
+                        return [
+                            'id' => $city->id,
+                            'name' => adminTrans($city->name),
+                        ];
+                    })->values()->toArray(),
+                ];
+            })
+            ->values();
+
+        $parents = Destination::where('is_active', true)
+            ->select('id', 'name')
+            ->orderBy('id')
             ->get();
 
-        $parents = Destination::where('is_active', true)->get();
-
-        return $this->view('admin.destinations.create', compact('countries', 'parents'));
+        return view('admin.destinations.create', compact('countries', 'parents'));
     }
 
     public function store(Request $request): RedirectResponse
