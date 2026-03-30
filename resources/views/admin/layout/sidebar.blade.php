@@ -72,11 +72,11 @@
                     </a>
                 </li>
 
-                <li class="menu-item {{ request()->routeIs('admin.regions.*') ? 'active' : '' }}">
+                {{-- <li class="menu-item {{ request()->routeIs('admin.regions.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.regions.index') }}" class="menu-link">
                         <div>المناطق</div>
                     </a>
-                </li>
+                </li> --}}
 
                 <li class="menu-item {{ request()->routeIs('admin.destinations.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.destinations.index') }}" class="menu-link">
@@ -200,11 +200,11 @@
                     </a>
                 </li>
 
-                <li class="menu-item {{ request()->routeIs('admin.articles.statistics') ? 'active' : '' }}">
+                {{-- <li class="menu-item {{ request()->routeIs('admin.articles.statistics') ? 'active' : '' }}">
                     <a href="{{ route('admin.articles.statistics') }}" class="menu-link">
                         <div>إحصائيات المقالات</div>
                     </a>
-                </li>
+                </li> --}}
 
                 <li class="menu-item {{ request()->routeIs('admin.static-pages.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.static-pages.index') }}" class="menu-link">

@@ -3,16 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Faq;
+use App\Traits\HandlesTranslatedFields;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class FaqController extends Controller
 {
+    use HandlesTranslatedFields;
+
     public function index(Request $request): View
     {
         $faqs = Faq::query()
-            ->when($request->filled('q'), fn ($q) => $q->where('id', 'like', '%' . $request->string('q') . '%'))
+            ->when($request->filled('q'), function ($query) use ($request) {
+                $search = $request->string('q');
+                $query->where('id', 'like', '%' . $search . '%')
+                    ->orWhere(function ($q) use ($search) {
+                        $this->applyTranslatedSearch($q, ['question', 'answer'], $search);
+                    });
+            })
             ->latest()
             ->paginate($this->perPage($request));
 
@@ -35,6 +44,8 @@ class FaqController extends Controller
             'is_active' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer'],
         ]);
+
+        $data = $this->translateModelFields($data, ['question', 'answer']);
 
         Faq::create($data);
 
@@ -63,6 +74,8 @@ class FaqController extends Controller
             'sort_order' => ['nullable', 'integer'],
         ]);
 
+        $data = $this->translateModelFields($data, ['question', 'answer']);
+
         $faq->update($data);
 
         return $this->success('admin.faqs.index', 'Faq updated.');
@@ -74,5 +87,4 @@ class FaqController extends Controller
 
         return $this->success('admin.faqs.index', 'Faq deleted.');
     }
-
 }

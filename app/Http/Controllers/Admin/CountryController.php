@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Country;
+use App\Traits\HandlesTranslatedFields;
 use App\Traits\UploadFileTrait;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -10,23 +11,23 @@ use Illuminate\View\View;
 
 class CountryController extends Controller
 {
-    use UploadFileTrait;
+    use UploadFileTrait, HandlesTranslatedFields;
 
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $countries = Country::query()
             ->when($request->filled('q'), function ($query) use ($request) {
-                $query->where('name', 'like', '%' . $request->q . '%');
+                $this->applyTranslatedSearch($query, ['name'], $request->string('q'));
             })
             ->latest()
             ->paginate($this->perPage($request));
 
         return $this->view('admin.countries.index', [
-            'countries' => $countries
+            'countries' => $countries,
         ]);
     }
 
-    public function create()
+    public function create(): View
     {
         return $this->view('admin.countries.create');
     }
@@ -34,14 +35,16 @@ class CountryController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'code'        => ['nullable', 'string'],
-            'name'        => ['nullable', 'string'],
-            'slug'        => ['nullable', 'string'],
-            'flag'        => ['nullable', 'image'],
-            'is_active'   => ['nullable', 'boolean'],
-            'sort_order'  => ['nullable', 'integer'],
+            'code' => ['nullable', 'string'],
+            'name' => ['nullable', 'string'],
+            'slug' => ['nullable', 'string'],
+            'flag' => ['nullable', 'image'],
+            'is_active' => ['nullable', 'boolean'],
+            'sort_order' => ['nullable', 'integer'],
             'is_featured' => ['nullable', 'boolean'],
         ]);
+
+        $data = $this->translateModelFields($data, ['name']);
 
         if ($request->hasFile('flag')) {
             $data['flag'] = $this->uploadImage('countries', $request->file('flag'));
@@ -55,12 +58,12 @@ class CountryController extends Controller
         return $this->success('admin.countries.index', 'Country created.');
     }
 
-    public function show(Country $country)
+    public function show(Country $country): View
     {
         return $this->view('admin.countries.show', compact('country'));
     }
 
-    public function edit(Country $country)
+    public function edit(Country $country): View
     {
         return $this->view('admin.countries.edit', compact('country'));
     }
@@ -68,14 +71,16 @@ class CountryController extends Controller
     public function update(Request $request, Country $country): RedirectResponse
     {
         $data = $request->validate([
-            'code'        => ['nullable', 'string'],
-            'name'        => ['nullable', 'string'],
-            'slug'        => ['nullable', 'string'],
-            'flag'        => ['nullable', 'image'],
-            'is_active'   => ['nullable', 'boolean'],
-            'sort_order'  => ['nullable', 'integer'],
+            'code' => ['nullable', 'string'],
+            'name' => ['nullable', 'string'],
+            'slug' => ['nullable', 'string'],
+            'flag' => ['nullable', 'image'],
+            'is_active' => ['nullable', 'boolean'],
+            'sort_order' => ['nullable', 'integer'],
             'is_featured' => ['nullable', 'boolean'],
         ]);
+
+        $data = $this->translateModelFields($data, ['name']);
 
         if ($request->hasFile('flag')) {
             $data['flag'] = $this->uploadImage('countries', $request->file('flag'));

@@ -77,7 +77,7 @@
         <div class="profile-card">
             <div class="profile-header d-flex justify-content-between align-items-center">
                 <div>
-                    <h4 class="mb-1">{{ $menu->name ?? 'بدون اسم' }}</h4>
+                    <h4 class="mb-1">{{ adminTrans($menu->name) ?: 'بدون اسم' }}</h4>
                     <small class="opacity-75">{{ $menu->slug ?? '-' }}</small>
                 </div>
                 <div class="d-flex gap-2">
@@ -94,7 +94,7 @@
                     <div class="col-md-4">
                         <div class="info-box">
                             <div class="info-label">اسم القائمة</div>
-                            <div class="info-value">{{ $menu->name ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans($menu->name) ?: '-' }}</div>
                         </div>
                     </div>
 
@@ -136,7 +136,7 @@
                     <div class="col-12">
                         <div class="info-box">
                             <div class="info-label">الوصف</div>
-                            <div class="info-value">{{ $menu->description ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans($menu->description) ?: '-' }}</div>
                         </div>
                     </div>
 
@@ -145,7 +145,7 @@
 
                         @forelse($menu->items ?? [] as $item)
                             <div class="item-list">
-                                <div><strong>العنوان:</strong> {{ $item->title ?? '-' }}</div>
+                                <div><strong>العنوان:</strong> {{ adminTrans($item->title) ?: '-' }}</div>
                                 <div><strong>الرابط:</strong> {{ $item->url ?? '-' }}</div>
                                 <div><strong>الترتيب:</strong> {{ $item->sort_order ?? 0 }}</div>
                             </div>

@@ -107,11 +107,11 @@
             <div class="profile-header d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div class="d-flex align-items-center gap-3">
                     @if ($country->flag)
-                        <img src="{{ asset($country->flag) }}" alt="{{ $country->name }}" class="mini-flag">
+                        <img src="{{ asset($country->flag) }}" alt="{{ adminTrans($country->name) }}" class="mini-flag">
                     @endif
 
                     <div>
-                        <h4 class="mb-1">{{ $country->name ?? 'بدون اسم' }}</h4>
+                        <h4 class="mb-1">{{ $country->display_name ?? 'بدون اسم' }}</h4>
                         <small class="opacity-75">{{ $country->code ?? '-' }}</small>
                     </div>
                 </div>
@@ -126,7 +126,8 @@
                 <div class="row mb-4">
                     <div class="col-12 text-center">
                         @if ($country->flag)
-                            <img src="{{ asset($country->flag) }}" alt="{{ $country->name }}" class="country-flag">
+                            <img src="{{ asset($country->flag) }}" alt="{{ adminTrans($country->name) }}"
+                                class="country-flag">
                         @else
                             <div class="no-image">لا توجد صورة</div>
                         @endif
@@ -172,7 +173,7 @@
                     <div class="col-12">
                         <div class="info-box">
                             <div class="info-label">الوصف</div>
-                            <div class="info-value">{{ $country->description ?: 'لا يوجد وصف' }}</div>
+                            <div class="info-value">{{ adminTrans($country->description) ?: 'لا يوجد وصف' }}</div>
                         </div>
                     </div>
                 </div>

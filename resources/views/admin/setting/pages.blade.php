@@ -68,7 +68,7 @@
                                 @foreach ($pages ?? collect() as $page)
                                     <option value="{{ $page->id }}"
                                         {{ old('about_page_id', $settings['about_page_id'] ?? null) == $page->id ? 'selected' : '' }}>
-                                        {{ $page->title }}
+                                        {{ adminTrans($page->title) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -81,7 +81,7 @@
                                 @foreach ($pages ?? collect() as $page)
                                     <option value="{{ $page->id }}"
                                         {{ old('terms_page_id', $settings['terms_page_id'] ?? null) == $page->id ? 'selected' : '' }}>
-                                        {{ $page->title }}
+                                        {{ adminTrans($page->title) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -94,7 +94,7 @@
                                 @foreach ($pages ?? collect() as $page)
                                     <option value="{{ $page->id }}"
                                         {{ old('privacy_page_id', $settings['privacy_page_id'] ?? null) == $page->id ? 'selected' : '' }}>
-                                        {{ $page->title }}
+                                        {{ adminTrans($page->title) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -107,7 +107,7 @@
                                 @foreach ($pages ?? collect() as $page)
                                     <option value="{{ $page->id }}"
                                         {{ old('contact_page_id', $settings['contact_page_id'] ?? null) == $page->id ? 'selected' : '' }}>
-                                        {{ $page->title }}
+                                        {{ adminTrans($page->title) }}
                                     </option>
                                 @endforeach
                             </select>

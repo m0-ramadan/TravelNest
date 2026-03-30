@@ -93,7 +93,7 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">اسم الباقة</label>
                             <input type="text" name="name" class="form-control"
-                                value="{{ old('name', $package->name) }}">
+                                value="{{ old('name', adminTrans($package->name)) }}">
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -109,7 +109,7 @@
                                 @foreach ($categories ?? collect() as $category)
                                     <option value="{{ $category->id }}"
                                         {{ old('category_id', $package->category_id) == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
+                                        {{ adminTrans($category->name) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -122,7 +122,7 @@
                                 @foreach ($destinations ?? collect() as $destination)
                                     <option value="{{ $destination->id }}"
                                         {{ old('destination_id', $package->destination_id) == $destination->id ? 'selected' : '' }}>
-                                        {{ $destination->name }}
+                                        {{ adminTrans($destination->name) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -161,12 +161,12 @@
 
                         <div class="col-md-12 mb-3">
                             <label class="form-label">وصف مختصر</label>
-                            <textarea name="short_description" class="form-control" rows="3">{{ old('short_description', $package->short_description) }}</textarea>
+                            <textarea name="short_description" class="form-control" rows="3">{{ old('short_description', adminTrans($package->short_description)) }}</textarea>
                         </div>
 
                         <div class="col-md-12 mb-3">
                             <label class="form-label">الوصف الكامل</label>
-                            <textarea name="description" class="form-control" rows="6">{{ old('description', $package->description) }}</textarea>
+                            <textarea name="description" class="form-control" rows="6">{{ old('description', adminTrans($package->description)) }}</textarea>
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -196,12 +196,12 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Meta Title</label>
                             <input type="text" name="seo_title" class="form-control"
-                                value="{{ old('seo_title', $package->seo_title) }}">
+                                value="{{ old('seo_title', adminTrans($package->seo_title)) }}">
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Meta Description</label>
-                            <textarea name="seo_description" class="form-control" rows="3">{{ old('seo_description', $package->seo_description) }}</textarea>
+                            <textarea name="seo_description" class="form-control" rows="3">{{ old('seo_description', adminTrans($package->seo_description)) }}</textarea>
                         </div>
                     </div>
 

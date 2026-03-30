@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Page;
 use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,7 +13,8 @@ class SettingController extends Controller
     public function pages(): View
     {
         $settings = Setting::where('group', 'pages')->pluck('value', 'key');
-        return $this->view('admin.setting.pages', compact('settings'));
+        $pages = Page::all();
+        return $this->view('admin.setting.pages', compact('settings', 'pages'));
     }
 
     public function edit(): View

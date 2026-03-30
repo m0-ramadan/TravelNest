@@ -108,7 +108,7 @@
                                 @foreach ($languages ?? collect() as $language)
                                     <option value="{{ $language->id }}"
                                         {{ old('language_id') == $language->id ? 'selected' : '' }}>
-                                        {{ $language->name }}
+                                        {{ $language->native_name ?? $language->name }}
                                     </option>
                                 @endforeach
                             </select>

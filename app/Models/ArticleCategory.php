@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasTranslatableAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ArticleCategory extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslatableAttributes;
 
     protected $fillable = [
         'name',
@@ -18,36 +21,38 @@ class ArticleCategory extends Model
         'meta_description',
         'parent_id',
         'order',
-        'is_active'
+        'is_active',
     ];
 
     protected $casts = [
+        'name' => 'array',
+        'description' => 'array',
+        'meta_title' => 'array',
+        'meta_description' => 'array',
         'is_active' => 'boolean',
-        'order' => 'integer'
+        'order' => 'integer',
     ];
 
-    // العلاقات
-    public function parent()
+    public function parent(): BelongsTo
     {
-        return $this->belongsTo(ArticleCategory::class, 'parent_id');
+        return $this->belongsTo(self::class, 'parent_id');
     }
 
-    public function children()
+    public function children(): HasMany
     {
-        return $this->hasMany(ArticleCategory::class, 'parent_id')->orderBy('order');
+        return $this->hasMany(self::class, 'parent_id')->orderBy('order');
     }
 
-    public function articles()
+    public function articles(): HasMany
     {
         return $this->hasMany(Article::class, 'category_id');
     }
 
-    public function activeArticles()
+    public function activeArticles(): HasMany
     {
         return $this->hasMany(Article::class, 'category_id')->where('is_active', true);
     }
 
-    // Scope
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -56,5 +61,10 @@ class ArticleCategory extends Model
     public function scopeMainCategories($query)
     {
         return $query->whereNull('parent_id');
+    }
+
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->translatedValue('name');
     }
 }

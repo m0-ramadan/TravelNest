@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Language;
+use App\Services\TranslatableContentSyncService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -12,7 +13,15 @@ class LanguageController extends Controller
     public function index(Request $request): View
     {
         $languages = Language::query()
-            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%' . $request->string('q') . '%'))
+            ->when($request->filled('q'), function ($query) use ($request) {
+                $search = $request->string('q');
+
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('native_name', 'like', '%' . $search . '%')
+                        ->orWhere('code', 'like', '%' . $search . '%');
+                });
+            })
             ->latest()
             ->paginate($this->perPage($request));
 
@@ -24,18 +33,33 @@ class LanguageController extends Controller
         return $this->view('admin.languages.create');
     }
 
-    public function store(Request $request): RedirectResponse
-    {
+    public function store(
+        Request $request,
+        TranslatableContentSyncService $translatableContentSyncService
+    ): RedirectResponse {
         $data = $request->validate([
-            'code' => ['nullable', 'string'],
-            'name' => ['nullable', 'string'],
-            'native_name' => ['nullable', 'string'],
+            'code' => ['required', 'string', 'max:10', 'unique:languages,code'],
+            'name' => ['required', 'string', 'max:255'],
+            'native_name' => ['nullable', 'string', 'max:255'],
             'is_default' => ['nullable', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer'],
         ]);
 
-        Language::create($data);
+        $data['is_default'] = $request->boolean('is_default');
+        $data['is_active'] = $request->boolean('is_active');
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+
+        if ($data['is_default']) {
+            Language::query()->update(['is_default' => false]);
+            $data['is_active'] = true;
+        }
+
+        $language = Language::create($data);
+
+        if ($language->is_active) {
+            $translatableContentSyncService->syncNewLanguage($language);
+        }
 
         return $this->success('admin.languages.index', 'Language created.');
     }
@@ -53,21 +77,41 @@ class LanguageController extends Controller
     public function update(Request $request, Language $language): RedirectResponse
     {
         $data = $request->validate([
-            'code' => ['nullable', 'string'],
-            'name' => ['nullable', 'string'],
-            'native_name' => ['nullable', 'string'],
+            'code' => ['required', 'string', 'max:10', 'unique:languages,code,' . $language->id],
+            'name' => ['required', 'string', 'max:255'],
+            'native_name' => ['nullable', 'string', 'max:255'],
             'is_default' => ['nullable', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer'],
         ]);
+
+        $data['is_default'] = $request->boolean('is_default');
+        $data['is_active'] = $request->boolean('is_active');
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+
+        if ($data['is_default']) {
+            Language::query()
+                ->where('id', '!=', $language->id)
+                ->update(['is_default' => false]);
+
+            $data['is_active'] = true;
+        }
 
         $language->update($data);
 
         return $this->success('admin.languages.index', 'Language updated.');
     }
 
-    public function destroy(Language $language): RedirectResponse
-    {
+    public function destroy(
+        Language $language,
+        TranslatableContentSyncService $translatableContentSyncService
+    ): RedirectResponse {
+        if ($language->is_default) {
+            return back()->with('error', 'Default language cannot be deleted.');
+        }
+
+        $translatableContentSyncService->removeLanguage($language->code);
+
         $language->delete();
 
         return $this->success('admin.languages.index', 'Language deleted.');
@@ -75,21 +119,43 @@ class LanguageController extends Controller
 
     public function toggle(Language $language): RedirectResponse
     {
-        $language->update(['is_active' => ! (bool) $language->is_active]);
+        if ($language->is_default) {
+            $language->update(['is_active' => true]);
+
+            return back()->with('success', 'Default language must stay active.');
+        }
+
+        $language->update([
+            'is_active' => !(bool) $language->is_active
+        ]);
+
         return back()->with('success', 'Language status updated.');
     }
 
     public function setDefault(Language $language): RedirectResponse
     {
         Language::query()->update(['is_default' => false]);
-        $language->update(['is_default' => true, 'is_active' => true]);
+
+        $language->update([
+            'is_default' => true,
+            'is_active' => true
+        ]);
+
         return back()->with('success', 'Default language changed.');
     }
 
     public function toggleAll(Request $request): RedirectResponse
     {
-        Language::query()->update(['is_active' => (bool) $request->boolean('status', true)]);
+        $status = (bool) $request->boolean('status', true);
+
+        Language::query()
+            ->where('is_default', false)
+            ->update(['is_active' => $status]);
+
+        Language::query()
+            ->where('is_default', true)
+            ->update(['is_active' => true]);
+
         return back()->with('success', 'All languages updated.');
     }
-
 }

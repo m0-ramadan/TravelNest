@@ -106,6 +106,7 @@ class SettingsController extends Controller
         return back()->with('success', 'Cache cleared.');
     }
 
+
     public function toggleMaintenance(): RedirectResponse
     {
         if (app()->isDownForMaintenance()) {
@@ -116,7 +117,6 @@ class SettingsController extends Controller
         Artisan::call('down');
         return back()->with('success', 'Maintenance enabled.');
     }
-
     protected function saveGroup(string $group, Request $request): RedirectResponse
     {
         foreach ($request->except(['_token', '_method']) as $key => $value) {

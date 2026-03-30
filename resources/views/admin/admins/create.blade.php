@@ -100,7 +100,8 @@
                             <select name="role_id" class="form-select">
                                 <option value="">اختر الدور</option>
                                 @foreach ($roles ?? collect() as $role)
-                                    <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
+                                    <option value="{{ $role->name }}"
+                                        {{ old('role_id') == $role->name ? 'selected' : '' }}>
                                         {{ $role->name }}
                                     </option>
                                 @endforeach

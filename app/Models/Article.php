@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasTranslatableAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Article extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslatableAttributes;
 
     protected $fillable = [
         'title',
@@ -26,171 +29,94 @@ class Article extends Model
         'is_featured',
         'views_count',
         'reading_time',
-        'published_at'
+        'published_at',
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
-        'is_featured' => 'boolean',
-        'published_at' => 'datetime',
         'title' => 'array',
         'content' => 'array',
         'excerpt' => 'array',
         'meta_title' => 'array',
         'meta_description' => 'array',
         'meta_keywords' => 'array',
+        'is_active' => 'boolean',
+        'is_featured' => 'boolean',
+        'views_count' => 'integer',
+        'reading_time' => 'integer',
+        'published_at' => 'datetime',
     ];
 
-    // Accessor للحصول على العنوان حسب اللغة
-    protected function title(): Attribute
+    public function getDisplayTitleAttribute(): string
     {
-        return Attribute::make(
-            get: function ($value) {
-                $data = json_decode($value, true) ?? [];
-                $lang = app()->getLocale();
-                return $data[$lang] ?? $data['ar'] ?? '';
-            }
-        );
+        return $this->translatedValue('title');
     }
 
-    // Accessor للحصول على المحتوى حسب اللغة
-    protected function content(): Attribute
+    public function getDisplayExcerptAttribute(): string
     {
-        return Attribute::make(
-            get: function ($value) {
-                $data = json_decode($value, true) ?? [];
-                $lang = app()->getLocale();
-                return $data[$lang] ?? $data['ar'] ?? '';
-            }
-        );
+        return $this->translatedValue('excerpt');
     }
 
-    // Accessor للحصول على الملخص حسب اللغة
-    protected function excerpt(): Attribute
+    public function getDisplayContentAttribute(): string
     {
-        return Attribute::make(
-            get: function ($value) {
-                $data = json_decode($value, true) ?? [];
-                $lang = app()->getLocale();
-                return $data[$lang] ?? $data['ar'] ?? '';
-            }
-        );
+        return $this->translatedValue('content');
     }
 
-    // Accessor للحصول على meta_title حسب اللغة
-    protected function metaTitle(): Attribute
+    public function getDisplayMetaTitleAttribute(): string
     {
-        return Attribute::make(
-            get: function ($value) {
-                $data = json_decode($value, true) ?? [];
-                $lang = app()->getLocale();
-                return $data[$lang] ?? $data['ar'] ?? '';
-            }
-        );
+        return $this->translatedValue('meta_title');
     }
 
-    // Accessor للحصول على meta_description حسب اللغة
-    protected function metaDescription(): Attribute
+    public function getDisplayMetaDescriptionAttribute(): string
     {
-        return Attribute::make(
-            get: function ($value) {
-                $data = json_decode($value, true) ?? [];
-                $lang = app()->getLocale();
-                return $data[$lang] ?? $data['ar'] ?? '';
-            }
-        );
+        return $this->translatedValue('meta_description');
     }
 
-    // Accessor للحصول على meta_keywords حسب اللغة
-    protected function metaKeywords(): Attribute
+    public function getDisplayMetaKeywordsAttribute(): string
     {
-        return Attribute::make(
-            get: function ($value) {
-                $data = json_decode($value, true) ?? [];
-                $lang = app()->getLocale();
-                return $data[$lang] ?? $data['ar'] ?? '';
-            }
-        );
+        return $this->translatedValue('meta_keywords');
     }
 
-    // دالة للحصول على ترجمة محددة
-    public function getTranslation($field, $lang = null)
-    {
-        $lang = $lang ?? app()->getLocale();
-        $data = $this->attributes[$field] ?? null;
-        
-        if ($data) {
-            $decoded = json_decode($data, true);
-            return $decoded[$lang] ?? $decoded['ar'] ?? null;
-        }
-        
-        return null;
-    }
-
-    // دالة لتعيين ترجمة
-    public function setTranslation($field, $lang, $value)
-    {
-        $data = $this->attributes[$field] ?? '{}';
-        $decoded = json_decode($data, true) ?? [];
-        $decoded[$lang] = $value;
-        $this->attributes[$field] = json_encode($decoded, JSON_UNESCAPED_UNICODE);
-    }
-
-    // دالة للحصول على جميع الترجمات لحقل معين
-    public function getAllTranslations($field)
-    {
-        $data = $this->attributes[$field] ?? null;
-        return $data ? json_decode($data, true) : [];
-    }
-
-    // العلاقة مع التصنيف
-    public function category()
+    public function category(): BelongsTo
     {
         return $this->belongsTo(ArticleCategory::class, 'category_id');
     }
 
-    // العلاقة مع المؤلف
-    public function author()
+    public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
     }
 
-    // العلاقة مع التاغات
-    public function tags()
+    public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class);
     }
 
-    // العلاقة مع التعليقات
-    public function comments()
+    public function comments(): HasMany
     {
         return $this->hasMany(ArticleComment::class);
     }
 
-    // Scope للمقالات النشطة
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
-    // Scope للمقالات المميزة
     public function scopeFeatured($query)
     {
         return $query->where('is_featured', true);
     }
 
-    // Scope للمقالات المنشورة
     public function scopePublished($query)
     {
         return $query->where('published_at', '<=', now());
     }
 
-    // حساب وقت القراءة
-    public function calculateReadingTime($content = null)
+    public function calculateReadingTime(?string $content = null): int
     {
-        $content = $content ?? $this->content;
+        $content = $content ?? $this->display_content;
         $wordCount = str_word_count(strip_tags($content));
-        $readingTime = ceil($wordCount / 200);
+        $readingTime = (int) ceil($wordCount / 200);
+
         return $readingTime > 0 ? $readingTime : 1;
     }
 }

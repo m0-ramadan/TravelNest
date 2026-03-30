@@ -2,12 +2,33 @@
 
 namespace App\Models;
 
+use App\Traits\HasTranslatableAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PackageInclusion extends Model
 {
-    protected $fillable = ['package_id', 'item_type', 'content', 'sort_order'];
+    use HasTranslatableAttributes;
 
-    public function package(): BelongsTo { return $this->belongsTo(Package::class); }
+    protected $fillable = [
+        'package_id',
+        'item_type',
+        'content',
+        'sort_order',
+    ];
+
+    protected $casts = [
+        'content' => 'array',
+        'sort_order' => 'integer',
+    ];
+
+    public function package(): BelongsTo
+    {
+        return $this->belongsTo(Package::class);
+    }
+
+    public function getDisplayContentAttribute(): string
+    {
+        return $this->translatedValue('content');
+    }
 }

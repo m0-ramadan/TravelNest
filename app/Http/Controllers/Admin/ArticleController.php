@@ -3,16 +3,28 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Article;
+use App\Services\ArticleAiService;
+use App\Traits\HandlesTranslatedFields;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ArticleController extends Controller
 {
+    use HandlesTranslatedFields;
+
     public function index(Request $request): View
     {
         $articles = Article::query()
-            ->when($request->filled('q'), fn($q) => $q->where('title', 'like', '%' . $request->string('q') . '%'))
+            ->when($request->filled('q'), function ($query) use ($request) {
+                $this->applyTranslatedSearch(
+                    $query,
+                    ['title', 'excerpt', 'content', 'seo_title', 'seo_description'],
+                    $request->string('q')
+                );
+            })
             ->latest()
             ->paginate($this->perPage($request));
 
@@ -41,6 +53,25 @@ class ArticleController extends Controller
             'seo_title' => ['nullable', 'string'],
             'seo_description' => ['nullable', 'string'],
         ]);
+
+        $data = $this->translateModelFields($data, [
+            'title',
+            'excerpt',
+            'content',
+            'seo_title',
+            'seo_description',
+        ]);
+
+        if (empty($data['slug']) && !empty($data['title'])) {
+            $slugSource = is_array($data['title'])
+                ? ($data['title']['en'] ?? $data['title']['ar'] ?? reset($data['title']))
+                : $data['title'];
+
+            $data['slug'] = Str::slug($slugSource ?: 'article-' . time());
+        }
+
+        $data['is_active'] = $request->boolean('is_active');
+        $data['is_featured'] = $request->boolean('is_featured');
 
         Article::create($data);
 
@@ -75,6 +106,25 @@ class ArticleController extends Controller
             'seo_description' => ['nullable', 'string'],
         ]);
 
+        $data = $this->translateModelFields($data, [
+            'title',
+            'excerpt',
+            'content',
+            'seo_title',
+            'seo_description',
+        ]);
+
+        if (empty($data['slug']) && !empty($data['title'])) {
+            $slugSource = is_array($data['title'])
+                ? ($data['title']['en'] ?? $data['title']['ar'] ?? reset($data['title']))
+                : $data['title'];
+
+            $data['slug'] = Str::slug($slugSource ?: 'article-' . $article->id);
+        }
+
+        $data['is_active'] = $request->boolean('is_active');
+        $data['is_featured'] = $request->boolean('is_featured');
+
         $article->update($data);
 
         return $this->success('admin.articles.index', 'Article updated.');
@@ -87,7 +137,7 @@ class ArticleController extends Controller
         return $this->success('admin.articles.index', 'Article deleted.');
     }
 
-    public function statistics()
+    public function statistics(): JsonResponse
     {
         return response()->json([
             'total' => Article::count(),
@@ -108,71 +158,309 @@ class ArticleController extends Controller
     public function toggleStatus(Article $article): RedirectResponse
     {
         $article->update(['is_active' => ! (bool) $article->is_active]);
+
         return back()->with('success', 'Article status updated.');
     }
 
     public function toggleFeatured(Article $article): RedirectResponse
     {
         $article->update(['is_featured' => ! (bool) $article->is_featured]);
+
         return back()->with('success', 'Article featured updated.');
     }
 
     public function createWithAI(): View
     {
-
         return $this->view('admin.articles.create-with-ai');
     }
 
-    public function storeWithAI(Request $request): RedirectResponse
-    {
-        return $this->store($request);
+    public function storeWithAI(
+        Request $request,
+        ArticleAiService $articleAiService
+    ): RedirectResponse {
+        $data = $request->validate([
+            'prompt' => ['required', 'string'],
+            'category_id' => ['nullable', 'integer'],
+            'post_type' => ['nullable', 'string'],
+            'author_id' => ['nullable', 'integer'],
+            'published_at' => ['nullable', 'date'],
+            'is_featured' => ['nullable', 'boolean'],
+            'is_active' => ['nullable', 'boolean'],
+        ]);
+
+        $generated = $articleAiService->generateArticle([
+            'prompt' => $data['prompt'],
+            'category' => '',
+            'tone' => 'professional',
+            'language_hint' => 'Arabic and English',
+        ]);
+
+        if (!$generated) {
+            return back()->withInput()->with('error', 'فشل توليد المقال بالذكاء الاصطناعي');
+        }
+
+        $translated = $articleAiService->translateFields($generated, [
+            'title',
+            'excerpt',
+            'content',
+            'seo_title',
+            'seo_description',
+        ]);
+
+        $finalData = [
+            'category_id' => $data['category_id'] ?? null,
+            'post_type' => $data['post_type'] ?? null,
+            'author_id' => $data['author_id'] ?? null,
+            'published_at' => $data['published_at'] ?? null,
+            'is_featured' => $request->boolean('is_featured'),
+            'is_active' => $request->boolean('is_active', true),
+            'title' => $translated['title'] ?? [],
+            'excerpt' => $translated['excerpt'] ?? [],
+            'content' => $translated['content'] ?? [],
+            'seo_title' => $translated['seo_title'] ?? [],
+            'seo_description' => $translated['seo_description'] ?? [],
+        ];
+
+        $finalData['slug'] = $articleAiService->makeSlugFromTitle($finalData['title'] ?? 'article-' . time());
+
+        Article::create($finalData);
+
+        return redirect()
+            ->route('admin.articles.index')
+            ->with('success', 'تم إنشاء المقال بالذكاء الاصطناعي');
     }
-    public function enhanceWithAI(Request $request)
-    {
-        return response()->json(['message' => 'AI enhance endpoint ready.']);
+
+    public function enhanceWithAI(
+        Request $request,
+        ArticleAiService $articleAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'content' => ['required', 'string'],
+            'instruction' => ['nullable', 'string'],
+        ]);
+
+        $content = $articleAiService->enhanceContent(
+            $data['content'],
+            $data['instruction'] ?? null
+        );
+
+        return response()->json([
+            'content' => $content ?: $data['content'],
+        ]);
     }
-    public function generateWithAI(Request $request)
-    {
-        return response()->json(['message' => 'AI generate endpoint ready.']);
+
+    public function generateWithAI(
+        Request $request,
+        ArticleAiService $articleAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'prompt' => ['required', 'string'],
+            'category' => ['nullable', 'string'],
+            'tone' => ['nullable', 'string'],
+        ]);
+
+        $generated = $articleAiService->generateArticle([
+            'prompt' => $data['prompt'],
+            'category' => $data['category'] ?? '',
+            'tone' => $data['tone'] ?? 'professional',
+            'language_hint' => 'Arabic and English',
+        ]);
+
+        return response()->json($generated ?: []);
     }
-    public function generateFullArticle(Request $request)
-    {
-        return response()->json(['title' => 'Generated title', 'content' => 'Generated content']);
+
+    public function generateFullArticle(
+        Request $request,
+        ArticleAiService $articleAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'topic' => ['required', 'string'],
+            'category' => ['nullable', 'string'],
+            'tone' => ['nullable', 'string'],
+        ]);
+
+        $generated = $articleAiService->generateArticle([
+            'topic' => $data['topic'],
+            'category' => $data['category'] ?? '',
+            'tone' => $data['tone'] ?? 'professional',
+            'language_hint' => 'Arabic and English',
+        ]);
+
+        return response()->json($generated ?: []);
     }
-    public function generateTitle(Request $request)
-    {
-        return response()->json(['title' => 'Generated title']);
+
+    public function generateTitle(
+        Request $request,
+        ArticleAiService $articleAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'topic' => ['required', 'string'],
+            'tone' => ['nullable', 'string'],
+        ]);
+
+        $title = $articleAiService->generateTitle(
+            $data['topic'],
+            $data['tone'] ?? null
+        );
+
+        return response()->json([
+            'title' => $title ?: '',
+        ]);
     }
-    public function generateContent(Request $request)
-    {
-        return response()->json(['content' => 'Generated content']);
+
+    public function generateContent(
+        Request $request,
+        ArticleAiService $articleAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'title' => ['required', 'string'],
+            'excerpt' => ['nullable', 'string'],
+            'tone' => ['nullable', 'string'],
+        ]);
+
+        $content = $articleAiService->generateContent(
+            $data['title'],
+            $data['excerpt'] ?? null,
+            $data['tone'] ?? null
+        );
+
+        return response()->json([
+            'content' => $content ?: '',
+        ]);
     }
-    public function enhanceContent(Request $request)
-    {
-        return response()->json(['content' => $request->input('content')]);
+
+    public function enhanceContent(
+        Request $request,
+        ArticleAiService $articleAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'content' => ['required', 'string'],
+            'instruction' => ['nullable', 'string'],
+        ]);
+
+        $content = $articleAiService->enhanceContent(
+            $data['content'],
+            $data['instruction'] ?? null
+        );
+
+        return response()->json([
+            'content' => $content ?: $data['content'],
+        ]);
     }
-    public function generateExcerpt(Request $request)
-    {
-        return response()->json(['excerpt' => 'Generated excerpt']);
+
+    public function generateExcerpt(
+        Request $request,
+        ArticleAiService $articleAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'title' => ['required', 'string'],
+            'content' => ['nullable', 'string'],
+        ]);
+
+        $excerpt = $articleAiService->generateExcerpt(
+            $data['title'],
+            $data['content'] ?? null
+        );
+
+        return response()->json([
+            'excerpt' => $excerpt ?: '',
+        ]);
     }
-    public function translateAll(Request $request)
-    {
-        return response()->json(['message' => 'Translate all endpoint ready.']);
+
+    public function translateAll(
+        Request $request,
+        ArticleAiService $articleAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'title' => ['nullable'],
+            'excerpt' => ['nullable'],
+            'content' => ['nullable'],
+            'seo_title' => ['nullable'],
+            'seo_description' => ['nullable'],
+        ]);
+
+        $translated = $articleAiService->translateFields($data, [
+            'title',
+            'excerpt',
+            'content',
+            'seo_title',
+            'seo_description',
+        ]);
+
+        return response()->json($translated);
     }
-    public function improveAll(Request $request)
-    {
-        return response()->json(['message' => 'Improve all endpoint ready.']);
+
+    public function improveAll(
+        Request $request,
+        ArticleAiService $articleAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'title' => ['nullable', 'string'],
+            'excerpt' => ['nullable', 'string'],
+            'content' => ['nullable', 'string'],
+            'seo_title' => ['nullable', 'string'],
+            'seo_description' => ['nullable', 'string'],
+        ]);
+
+        $improved = $articleAiService->improveAll($data);
+
+        return response()->json($improved);
     }
-    public function generateMetaTitle(Request $request)
-    {
-        return response()->json(['meta_title' => $request->input('title')]);
+
+    public function generateMetaTitle(
+        Request $request,
+        ArticleAiService $articleAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'title' => ['required', 'string'],
+            'content' => ['nullable', 'string'],
+        ]);
+
+        $metaTitle = $articleAiService->generateMetaTitle(
+            $data['title'],
+            $data['content'] ?? null
+        );
+
+        return response()->json([
+            'meta_title' => $metaTitle ?: '',
+        ]);
     }
-    public function generateMetaDescription(Request $request)
-    {
-        return response()->json(['meta_description' => $request->input('content')]);
+
+    public function generateMetaDescription(
+        Request $request,
+        ArticleAiService $articleAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'title' => ['required', 'string'],
+            'content' => ['nullable', 'string'],
+        ]);
+
+        $metaDescription = $articleAiService->generateMetaDescription(
+            $data['title'],
+            $data['content'] ?? null
+        );
+
+        return response()->json([
+            'meta_description' => $metaDescription ?: '',
+        ]);
     }
-    public function generateKeywords(Request $request)
-    {
-        return response()->json(['keywords' => []]);
+
+    public function generateKeywords(
+        Request $request,
+        ArticleAiService $articleAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'title' => ['required', 'string'],
+            'content' => ['nullable', 'string'],
+        ]);
+
+        $keywords = $articleAiService->generateKeywords(
+            $data['title'],
+            $data['content'] ?? null
+        );
+
+        return response()->json([
+            'keywords' => $keywords,
+        ]);
     }
 }

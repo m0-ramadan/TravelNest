@@ -3,16 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Testimonial;
+use App\Traits\HandlesTranslatedFields;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class TestimonialController extends Controller
 {
+    use HandlesTranslatedFields;
+
     public function index(Request $request): View
     {
         $testimonials = Testimonial::query()
-            ->when($request->filled('q'), fn ($q) => $q->where('id', 'like', '%' . $request->string('q') . '%'))
+            ->when($request->filled('q'), function ($query) use ($request) {
+                $search = $request->string('q');
+                $query->where('id', 'like', '%' . $search . '%')
+                    ->orWhere(function ($q) use ($search) {
+                        $this->applyTranslatedSearch($q, ['customer_country', 'content', 'response_from_admin'], $search);
+                    });
+            })
             ->latest()
             ->paginate($this->perPage($request));
 
@@ -42,6 +51,12 @@ class TestimonialController extends Controller
             'responded_at' => ['nullable', 'date'],
             'published_at' => ['nullable', 'date'],
             'sort_order' => ['nullable', 'integer'],
+        ]);
+
+        $data = $this->translateModelFields($data, [
+            'customer_country',
+            'content',
+            'response_from_admin',
         ]);
 
         Testimonial::create($data);
@@ -79,6 +94,12 @@ class TestimonialController extends Controller
             'sort_order' => ['nullable', 'integer'],
         ]);
 
+        $data = $this->translateModelFields($data, [
+            'customer_country',
+            'content',
+            'response_from_admin',
+        ]);
+
         $testimonial->update($data);
 
         return $this->success('admin.testimonials.index', 'Testimonial updated.');
@@ -93,13 +114,15 @@ class TestimonialController extends Controller
 
     public function toggleStatus(Testimonial $testimonial): RedirectResponse
     {
-        $testimonial->update(['is_active' => ! (bool) ($testimonial->is_active ?? true)]);
+        $testimonial->update(['is_active' => !(bool) ($testimonial->is_active ?? true)]);
+
         return back()->with('success', 'Testimonial status updated.');
     }
 
     public function toggleFeatured(Testimonial $testimonial): RedirectResponse
     {
-        $testimonial->update(['is_featured' => ! (bool) $testimonial->is_featured]);
+        $testimonial->update(['is_featured' => !(bool) $testimonial->is_featured]);
+
         return back()->with('success', 'Testimonial featured updated.');
     }
 
@@ -109,5 +132,4 @@ class TestimonialController extends Controller
 
         return back()->with('success', 'Selected testimonials removed.');
     }
-
 }

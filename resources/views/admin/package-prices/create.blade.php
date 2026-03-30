@@ -65,6 +65,7 @@
 
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
+
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">الرئيسية</a></li>
@@ -77,7 +78,7 @@
             <div class="main-header d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="mb-0">إضافة سعر جديد</h5>
-                    <small class="opacity-75">إدخال بيانات السعر</small>
+                    <small class="opacity-75">إدخال بيانات سعر الباقة</small>
                 </div>
                 <a href="{{ route('admin.package-prices.index') }}" class="btn btn-light">رجوع</a>
             </div>
@@ -89,6 +90,7 @@
                     <div class="section-title">بيانات السعر</div>
 
                     <div class="row">
+
                         <div class="col-md-6 mb-3">
                             <label class="form-label">الباقة</label>
                             <select name="package_id" class="form-select">
@@ -96,7 +98,7 @@
                                 @foreach ($packages ?? collect() as $package)
                                     <option value="{{ $package->id }}"
                                         {{ old('package_id', request('package_id')) == $package->id ? 'selected' : '' }}>
-                                        {{ $package->name }}
+                                        {{ adminTrans($package->title) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -116,73 +118,75 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Label</label>
+                            <label class="form-label">اسم العرض (Label)</label>
                             <input type="text" name="label" class="form-control" value="{{ old('label') }}">
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Season Name</label>
+                            <label class="form-label">اسم الموسم</label>
                             <input type="text" name="season_name" class="form-control" value="{{ old('season_name') }}">
                         </div>
 
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Price Type</label>
+                            <label class="form-label">نوع السعر</label>
                             <input type="text" name="price_type" class="form-control" value="{{ old('price_type') }}">
                         </div>
 
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Room Type</label>
+                            <label class="form-label">نوع الغرفة</label>
                             <input type="text" name="room_type" class="form-control" value="{{ old('room_type') }}">
                         </div>
 
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Amount</label>
+                            <label class="form-label">السعر</label>
                             <input type="number" step="0.01" name="amount" class="form-control"
                                 value="{{ old('amount') }}">
                         </div>
 
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Pax Min</label>
+                            <label class="form-label">أقل عدد أفراد</label>
                             <input type="number" name="pax_min" class="form-control" value="{{ old('pax_min') }}">
                         </div>
 
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Pax Max</label>
+                            <label class="form-label">أقصى عدد أفراد</label>
                             <input type="number" name="pax_max" class="form-control" value="{{ old('pax_max') }}">
                         </div>
 
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Group Min</label>
+                            <label class="form-label">أقل عدد للمجموعة</label>
                             <input type="number" name="group_size_min" class="form-control"
                                 value="{{ old('group_size_min') }}">
                         </div>
 
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Group Max</label>
+                            <label class="form-label">أقصى عدد للمجموعة</label>
                             <input type="number" name="group_size_max" class="form-control"
                                 value="{{ old('group_size_max') }}">
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Valid From</label>
+                            <label class="form-label">تاريخ البداية</label>
                             <input type="date" name="valid_from" class="form-control" value="{{ old('valid_from') }}">
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Valid To</label>
+                            <label class="form-label">تاريخ النهاية</label>
                             <input type="date" name="valid_to" class="form-control" value="{{ old('valid_to') }}">
                         </div>
 
                         <div class="col-md-12 mb-3">
-                            <label class="form-label">Notes</label>
+                            <label class="form-label">ملاحظات</label>
                             <textarea name="notes" class="form-control" rows="4">{{ old('notes') }}</textarea>
                         </div>
+
                     </div>
 
                     <div class="d-flex gap-2 mt-4">
                         <button class="btn btn-primary" type="submit">حفظ</button>
                         <a href="{{ route('admin.package-prices.index') }}" class="btn btn-secondary">إلغاء</a>
                     </div>
+
                 </form>
             </div>
         </div>

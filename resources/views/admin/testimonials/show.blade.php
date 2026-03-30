@@ -212,15 +212,17 @@
         <div class="panel-card">
             <div class="panel-header d-flex justify-content-between align-items-center">
                 <div>
-                    <h5 class="mb-0">{{ $testimonial->client_name ?? ($testimonial->name ?? 'بدون اسم') }}</h5>
-                    <small class="opacity-75">{{ $testimonial->title ?? '-' }}</small>
+                    <h5 class="mb-0">{{ $testimonial->client_name ?? (adminTrans($testimonial->name) ?: 'بدون اسم') }}
+                    </h5>
+                    <small class="opacity-75">{{ adminTrans($testimonial->title) ?: '-' }}</small>
                 </div>
                 <a href="{{ route('admin.testimonials.index') }}" class="btn btn-outline-light">رجوع</a>
             </div>
             <div class="panel-body">
                 <div class="info-box">
                     <div class="info-label">المحتوى</div>
-                    <div class="info-value">{{ $testimonial->content ?? ($testimonial->message ?? '-') }}</div>
+                    <div class="info-value">
+                        {{ adminTrans($testimonial->content) ?: (adminTrans($testimonial->message) ?: '-') }}</div>
                 </div>
                 <div class="row">
                     <div class="col-md-4">

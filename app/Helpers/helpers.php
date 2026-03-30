@@ -305,4 +305,26 @@ if (!function_exists('greeting')) {
             return 'تصبح على خير 🌙';
         }
     }
+    if (!function_exists('adminTrans')) {
+        function adminTrans($value, array $preferred = ['ar', 'en'])
+        {
+            if (!is_array($value)) {
+                return (string) ($value ?? '');
+            }
+
+            foreach ($preferred as $lang) {
+                if (!empty($value[$lang])) {
+                    return (string) $value[$lang];
+                }
+            }
+
+            foreach ($value as $translation) {
+                if (is_string($translation) && trim($translation) !== '') {
+                    return trim($translation);
+                }
+            }
+
+            return '';
+        }
+    }
 }

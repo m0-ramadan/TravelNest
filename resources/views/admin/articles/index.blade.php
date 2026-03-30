@@ -3,7 +3,7 @@
 @section('title', 'إدارة المقالات')
 
 @section('css')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
             --primary-color: #696cff;
@@ -503,7 +503,7 @@
                                     <div class="order-header-info">
                                         <div class="order-title">
                                             <div class="d-flex align-items-center gap-3 flex-wrap">
-                                                <span>{{ $article->title ?? 'بدون عنوان' }}</span>
+                                                <span>{{ adminTrans($article->title) ?: 'بدون عنوان' }}</span>
                                                 <span class="badge-status status-{{ $isActive }}">
                                                     {{ $isActive == 'active' ? 'منشور' : 'غير منشور' }}
                                                 </span>
@@ -538,7 +538,7 @@
                                         <div class="detail-item">
                                             <span class="detail-label">الوصف:</span>
                                             <span
-                                                class="detail-value">{{ \Illuminate\Support\Str::limit($article->excerpt ?? '-', 60) }}</span>
+                                                class="detail-value">{{ \Illuminate\Support\Str::limit(adminTrans($article->excerpt) ?? '-', 60) }}</span>
                                         </div>
                                     </div>
 
@@ -552,7 +552,8 @@
                                             <i class="fas fa-edit me-1"></i>تعديل
                                         </a>
                                         <button type="button" class="btn btn-sm btn-danger delete-btn"
-                                            data-id="{{ $article->id }}" data-name="{{ $article->title ?? 'المقال' }}">
+                                            data-id="{{ $article->id }}"
+                                            data-name="{{ adminTrans($article->title) ?: 'المقال' }}">
                                             <i class="fas fa-trash me-1"></i>حذف
                                         </button>
                                     </div>

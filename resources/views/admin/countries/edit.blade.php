@@ -85,7 +85,7 @@
             <div class="main-header d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="mb-0">تعديل بيانات الدولة</h5>
-                    <small class="opacity-75">{{ $country->name ?? '' }}</small>
+                    <small class="opacity-75">{{ $country->display_name ?? '' }}</small>
                 </div>
                 <a href="{{ route('admin.countries.index') }}" class="btn btn-light">رجوع</a>
             </div>
@@ -101,7 +101,7 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">اسم الدولة</label>
                             <input type="text" name="name" class="form-control"
-                                value="{{ old('name', $country->name) }}">
+                                value="{{ old('name', $country->display_name) }}">
                         </div>
 
                         <div class="col-md-6 mb-3">

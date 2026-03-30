@@ -114,7 +114,7 @@
                                 @foreach ($countries ?? collect() as $country)
                                     <option value="{{ $country->id }}"
                                         {{ old('country_id') == $country->id ? 'selected' : '' }}>
-                                        {{ $country->name }}
+                                        {{ adminTrans($country->name) }}
                                     </option>
                                 @endforeach
                             </select>

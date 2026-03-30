@@ -3,7 +3,7 @@
 @section('title', 'إدارة المدن')
 
 @section('css')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
             --primary-color: #696cff;
@@ -261,7 +261,7 @@
                             @foreach ($countries ?? collect() as $country)
                                 <option value="{{ $country->id }}"
                                     {{ request('country_id') == $country->id ? 'selected' : '' }}>
-                                    {{ $country->name }}
+                                    {{ adminTrans($country->name) }}
                                 </option>
                             @endforeach
                         </select>
@@ -301,7 +301,7 @@
                     <div class="item-card">
                         <div class="item-header">
                             <div>
-                                <h6 class="mb-1">{{ $city->name ?? 'بدون اسم' }}</h6>
+                                <h6 class="mb-1">{{ adminTrans($city->name) ?: 'بدون اسم' }}</h6>
                                 <small class="text-light opacity-75">{{ $city->slug ?? '-' }}</small>
                             </div>
 
@@ -316,7 +316,7 @@
                         <div class="detail-row">
                             <div>
                                 <span class="detail-label">الدولة:</span>
-                                <span>{{ $city->country->name ?? '-' }}</span>
+                                <span>{{ adminTrans(optional($city->country)->name) ?: '-' }}</span>
                             </div>
 
                             <div>

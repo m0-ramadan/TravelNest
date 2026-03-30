@@ -9,13 +9,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Spatie\Permission\Models\Role;
 
 class AdminController extends Controller
 {
     public function index(Request $request): View
     {
         $admins = Admin::query()
-            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%' . $request->string('q') . '%')
+            ->when($request->filled('q'), fn($q) => $q->where('name', 'like', '%' . $request->string('q') . '%')
                 ->orWhere('email', 'like', '%' . $request->string('q') . '%'))
             ->latest()
             ->paginate($this->perPage($request));
@@ -25,7 +26,8 @@ class AdminController extends Controller
 
     public function create(): View
     {
-        return $this->view('admin.admins.create');
+        $roles = Role::all();
+        return $this->view('admin.admins.create', compact('roles'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -36,14 +38,17 @@ class AdminController extends Controller
             'password' => ['required', 'confirmed', 'min:8'],
             'phone' => ['nullable', 'string', 'max:50'],
             'image' => ['nullable', 'string', 'max:255'],
+            'role_id' => ['nullable'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
         $data['password'] = Hash::make($data['password']);
         $data['is_active'] = (bool) ($data['is_active'] ?? true);
+        $admin = Admin::create($data);
 
-        Admin::create($data);
-
+        if (!empty($data['role_id'])) {
+            $admin->assignRole($data['role_id']);
+        }
         return $this->success('admin.admins.index', 'Admin created.');
     }
 

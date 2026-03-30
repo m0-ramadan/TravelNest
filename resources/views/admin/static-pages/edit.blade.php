@@ -223,7 +223,7 @@
                         <div class="col-md-8 mb-3">
                             <label class="form-label">العنوان</label>
                             <input type="text" name="title" class="form-control"
-                                value="{{ old('title', $page->title) }}">
+                                value="{{ old('title', adminTrans($page->title)) }}">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Slug</label>
@@ -232,16 +232,16 @@
                         </div>
                         <div class="col-12 mb-3">
                             <label class="form-label">المحتوى</label>
-                            <textarea name="content" class="form-control" rows="12">{{ old('content', $page->content) }}</textarea>
+                            <textarea name="content" class="form-control" rows="12">{{ old('content', adminTrans($page->content)) }}</textarea>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Meta Title</label>
                             <input type="text" name="meta_title" class="form-control"
-                                value="{{ old('meta_title', $page->meta_title) }}">
+                                value="{{ old('meta_title', adminTrans($page->meta_title)) }}">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Meta Description</label>
-                            <textarea name="meta_description" class="form-control" rows="3">{{ old('meta_description', $page->meta_description) }}</textarea>
+                            <textarea name="meta_description" class="form-control" rows="3">{{ old('meta_description', adminTrans($page->meta_description)) }}</textarea>
                         </div>
                     </div>
                     <div class="d-flex gap-2">

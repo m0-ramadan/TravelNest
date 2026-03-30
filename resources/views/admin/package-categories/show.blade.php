@@ -68,10 +68,11 @@
         <div class="profile-card">
             <div class="profile-header d-flex justify-content-between align-items-center">
                 <div>
-                    <h4 class="mb-1">{{ $category->name ?? 'بدون اسم' }}</h4>
+                    <h4 class="mb-1">{{ adminTrans($category->name) ?: 'بدون اسم' }}</h4>
                     <small class="opacity-75">{{ $category->slug ?? '-' }}</small>
                 </div>
                 <div class="d-flex gap-2">
+
                     <a href="{{ route('admin.package-categories.edit', $category) }}" class="btn btn-light">تعديل</a>
                     <a href="{{ route('admin.package-categories.index') }}" class="btn btn-outline-light">رجوع</a>
                 </div>
@@ -119,21 +120,21 @@
                     <div class="col-12">
                         <div class="info-box">
                             <div class="info-label">الوصف</div>
-                            <div class="info-value">{{ $category->description ?: '-' }}</div>
+                            <div class="info-value">{{ adminTrans($category->description) ?: '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="info-box">
                             <div class="info-label">Meta Title</div>
-                            <div class="info-value">{{ $category->seo_title ?: '-' }}</div>
+                            <div class="info-value">{{ adminTrans($category->seo_title) ?: '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="info-box">
                             <div class="info-label">Meta Description</div>
-                            <div class="info-value">{{ $category->seo_description ?: '-' }}</div>
+                            <div class="info-value">{{ adminTrans($category->seo_description) ?: '-' }}</div>
                         </div>
                     </div>
                 </div>

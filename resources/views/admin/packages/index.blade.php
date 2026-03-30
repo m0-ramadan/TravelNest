@@ -3,7 +3,7 @@
 @section('title', 'إدارة الباقات')
 
 @section('css')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
             --primary-color: #696cff;
@@ -266,7 +266,7 @@
                             @foreach ($categories ?? collect() as $category)
                                 <option value="{{ $category->id }}"
                                     {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->name }}
+                                    {{ adminTrans($category->name) }}
                                 </option>
                             @endforeach
                         </select>
@@ -311,7 +311,7 @@
                     <div class="item-card">
                         <div class="item-header">
                             <div>
-                                <h6 class="mb-1">{{ $package->name ?? 'بدون اسم' }}</h6>
+                                <h6 class="mb-1">{{ adminTrans($package->name) ?: 'بدون اسم' }}</h6>
                                 <small class="text-light opacity-75">{{ $package->slug ?? '-' }}</small>
                             </div>
 
@@ -329,7 +329,7 @@
                         <div class="detail-row">
                             <div>
                                 <span class="detail-label">التصنيف:</span>
-                                <span>{{ $package->category->name ?? '-' }}</span>
+                                <span>{{ adminTrans(optional($package->category)->name) ?: '-' }}</span>
                             </div>
 
                             <div>
@@ -349,7 +349,7 @@
 
                             <div>
                                 <span class="detail-label">الوجهة:</span>
-                                <span>{{ $package->destination->name ?? '-' }}</span>
+                                <span>{{ adminTrans(optional($package->destination)->name) ?: '-' }}</span>
                             </div>
 
                             <div>
@@ -360,13 +360,12 @@
 
                         <div class="mb-3">
                             <span class="detail-label">الوصف:</span>
-                            <span>{{ \Illuminate\Support\Str::limit($package->short_description ?? ($package->description ?? '-'), 180) }}</span>
+                            <span>{{ \Illuminate\Support\Str::limit(adminTrans($package->short_description) ?: (adminTrans($package->description) ?: '-'), 180) }}</span>
                         </div>
 
                         <div class="d-flex gap-2 flex-wrap">
                             <a href="{{ route('admin.packages.show', $package) }}" class="btn btn-info btn-sm">عرض</a>
-                            <a href="{{ route('admin.packages.edit', $package) }}"
-                                class="btn btn-warning btn-sm">تعديل</a>
+                            <a href="{{ route('admin.packages.edit', $package) }}" class="btn btn-warning btn-sm">تعديل</a>
 
                             @if (Route::has('admin.package-prices.by-package'))
                                 <a href="{{ route('admin.package-prices.by-package', $package) }}"

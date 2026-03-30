@@ -3,20 +3,32 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Page;
+use App\Services\PageAiService;
+use App\Traits\HandlesTranslatedFields;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class StaticPageController extends Controller
 {
+    use HandlesTranslatedFields;
+
     public function index(Request $request): View
     {
-        $static_pages = Page::query()
-            ->when($request->filled('q'), fn($q) => $q->where('title', 'like', '%' . $request->string('q') . '%'))
+        $pages = Page::query()
+            ->when($request->filled('q'), function ($query) use ($request) {
+                $this->applyTranslatedSearch(
+                    $query,
+                    ['title', 'body', 'seo_title', 'seo_description'],
+                    $request->string('q')
+                );
+            })
             ->latest()
             ->paginate($this->perPage($request));
 
-        return $this->view('admin.static-pages.index', ['pages' => $static_pages]);
+        return $this->view('admin.static-pages.index', compact('pages'));
     }
 
     public function create(): View
@@ -39,22 +51,44 @@ class StaticPageController extends Controller
             'seo_description' => ['nullable', 'string'],
         ]);
 
+        $data = $this->translateModelFields($data, [
+            'title',
+            'body',
+            'seo_title',
+            'seo_description'
+        ]);
+
+        if (empty($data['slug']) && !empty($data['title'])) {
+            $slugSource = is_array($data['title'])
+                ? ($data['title']['en'] ?? $data['title']['ar'] ?? reset($data['title']))
+                : $data['title'];
+
+            $data['slug'] = Str::slug($slugSource ?: 'page-' . time());
+        }
+
+        $data['is_home'] = $request->boolean('is_home');
+        $data['is_active'] = $request->boolean('is_active', true);
+
         Page::create($data);
 
         return $this->success('admin.static-pages.index', 'Page created.');
     }
 
-    public function show(Page $Page): View
+    public function show($pageId): View
     {
-        return $this->view('admin.static-pages.show', compact('Page'));
+        $page = Page::findOrFail($pageId);
+
+        return $this->view('admin.static-pages.show', compact('page'));
     }
 
-    public function edit(Page $Page): View
+    public function edit($pageId): View
     {
-        return $this->view('admin.static-pages.edit', compact('Page'));
+        $page = Page::findOrFail($pageId);
+
+        return $this->view('admin.static-pages.edit', compact('page'));
     }
 
-    public function update(Request $request, Page $Page): RedirectResponse
+    public function update(Request $request, Page $page): RedirectResponse
     {
         $data = $request->validate([
             'slug' => ['nullable', 'string'],
@@ -69,14 +103,32 @@ class StaticPageController extends Controller
             'seo_description' => ['nullable', 'string'],
         ]);
 
-        $Page->update($data);
+        $data = $this->translateModelFields($data, [
+            'title',
+            'body',
+            'seo_title',
+            'seo_description'
+        ]);
+
+        if (empty($data['slug']) && !empty($data['title'])) {
+            $slugSource = is_array($data['title'])
+                ? ($data['title']['en'] ?? $data['title']['ar'] ?? reset($data['title']))
+                : $data['title'];
+
+            $data['slug'] = Str::slug($slugSource ?: 'page-' . $page->id);
+        }
+
+        $data['is_home'] = $request->boolean('is_home');
+        $data['is_active'] = $request->boolean('is_active', true);
+
+        $page->update($data);
 
         return $this->success('admin.static-pages.index', 'Page updated.');
     }
 
-    public function destroy(Page $Page): RedirectResponse
+    public function destroy(Page $page): RedirectResponse
     {
-        $Page->delete();
+        $page->delete();
 
         return $this->success('admin.static-pages.index', 'Page deleted.');
     }
@@ -84,6 +136,7 @@ class StaticPageController extends Controller
     public function bulkAction(Request $request): RedirectResponse
     {
         Page::whereIn('id', (array) $request->input('ids', []))->delete();
+
         return back()->with('success', 'Bulk action applied.');
     }
 
@@ -92,76 +145,307 @@ class StaticPageController extends Controller
         return $this->view('admin.static-pages.edit-with-ai', compact('page'));
     }
 
-    public function enhanceTitleWithAI(Request $request)
-    {
-        return response()->json(['title' => $request->input('title')]);
+    public function translateWithAI(
+        Request $request,
+        PageAiService $pageAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'title' => ['nullable'],
+            'body' => ['nullable'],
+            'seo_title' => ['nullable'],
+            'seo_description' => ['nullable'],
+        ]);
+
+        $translated = $pageAiService->translateFields($data, [
+            'title',
+            'body',
+            'seo_title',
+            'seo_description',
+        ]);
+
+        return response()->json($translated);
     }
-    public function translateContentWithAI(Request $request)
-    {
-        return response()->json(['content' => $request->input('content')]);
+
+    public function enhanceTitleWithAI(
+        Request $request,
+        PageAiService $pageAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'title' => ['required', 'string'],
+        ]);
+
+        $title = $pageAiService->generateTitle($data['title']);
+
+        return response()->json([
+            'title' => $title ?: $data['title'],
+        ]);
     }
-    public function translateWithAI(Request $request)
-    {
-        return response()->json(['message' => 'Translation endpoint ready.']);
+
+    public function enhanceContentWithAI(
+        Request $request,
+        PageAiService $pageAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'content' => ['required', 'string'],
+            'instruction' => ['nullable', 'string'],
+        ]);
+
+        $content = $pageAiService->enhanceText(
+            $data['content'],
+            $data['instruction'] ?? 'حسن الأسلوب والتنظيم والوضوح'
+        );
+
+        return response()->json([
+            'content' => $content ?: $data['content'],
+        ]);
     }
-    public function enhanceContentWithAI(Request $request)
-    {
-        return response()->json(['content' => $request->input('content')]);
+
+    public function expandContentWithAI(
+        Request $request,
+        PageAiService $pageAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'content' => ['required', 'string'],
+        ]);
+
+        $content = $pageAiService->expandContent($data['content']);
+
+        return response()->json([
+            'content' => $content ?: $data['content'],
+        ]);
     }
-    public function expandContentWithAI(Request $request)
-    {
-        return response()->json(['content' => $request->input('content')]);
+
+    public function simplifyContentWithAI(
+        Request $request,
+        PageAiService $pageAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'content' => ['required', 'string'],
+        ]);
+
+        $content = $pageAiService->simplifyContent($data['content']);
+
+        return response()->json([
+            'content' => $content ?: $data['content'],
+        ]);
     }
-    public function simplifyContentWithAI(Request $request)
-    {
-        return response()->json(['content' => $request->input('content')]);
+
+    public function formatContentWithAI(
+        Request $request,
+        PageAiService $pageAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'content' => ['required', 'string'],
+        ]);
+
+        $content = $pageAiService->formatContent($data['content']);
+
+        return response()->json([
+            'content' => $content ?: $data['content'],
+        ]);
     }
-    public function loadTemplateWithAI(Request $request)
-    {
-        return response()->json(['template' => $request->input('template')]);
+
+    public function checkGrammarWithAI(
+        Request $request,
+        PageAiService $pageAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'content' => ['required', 'string'],
+        ]);
+
+        $content = $pageAiService->checkGrammar($data['content']);
+
+        return response()->json([
+            'content' => $content ?: $data['content'],
+        ]);
     }
-    public function generateFromPromptWithAI(Request $request)
-    {
-        return response()->json(['content' => $request->input('prompt')]);
+
+    public function enhanceTextWithAI(
+        Request $request,
+        PageAiService $pageAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'content' => ['required', 'string'],
+            'instruction' => ['nullable', 'string'],
+        ]);
+
+        $content = $pageAiService->enhanceText(
+            $data['content'],
+            $data['instruction'] ?? null
+        );
+
+        return response()->json([
+            'content' => $content ?: $data['content'],
+        ]);
     }
-    public function generatePageWithAI(Request $request)
-    {
-        return response()->json(['message' => 'Generator endpoint ready.']);
+
+    public function addSectionWithAI(
+        Request $request,
+        PageAiService $pageAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'content' => ['required', 'string'],
+            'section' => ['required', 'string'],
+        ]);
+
+        $content = $pageAiService->addSection(
+            $data['content'],
+            $data['section']
+        );
+
+        return response()->json([
+            'content' => $content ?: $data['content'],
+        ]);
     }
-    public function generateTitleWithAI(Request $request)
-    {
-        return response()->json(['title' => $request->input('topic', 'Generated Title')]);
+
+    public function loadTemplateWithAI(
+        Request $request,
+        PageAiService $pageAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'template' => ['required', 'string'],
+        ]);
+
+        $content = $pageAiService->loadTemplate($data['template']);
+
+        return response()->json([
+            'content' => $content ?: '',
+        ]);
     }
-    public function generateContentWithAI(Request $request)
-    {
-        return response()->json(['content' => 'Generated content']);
+
+    public function generateFromPromptWithAI(
+        Request $request,
+        PageAiService $pageAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'prompt' => ['required', 'string'],
+            'template' => ['nullable', 'string'],
+        ]);
+
+        $generated = $pageAiService->generatePage([
+            'prompt' => $data['prompt'],
+            'template' => $data['template'] ?? 'default',
+        ]);
+
+        return response()->json($generated ?: []);
     }
-    public function formatContentWithAI(Request $request)
-    {
-        return response()->json(['content' => $request->input('content')]);
+
+    public function generatePageWithAI(
+        Request $request,
+        PageAiService $pageAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'prompt' => ['required', 'string'],
+            'template' => ['nullable', 'string'],
+        ]);
+
+        $generated = $pageAiService->generatePage([
+            'prompt' => $data['prompt'],
+            'template' => $data['template'] ?? 'default',
+        ]);
+
+        if (!$generated) {
+            return response()->json([], 422);
+        }
+
+        $translated = $pageAiService->translateFields($generated, [
+            'title',
+            'body',
+            'seo_title',
+            'seo_description',
+        ]);
+
+        return response()->json($translated);
     }
-    public function checkGrammarWithAI(Request $request)
-    {
-        return response()->json(['content' => $request->input('content')]);
+
+    public function generateTitleWithAI(
+        Request $request,
+        PageAiService $pageAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'topic' => ['required', 'string'],
+        ]);
+
+        $title = $pageAiService->generateTitle($data['topic']);
+
+        return response()->json([
+            'title' => $title ?: '',
+        ]);
     }
-    public function enhanceTextWithAI(Request $request)
-    {
-        return response()->json(['content' => $request->input('content')]);
+
+    public function generateContentWithAI(
+        Request $request,
+        PageAiService $pageAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'title' => ['required', 'string'],
+            'template' => ['nullable', 'string'],
+        ]);
+
+        $content = $pageAiService->generateBody(
+            $data['title'],
+            $data['template'] ?? null
+        );
+
+        return response()->json([
+            'content' => $content ?: '',
+        ]);
     }
-    public function addSectionWithAI(Request $request)
-    {
-        return response()->json(['section' => $request->input('section')]);
+
+    public function generateMetaTitleWithAI(
+        Request $request,
+        PageAiService $pageAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'title' => ['required', 'string'],
+            'content' => ['nullable', 'string'],
+        ]);
+
+        $metaTitle = $pageAiService->generateMetaTitle(
+            $data['title'],
+            $data['content'] ?? null
+        );
+
+        return response()->json([
+            'meta_title' => $metaTitle ?: '',
+        ]);
     }
-    public function generateMetaTitleWithAI(Request $request)
-    {
-        return response()->json(['meta_title' => $request->input('title')]);
+
+    public function generateMetaDescriptionWithAI(
+        Request $request,
+        PageAiService $pageAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'title' => ['required', 'string'],
+            'content' => ['nullable', 'string'],
+        ]);
+
+        $metaDescription = $pageAiService->generateMetaDescription(
+            $data['title'],
+            $data['content'] ?? null
+        );
+
+        return response()->json([
+            'meta_description' => $metaDescription ?: '',
+        ]);
     }
-    public function generateMetaDescriptionWithAI(Request $request)
-    {
-        return response()->json(['meta_description' => $request->input('content')]);
-    }
-    public function generateKeywordsWithAI(Request $request)
-    {
-        return response()->json(['keywords' => []]);
+
+    public function generateKeywordsWithAI(
+        Request $request,
+        PageAiService $pageAiService
+    ): JsonResponse {
+        $data = $request->validate([
+            'title' => ['required', 'string'],
+            'content' => ['nullable', 'string'],
+        ]);
+
+        $keywords = $pageAiService->generateKeywords(
+            $data['title'],
+            $data['content'] ?? null
+        );
+
+        return response()->json([
+            'keywords' => $keywords,
+        ]);
     }
 }
