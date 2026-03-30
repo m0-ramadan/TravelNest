@@ -309,6 +309,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('faqs', FaqController::class);
         Route::resource('testimonials', TestimonialController::class)->except(['create', 'edit']);
 
+
         Route::prefix('article')->name('articles.')->group(function () {
             Route::get('statistics', [ArticleController::class, 'statistics'])->name('statistics');
             Route::post('bulk-actions', [ArticleController::class, 'bulkActions'])->name('bulk-actions');
