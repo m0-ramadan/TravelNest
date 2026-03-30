@@ -141,10 +141,10 @@
                             <label class="form-label">الدولة</label>
                             <select name="country_id" id="country_id" class="form-select">
                                 <option value="">اختر الدولة</option>
-                                @foreach ($countries ?? collect() as $country)
-                                    <option value="{{ $country->id }}"
-                                        {{ old('country_id') == $country->id ? 'selected' : '' }}>
-                                        {{ adminTrans($country->name) }}
+                                @foreach ($countries as $country)
+                                    <option value="{{ $country['id'] }}"
+                                        {{ old('country_id') == $country['id'] ? 'selected' : '' }}>
+                                        {{ $country['name'] }}
                                     </option>
                                 @endforeach
                             </select>
@@ -161,7 +161,7 @@
                             <label class="form-label">الوجهة الأم</label>
                             <select name="parent_id" class="form-select">
                                 <option value="">بدون</option>
-                                @foreach ($parents ?? collect() as $parent)
+                                @foreach ($parents as $parent)
                                     <option value="{{ $parent->id }}"
                                         {{ old('parent_id') == $parent->id ? 'selected' : '' }}>
                                         {{ adminTrans($parent->name) }}
@@ -262,52 +262,37 @@
         function loadCities(countryId, selectedCityId = null) {
             citySelect.innerHTML = '<option value="">اختر المدينة</option>';
 
-            if (!countryId) return;
+            if (!countryId) {
+                return;
+            }
 
             const selectedCountry = countries.find(country => String(country.id) === String(countryId));
 
-            if (selectedCountry && selectedCountry.cities && selectedCountry.cities.length > 0) {
-                selectedCountry.cities.forEach(city => {
-                    const option = document.createElement('option');
-                    option.value = city.id;
-                    option.textContent = city.name;
-
-                    if (selectedCityId && String(selectedCityId) === String(city.id)) {
-                        option.selected = true;
-                    }
-
-                    citySelect.appendChild(option);
-                });
+            if (!selectedCountry || !selectedCountry.cities || !selectedCountry.cities.length) {
+                return;
             }
+
+            selectedCountry.cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city.id;
+                option.textContent = city.name;
+
+                if (selectedCityId && String(selectedCityId) === String(city.id)) {
+                    option.selected = true;
+                }
+
+                citySelect.appendChild(option);
+            });
         }
 
         countrySelect.addEventListener('change', function() {
             loadCities(this.value);
         });
 
-        window.addEventListener('load', function() {
+        document.addEventListener('DOMContentLoaded', function() {
             if (countrySelect.value) {
                 loadCities(countrySelect.value, oldCityId);
             }
         });
-
-        function previewImage(inputId, previewId) {
-            const input = document.getElementById(inputId);
-            const preview = document.getElementById(previewId);
-
-            input.addEventListener('change', function() {
-                const file = this.files[0];
-                if (!file) {
-                    preview.style.display = 'none';
-                    return;
-                }
-
-                preview.src = URL.createObjectURL(file);
-                preview.style.display = 'block';
-            });
-        }
-
-        previewImage('hero_image', 'hero_preview');
-        previewImage('featured_image', 'featured_preview');
     </script>
 @endsection
