@@ -1,28 +1,3 @@
-@php
-    if (!function_exists('adminTrans')) {
-        function adminTrans($value, array $preferred = ['Ar', 'En'])
-        {
-            if (!is_array($value)) {
-                return (string) ($value ?? '');
-            }
-
-            foreach ($preferred as $lang) {
-                if (!empty($value[$lang])) {
-                    return (string) $value[$lang];
-                }
-            }
-
-            foreach ($value as $translation) {
-                if (is_string($translation) && trim($translation) !== '') {
-                    return trim($translation);
-                }
-            }
-
-            return '';
-        }
-    }
-@endphp
-
 @extends('admin.layout.master')
 
 @section('title', 'تعديل مقال')
