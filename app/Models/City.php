@@ -15,6 +15,7 @@ class City extends Model
         'country_id',
         'name',
         'slug',
+        'sort_order',
     ];
 
     protected $casts = [
