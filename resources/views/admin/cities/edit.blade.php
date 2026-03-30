@@ -85,7 +85,7 @@
             <div class="main-header d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="mb-0">تعديل بيانات المدينة</h5>
-                    <small class="opacity-75">{{ $city->name ?? '' }}</small>
+                    <small class="opacity-75">{{ adminTrans($city->name) ?? '' }}</small>
                 </div>
                 <a href="{{ route('admin.cities.index') }}" class="btn btn-light">رجوع</a>
             </div>
