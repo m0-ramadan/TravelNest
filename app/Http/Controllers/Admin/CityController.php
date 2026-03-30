@@ -89,6 +89,7 @@ class CityController extends Controller
             'country_id' => ['nullable', 'integer'],
             'name' => ['nullable', 'string'],
             'slug' => ['nullable', 'string'],
+            'sort_order' => ['nullable'],
         ]);
 
         $data = $this->translateModelFields($data, ['name']);
