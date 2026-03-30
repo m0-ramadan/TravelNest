@@ -2,16 +2,36 @@
 
 namespace App\Models;
 
+use App\Traits\HasTranslatableAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BlogCategory extends Model
 {
-    protected $fillable = ['name', 'slug', 'description', 'is_active', 'sort_order'];
+    use HasTranslatableAttributes;
 
-    protected $casts = [
-        'is_active' => 'boolean',
+    protected $fillable = [
+        'name',
+        'slug',
+        'description',
+        'is_active',
+        'sort_order',
     ];
 
-    public function posts(): HasMany { return $this->hasMany(Post::class, 'category_id'); }
+    protected $casts = [
+        'name' => 'array',
+        'description' => 'array',
+        'is_active' => 'boolean',
+        'sort_order' => 'integer',
+    ];
+
+    public function posts(): HasMany
+    {
+        return $this->hasMany(Post::class, 'category_id');
+    }
+
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->translatedValue('name');
+    }
 }

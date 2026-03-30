@@ -70,7 +70,7 @@
             <div class="main-header d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="mb-0">تعديل القائمة</h5>
-                    <small class="opacity-75">{{ $menu->name ?? '' }}</small>
+                    <small class="opacity-75">{{ adminTrans($menu->name) ?? '' }}</small>
                 </div>
                 <a href="{{ route('admin.menus.index') }}" class="btn btn-light">رجوع</a>
             </div>
@@ -84,7 +84,7 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">اسم القائمة</label>
                             <input type="text" name="name" class="form-control"
-                                value="{{ old('name', $menu->name) }}">
+                                value="{{ old('name', adminTrans($menu->name)) }}">
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -113,7 +113,7 @@
                                 @foreach ($languages ?? collect() as $language)
                                     <option value="{{ $language->id }}"
                                         {{ old('language_id', $menu->language_id) == $language->id ? 'selected' : '' }}>
-                                        {{ $language->name }}
+                                        {{ $language->native_name ?? $language->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -127,7 +127,7 @@
 
                         <div class="col-md-12 mb-3">
                             <label class="form-label">الوصف</label>
-                            <textarea name="description" class="form-control" rows="4">{{ old('description', $menu->description) }}</textarea>
+                            <textarea name="description" class="form-control" rows="4">{{ old('description', adminTrans($menu->description)) }}</textarea>
                         </div>
 
                         <div class="col-md-12 mb-3">

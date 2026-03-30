@@ -3,7 +3,7 @@
 @section('title', 'وسائل التواصل الاجتماعي')
 
 @section('css')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
             --primary-color: #696cff;
@@ -164,11 +164,16 @@
         </div>
 
         <div class="main-card">
-            <div class="main-header">
-                <h5 class="mb-0">قائمة وسائل التواصل</h5>
-                <small class="opacity-75">إدارة روابط المنصات الاجتماعية للموقع</small>
-            </div>
+            <div class="main-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">قائمة وسائل التواصل</h5>
+                    <small class="opacity-75">إدارة روابط المنصات الاجتماعية للموقع</small>
+                </div>
 
+                <a href="{{ route('admin.social-media.create') }}" class="btn btn-light">
+                    <i class="fas fa-plus"></i> إضافة جديد
+                </a>
+            </div>
             <div class="p-4">
                 @forelse($socialMedia as $item)
                     <div class="item-card">

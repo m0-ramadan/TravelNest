@@ -212,7 +212,7 @@
         <div class="panel-card">
             <div class="panel-header d-flex justify-content-between align-items-center">
                 <div>
-                    <h5 class="mb-0">{{ $page->title ?? 'بدون عنوان' }}</h5>
+                    <h5 class="mb-0">{{ adminTrans($page->title) ?: 'بدون عنوان' }}</h5>
                     <small class="opacity-75">Slug: {{ $page->slug ?? '-' }}</small>
                 </div>
                 <div class="d-flex gap-2">
@@ -223,7 +223,8 @@
             <div class="panel-body">
                 <div class="info-box">
                     <div class="info-label">المحتوى</div>
-                    <div class="info-value" style="white-space: pre-wrap; line-height: 1.9;">{{ $page->content ?? '-' }}
+                    <div class="info-value" style="white-space: pre-wrap; line-height: 1.9;">
+                        {{ adminTrans($page->content) ?: '-' }}
                     </div>
                 </div>
                 <div class="row">

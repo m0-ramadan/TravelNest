@@ -3,7 +3,7 @@
 @section('title', 'الأسئلة الشائعة')
 
 @section('css')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
             --primary-color: #696cff;
@@ -229,7 +229,7 @@
                     <div class="item-card">
                         <div class="d-flex justify-content-between align-items-start flex-wrap mb-3">
                             <div>
-                                <h6 class="mb-1">{{ $faq->question ?? 'بدون سؤال' }}</h6>
+                                <h6 class="mb-1">{{ adminTrans($faq->question) ?: 'بدون سؤال' }}</h6>
                                 <small class="text-light opacity-75">الترتيب: {{ $faq->sort_order ?? 0 }}</small>
                             </div>
 

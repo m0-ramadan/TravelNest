@@ -70,7 +70,7 @@
         <div class="profile-card">
             <div class="profile-header d-flex justify-content-between align-items-center">
                 <div>
-                    <h4 class="mb-1">{{ $faq->question ?? 'بدون سؤال' }}</h4>
+                    <h4 class="mb-1">{{ adminTrans($faq->question) ?: 'بدون سؤال' }}</h4>
                     <small class="opacity-75">ترتيب: {{ $faq->sort_order ?? 0 }}</small>
                 </div>
                 <div class="d-flex gap-2">
@@ -105,14 +105,14 @@
                     <div class="col-12">
                         <div class="info-box">
                             <div class="info-label">السؤال</div>
-                            <div class="info-value">{{ $faq->question ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans($faq->question) ?: '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-12">
                         <div class="info-box">
                             <div class="info-label">الإجابة</div>
-                            <div class="info-value">{{ $faq->answer ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans($faq->answer) ?: '-' }}</div>
                         </div>
                     </div>
                 </div>

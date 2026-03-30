@@ -68,7 +68,7 @@
         <div class="profile-card">
             <div class="profile-header d-flex justify-content-between align-items-center">
                 <div>
-                    <h4 class="mb-1">{{ $package->name ?? 'بدون اسم' }}</h4>
+                    <h4 class="mb-1">{{ adminTrans($package->name) ?: 'بدون اسم' }}</h4>
                     <small class="opacity-75">{{ $package->slug ?? '-' }}</small>
                 </div>
                 <div class="d-flex gap-2">
@@ -82,14 +82,14 @@
                     <div class="col-md-4">
                         <div class="info-box">
                             <div class="info-label">التصنيف</div>
-                            <div class="info-value">{{ $package->category->name ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans(optional($package->category)->name) ?: '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-md-4">
                         <div class="info-box">
                             <div class="info-label">الوجهة</div>
-                            <div class="info-value">{{ $package->destination->name ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans(optional($package->destination)->name) ?: '-' }}</div>
                         </div>
                     </div>
 
@@ -138,28 +138,28 @@
                     <div class="col-12">
                         <div class="info-box">
                             <div class="info-label">الوصف المختصر</div>
-                            <div class="info-value">{{ $package->short_description ?: '-' }}</div>
+                            <div class="info-value">{{ adminTrans($package->short_description) ?: '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-12">
                         <div class="info-box">
                             <div class="info-label">الوصف الكامل</div>
-                            <div class="info-value">{{ $package->description ?: '-' }}</div>
+                            <div class="info-value">{{ adminTrans($package->description) ?: '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="info-box">
                             <div class="info-label">Meta Title</div>
-                            <div class="info-value">{{ $package->seo_title ?: '-' }}</div>
+                            <div class="info-value">{{ adminTrans($package->seo_title) ?: '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="info-box">
                             <div class="info-label">Meta Description</div>
-                            <div class="info-value">{{ $package->seo_description ?: '-' }}</div>
+                            <div class="info-value">{{ adminTrans($package->seo_description) ?: '-' }}</div>
                         </div>
                     </div>
                 </div>

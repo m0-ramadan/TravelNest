@@ -1,3 +1,28 @@
+@php
+    if (!function_exists('adminTrans')) {
+        function adminTrans($value, array $preferred = ['ar', 'en'])
+        {
+            if (!is_array($value)) {
+                return (string) ($value ?? '');
+            }
+
+            foreach ($preferred as $lang) {
+                if (!empty($value[$lang])) {
+                    return (string) $value[$lang];
+                }
+            }
+
+            foreach ($value as $translation) {
+                if (is_string($translation) && trim($translation) !== '') {
+                    return trim($translation);
+                }
+            }
+
+            return '';
+        }
+    }
+@endphp
+
 @extends('admin.layout.master')
 
 @section('title', 'عرض المقال')
@@ -73,7 +98,7 @@
         <div class="profile-card">
             <div class="profile-header d-flex justify-content-between align-items-center">
                 <div>
-                    <h4 class="mb-1">{{ $article->title ?? 'بدون عنوان' }}</h4>
+                    <h4 class="mb-1">{{ adminTrans($article->title) ?: 'بدون عنوان' }}</h4>
                     <small class="opacity-75">{{ $article->slug ?? '-' }}</small>
                 </div>
                 <div class="d-flex gap-2">
@@ -124,28 +149,28 @@
                     <div class="col-12">
                         <div class="info-box">
                             <div class="info-label">الوصف المختصر</div>
-                            <div class="info-value content-box">{{ $article->excerpt ?: 'لا يوجد وصف مختصر' }}</div>
+                            <div class="info-value content-box">{!! adminTrans($article->excerpt) ?: 'لا يوجد وصف مختصر' !!}</div>
                         </div>
                     </div>
 
                     <div class="col-12">
                         <div class="info-box">
                             <div class="info-label">المحتوى</div>
-                            <div class="info-value content-box">{{ $article->content ?: 'لا يوجد محتوى' }}</div>
+                            <div class="info-value content-box">{!! adminTrans($article->content) ?: 'لا يوجد محتوى' !!}</div>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="info-box">
                             <div class="info-label">SEO Title</div>
-                            <div class="info-value">{{ $article->seo_title ?: '-' }}</div>
+                            <div class="info-value">{{ adminTrans($article->seo_title) ?: '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="info-box">
                             <div class="info-label">SEO Description</div>
-                            <div class="info-value content-box">{{ $article->seo_description ?: '-' }}</div>
+                            <div class="info-value content-box">{{ adminTrans($article->seo_description) ?: '-' }}</div>
                         </div>
                     </div>
                 </div>

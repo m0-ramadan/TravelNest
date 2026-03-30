@@ -27,7 +27,7 @@
                     <!-- الشعار -->
                     <div class="app-brand mb-5 d-flex justify-content-center align-items-center">
                         <a href="{{ url('/') }}" class="app-brand-link">
-                            <img height="100" width="100" src="{{ asset('dashboard/assets/img/tala.png') }}"
+                            <img height="100" width="300" src="{{ asset('dashboard/assets/img/tala.png') }}"
                                 alt="شعار {{ env('APP_NAME') }}">
                         </a>
                     </div>

@@ -2,13 +2,23 @@
 
 namespace App\Models;
 
+use App\Traits\HasTranslatableAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Menu extends Model
 {
-    protected $fillable = ['name', 'location_key'];
+    use HasTranslatableAttributes;
+
+    protected $fillable = [
+        'name',
+        'location_key',
+    ];
+
+    protected $casts = [
+        'name' => 'array',
+    ];
 
     public function items(): HasMany
     {
@@ -23,5 +33,10 @@ class Menu extends Model
     public function translations(): MorphMany
     {
         return $this->morphMany(Translation::class, 'translatable', 'translatable_type', 'translatable_id');
+    }
+
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->translatedValue('name');
     }
 }

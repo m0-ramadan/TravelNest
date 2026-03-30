@@ -109,7 +109,7 @@
                                 @foreach ($categories ?? collect() as $category)
                                     <option value="{{ $category->id }}"
                                         {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
+                                        {{ adminTrans($category->name) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -122,7 +122,7 @@
                                 @foreach ($destinations ?? collect() as $destination)
                                     <option value="{{ $destination->id }}"
                                         {{ old('destination_id') == $destination->id ? 'selected' : '' }}>
-                                        {{ $destination->name }}
+                                        {{ adminTrans($destination->name) }}
                                     </option>
                                 @endforeach
                             </select>

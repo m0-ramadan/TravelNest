@@ -3,7 +3,7 @@
 @section('title', 'إدارة الدول')
 
 @section('css')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
             --primary-color: #696cff;
@@ -307,7 +307,7 @@
                             <div class="row mb-4">
                                 <div class="col-12 text-center">
                                     @if ($country->flag)
-                                        <img src="{{ asset($country->flag) }}" alt="{{ $country->name }}"
+                                        <img src="{{ asset($country->flag) }}" alt="{{ adminTrans($country->name) }}"
                                             class="country-flag">
                                     @else
                                         <div class="no-image">لا توجد صورة</div>
@@ -315,7 +315,7 @@
                                 </div>
                             </div>
                             <div>
-                                <h6 class="mb-1">{{ $country->name ?? 'بدون اسم' }}</h6>
+                                <h6 class="mb-1">{{ $country->display_name ?? 'بدون اسم' }}</h6>
                                 <small class="text-light opacity-75">{{ $country->code ?? '-' }}</small>
                             </div>
 

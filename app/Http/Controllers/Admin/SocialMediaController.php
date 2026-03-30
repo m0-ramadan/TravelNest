@@ -12,11 +12,11 @@ class SocialMediaController extends Controller
     public function index(Request $request): View
     {
         $social_media = SocialMedia::query()
-            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%' . $request->string('q') . '%'))
+            ->when($request->filled('q'), fn($q) => $q->where('name', 'like', '%' . $request->string('q') . '%'))
             ->latest()
             ->paginate($this->perPage($request));
 
-        return $this->view('admin.social-media.index', ['social_media' => $social_media]);
+        return $this->view('admin.social-media.index', ['socialMedia' => $social_media]);
     }
 
     public function create(): View
@@ -83,5 +83,4 @@ class SocialMediaController extends Controller
 
         return back()->with('success', 'Social links updated.');
     }
-
 }

@@ -219,7 +219,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('packages', PackageController::class);
         Route::resource('package-prices', PackagePriceController::class);
 
-        Route::prefix('packages')->name('packages.')->group(function () {
+        Route::prefix('package')->name('packages.')->group(function () {
             Route::get('statistics', [PackageController::class, 'statistics'])->name('statistics');
             Route::post('bulk-action', [PackageController::class, 'bulkAction'])->name('bulk-action');
             Route::post('{package}/toggle-status', [PackageController::class, 'toggleStatus'])->name('toggle-status');
@@ -309,7 +309,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('faqs', FaqController::class);
         Route::resource('testimonials', TestimonialController::class)->except(['create', 'edit']);
 
-        Route::prefix('articles')->name('articles.')->group(function () {
+
+        Route::prefix('article')->name('articles.')->group(function () {
             Route::get('statistics', [ArticleController::class, 'statistics'])->name('statistics');
             Route::post('bulk-actions', [ArticleController::class, 'bulkActions'])->name('bulk-actions');
             Route::patch('{article}/toggle-status', [ArticleController::class, 'toggleStatus'])->name('toggle-status');
@@ -432,6 +433,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/', [SocialMediaController::class, 'index'])->name('index');
             Route::get('{id}/edit', [SocialMediaController::class, 'edit'])->name('edit');
             Route::put('{id}', [SocialMediaController::class, 'update'])->name('update');
+            Route::get('create', [SocialMediaController::class, 'create'])->name('create');
+            Route::post('store', [SocialMediaController::class, 'store'])->name('store');
             Route::post('bulk-update', [SocialMediaController::class, 'bulkUpdate'])->name('bulk-update');
         });
 

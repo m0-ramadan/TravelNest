@@ -101,7 +101,7 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">اسم المدينة</label>
                             <input type="text" name="name" class="form-control"
-                                value="{{ old('name', $city->name) }}">
+                                value="{{ old('name', adminTrans($city->name)) }}">
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -117,7 +117,7 @@
                                 @foreach ($countries ?? collect() as $country)
                                     <option value="{{ $country->id }}"
                                         {{ old('country_id', $city->country_id) == $country->id ? 'selected' : '' }}>
-                                        {{ $country->name }}
+                                        {{ adminTrans($country->name) }}
                                     </option>
                                 @endforeach
                             </select>

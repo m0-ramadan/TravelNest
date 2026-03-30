@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\City;
 use App\Models\Country;
+use App\Traits\HandlesTranslatedFields;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class CityController extends Controller
 {
+    use HandlesTranslatedFields;
+
     public function index(Request $request): View
     {
         $cities = City::query()
@@ -17,10 +20,11 @@ class CityController extends Controller
                 $search = $request->string('search');
 
                 $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', '%' . $search . '%')
-                        ->orWhereHas('country', function ($countryQuery) use ($search) {
-                            $countryQuery->where('name', 'like', '%' . $search . '%');
-                        });
+                    $this->applyTranslatedSearch($q, ['name'], $search);
+
+                    $q->orWhereHas('country', function ($countryQuery) use ($search) {
+                        $this->applyTranslatedSearch($countryQuery, ['name'], $search);
+                    });
                 });
             })
             ->when($request->filled('country_id'), function ($query) use ($request) {
@@ -60,6 +64,8 @@ class CityController extends Controller
             'slug' => ['nullable', 'string'],
         ]);
 
+        $data = $this->translateModelFields($data, ['name']);
+
         City::create($data);
 
         return $this->success('admin.cities.index', 'City created.');
@@ -73,6 +79,7 @@ class CityController extends Controller
     public function edit(City $city): View
     {
         $countries = Country::where('is_active', true)->get();
+
         return $this->view('admin.cities.edit', compact('city', 'countries'));
     }
 
@@ -82,7 +89,10 @@ class CityController extends Controller
             'country_id' => ['nullable', 'integer'],
             'name' => ['nullable', 'string'],
             'slug' => ['nullable', 'string'],
+            'sort_order' => ['nullable'],
         ]);
+
+        $data = $this->translateModelFields($data, ['name']);
 
         $city->update($data);
 

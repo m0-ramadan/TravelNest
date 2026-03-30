@@ -69,7 +69,7 @@
         <div class="profile-card">
             <div class="profile-header d-flex justify-content-between align-items-center">
                 <div>
-                    <h4 class="mb-1">{{ $paymentMethod->name ?? 'بدون اسم' }}</h4>
+                    <h4 class="mb-1">{{ adminTrans($paymentMethod->name) ?: 'بدون اسم' }}</h4>
                     <small class="opacity-75">{{ $paymentMethod->type ?? '-' }}</small>
                 </div>
                 <div class="d-flex gap-2">
@@ -83,7 +83,7 @@
                     <div class="col-md-4">
                         <div class="info-box">
                             <div class="info-label">الاسم</div>
-                            <div class="info-value">{{ $paymentMethod->name ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans($paymentMethod->name) ?: '-' }}</div>
                         </div>
                     </div>
 
@@ -125,7 +125,7 @@
                     <div class="col-12">
                         <div class="info-box">
                             <div class="info-label">الوصف</div>
-                            <div class="info-value">{{ $paymentMethod->description ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans($paymentMethod->description) ?: '-' }}</div>
                         </div>
                     </div>
 

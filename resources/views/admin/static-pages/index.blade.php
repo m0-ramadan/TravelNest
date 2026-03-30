@@ -237,10 +237,10 @@
                     <div class="item-row">
                         <div class="d-flex justify-content-between align-items-start flex-wrap">
                             <div>
-                                <h6 class="mb-2">{{ $page->title ?? 'بدون عنوان' }}</h6>
+                                <h6 class="mb-2">{{ adminTrans($page->title) ?: 'بدون عنوان' }}</h6>
                                 <div class="mb-2">Slug: {{ $page->slug ?? '-' }}</div>
                                 <small
-                                    class="text-light opacity-75">{{ \Illuminate\Support\Str::limit($page->content ?? '-', 140) }}</small>
+                                    class="text-light opacity-75">{{ \Illuminate\Support\Str::limit(adminTrans($page->content) ?: '-', 140) }}</small>
                             </div>
                             <div class="d-flex gap-2 mt-2 mt-md-0">
                                 <a href="{{ route('admin.static-pages.show', $page) }}" class="btn btn-sm btn-info">عرض</a>

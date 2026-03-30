@@ -68,6 +68,24 @@
             font-weight: 600;
             margin-bottom: 8px;
         }
+
+        .image-preview {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .1);
+            margin-top: 10px;
+            display: none;
+        }
+
+        pre.json-box {
+            background: rgba(255, 255, 255, .04);
+            color: #fff;
+            padding: 12px;
+            border-radius: 10px;
+            min-height: 140px;
+        }
     </style>
 @endsection
 
@@ -98,7 +116,7 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">اسم الوجهة</label>
+                            <label class="form-label">الاسم</label>
                             <input type="text" name="name" class="form-control" value="{{ old('name') }}">
                         </div>
 
@@ -107,27 +125,46 @@
                             <input type="text" name="slug" class="form-control" value="{{ old('slug') }}">
                         </div>
 
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">النوع</label>
+                            <select name="type" class="form-select">
+                                <option value="city" {{ old('type', 'city') == 'city' ? 'selected' : '' }}>city</option>
+                                <option value="country" {{ old('type') == 'country' ? 'selected' : '' }}>country</option>
+                                <option value="region" {{ old('type') == 'region' ? 'selected' : '' }}>region</option>
+                                <option value="attraction" {{ old('type') == 'attraction' ? 'selected' : '' }}>attraction
+                                </option>
+                                <option value="poi" {{ old('type') == 'poi' ? 'selected' : '' }}>poi</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">الدولة</label>
-                            <select name="country_id" class="form-select">
+                            <select name="country_id" id="country_id" class="form-select">
                                 <option value="">اختر الدولة</option>
                                 @foreach ($countries ?? collect() as $country)
                                     <option value="{{ $country->id }}"
                                         {{ old('country_id') == $country->id ? 'selected' : '' }}>
-                                        {{ $country->name }}
+                                        {{ adminTrans($country->name) }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
 
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">المدينة</label>
-                            <select name="city_id" class="form-select">
+                            <select name="city_id" id="city_id" class="form-select">
                                 <option value="">اختر المدينة</option>
-                                @foreach ($cities ?? collect() as $city)
-                                    <option value="{{ $city->id }}"
-                                        {{ old('city_id') == $city->id ? 'selected' : '' }}>
-                                        {{ $city->name }}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">الوجهة الأم</label>
+                            <select name="parent_id" class="form-select">
+                                <option value="">بدون</option>
+                                @foreach ($parents ?? collect() as $parent)
+                                    <option value="{{ $parent->id }}"
+                                        {{ old('parent_id') == $parent->id ? 'selected' : '' }}>
+                                        {{ adminTrans($parent->name) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -140,13 +177,54 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">الصورة</label>
-                            <input type="file" name="image" class="form-control">
+                            <label class="form-label">Latitude</label>
+                            <input type="text" name="latitude" class="form-control" value="{{ old('latitude') }}">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Longitude</label>
+                            <input type="text" name="longitude" class="form-control" value="{{ old('longitude') }}">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Hero Image</label>
+                            <input type="file" name="hero_image" class="form-control" id="hero_image">
+                            <img id="hero_preview" class="image-preview" alt="hero preview">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Featured Image</label>
+                            <input type="file" name="featured_image" class="form-control" id="featured_image">
+                            <img id="featured_preview" class="image-preview" alt="featured preview">
                         </div>
 
                         <div class="col-md-12 mb-3">
-                            <label class="form-label">الوصف</label>
+                            <label class="form-label">Short Description</label>
+                            <textarea name="short_description" class="form-control" rows="3">{{ old('short_description') }}</textarea>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Description</label>
                             <textarea name="description" class="form-control" rows="5">{{ old('description') }}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="section-title mt-4">SEO</div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">SEO Title</label>
+                            <input type="text" name="seo_title" class="form-control" value="{{ old('seo_title') }}">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">SEO Description</label>
+                            <textarea name="seo_description" class="form-control" rows="3">{{ old('seo_description') }}</textarea>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Schema JSON</label>
+                            <textarea name="schema_json" class="form-control" rows="6">{{ old('schema_json') }}</textarea>
                         </div>
 
                         <div class="col-md-12 mb-3 d-flex gap-4">
@@ -172,4 +250,64 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('js')
+    <script>
+        const countries = @json($countries);
+        const countrySelect = document.getElementById('country_id');
+        const citySelect = document.getElementById('city_id');
+        const oldCityId = "{{ old('city_id') }}";
+
+        function loadCities(countryId, selectedCityId = null) {
+            citySelect.innerHTML = '<option value="">اختر المدينة</option>';
+
+            if (!countryId) return;
+
+            const selectedCountry = countries.find(country => String(country.id) === String(countryId));
+
+            if (selectedCountry && selectedCountry.cities && selectedCountry.cities.length > 0) {
+                selectedCountry.cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city.id;
+                    option.textContent = city.name;
+
+                    if (selectedCityId && String(selectedCityId) === String(city.id)) {
+                        option.selected = true;
+                    }
+
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+
+        countrySelect.addEventListener('change', function() {
+            loadCities(this.value);
+        });
+
+        window.addEventListener('load', function() {
+            if (countrySelect.value) {
+                loadCities(countrySelect.value, oldCityId);
+            }
+        });
+
+        function previewImage(inputId, previewId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+
+            input.addEventListener('change', function() {
+                const file = this.files[0];
+                if (!file) {
+                    preview.style.display = 'none';
+                    return;
+                }
+
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+            });
+        }
+
+        previewImage('hero_image', 'hero_preview');
+        previewImage('featured_image', 'featured_preview');
+    </script>
 @endsection

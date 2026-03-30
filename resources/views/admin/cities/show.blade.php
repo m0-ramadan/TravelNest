@@ -68,7 +68,7 @@
         <div class="profile-card">
             <div class="profile-header d-flex justify-content-between align-items-center">
                 <div>
-                    <h4 class="mb-1">{{ $city->name ?? 'بدون اسم' }}</h4>
+                    <h4 class="mb-1">{{ adminTrans($city->name) ?: 'بدون اسم' }}</h4>
                     <small class="opacity-75">{{ $city->slug ?? '-' }}</small>
                 </div>
 
@@ -83,7 +83,7 @@
                     <div class="col-md-4">
                         <div class="info-box">
                             <div class="info-label">الدولة</div>
-                            <div class="info-value">{{ $city->country->name ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans(optional($city->country)->name) ?: '-' }}</div>
                         </div>
                     </div>
 
@@ -119,7 +119,7 @@
                     <div class="col-12">
                         <div class="info-box">
                             <div class="info-label">الوصف</div>
-                            <div class="info-value">{{ $city->description ?: 'لا يوجد وصف' }}</div>
+                            <div class="info-value">{{ adminTrans($city->description) ?: 'لا يوجد وصف' }}</div>
                         </div>
                     </div>
                 </div>

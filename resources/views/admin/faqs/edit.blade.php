@@ -93,12 +93,12 @@
                         <div class="col-md-12 mb-3">
                             <label class="form-label">السؤال</label>
                             <input type="text" name="question" class="form-control"
-                                value="{{ old('question', $faq->question) }}">
+                                value="{{ old('question', adminTrans($faq->question)) }}">
                         </div>
 
                         <div class="col-md-12 mb-3">
                             <label class="form-label">الإجابة</label>
-                            <textarea name="answer" class="form-control" rows="8">{{ old('answer', $faq->answer) }}</textarea>
+                            <textarea name="answer" class="form-control" rows="8">{{ old('answer', adminTrans($faq->answer)) }}</textarea>
                         </div>
 
                         <div class="col-md-4 mb-3">

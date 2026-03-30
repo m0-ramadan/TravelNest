@@ -93,73 +93,74 @@
         <div class="main-card">
             <div class="main-header d-flex justify-content-between align-items-center">
                 <div>
-                    <h5 class="mb-0">عناصر القائمة: {{ $menu->name ?? '-' }}</h5>
+                    <h5 class="mb-0">عناصر القائمة: {{ adminTrans($menu->name) ?: '-' }}</h5>
                     <small class="opacity-75">إدارة روابط وعناصر القائمة</small>
                 </div>
                 <a href="{{ route('admin.menus.index') }}" class="btn btn-light">رجوع</a>
             </div>
 
             <div class="p-4">
-                @if (Route::has('admin.menu-items.store'))
-                    <div class="section-card">
-                        <h5 class="mb-3">إضافة عنصر جديد</h5>
 
-                        <form action="{{ route('admin.menu-items.store') }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="menu_id" value="{{ $menu->id }}">
+                <div class="section-card">
+                    <h5 class="mb-3">إضافة عنصر جديد</h5>
 
-                            <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label">العنوان</label>
-                                    <input type="text" name="title" class="form-control">
-                                </div>
+                    <form action="{{ route('admin.menu-items.store') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="menu_id" value="{{ $menu->id }}">
 
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label">الرابط</label>
-                                    <input type="text" name="url" class="form-control">
-                                </div>
-
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label">Parent Item</label>
-                                    <select name="parent_id" class="form-select">
-                                        <option value="">بدون</option>
-                                        @foreach ($menu->items ?? collect() as $parentItem)
-                                            <option value="{{ $parentItem->id }}">{{ $parentItem->title }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">الترتيب</label>
-                                    <input type="number" name="sort_order" class="form-control" value="0">
-                                </div>
-
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">الهدف</label>
-                                    <select name="target" class="form-select">
-                                        <option value="_self">_self</option>
-                                        <option value="_blank">_blank</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">الأيقونة</label>
-                                    <input type="text" name="icon" class="form-control">
-                                </div>
-
-                                <div class="col-md-3 mb-3 d-flex align-items-end">
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" value="1" name="is_active"
-                                            id="is_active" checked>
-                                        <label class="form-check-label" for="is_active">مفعل</label>
-                                    </div>
-                                </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">العنوان</label>
+                                <input type="text" name="title" class="form-control">
                             </div>
 
-                            <button class="btn btn-primary" type="submit">إضافة العنصر</button>
-                        </form>
-                    </div>
-                @endif
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">الرابط</label>
+                                <input type="text" name="url" class="form-control">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Parent Item</label>
+                                <select name="parent_id" class="form-select">
+                                    <option value="">بدون</option>
+                                    @foreach ($menu->items ?? collect() as $parentItem)
+                                        <option value="{{ $parentItem->id }}">{{ adminTrans($parentItem->title) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">الترتيب</label>
+                                <input type="number" name="sort_order" class="form-control" value="0">
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">الهدف</label>
+                                <select name="target" class="form-select">
+                                    <option value="_self">_self</option>
+                                    <option value="_blank">_blank</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">الأيقونة</label>
+                                <input type="text" name="icon" class="form-control">
+                            </div>
+
+                            <div class="col-md-3 mb-3 d-flex align-items-end">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" value="1" name="is_active"
+                                        id="is_active" checked>
+                                    <label class="form-check-label" for="is_active">مفعل</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" type="submit">إضافة العنصر</button>
+                    </form>
+                </div>
+
 
                 <div class="section-card">
                     <h5 class="mb-3">العناصر الحالية</h5>
@@ -168,7 +169,7 @@
                         <div class="item-card">
                             <div class="d-flex justify-content-between align-items-start flex-wrap mb-3">
                                 <div>
-                                    <h6 class="mb-1">{{ $item->title ?? '-' }}</h6>
+                                    <h6 class="mb-1">{{ adminTrans($item->title) ?: '-' }}</h6>
                                     <small class="text-light opacity-75">{{ $item->url ?? '-' }}</small>
                                 </div>
 

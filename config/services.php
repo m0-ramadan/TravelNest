@@ -40,6 +40,11 @@ return [
         'public_key' => env('PAYMOB_PUBLIC_KEY', 'ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3lJNklrMWxjbU5vWVc1MElpd2ljSEp2Wm1sc1pWOXdheUk2TVRNd09UUXNJbTVoYldVaU9pSnBibWwwYVdGc0luMC5lamwwLTNBaWM3b3BZWjNhV3FqTmU4RjU2OUVPaU9NNUhqRjlTaThxVmRJSkN3dU1fN21UTmV1ZUpzbUdqMlpBajg3NkJyMEtGTlJLb0NwM21iMnp2UQ=='),
         'password' => env('PAYMOB_PASSWORD', 'Almlm13212..@'),
         'mode'            => env('PAYMOB_MODE', 'test'),
-
+    ],
+    'deepseek' => [
+        'api_key' => env('DEEPSEEK_API_KEY'),
+        'model' => env('DEEPSEEK_MODEL', 'deepseek-chat'),
+        'base_url' => env('DEEPSEEK_BASE_URL', 'https://api.deepseek.com/v1/chat/completions'),
+        'timeout' => 60,
     ],
 ];

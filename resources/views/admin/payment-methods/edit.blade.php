@@ -84,7 +84,7 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">اسم الوسيلة</label>
                             <input type="text" name="name" class="form-control"
-                                value="{{ old('name', $paymentMethod->name) }}">
+                                value="{{ old('name', adminTrans($paymentMethod->name)) }}">
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -107,7 +107,7 @@
 
                         <div class="col-md-12 mb-3">
                             <label class="form-label">الوصف</label>
-                            <textarea name="description" class="form-control" rows="4">{{ old('description', $paymentMethod->description) }}</textarea>
+                            <textarea name="description" class="form-control" rows="4">{{ old('description', adminTrans($paymentMethod->description)) }}</textarea>
                         </div>
 
                         <div class="col-md-12 mb-3">

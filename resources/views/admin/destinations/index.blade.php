@@ -3,7 +3,7 @@
 @section('title', 'إدارة الوجهات')
 
 @section('css')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
             --primary-color: #696cff;
@@ -260,7 +260,7 @@
                             @foreach ($countries ?? collect() as $country)
                                 <option value="{{ $country->id }}"
                                     {{ request('country_id') == $country->id ? 'selected' : '' }}>
-                                    {{ $country->name }}
+                                    {{ adminTrans($country->name) }}
                                 </option>
                             @endforeach
                         </select>
@@ -300,7 +300,7 @@
                     <div class="item-card">
                         <div class="item-header">
                             <div>
-                                <h6 class="mb-1">{{ $destination->name ?? 'بدون اسم' }}</h6>
+                                <h6 class="mb-1">{{ adminTrans($destination->name) ?: 'بدون اسم' }}</h6>
                                 <small class="text-light opacity-75">{{ $destination->slug ?? '-' }}</small>
                             </div>
 
@@ -318,12 +318,12 @@
                         <div class="detail-row">
                             <div>
                                 <span class="detail-label">الدولة:</span>
-                                <span>{{ $destination->country->name ?? '-' }}</span>
+                                <span>{{ adminTrans(optional($destination->country)->name) ?: '-' }}</span>
                             </div>
 
                             <div>
                                 <span class="detail-label">المدينة:</span>
-                                <span>{{ $destination->city->name ?? '-' }}</span>
+                                <span>{{ adminTrans(optional($destination->city)->name) ?: '-' }}</span>
                             </div>
 
                             <div>

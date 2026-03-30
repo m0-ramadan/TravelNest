@@ -3,7 +3,7 @@
 @section('title', 'الحجوزات')
 
 @section('css')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
             --primary-color: #696cff;
@@ -285,8 +285,7 @@
 
                         <div class="d-flex gap-2 flex-wrap">
                             <a href="{{ route('admin.bookings.show', $booking) }}" class="btn btn-info btn-sm">عرض</a>
-                            <a href="{{ route('admin.bookings.edit', $booking) }}"
-                                class="btn btn-warning btn-sm">تعديل</a>
+                            <a href="{{ route('admin.bookings.edit', $booking) }}" class="btn btn-warning btn-sm">تعديل</a>
                             <a href="{{ route('admin.bookings.print', $booking) }}"
                                 class="btn btn-secondary btn-sm">طباعة</a>
 

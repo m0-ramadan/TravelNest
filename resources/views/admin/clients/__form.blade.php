@@ -92,7 +92,7 @@ use App\Models\Region;
         @foreach ($parents as $parent)
         <option value="{{ $parent->id }}" @if (old('parent_id', isset($transfer) ? $transfer->parent_id : '') ==
             $parent->id) selected @endif>
-            {{ $parent->name }} ({{ $parent->type == 1 ? 'Admin' : 'Employee' }})
+            {{ adminTrans($parent->name) }} ({{ $parent->type == 1 ? 'Admin' : 'Employee' }})
         </option>
         @endforeach
     </select>

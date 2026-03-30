@@ -3,20 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\PaymentMethod;
+use App\Traits\HandlesTranslatedFields;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class PaymentMethodController extends Controller
 {
+    use HandlesTranslatedFields;
+
     public function index(Request $request): View
     {
-        $payment_methods = PaymentMethod::query()
-            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%' . $request->string('q') . '%'))
+        $paymentMethods = PaymentMethod::query()
+            ->when($request->filled('q'), function ($query) use ($request) {
+                $this->applyTranslatedSearch($query, ['name'], $request->string('q'));
+            })
             ->latest()
             ->paginate($this->perPage($request));
 
-        return $this->view('admin.payment-methods.index', ['payment_methods' => $payment_methods]);
+        return $this->view('admin.payment-methods.index', compact('paymentMethods'));
     }
 
     public function create(): View
@@ -28,12 +33,14 @@ class PaymentMethodController extends Controller
     {
         $data = $request->validate([
             'name' => ['nullable', 'string'],
-            'code' => ['nullable', 'string'],
-            'description' => ['nullable', 'string'],
-            'image' => ['nullable', 'string'],
+            'slug' => ['nullable', 'string'],
+            'provider' => ['nullable', 'string'],
+            'is_online' => ['nullable', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer'],
         ]);
+
+        $data = $this->translateModelFields($data, ['name']);
 
         PaymentMethod::create($data);
 
@@ -54,12 +61,14 @@ class PaymentMethodController extends Controller
     {
         $data = $request->validate([
             'name' => ['nullable', 'string'],
-            'code' => ['nullable', 'string'],
-            'description' => ['nullable', 'string'],
-            'image' => ['nullable', 'string'],
+            'slug' => ['nullable', 'string'],
+            'provider' => ['nullable', 'string'],
+            'is_online' => ['nullable', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer'],
         ]);
+
+        $data = $this->translateModelFields($data, ['name']);
 
         $paymentMethod->update($data);
 
@@ -72,11 +81,4 @@ class PaymentMethodController extends Controller
 
         return $this->success('admin.payment-methods.index', 'PaymentMethod deleted.');
     }
-
-    public function toggleStatus(PaymentMethod $paymentMethod): RedirectResponse
-    {
-        $paymentMethod->update(['is_active' => ! (bool) $paymentMethod->is_active]);
-        return back()->with('success', 'Payment method status updated.');
-    }
-
 }
