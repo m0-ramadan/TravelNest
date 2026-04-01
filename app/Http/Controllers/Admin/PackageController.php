@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Currency;
 use App\Models\Destination;
 use App\Models\Package;
 use App\Models\PackageCategory;
@@ -30,7 +31,10 @@ class PackageController extends Controller
 
     public function create(): View
     {
-        return $this->view('admin.packages.create');
+        $categories = PackageCategory::all();
+        $destinations = Destination::all();
+        $currencies = Currency::all();
+        return $this->view('admin.packages.create', ['categories' => $categories, 'destinations' => $destinations, 'currencies' => $currencies]);
     }
 
     public function store(Request $request): RedirectResponse
