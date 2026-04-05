@@ -342,7 +342,7 @@
         }
 
         document.getElementById('btn-ai-title').addEventListener('click', async function() {
-            const data = await postAi('{{ route('admin.articles.ai.generate-title') }}', {
+            const data = await postAi('{{ route('admin.articles.ai-generate-title') }}', {
                 topic: document.getElementById('title').value || document.getElementById('excerpt')
                     .value || 'مقال'
             });
@@ -353,7 +353,7 @@
         });
 
         document.getElementById('btn-ai-content').addEventListener('click', async function() {
-            const data = await postAi('{{ route('admin.articles.ai.generate-content') }}', {
+            const data = await postAi('{{ route('admin.articles.ai-generate-content') }}', {
                 title: document.getElementById('title').value || 'مقال',
                 excerpt: document.getElementById('excerpt').value || ''
             });
@@ -364,7 +364,7 @@
         });
 
         document.getElementById('btn-ai-excerpt').addEventListener('click', async function() {
-            const data = await postAi('{{ route('admin.articles.ai.generate-excerpt') }}', {
+            const data = await postAi('{{ route('admin.articles.ai-generate-excerpt') }}', {
                 title: document.getElementById('title').value || 'مقال',
                 content: getContent()
             });
@@ -375,7 +375,7 @@
         });
 
         document.getElementById('btn-ai-enhance').addEventListener('click', async function() {
-            const data = await postAi('{{ route('admin.articles.ai.enhance-content') }}', {
+            const data = await postAi('{{ route('admin.articles.ai-enhance-content') }}', {
                 content: getContent(),
                 instruction: 'حسن الأسلوب والتنظيم والوضوح مع الحفاظ على المعنى'
             });
@@ -386,7 +386,7 @@
         });
 
         document.getElementById('btn-ai-translate').addEventListener('click', async function() {
-            const data = await postAi('{{ route('admin.articles.ai.translate-all') }}', {
+            const data = await postAi('{{ route('admin.articles.ai-translate-all') }}', {
                 title: document.getElementById('title').value,
                 excerpt: document.getElementById('excerpt').value,
                 content: getContent(),
@@ -407,13 +407,13 @@
         });
 
         document.getElementById('btn-ai-seo').addEventListener('click', async function() {
-            const metaTitle = await postAi('{{ route('admin.articles.ai.generate-meta-title') }}', {
+            const metaTitle = await postAi('{{ route('admin.articles.ai-generate-meta-title') }}', {
                 title: document.getElementById('title').value,
                 content: getContent()
             });
 
             const metaDescription = await postAi(
-                '{{ route('admin.articles.ai.generate-meta-description') }}', {
+                '{{ route('admin.articles.ai-generate-meta-description') }}', {
                     title: document.getElementById('title').value,
                     content: getContent()
                 });
