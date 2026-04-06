@@ -5,15 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Article;
 use App\Services\ArticleAiService;
 use App\Traits\HandlesTranslatedFields;
+use App\Traits\UploadFileTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
+
 class ArticleController extends Controller
 {
-    use HandlesTranslatedFields;
+    use HandlesTranslatedFields, UploadFileTrait;
 
     public function index(Request $request): View
     {
@@ -36,16 +38,28 @@ class ArticleController extends Controller
         return $this->view('admin.articles.create');
     }
 
+
+    public function show(Article $article): View
+    {
+        return $this->view('admin.articles.show', compact('article'));
+    }
+
+    public function edit(Article $article): View
+    {
+        return $this->view('admin.articles.edit', compact('article'));
+    }
+
+
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'category_id' => ['nullable', 'integer'],
-            'slug' => ['nullable', 'string'],
+            'slug' => ['nullable', 'string', 'max:255'],
             'title' => ['nullable', 'string'],
             'excerpt' => ['nullable', 'string'],
             'content' => ['nullable', 'string'],
-            'featured_image' => ['nullable', 'string'],
-            'post_type' => ['nullable', 'string'],
+            'featured_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'post_type' => ['nullable', 'string', 'max:255'],
             'author_id' => ['nullable', 'integer'],
             'published_at' => ['nullable', 'date'],
             'is_featured' => ['nullable', 'boolean'],
@@ -61,6 +75,10 @@ class ArticleController extends Controller
             'seo_title',
             'seo_description',
         ]);
+
+        if ($request->hasFile('featured_image')) {
+            $data['featured_image'] = $this->uploadImage('articles', $request->file('featured_image'));
+        }
 
         if (empty($data['slug']) && !empty($data['title'])) {
             $slugSource = is_array($data['title'])
@@ -78,26 +96,16 @@ class ArticleController extends Controller
         return $this->success('admin.articles.index', 'Article created.');
     }
 
-    public function show(Article $article): View
-    {
-        return $this->view('admin.articles.show', compact('article'));
-    }
-
-    public function edit(Article $article): View
-    {
-        return $this->view('admin.articles.edit', compact('article'));
-    }
-
     public function update(Request $request, Article $article): RedirectResponse
     {
         $data = $request->validate([
             'category_id' => ['nullable', 'integer'],
-            'slug' => ['nullable', 'string'],
+            'slug' => ['nullable', 'string', 'max:255'],
             'title' => ['nullable', 'string'],
             'excerpt' => ['nullable', 'string'],
             'content' => ['nullable', 'string'],
-            'featured_image' => ['nullable', 'string'],
-            'post_type' => ['nullable', 'string'],
+            'featured_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'post_type' => ['nullable', 'string', 'max:255'],
             'author_id' => ['nullable', 'integer'],
             'published_at' => ['nullable', 'date'],
             'is_featured' => ['nullable', 'boolean'],
@@ -113,6 +121,10 @@ class ArticleController extends Controller
             'seo_title',
             'seo_description',
         ]);
+
+        if ($request->hasFile('featured_image')) {
+            $data['featured_image'] = $this->uploadImage('articles', $request->file('featured_image'));
+        }
 
         if (empty($data['slug']) && !empty($data['title'])) {
             $slugSource = is_array($data['title'])
