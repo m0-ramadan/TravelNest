@@ -97,6 +97,7 @@
             gap: 10px;
         }
 
+        /* AI Loading */
         .loading-overlay {
             position: fixed;
             inset: 0;
@@ -128,6 +129,79 @@
             animation: spin 1s linear infinite;
         }
 
+        /* Submit Page Loader */
+        .page-loader {
+            position: fixed;
+            inset: 0;
+            background: rgba(30, 30, 45, 0.92);
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .page-loader.active {
+            display: flex;
+        }
+
+        .loader-box {
+            width: 100%;
+            max-width: 420px;
+            background: #2b3b4c;
+            border-radius: 20px;
+            padding: 30px 25px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, .08);
+        }
+
+        .loader-spinner {
+            width: 65px;
+            height: 65px;
+            border: 5px solid rgba(255, 255, 255, .15);
+            border-top: 5px solid #696cff;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        .loader-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .loader-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, .75);
+            margin-bottom: 20px;
+        }
+
+        .progress-wrapper {
+            width: 100%;
+            height: 14px;
+            background: rgba(255, 255, 255, .08);
+            border-radius: 30px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar-custom {
+            width: 0%;
+            height: 100%;
+            background: var(--primary-gradient);
+            border-radius: 30px;
+            transition: width .3s ease;
+        }
+
+        .progress-percent {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+        }
+
         .ck.ck-editor {
             width: 100%;
         }
@@ -152,10 +226,26 @@
 @endsection
 
 @section('content')
+    {{-- Loader خاص بأزرار الذكاء الاصطناعي --}}
     <div class="loading-overlay" id="ai-loading">
         <div class="loading-box">
             <div class="spinner"></div>
             <div>جاري تنفيذ طلب الذكاء الاصطناعي...</div>
+        </div>
+    </div>
+
+    {{-- Loader خاص بالحفظ --}}
+    <div class="page-loader" id="pageLoader">
+        <div class="loader-box">
+            <div class="loader-spinner"></div>
+            <div class="loader-title">جاري حفظ المقال...</div>
+            <div class="loader-text">برجاء الانتظار أثناء تحديث بيانات المقال</div>
+
+            <div class="progress-wrapper">
+                <div class="progress-bar-custom" id="progressBar"></div>
+            </div>
+
+            <div class="progress-percent" id="progressPercent">0%</div>
         </div>
     </div>
 
@@ -198,7 +288,7 @@
                 </div>
 
                 <form action="{{ route('admin.articles.update', $article->id) }}" method="POST"
-                    enctype="multipart/form-data">
+                    enctype="multipart/form-data" id="articleForm">
                     @csrf
                     @method('PUT')
 
@@ -283,7 +373,7 @@
                     </div>
 
                     <div class="d-flex gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary">حفظ</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">حفظ</button>
                         <a href="{{ route('admin.articles.index') }}" class="btn btn-secondary">إلغاء</a>
                     </div>
                 </form>
@@ -422,14 +512,65 @@
             });
 
             const metaDescription = await postAi(
-                '{{ route('admin.articles.ai-generate-meta-description') }}', {
-                    title: document.getElementById('title').value,
-                    content: getContent()
-                });
+            '{{ route('admin.articles.ai-generate-meta-description') }}', {
+                title: document.getElementById('title').value,
+                content: getContent()
+            });
 
-            if (metaTitle?.meta_title) document.getElementById('seo_title').value = metaTitle.meta_title;
-            if (metaDescription?.meta_description) document.getElementById('seo_description').value =
-                metaDescription.meta_description;
+            if (metaTitle?.meta_title) {
+                document.getElementById('seo_title').value = metaTitle.meta_title;
+            }
+
+            if (metaDescription?.meta_description) {
+                document.getElementById('seo_description').value = metaDescription.meta_description;
+            }
+        });
+
+        // Submit loader
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('articleForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const pageLoader = document.getElementById('pageLoader');
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
+
+            let progress = 0;
+            let interval = null;
+            let submitted = false;
+
+            form.addEventListener('submit', function(event) {
+                if (submitted) {
+                    event.preventDefault();
+                    return false;
+                }
+
+                submitted = true;
+                submitBtn.disabled = true;
+                pageLoader.classList.add('active');
+
+                interval = setInterval(() => {
+                    if (progress < 90) {
+                        progress += Math.floor(Math.random() * 10) + 3;
+
+                        if (progress > 90) progress = 90;
+
+                        progressBar.style.width = progress + '%';
+                        progressPercent.textContent = progress + '%';
+                    }
+                }, 200);
+            });
+
+            window.addEventListener('pageshow', function() {
+                clearInterval(interval);
+                progress = 0;
+
+                if (progressBar) progressBar.style.width = '0%';
+                if (progressPercent) progressPercent.textContent = '0%';
+                if (pageLoader) pageLoader.classList.remove('active');
+                if (submitBtn) submitBtn.disabled = false;
+
+                submitted = false;
+            });
         });
     </script>
 @endsection
