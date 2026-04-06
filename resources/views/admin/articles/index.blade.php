@@ -526,7 +526,7 @@
 
                                         <div class="detail-item">
                                             <span class="detail-label">النوع:</span>
-                                            <span class="detail-value">{{ $article->post_type ?? '-' }}</span>
+                                            <span class="detail-value">{{ $article->article_type ?? '-' }}</span>
                                         </div>
 
                                         <div class="detail-item">

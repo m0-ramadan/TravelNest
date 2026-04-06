@@ -309,8 +309,8 @@
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">النوع</label>
-                            <input type="text" name="post_type" class="form-control"
-                                value="{{ old('post_type', $article->post_type) }}">
+                            <input type="text" name="article_type" class="form-control"
+                                value="{{ old('article_type', $article->article_type) }}">
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -512,10 +512,10 @@
             });
 
             const metaDescription = await postAi(
-            '{{ route('admin.articles.ai-generate-meta-description') }}', {
-                title: document.getElementById('title').value,
-                content: getContent()
-            });
+                '{{ route('admin.articles.ai-generate-meta-description') }}', {
+                    title: document.getElementById('title').value,
+                    content: getContent()
+                });
 
             if (metaTitle?.meta_title) {
                 document.getElementById('seo_title').value = metaTitle.meta_title;

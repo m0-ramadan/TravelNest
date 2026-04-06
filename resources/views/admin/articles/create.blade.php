@@ -217,7 +217,8 @@
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">النوع</label>
-                            <input type="text" name="post_type" class="form-control" value="{{ old('post_type') }}">
+                            <input type="text" name="article_type" class="form-control"
+                                value="{{ old('article_type') }}">
                         </div>
 
                         <div class="col-md-6 mb-3">
