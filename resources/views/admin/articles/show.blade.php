@@ -148,6 +148,20 @@
                             <div class="info-value content-box">{{ adminTrans($article->seo_description) ?: '-' }}</div>
                         </div>
                     </div>
+
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label"> صورة المقال </div>
+                            <div class="info-value content-box">
+                                @if ($article->featured_image)
+                                    <img src="{{ asset('storage/' . $article->featured_image) }}"
+                                        style="width:150px;height:150px;object-fit:cover;border-radius:10px;">
+                                @else
+                                    لا توجد صورة
+                                @endif
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

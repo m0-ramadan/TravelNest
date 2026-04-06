@@ -241,6 +241,14 @@
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">صورة المقال</label>
+
+                            @if ($article->featured_image)
+                                <div class="mb-2">
+                                    <img src="{{ asset('storage/' . $article->featured_image) }}"
+                                        style="width:150px;height:150px;object-fit:cover;border-radius:10px;">
+                                </div>
+                            @endif
+
                             <input type="file" name="featured_image" class="form-control">
                         </div>
                     </div>
