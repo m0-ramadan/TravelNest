@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ArticleController;
+use App\Http\Controllers\Admin\AttractionController;
 use App\Http\Controllers\Admin\BookingController;
 use App\Http\Controllers\Admin\CityController;
 use App\Http\Controllers\Admin\ClientController;
@@ -363,6 +364,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('bulk-action', [FaqController::class, 'bulkAction'])->name('bulk-action');
         });
 
+        Route::resource('attractions', AttractionController::class);
+        Route::prefix('attractions')->name('attractions.')->group(function () {
+            Route::get('statistics', [AttractionController::class, 'statistics'])->name('statistics');
+            Route::post('bulk-actions', [AttractionController::class, 'bulkActions'])->name('bulk-actions');
+            Route::patch('{attraction}/toggle-status', [AttractionController::class, 'toggleStatus'])->name('toggle-status');
+        });
 
         Route::prefix('testimonials')->name('testimonials.')->group(function () {
             Route::post('{testimonial}/toggle-status', [TestimonialController::class, 'toggleStatus'])->name('toggle-status');
