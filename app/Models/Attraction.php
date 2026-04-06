@@ -19,19 +19,27 @@ class Attraction extends Model
         'short_description',
         'description',
         'image',
+        'opening_hours',
+        'map_url',
+        'is_featured',
         'is_active',
-        'seo_title',
-        'seo_description',
+        'sort_order',
     ];
 
     protected $casts = [
         'name' => 'array',
         'short_description' => 'array',
         'description' => 'array',
-        'seo_title' => 'array',
-        'seo_description' => 'array',
+        'is_featured' => 'boolean',
         'is_active' => 'boolean',
+        'sort_order' => 'integer',
     ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relations
+    |--------------------------------------------------------------------------
+    */
 
     public function destination(): BelongsTo
     {
@@ -45,16 +53,32 @@ class Attraction extends Model
 
     public function translations(): MorphMany
     {
-        return $this->morphMany(Translation::class, 'translatable', 'translatable_type', 'translatable_id');
+        return $this->morphMany(Translation::class, 'translatable');
     }
 
     public function seoMeta(): MorphMany
     {
-        return $this->morphMany(SeoMeta::class, 'model', 'model_type', 'model_id');
+        return $this->morphMany(SeoMeta::class, 'model');
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
 
     public function getDisplayNameAttribute(): string
     {
         return $this->translatedValue('name');
+    }
+
+    public function getDisplayShortDescriptionAttribute(): string
+    {
+        return $this->translatedValue('short_description');
+    }
+
+    public function getDisplayDescriptionAttribute(): string
+    {
+        return $this->translatedValue('description');
     }
 }

@@ -83,7 +83,11 @@
                         <div>الوجهات</div>
                     </a>
                 </li>
-
+                <li class="menu-item {{ request()->routeIs('admin.attractions.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.attractions.index') }}" class="menu-link">
+                        <div> المعالم السياحية </div>
+                    </a>
+                </li>
                 <li class="menu-item {{ request()->routeIs('admin.package-categories.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.package-categories.index') }}" class="menu-link">
                         <div>تصنيفات الباقات</div>
