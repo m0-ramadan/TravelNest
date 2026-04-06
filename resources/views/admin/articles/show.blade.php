@@ -87,7 +87,7 @@
                     <div class="col-md-4">
                         <div class="info-box">
                             <div class="info-label">النوع</div>
-                            <div class="info-value">{{ $article->post_type ?? '-' }}</div>
+                            <div class="info-value">{{ $article->article_type ?? '-' }}</div>
                         </div>
                     </div>
 
