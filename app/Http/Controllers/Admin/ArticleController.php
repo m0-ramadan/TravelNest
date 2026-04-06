@@ -96,8 +96,9 @@ class ArticleController extends Controller
         return $this->success('admin.articles.index', 'Article created.');
     }
 
-    public function update(Request $request, Article $article): RedirectResponse
+    public function update(Request $request, $article)
     {
+        $article = Article::findOrFail($article);
         $data = $request->validate([
             'category_id' => ['nullable', 'integer'],
             'slug' => ['nullable', 'string', 'max:255'],

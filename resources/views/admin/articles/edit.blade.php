@@ -197,7 +197,8 @@
                     <button type="button" class="btn btn-ai" id="btn-ai-seo">توليد SEO</button>
                 </div>
 
-                <form action="{{ route('admin.articles.update', $article) }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('admin.articles.update', $article->id) }}" method="POST"
+                    enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
