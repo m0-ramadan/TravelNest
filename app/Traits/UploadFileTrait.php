@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use Illuminate\Support\Facades\Storage;
+
 trait UploadFileTrait
 {
     private function uploadFile($path, $file)
@@ -21,11 +23,7 @@ trait UploadFileTrait
 
     function uploadImage($folder, $image)
     {
-        //$image->store( $folder);
-        $filename = $image->hashName();
-        $path2 = public_path("images/" . $folder);
-        $image->move($path2, $filename);
-        $path = 'images/' . $folder . '/' . $filename;
+        $path = $image->store('images/' . $folder, 'public');
         return $path;
     }
 
