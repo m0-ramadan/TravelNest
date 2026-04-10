@@ -117,11 +117,6 @@
                             <input type="number" name="sort_order" class="form-control" value="{{ old('sort_order', 0) }}">
                         </div>
 
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label">الوصف</label>
-                            <textarea name="description" class="form-control" rows="5">{{ old('description') }}</textarea>
-                        </div>
-
                         <div class="col-md-6 mb-3">
                             <label class="form-label">الصورة</label>
                             <input type="file" name="flag" class="form-control">

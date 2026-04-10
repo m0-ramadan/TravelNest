@@ -63,7 +63,7 @@ class AttractionController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'destination_id' => ['required', 'exists:destinations,id'],
+            'destination_id' => ['nullable', 'exists:destinations,id'],
             'slug' => ['nullable', 'string', 'max:255'],
             'name' => ['required', 'string'],
             'short_description' => ['nullable', 'string'],
@@ -104,7 +104,7 @@ class AttractionController extends Controller
     public function update(Request $request, Attraction $attraction): RedirectResponse
     {
         $data = $request->validate([
-            'destination_id' => ['required', 'exists:destinations,id'],
+            'destination_id' => ['nullable', 'exists:destinations,id'],
             'slug' => ['nullable', 'string', 'max:255'],
             'name' => ['required', 'string'],
             'short_description' => ['nullable', 'string'],

@@ -308,7 +308,7 @@
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">الصورة البارزة</label>
-                            <input type="text" name="featured_image" class="form-control"
+                            <input type="file" name="featured_image" class="form-control"
                                 value="{{ old('featured_image') }}" placeholder="رابط الصورة أو المسار">
                         </div>
 

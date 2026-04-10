@@ -99,7 +99,7 @@
             <div class="main-header d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="mb-0">تعديل بيانات الوجهة</h5>
-                    <small class="opacity-75">{{ $destination->name ?? '' }}</small>
+                    <small class="opacity-75">{{ adminTrans($destination->name ?? '') }}</small>
                 </div>
                 <a href="{{ route('admin.destinations.index') }}" class="btn btn-light">رجوع</a>
             </div>
