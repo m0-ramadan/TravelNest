@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Storage;
 
 class StaticPageController extends Controller
 {
@@ -43,7 +44,7 @@ class StaticPageController extends Controller
             'title' => ['nullable', 'string'],
             'body' => ['nullable', 'string'],
             'template' => ['nullable', 'string'],
-            'featured_image' => ['nullable', 'string'],
+            'featured_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'is_home' => ['nullable', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
             'published_at' => ['nullable', 'date'],
@@ -64,6 +65,10 @@ class StaticPageController extends Controller
                 : $data['title'];
 
             $data['slug'] = Str::slug($slugSource ?: 'page-' . time());
+        }
+
+        if ($request->hasFile('featured_image')) {
+            $data['featured_image'] = $request->file('featured_image')->store('pages', 'public');
         }
 
         $data['is_home'] = $request->boolean('is_home');
@@ -88,14 +93,17 @@ class StaticPageController extends Controller
         return $this->view('admin.static-pages.edit', compact('page'));
     }
 
-    public function update(Request $request, Page $page): RedirectResponse
+
+    public function update(Request $request, $page): RedirectResponse
     {
+        $page = Page::findOrFail($page);
+
         $data = $request->validate([
             'slug' => ['nullable', 'string'],
             'title' => ['nullable', 'string'],
             'body' => ['nullable', 'string'],
             'template' => ['nullable', 'string'],
-            'featured_image' => ['nullable', 'string'],
+            'featured_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'is_home' => ['nullable', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
             'published_at' => ['nullable', 'date'],
@@ -103,6 +111,7 @@ class StaticPageController extends Controller
             'seo_description' => ['nullable', 'string'],
         ]);
 
+        // ترجمة الحقول
         $data = $this->translateModelFields($data, [
             'title',
             'body',
@@ -110,12 +119,27 @@ class StaticPageController extends Controller
             'seo_description'
         ]);
 
+        // توليد slug
         if (empty($data['slug']) && !empty($data['title'])) {
             $slugSource = is_array($data['title'])
                 ? ($data['title']['en'] ?? $data['title']['ar'] ?? reset($data['title']))
                 : $data['title'];
 
             $data['slug'] = Str::slug($slugSource ?: 'page-' . $page->id);
+        }
+
+        // ✅ رفع الصورة
+        if ($request->hasFile('featured_image')) {
+
+            // حذف الصورة القديمة
+            if (!empty($page->featured_image)) {
+                Storage::disk('public')->delete($page->featured_image);
+            }
+
+            // رفع الجديدة
+            $path = $request->file('featured_image')->store('pages', 'public');
+
+            $data['featured_image'] = $path;
         }
 
         $data['is_home'] = $request->boolean('is_home');
