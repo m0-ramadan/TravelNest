@@ -77,12 +77,12 @@
                         <div>المناطق</div>
                     </a>
                 </li> --}}
-
+                {{-- 
                 <li class="menu-item {{ request()->routeIs('admin.destinations.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.destinations.index') }}" class="menu-link">
                         <div>الوجهات</div>
                     </a>
-                </li>
+                </li> --}}
                 <li class="menu-item {{ request()->routeIs('admin.attractions.index') ? 'active' : '' }}">
                     <a href="{{ route('admin.attractions.index') }}" class="menu-link">
                         <div> المعالم السياحية </div>

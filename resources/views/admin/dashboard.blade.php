@@ -61,7 +61,7 @@
             now()->endOfMonth(),
         ])->count();
 
-        $totalDestinations = \App\Models\Destination::count();
+        // $totalDestinations = \App\Models\Destination::count();
         $totalInquiries = \App\Models\Inquiry::count();
 
         $totalRevenue = class_exists(\App\Models\Payment::class)
@@ -278,7 +278,7 @@
                         </div>
 
                         {{-- الوجهات --}}
-                        <div class="col-sm-6 col-lg-4 mb-4">
+                        {{-- <div class="col-sm-6 col-lg-4 mb-4">
                             <div class="card card-border-shadow-secondary">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center mb-2 pb-1">
@@ -292,7 +292,7 @@
                                     <p class="mb-1">عدد الوجهات</p>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
 
                         {{-- الإيرادات --}}
                         <div class="col-sm-6 col-lg-4 mb-4">

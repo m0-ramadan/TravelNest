@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Attraction;
 use App\Models\Currency;
 use App\Models\Destination;
 use App\Models\Package;
@@ -32,7 +33,7 @@ class PackageController extends Controller
     public function create(): View
     {
         $categories = PackageCategory::all();
-        $destinations = Destination::all();
+        $destinations = Attraction::all();
         $currencies = Currency::all();
         return $this->view('admin.packages.create', ['categories' => $categories, 'destinations' => $destinations, 'currencies' => $currencies]);
     }
@@ -110,7 +111,10 @@ class PackageController extends Controller
 
     public function edit(Package $package): View
     {
-        return $this->view('admin.packages.edit', compact('package'));
+        $categories = PackageCategory::all();
+        $destinations = Attraction::all();
+        $currencies = Currency::all();
+        return $this->view('admin.packages.edit', ['categories' => $categories, 'destinations' => $destinations, 'currencies' => $currencies] + compact('package'));
     }
 
     public function update(Request $request, Package $package): RedirectResponse
@@ -240,7 +244,7 @@ class PackageController extends Controller
 
     public function createWithAI()
     {
-        $destinations = Destination::all();
+        $destinations = Attraction::all();
         $categories = PackageCategory::all();
         return $this->view('admin.packages.create-with-ai', compact('destinations', 'categories'));
     }
@@ -257,7 +261,7 @@ class PackageController extends Controller
         ]);
 
         $destination = !empty($data['destination_id'])
-            ? Destination::find($data['destination_id'])
+            ? Attraction::find($data['destination_id'])
             : null;
 
         $category = !empty($data['category_id'])

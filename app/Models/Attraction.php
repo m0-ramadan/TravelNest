@@ -13,7 +13,7 @@ class Attraction extends Model
     use HasTranslatableAttributes;
 
     protected $fillable = [
-        'destination_id',
+        'city_id',
         'slug',
         'name',
         'short_description',
@@ -21,29 +21,31 @@ class Attraction extends Model
         'image',
         'opening_hours',
         'map_url',
+        'latitude',
+        'longitude',
         'is_featured',
         'is_active',
         'sort_order',
+        'seo_title',
+        'seo_description',
     ];
 
     protected $casts = [
         'name' => 'array',
         'short_description' => 'array',
         'description' => 'array',
+        'seo_title' => 'array',
+        'seo_description' => 'array',
+        'latitude' => 'decimal:7',
+        'longitude' => 'decimal:7',
         'is_featured' => 'boolean',
         'is_active' => 'boolean',
         'sort_order' => 'integer',
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | Relations
-    |--------------------------------------------------------------------------
-    */
-
-    public function destination(): BelongsTo
+    public function city(): BelongsTo
     {
-        return $this->belongsTo(Destination::class);
+        return $this->belongsTo(City::class);
     }
 
     public function packageAttractions(): HasMany
@@ -60,12 +62,6 @@ class Attraction extends Model
     {
         return $this->morphMany(SeoMeta::class, 'model');
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Accessors
-    |--------------------------------------------------------------------------
-    */
 
     public function getDisplayNameAttribute(): string
     {

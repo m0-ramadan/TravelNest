@@ -20,10 +20,10 @@
                     <div class="col-md-4">
                         <select name="destination_id" class="form-select">
                             <option value="">كل الوجهات</option>
-                            @foreach ($destinations as $destination)
-                                <option value="{{ $destination->id }}"
-                                    {{ request('destination_id') == $destination->id ? 'selected' : '' }}>
-                                    {{ adminTrans($destination->name) }}
+                            @foreach ($cities as $city)
+                                <option value="{{ $city->id }}"
+                                    {{ request('destination_id') == $city->id ? 'selected' : '' }}>
+                                    {{ adminTrans($city->name) }}
                                 </option>
                             @endforeach
                         </select>
