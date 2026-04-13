@@ -2,35 +2,38 @@
 
 namespace App\Traits;
 
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 trait UploadFileTrait
 {
-    private function uploadFile($path, $file)
+    public function uploadImage(string $folder, UploadedFile $image): string
     {
-        $image_name = time() . '-' . $file->getClientOriginalName();
-        $file->move(public_path("images/" . $path), $image_name);
-        return "images/" . $path . "/" . $image_name;
+        $extension = $image->getClientOriginalExtension();
+        $fileName = time() . '-' . Str::random(10) . '.' . $extension;
+
+        return $image->storeAs('images/' . trim($folder, '/'), $fileName, 'public');
     }
 
-    private function generalUploadFile($path, $file)
+    public function uploadFile(string $folder, UploadedFile $file): string
     {
-        $file_name = time() . '-' . $file->getClientOriginalName();
-        $file->move(public_path($path), $file_name);
-        return $file_name;
+        $extension = $file->getClientOriginalExtension();
+        $fileName = time() . '-' . Str::random(10) . '.' . $extension;
+
+        return $file->storeAs('files/' . trim($folder, '/'), $fileName, 'public');
     }
 
-
-    function uploadImage($folder, $image)
+    public function deletePublicFile(?string $path): bool
     {
-        $path = $image->store('images/' . $folder, 'public');
-        return $path;
-    }
+        if (!$path) {
+            return false;
+        }
 
-    function  uploadImages($image, $folder, $imagename)
-    {
-        $image->move(public_path('images/' . $folder), $imagename);
-        $path = 'images/' . $folder . '/' . $imagename;
-        return $path;
+        if (Storage::disk('public')->exists($path)) {
+            return Storage::disk('public')->delete($path);
+        }
+
+        return false;
     }
 }

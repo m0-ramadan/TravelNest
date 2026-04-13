@@ -68,6 +68,26 @@
             font-weight: 600;
             margin-bottom: 8px;
         }
+
+        .image-preview,
+        .current-image {
+            margin-top: 12px;
+        }
+
+        .image-preview img,
+        .current-image img {
+            max-width: 220px;
+            max-height: 150px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .12);
+        }
+
+        .current-image-title {
+            font-size: 13px;
+            color: rgba(255, 255, 255, .7);
+            margin-bottom: 8px;
+        }
     </style>
 @endsection
 
@@ -123,17 +143,80 @@
                             </select>
                         </div>
 
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label">الترتيب</label>
                             <input type="number" name="sort_order" class="form-control"
                                 value="{{ old('sort_order', $city->sort_order ?? 0) }}">
                         </div>
 
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label">الوصف</label>
-                            <textarea name="description" class="form-control" rows="5">{{ old('description', $city->description) }}</textarea>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">مميزة</label>
+                            <div class="form-control d-flex align-items-center">
+                                <input class="form-check-input me-2" type="checkbox" value="1" name="is_featured"
+                                    id="is_featured"
+                                    {{ old('is_featured', $city->is_featured ?? false) ? 'checked' : '' }}>
+                                <span>نعم</span>
+                            </div>
                         </div>
 
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">الصورة الرئيسية</label>
+                            <input type="file" name="hero_image" class="form-control" accept="image/*"
+                                onchange="previewImage(this, 'heroPreview')">
+                            @if (!empty($city->hero_image))
+                                <div class="current-image">
+                                    <div class="current-image-title">الصورة الحالية</div>
+                                    <img src="{{ asset('storage/' . $city->hero_image) }}" alt="hero image">
+                                </div>
+                            @endif
+                            <div class="image-preview" id="heroPreview"></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">الصورة البارزة</label>
+                            <input type="file" name="featured_image" class="form-control" accept="image/*"
+                                onchange="previewImage(this, 'featuredPreview')">
+                            @if (!empty($city->featured_image))
+                                <div class="current-image">
+                                    <div class="current-image-title">الصورة الحالية</div>
+                                    <img src="{{ asset('storage/' . $city->featured_image) }}" alt="featured image">
+                                </div>
+                            @endif
+                            <div class="image-preview" id="featuredPreview"></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">خط العرض</label>
+                            <input type="text" name="latitude" class="form-control"
+                                value="{{ old('latitude', $city->latitude) }}">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">خط الطول</label>
+                            <input type="text" name="longitude" class="form-control"
+                                value="{{ old('longitude', $city->longitude) }}">
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">وصف مختصر</label>
+                            <textarea name="short_description" class="form-control" rows="3">{{ old('short_description', adminTrans($city->short_description)) }}</textarea>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">الوصف</label>
+                            <textarea name="description" class="form-control" rows="5">{{ old('description', adminTrans($city->description)) }}</textarea>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">SEO Title</label>
+                            <input type="text" name="seo_title" class="form-control"
+                                value="{{ old('seo_title', adminTrans($city->seo_title)) }}">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">SEO Description</label>
+                            <textarea name="seo_description" class="form-control" rows="3">{{ old('seo_description', adminTrans($city->seo_description)) }}</textarea>
+                        </div>
 
                         <div class="col-md-12 mb-3 d-flex gap-4">
                             <div class="form-check form-switch">
@@ -141,7 +224,6 @@
                                     id="is_active" {{ old('is_active', $city->is_active ?? true) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="is_active">مفعلة</label>
                             </div>
-
                         </div>
                     </div>
 
@@ -153,4 +235,21 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('js')
+    <script>
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            preview.innerHTML = '';
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="preview">`;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
 @endsection

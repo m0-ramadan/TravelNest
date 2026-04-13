@@ -119,9 +119,11 @@ class Package extends Model
         return $this->belongsTo(Admin::class, 'updated_by');
     }
 
+
+
     public function destinations(): BelongsToMany
     {
-        return $this->belongsToMany(Destination::class, 'package_destinations', 'package_id', 'destination_id')
+        return $this->belongsToMany(Attraction::class, 'package_destinations', 'package_id', 'destination_id')
             ->withPivot(['stop_order', 'is_primary', 'nights'])
             ->withTimestamps();
     }

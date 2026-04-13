@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Attraction;
-use App\Models\Destination;
+use App\Models\City;
 use App\Traits\HandlesTranslatedFields;
-use App\Traits\UploadFileTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use App\Traits\UploadFileTrait;
 
 class AttractionController extends Controller
 {
@@ -20,7 +20,7 @@ class AttractionController extends Controller
     public function index(Request $request): View
     {
         $attractions = Attraction::query()
-            ->with('destination')
+            ->with('city')
             ->when($request->filled('q'), function ($query) use ($request) {
                 $this->applyTranslatedSearch(
                     $query,
@@ -28,48 +28,62 @@ class AttractionController extends Controller
                     $request->string('q')
                 );
             })
-            ->when($request->filled('destination_id'), function ($query) use ($request) {
-                $query->where('destination_id', $request->destination_id);
+            ->when($request->filled('city_id'), function ($query) use ($request) {
+                $query->where('city_id', $request->city_id);
+            })
+            ->when($request->filled('status'), function ($query) use ($request) {
+                if ($request->status === 'active') {
+                    $query->where('is_active', true);
+                } elseif ($request->status === 'inactive') {
+                    $query->where('is_active', false);
+                }
             })
             ->latest()
-            ->paginate($this->perPage($request));
+            ->paginate($this->perPage($request))
+            ->withQueryString();
 
-        $destinations = Destination::where('is_active', true)->get();
+        $cities = City::where('is_active', true)->get();
 
-        return $this->view('admin.attractions.index', compact('attractions', 'destinations'));
+        return $this->view('admin.attractions.index', compact('attractions', 'cities'));
     }
 
     public function create(): View
     {
-        $destinations = Destination::where('is_active', true)->get();
+        $cities = City::where('is_active', true)->get();
 
-        return $this->view('admin.attractions.create', compact('destinations'));
+        return $this->view('admin.attractions.create', compact('cities'));
     }
 
     public function show(Attraction $attraction): View
     {
-        $attraction->load('destination');
+        $attraction->load('city');
 
         return $this->view('admin.attractions.show', compact('attraction'));
     }
 
     public function edit(Attraction $attraction): View
     {
-        $destinations = Destination::where('is_active', true)->get();
+        $cities = City::where('is_active', true)->get();
 
-        return $this->view('admin.attractions.edit', compact('attraction', 'destinations'));
+        return $this->view('admin.attractions.edit', compact('attraction', 'cities'));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'destination_id' => ['nullable', 'exists:destinations,id'],
+            'city_id' => ['nullable', 'exists:cities,id'],
             'slug' => ['nullable', 'string', 'max:255'],
             'name' => ['required', 'string'],
             'short_description' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'opening_hours' => ['nullable', 'string'],
+            'map_url' => ['nullable', 'string', 'max:255'],
+            'latitude' => ['nullable', 'numeric'],
+            'longitude' => ['nullable', 'numeric'],
+            'is_featured' => ['nullable', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
+            'sort_order' => ['nullable', 'integer'],
             'seo_title' => ['nullable', 'string'],
             'seo_description' => ['nullable', 'string'],
         ]);
@@ -94,7 +108,9 @@ class AttractionController extends Controller
             $data['slug'] = Str::slug($slugSource ?: 'attraction-' . time());
         }
 
-        $data['is_active'] = $request->boolean('is_active');
+        $data['is_featured'] = $request->boolean('is_featured');
+        $data['is_active'] = $request->boolean('is_active', true);
+        $data['sort_order'] = $data['sort_order'] ?? 0;
 
         Attraction::create($data);
 
@@ -104,13 +120,19 @@ class AttractionController extends Controller
     public function update(Request $request, Attraction $attraction): RedirectResponse
     {
         $data = $request->validate([
-            'destination_id' => ['nullable', 'exists:destinations,id'],
+            'city_id' => ['nullable', 'exists:cities,id'],
             'slug' => ['nullable', 'string', 'max:255'],
             'name' => ['required', 'string'],
             'short_description' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'opening_hours' => ['nullable', 'string'],
+            'map_url' => ['nullable', 'string', 'max:255'],
+            'latitude' => ['nullable', 'numeric'],
+            'longitude' => ['nullable', 'numeric'],
+            'is_featured' => ['nullable', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
+            'sort_order' => ['nullable', 'integer'],
             'seo_title' => ['nullable', 'string'],
             'seo_description' => ['nullable', 'string'],
         ]);
@@ -124,10 +146,7 @@ class AttractionController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            if ($attraction->image && Storage::disk('public')->exists($attraction->image)) {
-                Storage::disk('public')->delete($attraction->image);
-            }
-
+            $this->deletePublicFile($attraction->image);
             $data['image'] = $this->uploadImage('attractions', $request->file('image'));
         }
 
@@ -139,7 +158,9 @@ class AttractionController extends Controller
             $data['slug'] = Str::slug($slugSource ?: 'attraction-' . $attraction->id);
         }
 
-        $data['is_active'] = $request->boolean('is_active');
+        $data['is_featured'] = $request->boolean('is_featured');
+        $data['is_active'] = $request->boolean('is_active', true);
+        $data['sort_order'] = $data['sort_order'] ?? 0;
 
         $attraction->update($data);
 
@@ -163,13 +184,14 @@ class AttractionController extends Controller
             'total' => Attraction::count(),
             'active' => Attraction::where('is_active', true)->count(),
             'inactive' => Attraction::where('is_active', false)->count(),
+            'featured' => Attraction::where('is_featured', true)->count(),
         ]);
     }
 
     public function bulkActions(Request $request): RedirectResponse
     {
         $ids = (array) $request->input('ids', []);
-        $action = $request->input('action');
+        $action = (string) $request->input('action');
 
         if ($action === 'delete') {
             $items = Attraction::whereIn('id', $ids)->get();
@@ -178,8 +200,17 @@ class AttractionController extends Controller
                 if ($item->image && Storage::disk('public')->exists($item->image)) {
                     Storage::disk('public')->delete($item->image);
                 }
+
                 $item->delete();
             }
+        } elseif ($action === 'activate') {
+            Attraction::whereIn('id', $ids)->update(['is_active' => true]);
+        } elseif ($action === 'deactivate') {
+            Attraction::whereIn('id', $ids)->update(['is_active' => false]);
+        } elseif ($action === 'feature') {
+            Attraction::whereIn('id', $ids)->update(['is_featured' => true]);
+        } elseif ($action === 'unfeature') {
+            Attraction::whereIn('id', $ids)->update(['is_featured' => false]);
         }
 
         return back()->with('success', 'Bulk action applied.');
@@ -188,9 +219,18 @@ class AttractionController extends Controller
     public function toggleStatus(Attraction $attraction): RedirectResponse
     {
         $attraction->update([
-            'is_active' => ! (bool) $attraction->is_active,
+            'is_active' => !(bool) $attraction->is_active,
         ]);
 
         return back()->with('success', 'Attraction status updated.');
+    }
+
+    public function toggleFeatured(Attraction $attraction): RedirectResponse
+    {
+        $attraction->update([
+            'is_featured' => !(bool) $attraction->is_featured,
+        ]);
+
+        return back()->with('success', 'Attraction featured updated.');
     }
 }
