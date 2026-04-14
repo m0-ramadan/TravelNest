@@ -152,6 +152,18 @@
             color: #fff;
         }
 
+        .image-preview {
+            margin-top: 12px;
+        }
+
+        .image-preview img {
+            width: 140px;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .12);
+        }
+
         @keyframes spin {
             0% {
                 transform: rotate(0deg);
@@ -208,12 +220,11 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">الوجهة</label>
-                            <select name="destination_id" class="form-select">
-                                <option value="">اختر الوجهة</option>
+                            <label class="form-label">المدينة</label>
+                            <select name="city_id" class="form-select">
+                                <option value="">اختر المدينة</option>
                                 @foreach ($cities as $city)
-                                    <option value="{{ $city->id }}"
-                                        {{ old('destination_id') == $city->id ? 'selected' : '' }}>
+                                    <option value="{{ $city->id }}" {{ old('city_id') == $city->id ? 'selected' : '' }}>
                                         {{ adminTrans($city->name) }}
                                     </option>
                                 @endforeach
@@ -232,7 +243,45 @@
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">الصورة</label>
-                            <input type="file" name="image" class="form-control">
+                            <input type="file" name="image" class="form-control" accept="image/*"
+                                onchange="previewImage(this, 'imagePreview')">
+                            <div class="image-preview" id="imagePreview"></div>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">ساعات العمل</label>
+                            <input type="text" name="opening_hours" class="form-control"
+                                value="{{ old('opening_hours') }}">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">رابط الخريطة</label>
+                            <input type="text" name="map_url" class="form-control" value="{{ old('map_url') }}">
+                        </div>
+
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">خط العرض</label>
+                            <input type="text" name="latitude" class="form-control" value="{{ old('latitude') }}">
+                        </div>
+
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">خط الطول</label>
+                            <input type="text" name="longitude" class="form-control" value="{{ old('longitude') }}">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">الترتيب</label>
+                            <input type="number" name="sort_order" class="form-control"
+                                value="{{ old('sort_order', 0) }}">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">مميز</label>
+                            <div class="form-control d-flex align-items-center">
+                                <input class="form-check-input me-2" type="checkbox" name="is_featured" value="1"
+                                    {{ old('is_featured') ? 'checked' : '' }}>
+                                <span>نعم</span>
+                            </div>
                         </div>
 
                         <div class="col-12 mb-3">
@@ -255,7 +304,7 @@
                             <textarea name="seo_description" class="form-control" rows="3">{{ old('seo_description') }}</textarea>
                         </div>
 
-                        <div class="col-12 mb-3">
+                        <div class="col-12 mb-3 d-flex gap-4">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" name="is_active" value="1"
                                     {{ old('is_active', true) ? 'checked' : '' }}>
@@ -276,6 +325,19 @@
 
 @section('js')
     <script>
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            preview.innerHTML = '';
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="preview">`;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('attractionForm');
             const submitBtn = document.getElementById('submitBtn');
