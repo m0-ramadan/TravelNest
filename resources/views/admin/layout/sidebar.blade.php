@@ -90,19 +90,19 @@
                 </li>
                 <li class="menu-item {{ request()->routeIs('admin.package-categories.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.package-categories.index') }}" class="menu-link">
-                        <div>تصنيفات الباقات</div>
+                        <div>تصنيفات الرحلات</div>
                     </a>
                 </li>
 
                 <li class="menu-item {{ request()->routeIs('admin.packages.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.packages.index') }}" class="menu-link">
-                        <div>الباقات</div>
+                        <div>الرحلات</div>
                     </a>
                 </li>
 
                 <li class="menu-item {{ request()->routeIs('admin.package-prices.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.package-prices.index') }}" class="menu-link">
-                        <div>أسعار الباقات</div>
+                        <div>أسعار الرحلات</div>
                     </a>
                 </li>
 
