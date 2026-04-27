@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Attraction;
 use App\Models\Currency;
-use App\Models\Destination;
 use App\Models\Package;
 use App\Models\PackageCategory;
 use App\Services\PackageAiService;
 use App\Traits\HandlesTranslatedFields;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -18,246 +20,156 @@ class PackageController extends Controller
 {
     use HandlesTranslatedFields;
 
+    protected array $translatedFields = [
+        'title',
+        'subtitle',
+        'short_description',
+        'description',
+        'schedule_text',
+        'pickup_location',
+        'dropoff_location',
+        'destinations_text',
+        'location_summary',
+        'cancellation_policy',
+        'terms_conditions',
+        'seo_title',
+        'seo_description',
+        'breadcrumb_title',
+    ];
+
     public function index(Request $request): View
     {
         $packages = Package::query()
+            ->with(['category', 'primaryCountry', 'currency'])
             ->when($request->filled('q'), function ($query) use ($request) {
-                $this->applyTranslatedSearch($query, ['title', 'subtitle', 'short_description', 'description'], $request->string('q'));
+                $this->applyTranslatedSearch(
+                    $query,
+                    ['title', 'subtitle', 'short_description', 'description'],
+                    $request->string('q')
+                );
             })
             ->latest()
-            ->paginate($this->perPage($request));
+            ->paginate($this->perPage($request))
+            ->withQueryString();
 
-        return $this->view('admin.packages.index', ['packages' => $packages]);
+        return view('admin.packages.index', compact('packages'));
     }
-
+    private function perPage(Request $request): int
+    {
+        return max(5, min((int) $request->input('per_page', 15), 100));
+    }
     public function create(): View
     {
-        $categories = PackageCategory::all();
-        $destinations = Attraction::all();
-        $currencies = Currency::all();
-        return $this->view('admin.packages.create', ['categories' => $categories, 'destinations' => $destinations, 'currencies' => $currencies]);
+        return view('admin.packages.create', [
+            'categories' => PackageCategory::all(),
+            'destinations' => Attraction::all(),
+            'currencies' => Currency::all(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            'category_id' => ['nullable', 'integer'],
-            'primary_country_id' => ['nullable', 'integer'],
-            'package_type' => ['nullable', 'string'],
-            'slug' => ['nullable', 'string'],
-            'title' => ['nullable', 'string'],
-            'subtitle' => ['nullable', 'string'],
-            'short_description' => ['nullable', 'string'],
-            'description' => ['nullable', 'string'],
-            'duration_days' => ['nullable', 'integer'],
-            'duration_nights' => ['nullable', 'integer'],
-            'start_from_price' => ['nullable', 'numeric'],
-            'compare_price' => ['nullable', 'numeric'],
-            'currency_id' => ['nullable', 'integer'],
-            'schedule_text' => ['nullable', 'string'],
-            'pickup_location' => ['nullable', 'string'],
-            'dropoff_location' => ['nullable', 'string'],
-            'destinations_text' => ['nullable', 'string'],
-            'location_summary' => ['nullable', 'string'],
-            'tour_type' => ['nullable', 'string'],
-            'difficulty_level' => ['nullable', 'string'],
-            'booking_mode' => ['nullable', 'string'],
-            'rating_avg' => ['nullable', 'numeric'],
-            'reviews_count' => ['nullable', 'integer'],
-            'is_featured' => ['nullable', 'boolean'],
-            'is_best_seller' => ['nullable', 'boolean'],
-            'is_ultra_luxury' => ['nullable', 'boolean'],
-            'is_active' => ['nullable', 'boolean'],
-            'min_participants' => ['nullable', 'integer'],
-            'max_participants' => ['nullable', 'integer'],
-            'booking_lead_days' => ['nullable', 'integer'],
-            'cancellation_policy' => ['nullable', 'string'],
-            'terms_conditions' => ['nullable', 'string'],
-            'video_url' => ['nullable', 'string'],
-            'published_at' => ['nullable', 'date'],
-            'sort_order' => ['nullable', 'integer'],
-            'seo_title' => ['nullable', 'string'],
-            'seo_description' => ['nullable', 'string'],
-            'breadcrumb_title' => ['nullable', 'string'],
-            'canonical_url' => ['nullable', 'string'],
-        ]);
+        $validated = $this->validatePackage($request);
 
-        $data = $this->translateModelFields($data, [
-            'title',
-            'subtitle',
-            'short_description',
-            'description',
-            'schedule_text',
-            'pickup_location',
-            'dropoff_location',
-            'destinations_text',
-            'location_summary',
-            'cancellation_policy',
-            'terms_conditions',
-            'seo_title',
-            'seo_description',
-            'breadcrumb_title',
-        ]);
-        $data['slug'] = $data['slug'] ?? Str::slug($data['title']['en'] ?? 'package-' . time());
-        Package::create($data);
+        DB::transaction(function () use ($request, $validated) {
+            $packageData = $this->preparePackageData($request, $validated);
 
-        return $this->success('admin.packages.index', 'Package created.');
+            $package = Package::create($packageData);
+
+            $this->syncFacilities($package, $request);
+            $this->syncItineraries($package, $request);
+            $this->syncInclusions($package, $request);
+            $this->syncPrices($package, $request);
+        });
+
+        return $this->success('admin.packages.index', 'تم إنشاء الرحلة بنجاح.');
     }
 
     public function show(Package $package): View
     {
-        return $this->view('admin.packages.show', compact('package'));
+        $package->load([
+            'category',
+            'destination',
+            'currency',
+            'facilities',
+            'itineraries',
+            'inclusions',
+            'prices.currency',
+        ]);
+
+        return view('admin.packages.show', compact('package'));
     }
 
     public function edit(Package $package): View
     {
-        $categories = PackageCategory::all();
-        $destinations = Attraction::all();
-        $currencies = Currency::all();
-        return $this->view('admin.packages.edit', ['categories' => $categories, 'destinations' => $destinations, 'currencies' => $currencies] + compact('package'));
+        $package->load([
+            'facilities',
+            'itineraries',
+            'inclusions',
+            'prices',
+        ]);
+
+        return view('admin.packages.edit', [
+            'package' => $package,
+            'categories' => PackageCategory::all(),
+            'destinations' => Attraction::all(),
+            'currencies' => Currency::all(),
+        ]);
     }
 
     public function update(Request $request, Package $package): RedirectResponse
     {
-        $data = $request->validate([
-            'category_id' => ['nullable', 'integer'],
-            'primary_country_id' => ['nullable', 'integer'],
-            'package_type' => ['nullable', 'string'],
-            'slug' => ['nullable', 'string'],
-            'title' => ['nullable', 'string'],
-            'subtitle' => ['nullable', 'string'],
-            'short_description' => ['nullable', 'string'],
-            'description' => ['nullable', 'string'],
-            'duration_days' => ['nullable', 'integer'],
-            'duration_nights' => ['nullable', 'integer'],
-            'start_from_price' => ['nullable', 'numeric'],
-            'compare_price' => ['nullable', 'numeric'],
-            'currency_id' => ['nullable', 'integer'],
-            'schedule_text' => ['nullable', 'string'],
-            'pickup_location' => ['nullable', 'string'],
-            'dropoff_location' => ['nullable', 'string'],
-            'destinations_text' => ['nullable', 'string'],
-            'location_summary' => ['nullable', 'string'],
-            'tour_type' => ['nullable', 'string'],
-            'difficulty_level' => ['nullable', 'string'],
-            'booking_mode' => ['nullable', 'string'],
-            'rating_avg' => ['nullable', 'numeric'],
-            'reviews_count' => ['nullable', 'integer'],
-            'is_featured' => ['nullable', 'boolean'],
-            'is_best_seller' => ['nullable', 'boolean'],
-            'is_ultra_luxury' => ['nullable', 'boolean'],
-            'is_active' => ['nullable', 'boolean'],
-            'min_participants' => ['nullable', 'integer'],
-            'max_participants' => ['nullable', 'integer'],
-            'booking_lead_days' => ['nullable', 'integer'],
-            'cancellation_policy' => ['nullable', 'string'],
-            'terms_conditions' => ['nullable', 'string'],
-            'video_url' => ['nullable', 'string'],
-            'published_at' => ['nullable', 'date'],
-            'sort_order' => ['nullable', 'integer'],
-            'seo_title' => ['nullable', 'string'],
-            'seo_description' => ['nullable', 'string'],
-            'breadcrumb_title' => ['nullable', 'string'],
-            'canonical_url' => ['nullable', 'string'],
-        ]);
+        $validated = $this->validatePackage($request);
 
-        $data = $this->translateModelFields($data, [
-            'title',
-            'subtitle',
-            'short_description',
-            'description',
-            'schedule_text',
-            'pickup_location',
-            'dropoff_location',
-            'destinations_text',
-            'location_summary',
-            'cancellation_policy',
-            'terms_conditions',
-            'seo_title',
-            'seo_description',
-            'breadcrumb_title',
-        ]);
+        DB::transaction(function () use ($request, $validated, $package) {
+            $packageData = $this->preparePackageData($request, $validated, $package);
 
-        $package->update($data);
+            $package->update($packageData);
 
-        return $this->success('admin.packages.index', 'Package updated.');
+            $this->syncFacilities($package, $request);
+            $this->syncItineraries($package, $request);
+            $this->syncInclusions($package, $request);
+            $this->syncPrices($package, $request);
+        });
+
+        return $this->success('admin.packages.index', 'تم تعديل الرحلة بنجاح.');
     }
 
     public function destroy(Package $package): RedirectResponse
     {
         $package->delete();
 
-        return $this->success('admin.packages.index', 'Package deleted.');
+        return $this->success('admin.packages.index', 'تم حذف الرحلة بنجاح.');
     }
 
-    public function statistics()
+    public function createWithAI(): View
     {
-        return response()->json([
-            'total' => Package::count(),
-            'active' => Package::where('is_active', true)->count(),
-            'featured' => Package::where('is_featured', true)->count(),
+        return view('admin.packages.create-with-ai', [
+            'destinations' => Attraction::all(),
+            'categories' => PackageCategory::all(),
+            'currencies' => Currency::all(),
         ]);
     }
 
-    public function bulkAction(Request $request): RedirectResponse
+    public function storeWithAI(Request $request, PackageAiService $packageAiService): RedirectResponse
     {
-        $ids = (array) $request->input('ids', []);
-        $action = (string) $request->input('action');
-
-        if ($action === 'delete') {
-            Package::whereIn('id', $ids)->delete();
-        } elseif ($action === 'activate') {
-            Package::whereIn('id', $ids)->update(['is_active' => true]);
-        } elseif ($action === 'deactivate') {
-            Package::whereIn('id', $ids)->update(['is_active' => false]);
-        }
-
-        return back()->with('success', 'Bulk action applied.');
-    }
-
-    public function toggleStatus(Package $package): RedirectResponse
-    {
-        $package->update(['is_active' => !(bool) $package->is_active]);
-
-        return back()->with('success', 'Package status updated.');
-    }
-
-    public function toggleFeatured(Package $package): RedirectResponse
-    {
-        $package->update(['is_featured' => !(bool) $package->is_featured]);
-
-        return back()->with('success', 'Package featured updated.');
-    }
-
-    public function duplicate(Package $package): RedirectResponse
-    {
-        $copy = $package->replicate();
-        $copy->slug = $package->slug . '-' . now()->timestamp;
-        $copy->title = [
-            'en' => $package->display_title . ' (Copy)',
-            'ar' => $package->display_title . ' (Copy)',
-        ];
-        $copy->save();
-
-        return redirect()->route('admin.packages.edit', $copy)->with('success', 'Package duplicated.');
-    }
-
-    public function createWithAI()
-    {
-        $destinations = Attraction::all();
-        $categories = PackageCategory::all();
-        return $this->view('admin.packages.create-with-ai', compact('destinations', 'categories'));
-    }
-
-    public function storeWithAI(
-        Request $request,
-        PackageAiService $packageAiService
-    ): RedirectResponse {
         $data = $request->validate([
             'prompt' => ['required', 'string'],
+            'category_id' => ['nullable', 'integer'],
+            'destination_id' => ['nullable', 'integer'],
+            'primary_country_id' => ['nullable', 'integer'],
+            'currency_id' => ['nullable', 'integer'],
+            'package_type' => ['nullable', 'string'],
+            'tour_type' => ['nullable', 'string'],
+            'difficulty_level' => ['nullable', 'string'],
+            'booking_mode' => ['nullable', 'string'],
             'duration_days' => ['nullable', 'integer'],
-            'destination_id' => ['nullable', 'integer', 'exists:destinations,id'],
-            'category_id' => ['nullable', 'integer', 'exists:package_categories,id'],
+            'duration_nights' => ['nullable', 'integer'],
+            'route_text' => ['nullable', 'string'],
+            'schedule_text' => ['nullable', 'string'],
+            'luxury_level' => ['nullable', 'string'],
+            'content_language' => ['nullable', 'string'],
+            'extra_instructions' => ['nullable', 'string'],
         ]);
 
         $destination = !empty($data['destination_id'])
@@ -271,126 +183,158 @@ class PackageController extends Controller
         $aiData = $packageAiService->generate([
             'prompt' => $data['prompt'],
             'duration_days' => $data['duration_days'] ?? null,
+            'duration_nights' => $data['duration_nights'] ?? null,
+            'route_text' => $data['route_text'] ?? null,
+            'schedule_text' => $data['schedule_text'] ?? null,
+            'luxury_level' => $data['luxury_level'] ?? null,
+            'content_language' => $data['content_language'] ?? 'en',
+            'extra_instructions' => $data['extra_instructions'] ?? null,
             'destination_name' => $this->adminTrans($destination?->name),
             'category_name' => $this->adminTrans($category?->name),
         ]);
 
         if (!$aiData || !is_array($aiData)) {
-            return back()
-                ->withInput()
-                ->with('error', 'فشل توليد البيانات بالذكاء الاصطناعي');
+            return back()->withInput()->with('error', 'فشل توليد بيانات الرحلة بالذكاء الاصطناعي.');
         }
 
-        $finalData = array_merge($data, $aiData);
+        DB::transaction(function () use ($request, $data, $aiData, $destination) {
+            $finalData = array_merge($aiData, $data);
 
-        unset(
-            $finalData['prompt'],
-            $finalData['destination_id']
-        );
-
-        $finalData['category_id'] = $data['category_id'] ?? null;
-
-        if (!empty($destination?->country_id)) {
-            $finalData['primary_country_id'] = $destination->country_id;
-        }
-
-        $translatableFields = [
-            'title',
-            'subtitle',
-            'short_description',
-            'description',
-            'schedule_text',
-            'pickup_location',
-            'dropoff_location',
-            'destinations_text',
-            'location_summary',
-            'cancellation_policy',
-            'terms_conditions',
-            'seo_title',
-            'seo_description',
-            'breadcrumb_title',
-        ];
-
-        foreach ($translatableFields as $field) {
-            if (!array_key_exists($field, $finalData)) {
-                continue;
-            }
-
-            if (is_array($finalData[$field])) {
-                $finalData[$field] = array_filter(
-                    $finalData[$field],
-                    fn($value) => !is_null($value) && $value !== ''
-                );
-
-                if (empty($finalData[$field])) {
-                    $finalData[$field] = [
-                        'en' => '',
-                        'ar' => '',
-                    ];
-                }
-            } elseif (is_string($finalData[$field]) && trim($finalData[$field]) !== '') {
-                $finalData[$field] = $this->translateModelFields(
-                    [$field => $finalData[$field]],
-                    [$field]
-                )[$field];
-            } else {
-                $finalData[$field] = [
-                    'en' => '',
-                    'ar' => '',
-                ];
-            }
-        }
-
-        $finalData['duration_days'] = $finalData['duration_days'] ?? ($data['duration_days'] ?? null);
-        $finalData['duration_nights'] = $finalData['duration_nights'] ?? (
-            !empty($finalData['duration_days']) && (int) $finalData['duration_days'] > 0
-            ? (int) $finalData['duration_days'] - 1
-            : null
-        );
-
-        $allowedTourTypes = ['private', 'group', 'shared', 'custom'];
-        $allowedDifficultyLevels = ['easy', 'moderate', 'hard'];
-        $allowedBookingModes = ['request', 'instant'];
-        $allowedPackageTypes = ['travel_package', 'nile_cruise', 'day_tour', 'shore_excursion', 'tailor_made'];
-
-        $finalData['tour_type'] = in_array(($finalData['tour_type'] ?? null), $allowedTourTypes, true)
-            ? $finalData['tour_type']
-            : 'private';
-
-        $finalData['difficulty_level'] = in_array(($finalData['difficulty_level'] ?? null), $allowedDifficultyLevels, true)
-            ? $finalData['difficulty_level']
-            : 'easy';
-
-        $finalData['booking_mode'] = in_array(($finalData['booking_mode'] ?? null), $allowedBookingModes, true)
-            ? $finalData['booking_mode']
-            : 'request';
-
-        $finalData['package_type'] = in_array(($finalData['package_type'] ?? null), $allowedPackageTypes, true)
-            ? $finalData['package_type']
-            : 'travel_package';
-
-        $finalData['is_active'] = true;
-        $finalData['is_featured'] = false;
-        $finalData['is_best_seller'] = false;
-        $finalData['is_ultra_luxury'] = false;
-        $finalData['rating_avg'] = $finalData['rating_avg'] ?? 0;
-        $finalData['reviews_count'] = $finalData['reviews_count'] ?? 0;
-        $finalData['sort_order'] = $finalData['sort_order'] ?? 0;
-
-        $finalData['slug'] = !empty($finalData['slug'])
-            ? $finalData['slug']
-            : Str::slug(
-                $finalData['title']['en']
-                    ?? $finalData['title']['ar']
-                    ?? 'package-' . time()
+            unset(
+                $finalData['prompt'],
+                $finalData['luxury_level'],
+                $finalData['content_language'],
+                $finalData['extra_instructions']
             );
 
-        Package::create($finalData);
+            if (!empty($destination?->country_id)) {
+                $finalData['primary_country_id'] = $destination->country_id;
+            }
+
+            $finalData['is_active'] = true;
+            $finalData['is_featured'] = false;
+            $finalData['is_best_seller'] = false;
+            $finalData['is_ultra_luxury'] = false;
+            $finalData['rating_avg'] = $finalData['rating_avg'] ?? 0;
+            $finalData['reviews_count'] = $finalData['reviews_count'] ?? 0;
+            $finalData['sort_order'] = $finalData['sort_order'] ?? 0;
+
+            $packageData = $this->prepareAiPackageData($finalData);
+
+            $package = Package::create($packageData);
+
+            $this->createFacilitiesFromArray($package, $aiData['facilities'] ?? []);
+            $this->createItinerariesFromArray($package, $aiData['itinerary'] ?? []);
+            $this->createInclusionsFromArray($package, $aiData['included'] ?? [], 'included');
+            $this->createInclusionsFromArray($package, $aiData['excluded'] ?? [], 'excluded');
+            $this->createPricesFromArray($package, $aiData['prices'] ?? [], $package->currency_id);
+        });
 
         return redirect()
             ->route('admin.packages.index')
-            ->with('success', 'تم إنشاء الباقة بالذكاء الاصطناعي');
+            ->with('success', 'تم إنشاء الرحلة بالذكاء الاصطناعي.');
     }
+
+    public function toggleStatus(Package $package): RedirectResponse
+    {
+        $package->update(['is_active' => !(bool) $package->is_active]);
+
+        return back()->with('success', 'تم تحديث حالة الرحلة.');
+    }
+
+    public function toggleFeatured(Package $package): RedirectResponse
+    {
+        $package->update(['is_featured' => !(bool) $package->is_featured]);
+
+        return back()->with('success', 'تم تحديث تمييز الرحلة.');
+    }
+
+    public function duplicate(Package $package): RedirectResponse
+    {
+        DB::transaction(function () use ($package) {
+            $package->load(['facilities', 'itineraries', 'inclusions', 'prices']);
+
+            $copy = $package->replicate();
+            $copy->slug = $package->slug . '-' . now()->timestamp;
+            $copy->title = [
+                'en' => ($package->display_title ?? $this->adminTrans($package->title)) . ' (Copy)',
+                'ar' => ($package->display_title ?? $this->adminTrans($package->title)) . ' (Copy)',
+            ];
+            $copy->save();
+
+            foreach ($package->facilities as $facility) {
+                $copy->facilities()->create($facility->only(['title', 'sort_order']));
+            }
+
+            foreach ($package->itineraries as $day) {
+                $copy->itineraries()->create($day->only([
+                    'duration',
+                    'day_number',
+                    'title',
+                    'description',
+                    'meals_breakfast',
+                    'meals_lunch',
+                    'meals_dinner',
+                ]));
+            }
+
+            foreach ($package->inclusions as $item) {
+                $copy->inclusions()->create($item->only(['title', 'type', 'sort_order']));
+            }
+
+            foreach ($package->prices as $price) {
+                $copy->prices()->create($price->only([
+                    'label',
+                    'season_name',
+                    'price_type',
+                    'room_type',
+                    'amount',
+                    'currency_id',
+                    'valid_from',
+                    'valid_to',
+                    'notes',
+                ]));
+            }
+
+            session()->flash('duplicated_package_id', $copy->id);
+        });
+
+        $copyId = session('duplicated_package_id');
+
+        return redirect()
+            ->route('admin.packages.edit', $copyId)
+            ->with('success', 'تم نسخ الرحلة بنجاح.');
+    }
+
+    public function bulkAction(Request $request): RedirectResponse
+    {
+        $ids = (array) $request->input('ids', []);
+        $action = (string) $request->input('action');
+
+        if ($action === 'delete') {
+            Package::whereIn('id', $ids)->delete();
+        }
+
+        if ($action === 'activate') {
+            Package::whereIn('id', $ids)->update(['is_active' => true]);
+        }
+
+        if ($action === 'deactivate') {
+            Package::whereIn('id', $ids)->update(['is_active' => false]);
+        }
+
+        return back()->with('success', 'تم تنفيذ الإجراء بنجاح.');
+    }
+
+    public function statistics()
+    {
+        return response()->json([
+            'total' => Package::count(),
+            'active' => Package::where('is_active', true)->count(),
+            'featured' => Package::where('is_featured', true)->count(),
+        ]);
+    }
+
     public function enhanceWithAI(Request $request)
     {
         return response()->json(['message' => 'Connect AI service here.']);
@@ -408,14 +352,375 @@ class PackageController extends Controller
     {
         return response()->json(['message' => 'Connect translation service here.']);
     }
-    function adminTrans($value, array $preferred = ['ar', 'en'])
+
+    private function validatePackage(Request $request): array
     {
-        if (! is_array($value)) {
+        return $request->validate([
+            'category_id' => ['nullable', 'integer'],
+            'destination_id' => ['nullable', 'integer'],
+            'primary_country_id' => ['nullable', 'integer'],
+            'package_type' => ['nullable', 'string'],
+            'slug' => ['nullable', 'string'],
+            'title' => ['nullable', 'string'],
+            'subtitle' => ['nullable', 'string'],
+            'short_description' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
+
+            'duration_days' => ['nullable', 'integer'],
+            'duration_nights' => ['nullable', 'integer'],
+            'duration_text' => ['nullable', 'string'],
+            'route_text' => ['nullable', 'string'],
+
+            'start_from_price' => ['nullable', 'numeric'],
+            'compare_price' => ['nullable', 'numeric'],
+            'currency_id' => ['nullable', 'integer'],
+
+            'schedule_text' => ['nullable', 'string'],
+            'pickup_location' => ['nullable', 'string'],
+            'dropoff_location' => ['nullable', 'string'],
+            'destinations_text' => ['nullable', 'string'],
+            'location_summary' => ['nullable', 'string'],
+            'tour_type' => ['nullable', 'string'],
+            'difficulty_level' => ['nullable', 'string'],
+            'booking_mode' => ['nullable', 'string'],
+
+            'rating_avg' => ['nullable', 'numeric'],
+            'reviews_count' => ['nullable', 'integer'],
+            'min_participants' => ['nullable', 'integer'],
+            'max_participants' => ['nullable', 'integer'],
+            'booking_lead_days' => ['nullable', 'integer'],
+
+            'cancellation_policy' => ['nullable', 'string'],
+            'terms_conditions' => ['nullable', 'string'],
+            'children_policy' => ['nullable', 'string'],
+            'pickup_policy' => ['nullable', 'string'],
+            'pricing_information' => ['nullable', 'string'],
+
+            'video_url' => ['nullable', 'string'],
+            'published_at' => ['nullable', 'date'],
+            'sort_order' => ['nullable', 'integer'],
+
+            'seo_title' => ['nullable', 'string'],
+            'seo_description' => ['nullable', 'string'],
+            'breadcrumb_title' => ['nullable', 'string'],
+            'canonical_url' => ['nullable', 'string'],
+
+            'is_featured' => ['nullable', 'boolean'],
+            'is_best_seller' => ['nullable', 'boolean'],
+            'is_ultra_luxury' => ['nullable', 'boolean'],
+            'is_active' => ['nullable', 'boolean'],
+
+            'featured_image' => ['nullable', 'image', 'max:5120'],
+            'gallery_images' => ['nullable', 'array'],
+            'gallery_images.*' => ['nullable', 'image', 'max:5120'],
+
+            'facilities' => ['nullable', 'array'],
+            'facilities.*.title' => ['nullable', 'string'],
+            'facilities.*.sort_order' => ['nullable', 'integer'],
+
+            'itinerary' => ['nullable', 'array'],
+            'itinerary.*.duration' => ['nullable', 'string'],
+            'itinerary.*.day_number' => ['nullable', 'integer'],
+            'itinerary.*.title' => ['nullable', 'string'],
+            'itinerary.*.description' => ['nullable', 'string'],
+            'itinerary.*.meals_breakfast' => ['nullable', 'boolean'],
+            'itinerary.*.meals_lunch' => ['nullable', 'boolean'],
+            'itinerary.*.meals_dinner' => ['nullable', 'boolean'],
+
+            'included' => ['nullable', 'array'],
+            'included.*.title' => ['nullable', 'string'],
+
+            'excluded' => ['nullable', 'array'],
+            'excluded.*.title' => ['nullable', 'string'],
+
+            'prices' => ['nullable', 'array'],
+            'prices.*.label' => ['nullable', 'string'],
+            'prices.*.season_name' => ['nullable', 'string'],
+            'prices.*.price_type' => ['nullable', 'string'],
+            'prices.*.room_type' => ['nullable', 'string'],
+            'prices.*.amount' => ['nullable', 'numeric'],
+            'prices.*.currency_id' => ['nullable', 'integer'],
+            'prices.*.valid_from' => ['nullable', 'date'],
+            'prices.*.valid_to' => ['nullable', 'date'],
+            'prices.*.notes' => ['nullable', 'string'],
+        ]);
+    }
+
+    private function preparePackageData(Request $request, array $validated, ?Package $package = null): array
+    {
+        $data = collect($validated)->except([
+            'featured_image',
+            'gallery_images',
+            'facilities',
+            'itinerary',
+            'included',
+            'excluded',
+            'prices',
+        ])->toArray();
+
+        $data = $this->translateModelFields($data, $this->translatedFields);
+
+        $data['slug'] = !empty($data['slug'])
+            ? Str::slug($data['slug'])
+            : Str::slug($data['title']['en'] ?? $data['title']['ar'] ?? 'package-' . time());
+
+        $data['is_active'] = $request->boolean('is_active');
+        $data['is_featured'] = $request->boolean('is_featured');
+        $data['is_best_seller'] = $request->boolean('is_best_seller');
+        $data['is_ultra_luxury'] = $request->boolean('is_ultra_luxury');
+
+        if ($request->hasFile('featured_image')) {
+            $data['featured_image'] = $this->uploadFile($request->file('featured_image'), 'packages');
+        } elseif ($package) {
+            unset($data['featured_image']);
+        }
+
+        if ($request->hasFile('gallery_images')) {
+            $data['gallery_images'] = $this->uploadMultipleFiles($request->file('gallery_images'), 'packages/gallery');
+        } elseif ($package) {
+            unset($data['gallery_images']);
+        }
+
+        return $data;
+    }
+
+    private function prepareAiPackageData(array $data): array
+    {
+        $packageData = collect($data)->except([
+            'facilities',
+            'itinerary',
+            'included',
+            'excluded',
+            'prices',
+        ])->toArray();
+
+        $packageData = $this->normalizeTranslatedFields($packageData);
+
+        $packageData['slug'] = !empty($packageData['slug'])
+            ? Str::slug($packageData['slug'])
+            : Str::slug(
+                $packageData['title']['en']
+                    ?? $packageData['title']['ar']
+                    ?? 'package-' . time()
+            );
+
+        return $packageData;
+    }
+
+    private function normalizeTranslatedFields(array $data): array
+    {
+        foreach ($this->translatedFields as $field) {
+            if (!array_key_exists($field, $data)) {
+                continue;
+            }
+
+            if (is_array($data[$field])) {
+                $data[$field] = [
+                    'en' => $data[$field]['en'] ?? $data[$field]['ar'] ?? '',
+                    'ar' => $data[$field]['ar'] ?? $data[$field]['en'] ?? '',
+                ];
+                continue;
+            }
+
+            if (is_string($data[$field]) && trim($data[$field]) !== '') {
+                $data[$field] = $this->translateModelFields([$field => $data[$field]], [$field])[$field];
+                continue;
+            }
+
+            $data[$field] = ['en' => '', 'ar' => ''];
+        }
+
+        return $data;
+    }
+
+    private function syncFacilities(Package $package, Request $request): void
+    {
+        $package->facilities()->delete();
+
+        foreach ((array) $request->input('facilities', []) as $index => $facility) {
+            if (empty($facility['title'])) {
+                continue;
+            }
+
+            $package->facilities()->create([
+                'title' => $facility['title'],
+                'sort_order' => $facility['sort_order'] ?? $index,
+            ]);
+        }
+    }
+
+    private function syncItineraries(Package $package, Request $request): void
+    {
+        $package->itineraries()->delete();
+
+        foreach ((array) $request->input('itinerary', []) as $day) {
+            if (empty($day['title']) && empty($day['description'])) {
+                continue;
+            }
+
+            $package->itineraries()->create([
+                'duration' => $day['duration'] ?? null,
+                'day_number' => $day['day_number'] ?? null,
+                'title' => $day['title'] ?? null,
+                'description' => $day['description'] ?? null,
+                'meals_breakfast' => !empty($day['meals_breakfast']),
+                'meals_lunch' => !empty($day['meals_lunch']),
+                'meals_dinner' => !empty($day['meals_dinner']),
+            ]);
+        }
+    }
+
+    private function syncInclusions(Package $package, Request $request): void
+    {
+        $package->inclusions()->delete();
+
+        foreach ((array) $request->input('included', []) as $index => $item) {
+            if (empty($item['title'])) {
+                continue;
+            }
+
+            $package->inclusions()->create([
+                'title' => $item['title'],
+                'type' => 'included',
+                'sort_order' => $index,
+            ]);
+        }
+
+        foreach ((array) $request->input('excluded', []) as $index => $item) {
+            if (empty($item['title'])) {
+                continue;
+            }
+
+            $package->inclusions()->create([
+                'title' => $item['title'],
+                'type' => 'excluded',
+                'sort_order' => $index,
+            ]);
+        }
+    }
+
+    private function syncPrices(Package $package, Request $request): void
+    {
+        $package->prices()->delete();
+
+        foreach ((array) $request->input('prices', []) as $price) {
+            if (empty($price['amount'])) {
+                continue;
+            }
+
+            $package->prices()->create([
+                'label' => $price['label'] ?? null,
+                'season_name' => $price['season_name'] ?? null,
+                'price_type' => $price['price_type'] ?? 'from',
+                'room_type' => $price['room_type'] ?? null,
+                'amount' => $price['amount'],
+                'currency_id' => $price['currency_id'] ?? $package->currency_id,
+                'valid_from' => $price['valid_from'] ?? null,
+                'valid_to' => $price['valid_to'] ?? null,
+                'notes' => $price['notes'] ?? null,
+            ]);
+        }
+    }
+
+    private function createFacilitiesFromArray(Package $package, array $facilities): void
+    {
+        foreach ($facilities as $index => $facility) {
+            $title = is_array($facility) ? ($facility['title'] ?? null) : $facility;
+
+            if (!$title) {
+                continue;
+            }
+
+            $package->facilities()->create([
+                'title' => $title,
+                'sort_order' => $index,
+            ]);
+        }
+    }
+
+    private function createItinerariesFromArray(Package $package, array $itinerary): void
+    {
+        foreach ($itinerary as $day) {
+            if (!is_array($day)) {
+                continue;
+            }
+
+            $package->itineraries()->create([
+                'duration' => $day['duration'] ?? null,
+                'day_number' => $day['day_number'] ?? null,
+                'title' => $day['title'] ?? null,
+                'description' => $day['description'] ?? null,
+                'meals_breakfast' => !empty($day['meals_breakfast']),
+                'meals_lunch' => !empty($day['meals_lunch']),
+                'meals_dinner' => !empty($day['meals_dinner']),
+            ]);
+        }
+    }
+
+    private function createInclusionsFromArray(Package $package, array $items, string $type): void
+    {
+        foreach ($items as $index => $item) {
+            $title = is_array($item) ? ($item['title'] ?? null) : $item;
+
+            if (!$title) {
+                continue;
+            }
+
+            $package->inclusions()->create([
+                'title' => $title,
+                'type' => $type,
+                'sort_order' => $index,
+            ]);
+        }
+    }
+
+    private function createPricesFromArray(Package $package, array $prices, ?int $currencyId = null): void
+    {
+        foreach ($prices as $price) {
+            if (!is_array($price) || empty($price['amount'])) {
+                continue;
+            }
+
+            $package->prices()->create([
+                'label' => $price['label'] ?? $price['duration'] ?? null,
+                'season_name' => $price['season_name'] ?? $price['season'] ?? null,
+                'price_type' => $price['price_type'] ?? 'from',
+                'room_type' => $price['room_type'] ?? null,
+                'amount' => $price['amount'],
+                'currency_id' => $price['currency_id'] ?? $currencyId,
+                'valid_from' => $price['valid_from'] ?? null,
+                'valid_to' => $price['valid_to'] ?? null,
+                'notes' => $price['notes'] ?? null,
+            ]);
+        }
+    }
+
+    private function uploadFile($file, string $path): string
+    {
+        return 'storage/' . $file->store($path, 'public');
+    }
+
+    private function uploadMultipleFiles(array $files, string $path): array
+    {
+        $uploaded = [];
+
+        foreach ($files as $file) {
+            if ($file) {
+                $uploaded[] = $this->uploadFile($file, $path);
+            }
+        }
+
+        return $uploaded;
+    }
+
+    private function adminTrans($value, array $preferred = ['ar', 'en']): string
+    {
+        if (!is_array($value)) {
             return (string) ($value ?? '');
         }
 
         foreach ($preferred as $lang) {
-            if (! empty($value[$lang])) {
+            if (!empty($value[$lang])) {
                 return (string) $value[$lang];
             }
         }
