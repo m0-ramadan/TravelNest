@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'عرض الباقة')
+@section('title', 'عرض الرحلة')
 
 @section('css')
     <style>
@@ -8,6 +8,8 @@
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --dark-bg: #1e1e2d;
             --dark-card: #2b3b4c;
+            --dark-box: rgba(255, 255, 255, .05);
+            --dark-border: rgba(255, 255, 255, .1);
         }
 
         body {
@@ -18,10 +20,10 @@
 
         .profile-card {
             background: var(--dark-card);
-            border-radius: 15px;
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, .3);
-            border: 1px solid rgba(255, 255, 255, .1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+            border: 1px solid var(--dark-border);
         }
 
         .profile-header {
@@ -34,43 +36,108 @@
             padding: 30px;
         }
 
+        .section-title {
+            font-weight: 700;
+            font-size: 18px;
+            margin: 30px 0 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--dark-border);
+        }
+
         .info-box {
-            background: rgba(255, 255, 255, .05);
-            border: 1px solid rgba(255, 255, 255, .08);
+            background: var(--dark-box);
+            border: 1px solid var(--dark-border);
             border-radius: 12px;
             padding: 18px;
             margin-bottom: 15px;
+            height: calc(100% - 15px);
         }
 
         .info-label {
             color: rgba(255, 255, 255, .65);
             font-size: 13px;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
         }
 
         .info-value {
             color: #fff;
             font-weight: 600;
+            white-space: pre-line;
+        }
+
+        .badge-soft {
+            display: inline-block;
+            background: rgba(255, 255, 255, .1);
+            border: 1px solid rgba(255, 255, 255, .12);
+            color: #fff;
+            padding: 7px 10px;
+            border-radius: 999px;
+            margin: 3px;
+            font-size: 13px;
+        }
+
+        .image-preview {
+            width: 120px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid var(--dark-border);
+        }
+
+        .table-dark-custom {
+            color: #fff;
+            border-color: var(--dark-border);
+        }
+
+        .table-dark-custom th,
+        .table-dark-custom td {
+            color: #fff;
+            border-color: var(--dark-border);
+            vertical-align: middle;
+        }
+
+        .timeline-item {
+            background: var(--dark-box);
+            border: 1px solid var(--dark-border);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 14px;
         }
     </style>
 @endsection
 
 @section('content')
+    @php
+        $packageTitle = adminTrans($package->title ?? ($package->name ?? '')) ?: 'بدون اسم';
+        $galleryImages = $package->gallery_images ?? [];
+
+        if (is_string($galleryImages)) {
+            $decoded = json_decode($galleryImages, true);
+            $galleryImages = is_array($decoded) ? $decoded : [];
+        }
+    @endphp
+
     <div class="container-xxl flex-grow-1 container-p-y">
+
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">الرئيسية</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('admin.packages.index') }}">الباقات</a></li>
-                <li class="breadcrumb-item active">عرض الباقة</li>
+                <li class="breadcrumb-item">
+                    <a href="{{ route('admin.index') }}">الرئيسية</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ route('admin.packages.index') }}">الرحلات</a>
+                </li>
+                <li class="breadcrumb-item active">عرض الرحلة</li>
             </ol>
         </nav>
 
         <div class="profile-card">
-            <div class="profile-header d-flex justify-content-between align-items-center">
+            <div class="profile-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
-                    <h4 class="mb-1">{{ adminTrans($package->name) ?: 'بدون اسم' }}</h4>
+                    <h4 class="mb-1">{{ $packageTitle }}</h4>
                     <small class="opacity-75">{{ $package->slug ?? '-' }}</small>
                 </div>
+
                 <div class="d-flex gap-2">
                     <a href="{{ route('admin.packages.edit', $package) }}" class="btn btn-light">تعديل</a>
                     <a href="{{ route('admin.packages.index') }}" class="btn btn-outline-light">رجوع</a>
@@ -78,6 +145,43 @@
             </div>
 
             <div class="profile-body">
+
+                {{-- الصور --}}
+                <div class="section-title">الصور والمعرض</div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-label">الصورة الرئيسية</div>
+
+                            @if (!empty($package->featured_image))
+                                <img src="{{ asset($package->featured_image) }}" class="image-preview" alt="featured">
+                            @else
+                                <div class="info-value">-</div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="info-box">
+                            <div class="info-label">صور المعرض</div>
+
+                            @if (is_array($galleryImages) && count($galleryImages))
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach ($galleryImages as $image)
+                                        <img src="{{ asset($image) }}" class="image-preview" alt="gallery">
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="info-value">-</div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                {{-- البيانات الأساسية --}}
+                <div class="section-title">البيانات الأساسية</div>
+
                 <div class="row">
                     <div class="col-md-4">
                         <div class="info-box">
@@ -95,22 +199,36 @@
 
                     <div class="col-md-4">
                         <div class="info-box">
+                            <div class="info-label">الدولة الأساسية</div>
+                            <div class="info-value">{{ adminTrans(optional($package->primaryCountry)->name) ?: '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-label">نوع الرحلة</div>
+                            <div class="info-value">{{ $package->package_type ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-label">نوع الجولة</div>
+                            <div class="info-value">{{ $package->tour_type ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-label">نظام الحجز</div>
+                            <div class="info-value">{{ $package->booking_mode ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box">
                             <div class="info-label">العملة</div>
-                            <div class="info-value">{{ $package->currency->code ?? '-' }}</div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="info-box">
-                            <div class="info-label">عدد الأيام</div>
-                            <div class="info-value">{{ $package->duration_days ?? '-' }}</div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="info-box">
-                            <div class="info-label">السعر الأساسي</div>
-                            <div class="info-value">{{ number_format($package->base_price ?? 0, 2) }}</div>
+                            <div class="info-value">{{ optional($package->currency)->code ?? '-' }}</div>
                         </div>
                     </div>
 
@@ -121,45 +239,418 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="info-box">
-                            <div class="info-label">مميزة</div>
-                            <div class="info-value">{{ $package->is_featured ?? false ? 'نعم' : 'لا' }}</div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="info-box">
                             <div class="info-label">الترتيب</div>
                             <div class="info-value">{{ $package->sort_order ?? 0 }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- النصوص --}}
+                <div class="section-title">النصوص والوصف</div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="info-box">
+                            <div class="info-label">العنوان الفرعي</div>
+                            <div class="info-value">{{ adminTrans($package->subtitle ?? '') ?: '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-12">
                         <div class="info-box">
                             <div class="info-label">الوصف المختصر</div>
-                            <div class="info-value">{{ adminTrans($package->short_description) ?: '-' }}</div>
+                            <div class="info-value">{{ adminTrans($package->short_description ?? '') ?: '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-12">
                         <div class="info-box">
                             <div class="info-label">الوصف الكامل</div>
-                            <div class="info-value">{{ adminTrans($package->description) ?: '-' }}</div>
+                            <div class="info-value">{{ adminTrans($package->description ?? '') ?: '-' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- المدة والمسار --}}
+                <div class="section-title">المدة والمسار</div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <div class="info-label">عدد الأيام</div>
+                            <div class="info-value">{{ $package->duration_days ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <div class="info-label">عدد الليالي</div>
+                            <div class="info-value">{{ $package->duration_nights ?? '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="info-box">
-                            <div class="info-label">Meta Title</div>
-                            <div class="info-value">{{ adminTrans($package->seo_title) ?: '-' }}</div>
+                            <div class="info-label">نص المدة</div>
+                            <div class="info-value">{{ $package->duration_text ?? '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="info-box">
-                            <div class="info-label">Meta Description</div>
-                            <div class="info-value">{{ adminTrans($package->seo_description) ?: '-' }}</div>
+                            <div class="info-label">الجدول</div>
+                            <div class="info-value">{{ $package->schedule_text ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">المسار</div>
+                            <div class="info-value">{{ $package->route_text ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">مكان الاستلام</div>
+                            <div class="info-value">{{ $package->pickup_location ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">مكان الانتهاء</div>
+                            <div class="info-value">{{ $package->dropoff_location ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">الوجهات</div>
+                            <div class="info-value">{{ $package->destinations_text ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">ملخص الموقع</div>
+                            <div class="info-value">{{ $package->location_summary ?? '-' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- المرافق --}}
+                <div class="section-title">مرافق الرحلة</div>
+
+                <div class="info-box">
+                    @if (isset($package->facilities) && $package->facilities->count())
+                        @foreach ($package->facilities as $facility)
+                            <span class="badge-soft">{{ $facility->title }}</span>
+                        @endforeach
+                    @else
+                        <div class="info-value">-</div>
+                    @endif
+                </div>
+
+                {{-- البرنامج --}}
+                <div class="section-title">برنامج الرحلة</div>
+
+                @if (isset($package->itineraries) && $package->itineraries->count())
+                    @foreach ($package->itineraries as $day)
+                        <div class="timeline-item">
+                            <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
+                                <h6 class="mb-0">
+                                    Day {{ $day->day_number ?? '-' }} - {{ $day->title ?? '-' }}
+                                </h6>
+                                <span class="badge-soft">{{ $day->duration ?? '-' }}</span>
+                            </div>
+
+                            <div class="info-value mb-2">{{ $day->description ?? '-' }}</div>
+
+                            <div>
+                                @if ($day->meals_breakfast)
+                                    <span class="badge-soft">Breakfast</span>
+                                @endif
+                                @if ($day->meals_lunch)
+                                    <span class="badge-soft">Lunch</span>
+                                @endif
+                                @if ($day->meals_dinner)
+                                    <span class="badge-soft">Dinner</span>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                @else
+                    <div class="info-box">
+                        <div class="info-value">-</div>
+                    </div>
+                @endif
+
+                {{-- المشمول وغير المشمول --}}
+                <div class="section-title">المشمول وغير المشمول</div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">Included</div>
+
+                            @if (isset($package->inclusions) && $package->inclusions->where('type', 'included')->count())
+                                <ul class="mb-0">
+                                    @foreach ($package->inclusions->where('type', 'included') as $item)
+                                        <li>{{ $item->title }}</li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <div class="info-value">-</div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">Not Included</div>
+
+                            @if (isset($package->inclusions) && $package->inclusions->where('type', 'excluded')->count())
+                                <ul class="mb-0">
+                                    @foreach ($package->inclusions->where('type', 'excluded') as $item)
+                                        <li>{{ $item->title }}</li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <div class="info-value">-</div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                {{-- الأسعار --}}
+                <div class="section-title">الأسعار</div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <div class="info-label">السعر يبدأ من</div>
+                            <div class="info-value">
+                                {{ number_format($package->start_from_price ?? ($package->base_price ?? 0), 2) }}
+                                {{ optional($package->currency)->code }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <div class="info-label">سعر المقارنة</div>
+                            <div class="info-value">
+                                {{ $package->compare_price ? number_format($package->compare_price, 2) : '-' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (isset($package->prices) && $package->prices->count())
+                    <div class="table-responsive">
+                        <table class="table table-dark-custom">
+                            <thead>
+                                <tr>
+                                    <th>Label</th>
+                                    <th>Season</th>
+                                    <th>Price Type</th>
+                                    <th>Room</th>
+                                    <th>Amount</th>
+                                    <th>Currency</th>
+                                    <th>Valid From</th>
+                                    <th>Valid To</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($package->prices as $price)
+                                    <tr>
+                                        <td>{{ $price->label ?? '-' }}</td>
+                                        <td>{{ $price->season_name ?? '-' }}</td>
+                                        <td>{{ $price->price_type ?? '-' }}</td>
+                                        <td>{{ $price->room_type ?? '-' }}</td>
+                                        <td>{{ number_format($price->amount ?? 0, 2) }}</td>
+                                        <td>{{ optional($price->currency)->code ?? (optional($package->currency)->code ?? '-') }}
+                                        </td>
+                                        <td>{{ $price->valid_from ?? '-' }}</td>
+                                        <td>{{ $price->valid_to ?? '-' }}</td>
+                                        <td>{{ $price->notes ?? '-' }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="info-box">
+                        <div class="info-value">-</div>
+                    </div>
+                @endif
+
+                <div class="info-box mt-3">
+                    <div class="info-label">ملاحظات الأسعار</div>
+                    <div class="info-value">{{ $package->pricing_information ?? '-' }}</div>
+                </div>
+
+                {{-- السياسات --}}
+                <div class="section-title">السياسات والشروط</div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">سياسة الأطفال</div>
+                            <div class="info-value">{{ $package->children_policy ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">سياسة الاستلام والتوصيل</div>
+                            <div class="info-value">{{ $package->pickup_policy ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">سياسة الإلغاء</div>
+                            <div class="info-value">{{ $package->cancellation_policy ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">الشروط والأحكام</div>
+                            <div class="info-value">{{ $package->terms_conditions ?? '-' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- المشاركون والتقييم --}}
+                <div class="section-title">المشاركون والتقييم</div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <div class="info-label">الحد الأدنى للمشاركين</div>
+                            <div class="info-value">{{ $package->min_participants ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <div class="info-label">الحد الأقصى للمشاركين</div>
+                            <div class="info-value">{{ $package->max_participants ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <div class="info-label">أيام الحجز المسبق</div>
+                            <div class="info-value">{{ $package->booking_lead_days ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <div class="info-label">التقييم</div>
+                            <div class="info-value">{{ $package->rating_avg ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <div class="info-label">عدد المراجعات</div>
+                            <div class="info-value">{{ $package->reviews_count ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <div class="info-label">مستوى الصعوبة</div>
+                            <div class="info-value">{{ $package->difficulty_level ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">رابط الفيديو</div>
+                            <div class="info-value">
+                                @if (!empty($package->video_url))
+                                    <a href="{{ $package->video_url }}" target="_blank" class="text-white">
+                                        {{ $package->video_url }}
+                                    </a>
+                                @else
+                                    -
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- النشر --}}
+                <div class="section-title">النشر والإعدادات</div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <div class="info-label">تاريخ النشر</div>
+                            <div class="info-value">{{ optional($package->published_at)->format('Y-m-d') ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <div class="info-label">مميزة</div>
+                            <div class="info-value">{{ $package->is_featured ? 'نعم' : 'لا' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <div class="info-label">الأكثر مبيعًا</div>
+                            <div class="info-value">{{ $package->is_best_seller ? 'نعم' : 'لا' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <div class="info-label">فاخرة جدًا</div>
+                            <div class="info-value">{{ $package->is_ultra_luxury ? 'نعم' : 'لا' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- SEO --}}
+                <div class="section-title">SEO</div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">SEO Title</div>
+                            <div class="info-value">{{ adminTrans($package->seo_title ?? '') ?: '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">Breadcrumb Title</div>
+                            <div class="info-value">{{ adminTrans($package->breadcrumb_title ?? '') ?: '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="info-box">
+                            <div class="info-label">SEO Description</div>
+                            <div class="info-value">{{ adminTrans($package->seo_description ?? '') ?: '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-label">Canonical URL</div>
+                            <div class="info-value">{{ $package->canonical_url ?? '-' }}</div>
                         </div>
                     </div>
                 </div>
@@ -171,6 +662,7 @@
                         </a>
                     </div>
                 @endif
+
             </div>
         </div>
     </div>

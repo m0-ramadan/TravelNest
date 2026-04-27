@@ -108,7 +108,14 @@ class Package extends Model
     {
         return $this->belongsTo(Currency::class);
     }
-
+    public function destination(): BelongsTo
+    {
+        return $this->belongsTo(Attraction::class, 'destination_id');
+    }
+    public function facilities(): HasMany
+    {
+        return $this->hasMany(PackageHighlight::class)->orderBy('sort_order');
+    }
     public function creator(): BelongsTo
     {
         return $this->belongsTo(Admin::class, 'created_by');
