@@ -77,7 +77,7 @@
             <div class="main-header d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="mb-0">تعديل السؤال الشائع</h5>
-                    <small class="opacity-75">{{ $faq->question ?? '' }}</small>
+                    <small class="opacity-75">{{ adminTrans($faq->question) ?? '' }}</small>
                 </div>
                 <a href="{{ route('admin.faqs.index') }}" class="btn btn-light">رجوع</a>
             </div>
