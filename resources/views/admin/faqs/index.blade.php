@@ -250,7 +250,7 @@
 
                         <div class="mb-3">
                             <strong>الإجابة:</strong>
-                            {{ \Illuminate\Support\Str::limit($faq->answer ?? '-', 260) }}
+                            {{ \Illuminate\Support\Str::limit(adminTrans($faq->answer) ?? '-', 260) }}
                         </div>
 
                         <div class="d-flex gap-2 flex-wrap">
