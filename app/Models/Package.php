@@ -24,6 +24,7 @@ class Package extends Model
         'short_description',
         'description',
         'duration_days',
+        'duration_hours',
         'duration_nights',
         'start_from_price',
         'compare_price',

@@ -255,7 +255,7 @@
                         <div class="search-box">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text" class="form-control" name="search" value="{{ request('search') }}"
-                                placeholder="ابحث باسم الباقة أو الـ slug">
+                                placeholder="ابحث باسم الرحلة أو الـ slug">
                         </div>
                     </div>
 
@@ -301,7 +301,7 @@
                         <i class="fas fa-wand-magic-sparkles me-2"></i>إنشاء بالذكاء الاصطناعي
                     </a>
                     <a href="{{ route('admin.packages.create') }}" class="btn btn-light">
-                        <i class="fas fa-plus me-2"></i>إضافة باقة
+                        <i class="fas fa-plus me-2"></i>إضافة رحلة
                     </a>
                 </div>
             </div>
@@ -401,7 +401,7 @@
                             <i class="fas fa-suitcase"></i>
                         </div>
                         <h5 class="empty-state-text">لا توجد باقات حالياً</h5>
-                        <a href="{{ route('admin.packages.create') }}" class="btn btn-primary">إضافة باقة جديدة</a>
+                        <a href="{{ route('admin.packages.create') }}" class="btn btn-primary">إضافة رحلة جديدة</a>
                     </div>
                 @endforelse
 

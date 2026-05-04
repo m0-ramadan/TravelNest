@@ -322,17 +322,37 @@
                     <div class="section-title">المدة والمسار</div>
 
                     <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">عدد الأيام</label>
-                            <input type="number" name="duration_days" class="form-control"
-                                value="{{ old('duration_days') }}">
+                        <div class="col-12 mb-3">
+                            <label class="form-label">نوع المدة</label><br>
+
+                            <input type="radio" name="duration_type" value="days" checked
+                                onclick="toggleDuration()">
+                            أيام / ليالي
+
+                            <input type="radio" name="duration_type" value="hours" class="ms-3"
+                                onclick="toggleDuration()">
+                            ساعات
+                        </div>
+                        <div class="row" id="daysFields">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">عدد الأيام</label>
+                                <input type="number" name="duration_days" class="form-control">
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">عدد الليالي</label>
+                                <input type="number" name="duration_nights" class="form-control">
+                            </div>
                         </div>
 
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">عدد الليالي</label>
-                            <input type="number" name="duration_nights" class="form-control"
-                                value="{{ old('duration_nights') }}">
+                        <div class="row d-none" id="hoursFields">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">عدد الساعات</label>
+                                <input type="number" name="duration_hours" class="form-control">
+                            </div>
                         </div>
+
+
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">نص المدة المعروض</label>
@@ -892,6 +912,19 @@
         `);
 
             priceIndex++;
+        }
+    </script>
+    <script>
+        function toggleDuration() {
+            let type = document.querySelector('input[name="duration_type"]:checked').value;
+
+            if (type === 'days') {
+                document.getElementById('daysFields').classList.remove('d-none');
+                document.getElementById('hoursFields').classList.add('d-none');
+            } else {
+                document.getElementById('daysFields').classList.add('d-none');
+                document.getElementById('hoursFields').classList.remove('d-none');
+            }
         }
     </script>
 @endsection

@@ -8,6 +8,7 @@ use App\Models\Currency;
 use App\Models\Package;
 use App\Models\PackageCategory;
 use App\Services\PackageAiService;
+use App\Traits\ApiResponseTrait;
 use App\Traits\HandlesTranslatedFields;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -82,7 +83,7 @@ class PackageController extends Controller
             $this->syncPrices($package, $request);
         });
 
-        return $this->success('admin.packages.index', 'تم إنشاء الرحلة بنجاح.');
+        return redirect()->route('admin.packages.index')->with('success', 'تم إنشاء الرحلة بنجاح.');
     }
 
     public function show(Package $package): View
@@ -165,6 +166,7 @@ class PackageController extends Controller
             'booking_mode' => ['nullable', 'string'],
             'duration_days' => ['nullable', 'integer'],
             'duration_nights' => ['nullable', 'integer'],
+            'duration_hours' => ['nullable', 'integer'],
             'route_text' => ['nullable', 'string'],
             'schedule_text' => ['nullable', 'string'],
             'luxury_level' => ['nullable', 'string'],
@@ -184,6 +186,7 @@ class PackageController extends Controller
             'prompt' => $data['prompt'],
             'duration_days' => $data['duration_days'] ?? null,
             'duration_nights' => $data['duration_nights'] ?? null,
+            'duration_hours' => $data['duration_hours'] ?? null,
             'route_text' => $data['route_text'] ?? null,
             'schedule_text' => $data['schedule_text'] ?? null,
             'luxury_level' => $data['luxury_level'] ?? null,
@@ -368,6 +371,7 @@ class PackageController extends Controller
 
             'duration_days' => ['nullable', 'integer'],
             'duration_nights' => ['nullable', 'integer'],
+            'duration_hours' => ['nullable', 'integer'],
             'duration_text' => ['nullable', 'string'],
             'route_text' => ['nullable', 'string'],
 
