@@ -57,6 +57,8 @@ class InquiryController extends Controller
 
     public function show(Inquiry $inquiry): View
     {
+        $inquiry->load(['package', 'tailorMadeRequest']);
+
         return $this->view('admin.inquiries.show', compact('inquiry'));
     }
 

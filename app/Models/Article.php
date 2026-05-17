@@ -29,7 +29,7 @@ class Article extends Model
         'views_count',
         'reading_time',
         'published_at',
-        'article_type'
+        'article_type',
     ];
 
     protected $casts = [
@@ -48,32 +48,60 @@ class Article extends Model
 
     public function getDisplayTitleAttribute(): string
     {
-        return $this->translatedValue('title');
+        return $this->translatedValue('title') ?: '';
     }
 
     public function getDisplayExcerptAttribute(): string
     {
-        return $this->translatedValue('excerpt');
+        return $this->translatedValue('excerpt') ?: '';
     }
 
     public function getDisplayContentAttribute(): string
     {
-        return $this->translatedValue('content');
+        return $this->translatedValue('content') ?: '';
+    }
+
+    public function getDisplaySeoTitleAttribute(): string
+    {
+        return $this->translatedValue('seo_title') ?: $this->display_title;
+    }
+
+    public function getDisplaySeoDescriptionAttribute(): string
+    {
+        return $this->translatedValue('seo_description') ?: $this->display_excerpt;
+    }
+
+    public function getDisplaySeoKeywordsAttribute(): string
+    {
+        return $this->translatedValue('seo_keywords') ?: '';
     }
 
     public function getDisplayMetaTitleAttribute(): string
     {
-        return $this->translatedValue('meta_title');
+        return $this->display_seo_title;
     }
 
     public function getDisplayMetaDescriptionAttribute(): string
     {
-        return $this->translatedValue('meta_description');
+        return $this->display_seo_description;
     }
 
     public function getDisplayMetaKeywordsAttribute(): string
     {
-        return $this->translatedValue('meta_keywords');
+        return $this->display_seo_keywords;
+    }
+
+    public function getImageUrlAttribute(): string
+    {
+        if (!$this->featured_image) {
+            return asset('website/photos/home2.webp');
+        }
+
+        if (str_starts_with($this->featured_image, 'http://') || str_starts_with($this->featured_image, 'https://')) {
+            return $this->featured_image;
+        }
+
+        return asset($this->featured_image);
     }
 
     public function category(): BelongsTo
@@ -108,12 +136,14 @@ class Article extends Model
 
     public function scopePublished($query)
     {
-        return $query->where('published_at', '<=', now());
+        return $query->whereNotNull('published_at')
+            ->where('published_at', '<=', now());
     }
 
     public function calculateReadingTime(?string $content = null): int
     {
         $content = $content ?? $this->display_content;
+
         $wordCount = str_word_count(strip_tags($content));
         $readingTime = (int) ceil($wordCount / 200);
 

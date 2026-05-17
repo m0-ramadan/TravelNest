@@ -113,37 +113,36 @@ class TripsController extends Controller
         $t = 0;
         return view('Admin.trips.index', compact('trips', 't'));
     }
-public function archive(Request $request)
-{
-    try {
-        $query = Trip::onlyTrashed()
-            ->with(['representative', 'shipments'])
-            ->withCount('shipments')
-            ->orderBy('deleted_at', 'desc');
+    public function archive(Request $request)
+    {
+        try {
+            $query = Trip::onlyTrashed()
+                ->with(['representative', 'shipments'])
+                ->withCount('shipments')
+                ->orderBy('deleted_at', 'desc');
 
-        // البحث في الكود أو اسم المندوب أو كود الشحنة
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('code', 'like', "%{$search}%")
-                    ->orWhereHas('representative', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('shipments', function ($q) use ($search) {
-                        $q->where('code', 'like', "%{$search}%");
-                    });
-            });
+            // البحث في الكود أو اسم المندوب أو كود الشحنة
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('code', 'like', "%{$search}%")
+                        ->orWhereHas('representative', function ($q) use ($search) {
+                            $q->where('name', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('shipments', function ($q) use ($search) {
+                            $q->where('code', 'like', "%{$search}%");
+                        });
+                });
+            }
+
+            // تنفيذ الاستعلام مع التصفح
+            $trips = $query->paginate(10);
+
+            return view('Admin.trips.archive', compact('trips'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'حدث خطأ أثناء استرجاع الأرشيف: ' . $e->getMessage());
         }
-
-        // تنفيذ الاستعلام مع التصفح
-        $trips = $query->paginate(10);
-
-        return view('Admin.trips.archive', compact('trips'));
-
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'حدث خطأ أثناء استرجاع الأرشيف: ' . $e->getMessage());
     }
-}
 
     public function representativeTransfer(Request $request)
     {
@@ -251,7 +250,7 @@ public function archive(Request $request)
         //     ->orderByDesc('created_at')
         //     ->get();
 
-      $user = auth()->user();
+        $user = auth()->user();
 
         $query = ShipmentContent::query()
             ->whereIn('shipment_id', $shipments->pluck('id'))
@@ -349,7 +348,7 @@ public function archive(Request $request)
             $firstLetterTo   = strtoupper(substr($branchTo->key, 0, 2));
 
             // Count all trips that started from this branch
-           $tripCount = Trip::withTrashed()->where('branches_from', $branchFrom->id)->count() + 1;
+            $tripCount = Trip::withTrashed()->where('branches_from', $branchFrom->id)->count() + 1;
 
 
             do {
@@ -1492,6 +1491,4 @@ public function archive(Request $request)
 
         return $statusMap[$statusId] ?? 'غير معروف';
     }
-
-    
 }

@@ -2,44 +2,38 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\JsonTranslationFileService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class SetLocale
 {
+    public function __construct(
+        protected JsonTranslationFileService $jsonTranslationFileService
+    ) {}
+
     public function handle(Request $request, Closure $next): Response
     {
-        // الحصول على اللغة من الهيدر
-        $locale = $request->header('Accept-Language', config('app.locale'));
-        
-        // تنظيف وتأكيد اللغة
-        $locale = $this->sanitizeLocale($locale);
-        
-        // تعيين اللغة للتطبيق
-        app()->setLocale($locale);
-        
-        return $next($request);
-    }
+        $defaultLocale = config('app.locale', 'en');
 
-    /**
-     * تنظيف وتأكيد صحة اللغة
-     */
-    private function sanitizeLocale($locale): string
-    {
-        // قائمة اللغات المدعومة
-        $supportedLocales = ['ar', 'en', 'fr', 'es']; // أضف لغات أخرى حسب الحاجة
-        
-        // تقسيم اللغة إذا كانت تحتوي على إقليم (مثل en-US)
-        $locale = explode('-', $locale)[0];
-        $locale = explode('_', $locale)[0];
-        
-        // التحقق إذا كانت اللغة مدعومة
-        if (in_array($locale, $supportedLocales)) {
-            return $locale;
+        if ($request->session()->has('locale')) {
+            $locale = $request->session()->get('locale');
+        } else {
+            $locale = $defaultLocale;
         }
-        
-        // العودة للغة الافتراضية
-        return config('app.fallback_locale', 'ar');
+
+        $supportedLocales = \Illuminate\Support\Facades\Cache::remember('supported_locales', 3600, function () {
+            return \App\Models\Language::where('is_active', true)->pluck('code')->toArray();
+        });
+
+        if (!in_array($locale, $supportedLocales)) {
+            $locale = config('app.fallback_locale', 'en');
+        }
+
+        app()->setLocale($locale);
+        $this->jsonTranslationFileService->ensureLocaleFile($locale);
+
+        return $next($request);
     }
 }

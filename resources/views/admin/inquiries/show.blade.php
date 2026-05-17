@@ -74,7 +74,7 @@
             <div class="profile-header d-flex justify-content-between align-items-center">
                 <div>
                     <h4 class="mb-1">{{ $inquiry->subject ?? 'بدون عنوان' }}</h4>
-                    <small class="opacity-75">{{ $inquiry->name ?? '-' }}</small>
+                    <small class="opacity-75">{{ $inquiry->full_name ?? $inquiry->name ?? '-' }}</small>
                 </div>
                 <div class="d-flex gap-2">
                     <a href="{{ route('admin.inquiries.edit', $inquiry) }}" class="btn btn-light">تعديل</a>
@@ -87,7 +87,7 @@
                     <div class="col-md-4">
                         <div class="info-box">
                             <div class="info-label">الاسم</div>
-                            <div class="info-value">{{ $inquiry->name ?? '-' }}</div>
+                            <div class="info-value">{{ $inquiry->full_name ?? $inquiry->name ?? '-' }}</div>
                         </div>
                     </div>
 
@@ -108,7 +108,7 @@
                     <div class="col-md-4">
                         <div class="info-box">
                             <div class="info-label">الباقة</div>
-                            <div class="info-value">{{ $inquiry->package->name ?? '-' }}</div>
+                            <div class="info-value">{{ $inquiry->package->title ?? '-' }}</div>
                         </div>
                     </div>
 
@@ -148,6 +148,38 @@
                             <div class="info-value message-box">{{ $inquiry->message ?? '-' }}</div>
                         </div>
                     </div>
+
+                    @if ($inquiry->tailorMadeRequest)
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <div class="info-label">الإقامة</div>
+                                <div class="info-value">{{ $inquiry->tailorMadeRequest->accommodation_preference ?? '-' }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <div class="info-label">بلد الإقامة</div>
+                                <div class="info-value">{{ $inquiry->tailorMadeRequest->country_of_residence ?? '-' }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <div class="info-label">تاريخ العودة</div>
+                                <div class="info-value">
+                                    {{ optional($inquiry->tailorMadeRequest->end_date)->translatedFormat('d M Y') ?? '-' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <div class="info-label">الرضع</div>
+                                <div class="info-value">{{ $inquiry->tailorMadeRequest->infants ?? 0 }}</div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

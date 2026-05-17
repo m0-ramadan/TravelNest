@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Language;
+use App\Services\JsonTranslationFileService;
 use App\Services\TranslatableContentSyncService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,7 +36,8 @@ class LanguageController extends Controller
 
     public function store(
         Request $request,
-        TranslatableContentSyncService $translatableContentSyncService
+        TranslatableContentSyncService $translatableContentSyncService,
+        JsonTranslationFileService $jsonTranslationFileService
     ): RedirectResponse {
         $data = $request->validate([
             'code' => ['required', 'string', 'max:10', 'unique:languages,code'],
@@ -59,6 +61,7 @@ class LanguageController extends Controller
 
         if ($language->is_active) {
             $translatableContentSyncService->syncNewLanguage($language);
+            $jsonTranslationFileService->ensureLocaleFile($language->code);
         }
 
         return $this->success('admin.languages.index', 'Language created.');
@@ -74,8 +77,15 @@ class LanguageController extends Controller
         return $this->view('admin.languages.edit', compact('language'));
     }
 
-    public function update(Request $request, Language $language): RedirectResponse
+    public function update(
+        Request $request,
+        Language $language,
+        TranslatableContentSyncService $translatableContentSyncService,
+        JsonTranslationFileService $jsonTranslationFileService
+    ): RedirectResponse
     {
+        $oldCode = $language->code;
+
         $data = $request->validate([
             'code' => ['required', 'string', 'max:10', 'unique:languages,code,' . $language->id],
             'name' => ['required', 'string', 'max:255'],
@@ -99,28 +109,44 @@ class LanguageController extends Controller
 
         $language->update($data);
 
+        if ($oldCode !== $language->code) {
+            $jsonTranslationFileService->renameLocaleFile($oldCode, $language->code);
+        }
+
+        if ($language->is_active) {
+            $translatableContentSyncService->syncNewLanguage($language);
+            $jsonTranslationFileService->ensureLocaleFile($language->code);
+        }
+
         return $this->success('admin.languages.index', 'Language updated.');
     }
 
     public function destroy(
         Language $language,
-        TranslatableContentSyncService $translatableContentSyncService
+        TranslatableContentSyncService $translatableContentSyncService,
+        JsonTranslationFileService $jsonTranslationFileService
     ): RedirectResponse {
         if ($language->is_default) {
             return back()->with('error', 'Default language cannot be deleted.');
         }
 
         $translatableContentSyncService->removeLanguage($language->code);
+        $jsonTranslationFileService->removeLocaleFile($language->code);
 
         $language->delete();
 
         return $this->success('admin.languages.index', 'Language deleted.');
     }
 
-    public function toggle(Language $language): RedirectResponse
+    public function toggle(
+        Language $language,
+        TranslatableContentSyncService $translatableContentSyncService,
+        JsonTranslationFileService $jsonTranslationFileService
+    ): RedirectResponse
     {
         if ($language->is_default) {
             $language->update(['is_active' => true]);
+            $jsonTranslationFileService->ensureLocaleFile($language->code);
 
             return back()->with('success', 'Default language must stay active.');
         }
@@ -129,10 +155,18 @@ class LanguageController extends Controller
             'is_active' => !(bool) $language->is_active
         ]);
 
+        if ($language->is_active) {
+            $translatableContentSyncService->syncNewLanguage($language);
+            $jsonTranslationFileService->ensureLocaleFile($language->code);
+        }
+
         return back()->with('success', 'Language status updated.');
     }
 
-    public function setDefault(Language $language): RedirectResponse
+    public function setDefault(
+        Language $language,
+        JsonTranslationFileService $jsonTranslationFileService
+    ): RedirectResponse
     {
         Language::query()->update(['is_default' => false]);
 
@@ -141,10 +175,16 @@ class LanguageController extends Controller
             'is_active' => true
         ]);
 
+        $jsonTranslationFileService->ensureLocaleFile($language->code);
+
         return back()->with('success', 'Default language changed.');
     }
 
-    public function toggleAll(Request $request): RedirectResponse
+    public function toggleAll(
+        Request $request,
+        TranslatableContentSyncService $translatableContentSyncService,
+        JsonTranslationFileService $jsonTranslationFileService
+    ): RedirectResponse
     {
         $status = (bool) $request->boolean('status', true);
 
@@ -155,6 +195,16 @@ class LanguageController extends Controller
         Language::query()
             ->where('is_default', true)
             ->update(['is_active' => true]);
+
+        if ($status) {
+            Language::query()
+                ->where('is_active', true)
+                ->get()
+                ->each(function (Language $language) use ($translatableContentSyncService, $jsonTranslationFileService) {
+                    $translatableContentSyncService->syncNewLanguage($language);
+                    $jsonTranslationFileService->ensureLocaleFile($language->code);
+                });
+        }
 
         return back()->with('success', 'All languages updated.');
     }

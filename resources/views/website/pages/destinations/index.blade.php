@@ -1,6 +1,6 @@
 @extends('website.layouts.master')
 
-@section('title', 'Dubai Tours & Travel - Luxor and Aswan Travel')
+@section('title', ($pageTitle ?? __('Destinations')) . ' - Etro Tours')
 
 @section('css')
     <style>
@@ -9,7 +9,7 @@
             height: 60vh;
             min-height: 500px;
             max-height: 700px;
-            background: linear-gradient(rgba(28, 50, 92, 0.5), rgba(26, 75, 102, 0.6)), url('https://www.luxorandaswan.com/../images/17224767310dubai.jpg');
+            background: linear-gradient(rgba(28, 50, 92, 0.5), rgba(26, 75, 102, 0.6)), var(--hero-bg);
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -382,6 +382,37 @@
             }
         }
 
+        .country-filters {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .country-filter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 11px 18px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(197, 149, 91, 0.25);
+            color: var(--primary-navy);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 24px rgba(28, 50, 92, 0.06);
+        }
+
+        .country-filter:hover,
+        .country-filter.active {
+            background: var(--gradient-gold);
+            color: var(--primary-navy);
+            transform: translateY(-2px);
+            border-color: rgba(197, 149, 91, 0.4);
+        }
+
         @media (max-width: 480px) {
             .card-area {
                 padding: 50px 0;
@@ -419,6 +450,20 @@
             aspect-ratio: 4/3;
             flex-shrink: 0;
             background: linear-gradient(45deg, var(--primary-navy), var(--rich-gold));
+        }
+
+        .city-country-badge {
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            z-index: 2;
+            background: rgba(28, 50, 92, 0.82);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            backdrop-filter: blur(10px);
         }
 
         .cruise-img {
@@ -513,6 +558,26 @@
             line-height: 1.6;
             margin: 0;
             font-size: 1rem;
+        }
+
+        .destination-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 18px;
+            margin-bottom: 18px;
+            color: var(--primary-navy);
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+
+        .destination-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .destination-meta i {
+            color: var(--rich-gold);
         }
 
         .cruise-footer {
@@ -834,6 +899,20 @@
             font-size: 1.3rem;
         }
 
+        .pagination-wrap {
+            margin-top: 40px;
+        }
+
+        .pagination-wrap nav {
+            display: flex;
+            justify-content: center;
+        }
+
+        .pagination-wrap svg {
+            width: 18px;
+            height: 18px;
+        }
+
         @media (max-width: 768px) {
             .luxury-cta-content {
                 padding: 40px;
@@ -885,19 +964,18 @@
 @endsection
 
 @section('content')
-    <!-- Breadcrumb Section -->
     <section class="breadcrumb-section">
         <div class="container">
             <div class="breadcrumb-container">
-                <nav aria-label="breadcrumb">
+                <nav aria-label="{{ __('Breadcrumb') }}">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="https://www.luxorandaswan.com/">
-                                <i class="la la-home breadcrumb-icon"></i>Home
+                            <a href="{{ route('website.home') }}">
+                                <i class="la la-home breadcrumb-icon"></i>{{ __('Home') }}
                             </a>
                         </li>
                         <li class="breadcrumb-item active" aria-current="page">
-                            Dubai
+                            {{ $selectedCountry?->display_name ?: __('Destinations') }}
                         </li>
                     </ol>
                 </nav>
@@ -905,174 +983,104 @@
         </div>
     </section>
 
-    <!-- Hero Section -->
-    <section class="hero-section">
+    <section class="hero-section" style="--hero-bg:url('{{ $heroImage }}')">
         <div class="container">
             <div class="hero-content">
                 <div class="hero-badge">
                     <i class="la la-star"></i>
-                    Luxury Travel Experiences
+                    {{ $heroBadge }}
                 </div>
-                <h1 class="hero-title">Dubai Tours & Travel</h1>
-                <p class="hero-subtitle">Experience the city of the future with Arabian luxury</p>
+                <h1 class="hero-title">{{ $heroTitle }}</h1>
+                <p class="hero-subtitle">{{ $heroSubtitle }}</p>
             </div>
         </div>
     </section>
 
-    <!-- Overview Section -->
     <section class="overview-section">
         <div class="container">
             <div class="overview-content">
-                <h2 class="overview-title">Discover Dubai</h2>
+                <h2 class="overview-title">{{ $overviewTitle }}</h2>
                 <div class="overview-text">
-                    <p>Our Dubai tours will take you to explore the best of the Emirates, home to the world's most
-                        luxurious, opulent, technologically advanced cities. Tour Dubai and Abu Dhabi like a Sheikh through
-                        sand and splendor, from city highrises to nighttime desert celebrations. There's something for
-                        everyone with our Dubai travel packages!</p>
-                    <p>From the iconic Burj Khalifa to the stunning Sheikh Zayed Grand Mosque, from thrilling desert safaris
-                        to world-class shopping, experience the perfect blend of traditional Arabian culture and
-                        cutting-edge modernity.</p>
+                    <p>{{ $overviewText }}</p>
                 </div>
             </div>
         </div>
     </section>
-
-    <!-- Tours Section -->
 
     <section class="card-area">
         <div class="container">
-            <h2 class="section-title">Dubai Tours</h2>
-            <p class="section-subtitle">Choose from our selection of premium Dubai experiences</p>
+            <h2 class="section-title">{{ $sectionTitle }}</h2>
+            <p class="section-subtitle">{{ $sectionSubtitle }}</p>
+
+            @if ($countries->count())
+                <div class="country-filters">
+                    <a href="{{ route('website.destinations.index') }}"
+                        class="country-filter {{ $selectedCountry ? '' : 'active' }}">
+                        {{ __('Destinations') }}
+                    </a>
+                    @foreach ($countries as $country)
+                        <a href="{{ route('website.destinations.index', ['country' => $country->slug]) }}"
+                            class="country-filter {{ $selectedCountry?->id === $country->id ? 'active' : '' }}">
+                            {{ $country->display_name }}
+                        </a>
+                    @endforeach
+                </div>
+            @endif
 
             <div class="row">
-                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                    <div class="cruise-card">
-                        <div class="cruise-image">
-                            <a href="/Dubai/Dubai-Travel-Packages">
-                                <img src=".{{ asset('images/15979671381P1188326.jpg') }}" alt="Dubai Travel Packages"
-                                    class="cruise-img" loading="lazy">
-                                <div class="cruise-overlay">
-                                    <div class="overlay-content">
-                                        <i class="la la-eye"></i>
-                                        <span>View Trips</span>
+                @forelse ($destinations as $destination)
+                    <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+                        <div class="cruise-card">
+                            <div class="cruise-image">
+                                <div class="city-country-badge">{{ $destination['country'] }}</div>
+                                <a href="{{ $destination['url'] }}">
+                                    <img src="{{ $destination['image'] }}" alt="{{ $destination['title'] }}"
+                                        class="cruise-img" loading="lazy">
+                                    <div class="cruise-overlay">
+                                        <div class="overlay-content">
+                                            <i class="la la-eye"></i>
+                                            <span>{{ __('Discover') }}</span>
+                                        </div>
                                     </div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="cruise-content">
-                            <h3 class="cruise-title">
-                                <a href="/Dubai/Dubai-Travel-Packages">Dubai Travel Packages</a>
-                            </h3>
-                            <div class="cruise-description">
-                                <p>Pick from a variety of tours to Dubai and explore the charming metropolises with our
-                                    premium packages. Book Now!</p>
-                            </div>
-                            <div class="cruise-footer">
-                                <a href="/Dubai/Dubai-Travel-Packages" class="btn-cruise">
-                                    View Trips <i class="las la-angle-right"></i>
                                 </a>
+                            </div>
+                            <div class="cruise-content">
+                                <h3 class="cruise-title">
+                                    <a href="{{ $destination['url'] }}">{{ $destination['title'] }}</a>
+                                </h3>
+                                <div class="destination-meta">
+                                    <span><i class="la la-map-marker"></i>{{ $destination['attractions_count'] }}
+                                        {{ __('Sites') }}</span>
+                                    <span><i class="la la-suitcase"></i>{{ $destination['packages_count'] }}
+                                        {{ __('Trips') }}</span>
+                                </div>
+                                <div class="cruise-description">
+                                    <p>{{ $destination['description'] }}</p>
+                                </div>
+                                <div class="cruise-footer">
+                                    <a href="{{ $destination['url'] }}" class="btn-cruise">
+                                        {{ __('Discover') }} <i class="las la-angle-right"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                    <div class="cruise-card">
-                        <div class="cruise-image">
-                            <a href="/Dubai/Dubai-Excursions-and-Day-Tours">
-                                <img src="../../images/15979675791louvre-museum-abu-dhabi-and-sheikh-zayed-grand-mosque.5d8a28c9086c7.jpg"
-                                    alt="Dubai Excursions" class="cruise-img" loading="lazy">
-                                <div class="cruise-overlay">
-                                    <div class="overlay-content">
-                                        <i class="la la-eye"></i>
-                                        <span>View Trips</span>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="cruise-content">
-                            <h3 class="cruise-title">
-                                <a href="/Dubai/Dubai-Excursions-and-Day-Tours">Dubai Excursions & Day Tours</a>
-                            </h3>
-                            <div class="cruise-description">
-                                <p>Take the Emirates by storm with our unforgettable Abu Dhabi and Dubai day trips.
-                                    Experience the fun now!</p>
-                            </div>
-                            <div class="cruise-footer">
-                                <a href="/Dubai/Dubai-Excursions-and-Day-Tours" class="btn-cruise">
-                                    View Trips <i class="las la-angle-right"></i>
-                                </a>
-                            </div>
+                @empty
+                    <div class="col-12">
+                        <div class="empty-state">
+                            {{ __('No active destinations found. Add active cities from the admin panel.') }}
                         </div>
                     </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                    <div class="cruise-card">
-                        <div class="cruise-image">
-                            <a href="/Dubai/Dubai-Shore-Excursions">
-                                <img src="../../images/1597970230115979692981burj-khalifa-downtown-dubai.jpg"
-                                    alt="Dubai Shore Excursions" class="cruise-img" loading="lazy">
-                                <div class="cruise-overlay">
-                                    <div class="overlay-content">
-                                        <i class="la la-eye"></i>
-                                        <span>View Trips</span>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="cruise-content">
-                            <h3 class="cruise-title">
-                                <a href="/Dubai/Dubai-Shore-Excursions">Dubai Shore Excursions</a>
-                            </h3>
-                            <div class="cruise-description">
-                                <p>Looking for Emirates Shore Excursions? Visit water parks, Dubai Marina, and enjoy camel
-                                    rides while your ship docks in UAE.</p>
-                            </div>
-                            <div class="cruise-footer">
-                                <a href="/Dubai/Dubai-Shore-Excursions" class="btn-cruise">
-                                    View Trips <i class="las la-angle-right"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                    <div class="cruise-card">
-                        <div class="cruise-image">
-                            <a href="/Dubai/Dubai-Stopovers-Transit-Tours">
-                                <img src="../../images/15979713421Mideast-Laptop-Ban.jpg" alt="Dubai Stopovers"
-                                    class="cruise-img" loading="lazy">
-                                <div class="cruise-overlay">
-                                    <div class="overlay-content">
-                                        <i class="la la-eye"></i>
-                                        <span>View Trips</span>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="cruise-content">
-                            <h3 class="cruise-title">
-                                <a href="/Dubai/Dubai-Stopovers-Transit-Tours">Dubai Stopovers & Transit Tours</a>
-                            </h3>
-                            <div class="cruise-description">
-                                <p>Experience an unforgettable stopover in Dubai with our layover tours to enjoy the best
-                                    sightseeing in the Emirates.</p>
-                            </div>
-                            <div class="cruise-footer">
-                                <a href="/Dubai/Dubai-Stopovers-Transit-Tours" class="btn-cruise">
-                                    View Trips <i class="las la-angle-right"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                @endforelse
             </div>
+
+            @if (method_exists($destinations, 'links') && $destinations->hasPages())
+                <div class="pagination-wrap">
+                    {{ $destinations->links() }}
+                </div>
+            @endif
         </div>
     </section>
-
-
 @endsection
 
 @section('js')

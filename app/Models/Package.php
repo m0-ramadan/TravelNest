@@ -59,6 +59,7 @@ class Package extends Model
         'canonical_url',
         'created_by',
         'updated_by',
+        'offer_price',
     ];
 
     protected $casts = [

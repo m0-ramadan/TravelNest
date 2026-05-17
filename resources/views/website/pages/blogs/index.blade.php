@@ -1,15 +1,35 @@
 @extends('website.layouts.master')
 
-@section('title', 'Dubai Tours & Travel - Luxor and Aswan Travel')
+@php
+    use Illuminate\Support\Str;
+    use Illuminate\Support\Facades\Route;
+
+    $pageTitle = isset($category)
+        ? ($category->display_title ?? ($category->title ?? ($category->name ?? __('Blog Category')))) . ' - ' . __('Etro Tours')
+        : __('Blogs') . ' - ' . __('Etro Tours');
+
+    $heroTitle = isset($category)
+        ? $category->display_title ?? ($category->title ?? ($category->name ?? __('Travel Blog')))
+        : __('Etro Tours Travel Blog');
+
+    $heroSubtitle = isset($category)
+        ? __('Discover useful travel articles, destination guides, and expert insights about :category.', [
+            'category' => $category->display_title ?? ($category->title ?? ($category->name ?? __('Category'))),
+        ])
+        : __('Discover the wonders of Egypt through our expert travel insights, destination guides, and cultural explorations.');
+
+    $blogsRoute = Route::has('website.blogs') ? route('website.blogs') : url('/blogs');
+@endphp
+
+@section('title', $pageTitle)
 
 @section('css')
     <style>
-        /* Enhanced Hero Section with Responsive Heights */
         .hero-section {
             height: 60vh;
             min-height: 500px;
             max-height: 700px;
-            background: linear-gradient(rgba(28, 50, 92, 0.5), rgba(26, 75, 102, 0.6)), url('https://www.luxorandaswan.com/../images/17224767310dubai.jpg');
+            background: linear-gradient(rgba(28, 50, 92, 0.5), rgba(26, 75, 102, 0.6)), url('{{ asset('website/photos/home2.webp') }}');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -19,7 +39,6 @@
             overflow: hidden;
         }
 
-        /* Large Desktop (1400px+) */
         @media (min-width: 1400px) {
             .hero-section {
                 height: 65vh;
@@ -27,7 +46,6 @@
             }
         }
 
-        /* Desktop (1200px - 1399px) */
         @media (max-width: 1399px) and (min-width: 1200px) {
             .hero-section {
                 height: 60vh;
@@ -36,7 +54,6 @@
             }
         }
 
-        /* Laptop (992px - 1199px) */
         @media (max-width: 1199px) and (min-width: 992px) {
             .hero-section {
                 height: 55vh;
@@ -45,7 +62,6 @@
             }
         }
 
-        /* Tablet Portrait (768px - 991px) */
         @media (max-width: 991px) and (min-width: 768px) {
             .hero-section {
                 height: 50vh;
@@ -55,7 +71,6 @@
             }
         }
 
-        /* Mobile Landscape (576px - 767px) */
         @media (max-width: 767px) and (min-width: 576px) {
             .hero-section {
                 height: 45vh;
@@ -65,7 +80,6 @@
             }
         }
 
-        /* Mobile Portrait (320px - 575px) */
         @media (max-width: 575px) {
             .hero-section {
                 height: 40vh;
@@ -86,10 +100,7 @@
         .hero-section::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
             background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20" fill="none"><path d="M0 10L10 0L20 10L30 0L40 10L50 0L60 10L70 0L80 10L90 0L100 10V20H0V10Z" fill="rgba(197,149,91,0.1)"/></svg>') repeat-x;
             opacity: 0.4;
             animation: wave 20s ease-in-out infinite;
@@ -150,7 +161,7 @@
 
         .hero-badge {
             background: rgba(197, 149, 91, 0.9);
-            color: var(--primary-navy);
+            color: var(--primary-navy, #1c325c);
             padding: 10px 25px;
             border-radius: 50px;
             font-weight: 600;
@@ -188,6 +199,7 @@
             opacity: 0.95;
             font-weight: 300;
             letter-spacing: 1px;
+            line-height: 1.6;
         }
 
         @media (max-width: 767px) {
@@ -204,9 +216,8 @@
             }
         }
 
-        /* Breadcrumb Section */
         .breadcrumb-section {
-            background: var(--pearl-luxury);
+            background: var(--pearl-luxury, #faf8f3);
             padding: 15px 0;
             border-bottom: 1px solid rgba(197, 149, 91, 0.2);
         }
@@ -225,12 +236,12 @@
         }
 
         .breadcrumb-item {
-            color: var(--primary-navy);
+            color: var(--primary-navy, #1c325c);
             font-size: 0.95rem;
         }
 
         .breadcrumb-item a {
-            color: var(--primary-navy);
+            color: var(--primary-navy, #1c325c);
             text-decoration: none;
             transition: color 0.3s ease;
             display: flex;
@@ -239,358 +250,422 @@
         }
 
         .breadcrumb-item a:hover {
-            color: var(--rich-gold);
+            color: var(--rich-gold, #c5955b);
         }
 
         .breadcrumb-icon {
             font-size: 1.1rem;
-            color: var(--rich-gold);
+            color: var(--rich-gold, #c5955b);
         }
 
         .breadcrumb-item.active {
-            color: var(--rich-gold);
+            color: var(--rich-gold, #c5955b);
             font-weight: 600;
         }
 
-        /* Overview Section */
-        .overview-section {
-            background: var(--pearl-luxury);
-            padding: 60px 0;
-        }
-
-        .overview-content {
-            background: white;
-            border-radius: 25px;
-            padding: 50px;
-            box-shadow: var(--shadow-medium);
-            border: 2px solid rgba(197, 149, 91, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .overview-content:hover {
-            box-shadow: var(--shadow-dramatic);
-            border-color: rgba(197, 149, 91, 0.3);
-        }
-
-        .overview-title {
-            font-family: 'Playfair Display', serif;
-            color: var(--primary-navy);
-            font-size: 2rem;
-            font-weight: 600;
-            margin-bottom: 30px;
-            text-align: center;
-            position: relative;
-        }
-
-        .overview-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 3px;
-            background: var(--gradient-gold);
-            border-radius: 2px;
-        }
-
-        .overview-text {
-            color: var(--charcoal-deep);
-            line-height: 1.8;
-            font-size: 1.1rem;
-        }
-
-        .overview-text p {
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .overview-section {
-                padding: 40px 0;
-            }
-
-            .overview-content {
-                padding: 30px;
-            }
-
-            .overview-title {
-                font-size: 1.8rem;
-            }
-
-            .overview-text {
-                font-size: 1rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .overview-content {
-                padding: 25px;
-            }
-
-            .overview-title {
-                font-size: 1.6rem;
-            }
-        }
-
-        /* Card Area - Matching Homepage Style */
-        .card-area {
+        .blog-card-area {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             padding: 80px 0;
         }
 
-        .section-title {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 700;
-            color: var(--primary-navy);
-            text-align: center;
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 4px;
-            background: var(--gradient-gold);
-            border-radius: 2px;
-        }
-
-        .section-subtitle {
-            color: var(--warm-gray);
-            font-size: 1.2rem;
-            text-align: center;
-            margin-bottom: 50px;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.6;
-        }
-
-        @media (max-width: 768px) {
-            .card-area {
-                padding: 60px 0;
-            }
-
-            .section-subtitle {
-                font-size: 1.1rem;
-                margin-bottom: 40px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .card-area {
-                padding: 50px 0;
-            }
-
-            .section-subtitle {
-                font-size: 1rem;
-                margin-bottom: 30px;
-            }
-        }
-
-        /* Cruise Card - Enhanced */
-        .cruise-card {
+        .modern-blog-card {
             background: white;
             border-radius: 25px;
             overflow: hidden;
-            box-shadow: var(--shadow-medium);
+            box-shadow: var(--shadow-medium, 0 8px 30px rgba(28, 50, 92, .12));
             transition: all 0.4s ease;
-            border: 2px solid rgba(197, 149, 91, 0.1);
+            border: 1px solid rgba(197, 149, 91, 0.1);
             height: 100%;
             display: flex;
             flex-direction: column;
-            position: relative;
         }
 
-        .cruise-card:hover {
-            transform: translateY(-10px);
-            box-shadow: var(--shadow-dramatic);
-            border-color: var(--rich-gold);
+        .modern-blog-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-dramatic, 0 20px 45px rgba(28, 50, 92, .18));
         }
 
-        .cruise-image {
+        .blog-image {
             position: relative;
             overflow: hidden;
             aspect-ratio: 4/3;
             flex-shrink: 0;
-            background: linear-gradient(45deg, var(--primary-navy), var(--rich-gold));
+            background: #eee;
         }
 
-        .cruise-img {
+        .blog-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: all 0.6s ease;
-            opacity: 0.9;
+            transition: all 0.4s ease;
         }
 
-        .cruise-card:hover .cruise-img {
-            transform: scale(1.1);
-            opacity: 1;
+        .modern-blog-card:hover .blog-img {
+            transform: scale(1.05);
         }
 
-        .cruise-overlay {
+        .blog-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(28, 50, 92, 0.7) 0%, rgba(197, 149, 91, 0.6) 100%);
+            inset: 0;
+            background: rgba(28, 50, 92, 0.8);
             display: flex;
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transition: all 0.4s ease;
-            backdrop-filter: blur(2px);
+            transition: all 0.3s ease;
         }
 
-        .cruise-card:hover .cruise-overlay {
+        .modern-blog-card:hover .blog-overlay {
             opacity: 1;
         }
 
         .overlay-content {
             color: white;
             text-align: center;
-            transform: translateY(20px);
-            transition: transform 0.4s ease;
-        }
-
-        .cruise-card:hover .overlay-content {
-            transform: translateY(0);
+            font-weight: 600;
         }
 
         .overlay-content i {
             display: block;
-            font-size: 2rem;
+            font-size: 1.8rem;
             margin-bottom: 8px;
         }
 
-        .overlay-content span {
-            font-size: 1rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .cruise-content {
-            padding: 30px;
+        .blog-content-wrapper {
+            padding: 20px;
             flex: 1;
             display: flex;
             flex-direction: column;
         }
 
-        .cruise-title {
+        .blog-card-title {
             font-family: 'Playfair Display', serif;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 600;
-            color: var(--primary-navy);
+            color: var(--primary-navy, #1c325c);
             margin-bottom: 15px;
             line-height: 1.3;
         }
 
-        .cruise-title a {
+        .blog-card-title a {
+            color: inherit;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .blog-card-title a:hover {
+            color: var(--rich-gold, #c5955b);
+        }
+
+        .blog-date {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px 12px;
+            background: var(--light-sand, #efe4d3);
+            border-radius: 8px;
+            color: var(--primary-navy, #1c325c);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .blog-date i {
+            color: var(--rich-gold, #c5955b);
+            font-size: 1.1rem;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .blog-description {
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        .blog-description p {
+            color: var(--warm-gray, #777);
+            line-height: 1.5;
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .blog-footer {
+            padding-top: 15px;
+            border-top: 1px solid rgba(197, 149, 91, 0.2);
+            margin-top: auto;
+        }
+
+        .btn-blog {
+            background: var(--gradient-gold, #c5955b);
+            color: var(--primary-navy, #1c325c);
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-gold, 0 8px 20px rgba(197, 149, 91, .25));
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-blog:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(197, 149, 91, 0.4);
+            color: var(--primary-navy, #1c325c);
+        }
+
+        .luxury-sidebar {
+            background: white;
+            border-radius: 20px;
+            padding: 0;
+            box-shadow: var(--shadow-medium, 0 8px 30px rgba(28, 50, 92, .12));
+            border: 1px solid rgba(197, 149, 91, 0.15);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-widget {
+            padding: 25px;
+            border-bottom: 1px solid rgba(197, 149, 91, 0.1);
+        }
+
+        .sidebar-widget:last-child {
+            border-bottom: none;
+        }
+
+        .sidebar-title {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-navy, #1c325c);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .sidebar-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--gradient-gold, #c5955b);
+            border-radius: 2px;
+        }
+
+        .search-form {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 50px 12px 15px;
+            border: 2px solid rgba(197, 149, 91, 0.2);
+            border-radius: 25px;
+            font-size: 0.95rem;
+            background: var(--light-sand, #efe4d3);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--rich-gold, #c5955b);
+            background: white;
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--gradient-gold, #c5955b);
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-navy, #1c325c);
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .category-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            padding: 8px 15px;
+            background: rgba(197, 149, 91, 0.1);
+            color: var(--primary-navy, #1c325c);
+            text-decoration: none;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(197, 149, 91, 0.2);
+        }
+
+        .category-tag:hover {
+            background: var(--gradient-gold, #c5955b);
+            color: var(--primary-navy, #1c325c);
+            transform: translateY(-2px);
+        }
+
+        .popular-article {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(197, 149, 91, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .popular-article:last-child {
+            border-bottom: none;
+        }
+
+        .popular-article:hover {
+            background: rgba(197, 149, 91, 0.05);
+            margin: 0 -15px;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .popular-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #eee;
+        }
+
+        .popular-content h4 {
+            font-size: 0.95rem;
+            color: var(--primary-navy, #1c325c);
+            margin-bottom: 5px;
+            line-height: 1.3;
+            font-weight: 700;
+        }
+
+        .popular-content h4 a {
             color: inherit;
             text-decoration: none;
             transition: color 0.3s ease;
         }
 
-        .cruise-title a:hover {
-            color: var(--rich-gold);
+        .popular-content h4 a:hover {
+            color: var(--rich-gold, #c5955b);
         }
 
-        .cruise-description {
-            margin-bottom: 20px;
-            flex: 1;
-        }
-
-        .cruise-description p {
-            color: var(--warm-gray);
-            line-height: 1.6;
+        .popular-date {
+            font-size: 0.8rem;
+            color: var(--warm-gray, #777);
             margin: 0;
-            font-size: 1rem;
         }
 
-        .cruise-footer {
-            padding-top: 20px;
-            border-top: 1px solid rgba(197, 149, 91, 0.2);
-            margin-top: auto;
-        }
-
-        .btn-cruise {
-            background: var(--gradient-gold);
-            color: var(--primary-navy);
-            padding: 12px 25px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.4s ease;
-            box-shadow: var(--shadow-gold);
-            width: 100%;
+        .pagination-wrapper {
+            display: flex;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
+            align-items: center;
+            margin-top: 40px;
+            gap: 20px;
         }
 
-        .btn-cruise::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
+        .pagination-wrapper .pagination {
+            margin: 0;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
-        .btn-cruise:hover::before {
-            left: 100%;
+        .pagination-wrapper .page-link {
+            color: var(--primary-navy, #1c325c);
+            border: 1px solid rgba(197, 149, 91, 0.25);
+            border-radius: 12px;
+            margin: 0 2px;
+            padding: 10px 14px;
+            font-weight: 600;
+            background: white;
         }
 
-        .btn-cruise:hover {
+        .pagination-wrapper .page-item.active .page-link {
+            background: var(--gradient-gold, #c5955b);
+            border-color: var(--rich-gold, #c5955b);
+            color: var(--primary-navy, #1c325c);
+        }
+
+        .pagination-wrapper .page-link:hover {
+            background: rgba(197, 149, 91, 0.15);
+            color: var(--primary-navy, #1c325c);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-gold, #c5955b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-navy, #1c325c);
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(197, 149, 91, 0.4);
-            color: var(--primary-navy);
+            box-shadow: 0 6px 15px rgba(197, 149, 91, 0.3);
+            color: var(--primary-navy, #1c325c);
         }
 
-        @media (max-width: 768px) {
-            .cruise-content {
-                padding: 25px;
-            }
-
-            .cruise-title {
-                font-size: 1.3rem;
-            }
+        .empty-state {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            text-align: center;
+            color: var(--warm-gray, #777);
+            border: 1px solid rgba(197, 149, 91, 0.15);
+            box-shadow: var(--shadow-medium, 0 8px 30px rgba(28, 50, 92, .12));
         }
 
-        @media (max-width: 480px) {
-            .cruise-content {
-                padding: 20px;
-            }
-
-            .cruise-title {
-                font-size: 1.2rem;
-            }
-
-            .cruise-description p {
-                font-size: 0.95rem;
-            }
-        }
-
-        /* Why Choose Section - Matching Homepage */
         .why-choose-section {
-            background: var(--pearl-luxury);
+            background: var(--pearl-luxury, #faf8f3);
             padding: 80px 0;
             position: relative;
             border-top: 1px solid rgba(197, 149, 91, 0.2);
+        }
+
+        .section-header {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-navy, #1c325c);
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            margin-bottom: 20px;
+        }
+
+        .section-subtitle {
+            color: var(--warm-gray, #777);
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 60px;
+            line-height: 1.6;
         }
 
         .choose-card {
@@ -598,7 +673,7 @@
             border-radius: 25px;
             padding: 40px 30px;
             text-align: center;
-            box-shadow: var(--shadow-medium);
+            box-shadow: var(--shadow-medium, 0 8px 30px rgba(28, 50, 92, .12));
             border: 2px solid transparent;
             transition: all 0.4s ease;
             height: 100%;
@@ -606,32 +681,16 @@
             overflow: hidden;
         }
 
-        .choose-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: var(--gradient-gold);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-
-        .choose-card:hover::before {
-            transform: scaleX(1);
-        }
-
         .choose-card:hover {
             transform: translateY(-8px);
-            box-shadow: var(--shadow-dramatic);
-            border-color: var(--rich-gold);
+            box-shadow: var(--shadow-dramatic, 0 20px 45px rgba(28, 50, 92, .18));
+            border-color: var(--rich-gold, #c5955b);
         }
 
         .choose-icon {
             width: 80px;
             height: 80px;
-            background: var(--gradient-gold);
+            background: var(--gradient-gold, #c5955b);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -639,7 +698,7 @@
             margin: 0 auto 25px;
             font-size: 2.2rem;
             color: white;
-            box-shadow: var(--shadow-gold);
+            box-shadow: var(--shadow-gold, 0 8px 20px rgba(197, 149, 91, .25));
             transition: all 0.3s ease;
         }
 
@@ -649,7 +708,7 @@
 
         .choose-title {
             font-family: 'Playfair Display', serif;
-            color: var(--primary-navy);
+            color: var(--primary-navy, #1c325c);
             font-size: 1.4rem;
             font-weight: 600;
             margin-bottom: 20px;
@@ -662,7 +721,7 @@
         .feature-item {
             padding: 12px 0;
             border-bottom: 1px solid rgba(197, 149, 91, 0.2);
-            color: var(--warm-gray);
+            color: var(--warm-gray, #777);
             font-size: 0.95rem;
             line-height: 1.6;
         }
@@ -671,9 +730,8 @@
             border-bottom: none;
         }
 
-        /* CTA Section - Matching Homepage */
         .luxury-cta-section {
-            background: var(--gradient-hero);
+            background: linear-gradient(135deg, var(--primary-navy, #1c325c), #1a4b66);
             padding: 70px 0;
             position: relative;
             overflow: hidden;
@@ -683,10 +741,7 @@
         .luxury-cta-section::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
             background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20" fill="none"><path d="M0 10L10 0L20 10L30 0L40 10L50 0L60 10L70 0L80 10L90 0L100 10V20H0V10Z" fill="rgba(197,149,91,0.1)"/></svg>') repeat-x;
             opacity: 0.3;
         }
@@ -699,7 +754,7 @@
             border-radius: 25px;
             padding: 50px;
             border: 1px solid rgba(197, 149, 91, 0.3);
-            box-shadow: var(--shadow-dramatic);
+            box-shadow: var(--shadow-dramatic, 0 20px 45px rgba(28, 50, 92, .18));
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -710,14 +765,14 @@
         .cta-icon-container {
             width: 80px;
             height: 80px;
-            background: var(--gradient-gold);
+            background: var(--gradient-gold, #c5955b);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2.2rem;
-            color: var(--primary-navy);
-            box-shadow: var(--shadow-gold);
+            color: var(--primary-navy, #1c325c);
+            box-shadow: var(--shadow-gold, 0 8px 20px rgba(197, 149, 91, .25));
             flex-shrink: 0;
         }
 
@@ -764,13 +819,13 @@
         }
 
         .trust-feature i {
-            color: var(--rich-gold);
+            color: var(--rich-gold, #c5955b);
             font-size: 1.1rem;
         }
 
         .luxury-cta-btn {
-            background: var(--gradient-gold);
-            color: var(--primary-navy);
+            background: var(--gradient-gold, #c5955b);
+            color: var(--primary-navy, #1c325c);
             padding: 16px 35px;
             border-radius: 30px;
             text-decoration: none;
@@ -780,17 +835,16 @@
             align-items: center;
             gap: 10px;
             transition: all 0.3s ease;
-            box-shadow: var(--shadow-gold);
+            box-shadow: var(--shadow-gold, 0 8px 20px rgba(197, 149, 91, .25));
             white-space: nowrap;
         }
 
         .luxury-cta-btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(197, 149, 91, 0.4);
-            color: var(--primary-navy);
+            color: var(--primary-navy, #1c325c);
         }
 
-        /* Mobile WhatsApp Button */
         .fixed-mobile-btn {
             position: fixed;
             bottom: 20px;
@@ -801,8 +855,33 @@
         }
 
         @media (max-width: 768px) {
+            .blog-card-area {
+                padding: 60px 0;
+            }
+
             .fixed-mobile-btn {
                 display: block;
+            }
+
+            .pagination-wrapper {
+                flex-direction: column;
+            }
+
+            .luxury-cta-content {
+                padding: 40px;
+            }
+
+            .cta-title {
+                font-size: 1.8rem;
+            }
+
+            .cta-content-wrapper {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .trust-features {
+                justify-content: center;
             }
         }
 
@@ -828,29 +907,6 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
             color: white;
-        }
-
-        .mobile-enquiry-btn i {
-            font-size: 1.3rem;
-        }
-
-        @media (max-width: 768px) {
-            .luxury-cta-content {
-                padding: 40px;
-            }
-
-            .cta-title {
-                font-size: 1.8rem;
-            }
-
-            .cta-content-wrapper {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .trust-features {
-                justify-content: center;
-            }
         }
 
         @media (max-width: 480px) {
@@ -881,882 +937,263 @@
                 justify-content: center;
             }
         }
+
+        html[data-theme='dark'] .hero-section {
+            background: linear-gradient(rgba(7, 15, 29, 0.74), rgba(12, 31, 57, 0.82)), url('{{ asset('website/photos/home2.webp') }}');
+            background-size: cover;
+            background-position: center;
+        }
+
+        html[data-theme='dark'] .breadcrumb-section,
+        html[data-theme='dark'] .blog-card-area,
+        html[data-theme='dark'] .why-choose-section {
+            background: linear-gradient(180deg, #0b1220 0%, #111827 100%) !important;
+        }
+
+        html[data-theme='dark'] .breadcrumb-item,
+        html[data-theme='dark'] .breadcrumb-item a,
+        html[data-theme='dark'] .blog-card-title,
+        html[data-theme='dark'] .sidebar-title,
+        html[data-theme='dark'] .section-header,
+        html[data-theme='dark'] .choose-title {
+            color: var(--charcoal-deep) !important;
+        }
+
+        html[data-theme='dark'] .modern-blog-card,
+        html[data-theme='dark'] .luxury-sidebar,
+        html[data-theme='dark'] .choose-card {
+            background: #111827 !important;
+            border-color: rgba(148, 163, 184, 0.16) !important;
+            box-shadow: var(--shadow-medium) !important;
+        }
+
+        html[data-theme='dark'] .blog-image,
+        html[data-theme='dark'] .popular-img {
+            background: #0f172a !important;
+        }
+
+        html[data-theme='dark'] .blog-date,
+        html[data-theme='dark'] .search-input,
+        html[data-theme='dark'] .category-tag,
+        html[data-theme='dark'] .empty-state {
+            background: #172033 !important;
+            color: var(--warm-gray) !important;
+            border-color: rgba(148, 163, 184, 0.18) !important;
+        }
+
+        html[data-theme='dark'] .blog-description p,
+        html[data-theme='dark'] .popular-date,
+        html[data-theme='dark'] .section-subtitle,
+        html[data-theme='dark'] .feature-item {
+            color: var(--warm-gray) !important;
+        }
+
+        html[data-theme='dark'] .blog-footer,
+        html[data-theme='dark'] .sidebar-widget,
+        html[data-theme='dark'] .popular-article,
+        html[data-theme='dark'] .feature-item {
+            border-color: rgba(148, 163, 184, 0.14) !important;
+        }
+
+        html[data-theme='dark'] .search-input:focus {
+            background: #0f172a !important;
+        }
+
+        html[data-theme='dark'] .category-tag:hover,
+        html[data-theme='dark'] .pagination-wrapper .page-item.active .page-link,
+        html[data-theme='dark'] .social-link {
+            color: #0f172a !important;
+        }
+
+        html[data-theme='dark'] .popular-article:hover {
+            background: rgba(244, 195, 106, 0.08) !important;
+        }
+
+        html[data-theme='dark'] .pagination-wrapper .page-link {
+            background: #111827 !important;
+            color: var(--charcoal-deep) !important;
+            border-color: rgba(148, 163, 184, 0.18) !important;
+        }
+
+        html[dir='rtl'] .hero-content,
+        html[dir='rtl'] .blog-content-wrapper,
+        html[dir='rtl'] .sidebar-widget,
+        html[dir='rtl'] .choose-features,
+        html[dir='rtl'] .cta-text-content {
+            text-align: right;
+        }
+
+        html[dir='rtl'] .sidebar-title::after {
+            left: auto;
+            right: 0;
+        }
+
+        html[dir='rtl'] .blog-date i {
+            margin-right: 0;
+            margin-left: 8px;
+        }
+
+        html[dir='rtl'] .search-input {
+            padding: 12px 15px 12px 50px;
+        }
+
+        html[dir='rtl'] .search-btn {
+            right: auto;
+            left: 5px;
+        }
+
+        html[dir='rtl'] .breadcrumb-item a,
+        html[dir='rtl'] .blog-date,
+        html[dir='rtl'] .trust-feature {
+            flex-direction: row-reverse;
+        }
     </style>
 @endsection
 
 @section('content')
-    <!-- End Google Tag Manager -->
-    <section class="breadcrumb-section">
-        <div class="container">
-            <div class="breadcrumb-container">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item">
-                            <a href="https://www.luxorandaswan.com/">
-                                <i class="la la-home breadcrumb-icon"></i>Home
-                            </a>
-                        </li>
-                        <li class="breadcrumb-item active" aria-current="page">
-                            Travel Blog
-                        </li>
-                    </ol>
-                </nav>
-            </div>
-        </div>
-    </section>
 
-    <!-- Blog Hero Section -->
-    <section class="blog-hero">
+    <section class="hero-section">
         <div class="container">
-            <div class="blog-content">
-                <div class="blog-badge">
-                    <i class="la la-newspaper"></i> Travel Insights
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="la la-newspaper"></i>
+                    {{ __('Travel Insights') }}
                 </div>
-                <h1 class="blog-title">Luxor and Aswan Travel Blog</h1>
-                <p class="blog-subtitle">
-                    Discover the wonders of ancient Egypt through our expert travel insights,
-                    destination guides, and cultural explorations along the magnificent Nile.
+
+                <h1 class="hero-title">{{ $heroTitle }}</h1>
+
+                <p class="hero-subtitle">
+                    {{ $heroSubtitle }}
                 </p>
             </div>
         </div>
     </section>
 
-    <!-- Blog Content Area -->
+    <section class="breadcrumb-section">
+        <div class="container">
+            <div class="breadcrumb-container">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{{ route('website.home') }}">
+                            <i class="la la-home breadcrumb-icon"></i>
+                            {{ __('Home') }}
+                        </a>
+                    </li>
+
+                    @if (isset($category))
+                        <li class="breadcrumb-item">
+                            <a href="{{ $blogsRoute }}">{{ __('Blogs') }}</a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            {{ $category->display_title ?? ($category->title ?? ($category->name ?? __('Category'))) }}
+                        </li>
+                    @else
+                        <li class="breadcrumb-item active">{{ __('Blogs') }}</li>
+                    @endif
+                </ol>
+            </div>
+        </div>
+    </section>
+
     <section class="blog-card-area">
         <div class="container">
             <div class="row">
-                <!-- Main Content -->
+
                 <div class="col-lg-8">
                     <div class="row">
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/nile-valley-information/best-month-for-a-nile-river-cruise">
-                                        <img src="/../images/17519041161vessels-head2.jpg"
-                                            alt="Best Month for a Nile River Cruise: When to Go and Why" class="blog-img"
-                                            loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
+                        @forelse ($articles as $article)
+                            @php
+                                $articleTitle = $article->display_title ?: __('Article');
+
+                                $articleImage =
+                                    $article->featured_image
+                                        ? asset('storage/' . ltrim($article->featured_image, '/'))
+                                        : asset('website/photos/home2.webp');
+
+                                $articleDate = $article->published_at ?? ($article->created_at ?? now());
+
+                                $articleCategoryTitle =
+                                    $article->category?->display_title ??
+                                    ($article->category?->title ?? ($article->category?->name ?? __('General')));
+
+                                $articleCategorySlug = $article->category?->slug ?? Str::slug($articleCategoryTitle);
+
+                                $articleExcerpt =
+                                    $article->display_excerpt ?: Str::limit(strip_tags($article->display_content), 120);
+
+                                $articleUrl = Route::has('website.blogs.show.legacy')
+                                    ? route('website.blogs.show.legacy', [$articleCategorySlug, $article->slug])
+                                    : (Route::has('website.blogs.show')
+                                        ? route('website.blogs.show', $article->slug)
+                                        : url('/blogs/' . $article->slug));
+                            @endphp
+
+                            <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+                                <div class="modern-blog-card">
+                                    <div class="blog-image">
+                                        <a href="{{ $articleUrl }}">
+                                            <img src="{{ $articleImage }}" alt="{{ $articleTitle }}" class="blog-img"
+                                                loading="lazy">
+
+                                            <div class="blog-overlay">
+                                                <div class="overlay-content">
+                                                    <i class="la la-eye"></i>
+                                                    <span>{{ __('Read Article') }}</span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/nile-valley-information/best-month-for-a-nile-river-cruise">
-                                            Best Month for a Nile River Cruise: When to Go and Why </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Mon, 07 Jul 2025</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Discover the ideal time to embark on a breathtaking Nile River cruise and immerse
-                                            yourself in the rich history and stunn</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/nile-valley-information/best-month-for-a-nile-river-cruise"
-                                            class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
                                         </a>
+                                    </div>
+
+                                    <div class="blog-content-wrapper">
+                                        <h3 class="blog-card-title">
+                                            <a href="{{ $articleUrl }}">
+                                                {{ $articleTitle }}
+                                            </a>
+                                        </h3>
+
+                                        <div class="blog-date">
+                                            <i class="la la-calendar"></i>
+                                            <span>{{ \Carbon\Carbon::parse($articleDate)->locale(app()->getLocale())->translatedFormat('D, d M Y') }}</span>
+                                        </div>
+
+                                        <div class="blog-description">
+                                            <p>{{ $articleExcerpt }}</p>
+                                        </div>
+
+                                        <div class="blog-footer">
+                                            <a href="{{ $articleUrl }}" class="btn-blog">
+                                                {{ __('Read More') }} <i class="la la-arrow-right"></i>
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a
-                                        href="/blog/nile-valley-information/luxury-nile-cruise-a-journey-of-opulence-and-history">
-                                        <img src="/../images/17289450971AdobeStock_485657585.jpg"
-                                            alt="Luxury Nile Cruise: A Journey of Opulence and History" class="blog-img"
-                                            loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a
-                                            href="/blog/nile-valley-information/luxury-nile-cruise-a-journey-of-opulence-and-history">
-                                            Luxury Nile Cruise: A Journey of Opulence and History </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Mon, 14 Oct 2024</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Luxury Nile Cruise: A Journey of Opulence and History
-                                        </p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/nile-valley-information/luxury-nile-cruise-a-journey-of-opulence-and-history"
-                                            class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
+                        @empty
+                            <div class="col-12">
+                                <div class="empty-state">
+                                    {{ __('No articles found.') }}
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/egypt-travel-guide/what-is-the-best-way-to-see-egypt-in-9-days">
-                                        <img src="/../images/17237245321pyramids-of-egypt2.jpg"
-                                            alt="What is the best way to see Egypt in 9 days?" class="blog-img"
-                                            loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/egypt-travel-guide/what-is-the-best-way-to-see-egypt-in-9-days">
-                                            What is the best way to see Egypt in 9 days? </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Thu, 15 Aug 2024</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Discover the ultimate 9-day Egypt itinerary that combines the wonders of Cairo,
-                                            Luxor, and Aswan with a luxurious Nile R</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/egypt-travel-guide/what-is-the-best-way-to-see-egypt-in-9-days"
-                                            class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a
-                                        href="/blog/nile-valley-information/exploring-ancient-treasures-top-attractions-to-visit-on-a-nile-river-cruise">
-                                        <img src="/../images/16882975301MS-Amwaj-cruise2.jpg"
-                                            alt="Exploring Ancient Treasures: Top Attractions to Visit on a Nile River Cruise"
-                                            class="blog-img" loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a
-                                            href="/blog/nile-valley-information/exploring-ancient-treasures-top-attractions-to-visit-on-a-nile-river-cruise">
-                                            Exploring Ancient Treasures: Top Attractions to Visit on a Nile River Cruise
-                                        </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Sun, 02 Jul 2023</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Embark on a Nile River cruise and discover Egypt&amp;#39;s ancient treasures.
-                                            Explore the Valley of the Kings, marvel at the</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/nile-valley-information/exploring-ancient-treasures-top-attractions-to-visit-on-a-nile-river-cruise"
-                                            class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/aswan-attraction/interesting-facts-abu-simbel-temple">
-                                        <img src="/../images/16804026371abu-simbel.jpg"
-                                            alt="Interesting Facts Abu Simbel Temple" class="blog-img" loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/aswan-attraction/interesting-facts-abu-simbel-temple">
-                                            Interesting Facts Abu Simbel Temple </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Sun, 02 Apr 2023</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Discover fascinating facts about Abu Simbel Temple, a UNESCO World Heritage Site
-                                            in Egypt that boasts incredible history</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/aswan-attraction/interesting-facts-abu-simbel-temple"
-                                            class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/luxor-attraction/luxor-temple-the-ancient-wonder-of-egypt">
-                                        <img src="/../images/168040185818af02600-a8f9-11ec-ad74-ab832bebcff9-AdobeStock_488004532-2.jpg"
-                                            alt="Luxor Temple: The Ancient Wonder of Egypt" class="blog-img"
-                                            loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/luxor-attraction/luxor-temple-the-ancient-wonder-of-egypt">
-                                            Luxor Temple: The Ancient Wonder of Egypt </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Sun, 02 Apr 2023</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Discover the history and significance of Luxor Temple, one of Ancient
-                                            Egypt&amp;#39;s grandest temple complexes, built by th</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/luxor-attraction/luxor-temple-the-ancient-wonder-of-egypt"
-                                            class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/luxor-attraction/things-to-do-in-luxor">
-                                        <img src="/../images/1680401166125.jpg"
-                                            alt="Top Things to Do in Luxor, Egypt: A Guide to Exploring Ancient Temples and Tombs"
-                                            class="blog-img" loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/luxor-attraction/things-to-do-in-luxor">
-                                            Top Things to Do in Luxor, Egypt: A Guide to Exploring Ancient Temples and Tombs
-                                        </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Sun, 02 Apr 2023</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Explore the top things to do in Luxor, Egypt, including the Karnak Temple
-                                            Complex, Valley of the Kings, Luxor Temple, Co</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/luxor-attraction/things-to-do-in-luxor" class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/cairo-attractions/top-tourist-attractions-in-egypt-cairo">
-                                        <img src="/../images/16803968351spencer-davis-ONVA6s03hg8-unsplash-scaled.jpg"
-                                            alt="Discover the Best Tourist Attractions in Cairo" class="blog-img"
-                                            loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/cairo-attractions/top-tourist-attractions-in-egypt-cairo">
-                                            Discover the Best Tourist Attractions in Cairo </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Sun, 02 Apr 2023</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Discover the top tourist attractions in Cairo, Egypt, including the Great
-                                            Pyramids of Giza, Sphinx, Egyptian Museum, and</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/cairo-attractions/top-tourist-attractions-in-egypt-cairo"
-                                            class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/egyptian-history/egyptian-symbol-of-life">
-                                        <img src="/../images/167628991312.jpg" alt="Egyptian Symbol of Life"
-                                            class="blog-img" loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/egyptian-history/egyptian-symbol-of-life">
-                                            Egyptian Symbol of Life </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Mon, 13 Feb 2023</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Discover the rich history and cultural significance of the Egyptian symbol of
-                                            life, the ankh. Explore its use as a symbo</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/egyptian-history/egyptian-symbol-of-life" class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/aswan-attraction/top-attractions-to-visit-in-aswan">
-                                        <img src="/../images/16736998811philae_temple_aswan2.jpg"
-                                            alt="Top Attractions to visit in Aswan" class="blog-img" loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/aswan-attraction/top-attractions-to-visit-in-aswan">
-                                            Top Attractions to visit in Aswan </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Sat, 14 Jan 2023</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Discover Aswan top tourist attractions, places to visit in Aswan, places to go in
-                                            Aswan, and the historical sites in thi</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/aswan-attraction/top-attractions-to-visit-in-aswan"
-                                            class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/luxor-attraction/guide-to-the-top-luxor-attractions-in-egypt">
-                                        <img src="/../images/16605833081egypt-luxor-temple-of-deir-al-bahri.jpg"
-                                            alt="Guide to the Top Luxor Attractions in Egypt" class="blog-img"
-                                            loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/luxor-attraction/guide-to-the-top-luxor-attractions-in-egypt">
-                                            Guide to the Top Luxor Attractions in Egypt </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Mon, 15 Aug 2022</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Discover Luxor tourist attractions, places to visit in Luxor, places to go in
-                                            Luxor, and the historical sites in this an</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/luxor-attraction/guide-to-the-top-luxor-attractions-in-egypt"
-                                            class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/jordan-best-travel-guide/activities-and-things-to-do-in-jordan">
-                                        <img src="/../images/16597890471jordan-top-attractions-petra.jpg"
-                                            alt="Top Activities and Things to Do in Jordan" class="blog-img"
-                                            loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/jordan-best-travel-guide/activities-and-things-to-do-in-jordan">
-                                            Top Activities and Things to Do in Jordan </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Sat, 06 Aug 2022</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Jordan is every travelers dream introduction to the Middle East. The destination
-                                            gets travelers up close to world wonder</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/jordan-best-travel-guide/activities-and-things-to-do-in-jordan"
-                                            class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/luxor-attraction/the-ramesseum">
-                                        <img src="/../images/1658765694124.jpg" alt="The Ramesseum - Luxor"
-                                            class="blog-img" loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/luxor-attraction/the-ramesseum">
-                                            The Ramesseum - Luxor </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Mon, 25 Jul 2022</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>This temple was dedicated to Ramesses II and a testament to his power and
-                                            influence and it was meant to be the greatest </p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/luxor-attraction/the-ramesseum" class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/egypt-travel-guide/aswan">
-                                        <img src="/../images/16587153061upper-egypt-aswan-dams-philae-temple-isis-20570924.jpg"
-                                            alt="Aswan, Upper Egypt" class="blog-img" loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/egypt-travel-guide/aswan">
-                                            Aswan, Upper Egypt </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Mon, 25 Jul 2022</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Aswan is the third Biggest City in Egypt and it`s located on the South of Egypt,
-                                            used to be called during the Ancient Eg</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/egypt-travel-guide/aswan" class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/egypt-travel-guide/3-reasons-to-tour-the-jamaican-blue-mountains">
-                                        <img src="/../images/1660566729122233.jpg"
-                                            alt="3 Reasons to Tour the Jamaican Blue Mountains" class="blog-img"
-                                            loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/egypt-travel-guide/3-reasons-to-tour-the-jamaican-blue-mountains">
-                                            3 Reasons to Tour the Jamaican Blue Mountains </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Mon, 28 Mar 2022</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Most probably you heard of the Jamaican Blue Mountains because of their great
-                                            coffee. But did you know that you could ac</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/egypt-travel-guide/3-reasons-to-tour-the-jamaican-blue-mountains"
-                                            class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/aswan-attraction/aswan-high-dam">
-                                        <img src="/../images/1659567752133334.jpg" alt="Aswan High Dam" class="blog-img"
-                                            loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/aswan-attraction/aswan-high-dam">
-                                            Aswan High Dam </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Tue, 06 Aug 2019</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Egypt, Aswan High Dam located near Aswan, the world famous Aswan Dam was an
-                                            engineering miracle when it was built in the</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/aswan-attraction/aswan-high-dam" class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/cairo-attractions/memphis-egypt">
-                                        <img src="/../images/165956763610a6141af4c148daad104b0bee1373a12.jpg"
-                                            alt="Memphis Egypt" class="blog-img" loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/cairo-attractions/memphis-egypt">
-                                            Memphis Egypt </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Tue, 06 Aug 2019</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Memphis Egypt was founded in 1st Dynasty by King Narmar. Learn more about ancient
-                                            Egypt&amp;#39;s capital! Memphis was the f</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/cairo-attractions/memphis-egypt" class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/cairo-attractions/islamic-art-museum">
-                                        <img src="/../images/165956747811.jpg" alt="Islamic Art Museum" class="blog-img"
-                                            loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/cairo-attractions/islamic-art-museum">
-                                            Islamic Art Museum </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Tue, 06 Aug 2019</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Cairo Tower is a free-standing concrete tower in Cairo, Egypt At 187 m, it has
-                                            been the tallest structure in Egypt and N</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/cairo-attractions/islamic-art-museum" class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/cairo-attractions/cairo-tower-egypt">
-                                        <img src="/../images/1659567353122344.jpg"
-                                            alt="Fantastic Information about Cairo Tower - Egypt" class="blog-img"
-                                            loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/cairo-attractions/cairo-tower-egypt">
-                                            Fantastic Information about Cairo Tower - Egypt </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Tue, 06 Aug 2019</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Cairo Tower is a free-standing concrete tower in Cairo, Egypt At 187 m, Cairo
-                                            Tower has been the tallest structure in Eg</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/cairo-attractions/cairo-tower-egypt" class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                            <div class="modern-blog-card">
-                                <div class="blog-image">
-                                    <a href="/blog/cairo-attractions/bab-zuweila">
-                                        <img src="/../images/165956716712Bab-Zuweila.jpg" alt="Bab Zuweila"
-                                            class="blog-img" loading="lazy">
-                                        <div class="blog-overlay">
-                                            <div class="overlay-content">
-                                                <i class="la la-eye"></i>
-                                                <span>Read Article</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="blog-content-wrapper">
-                                    <h3 class="blog-card-title">
-                                        <a href="/blog/cairo-attractions/bab-zuweila">
-                                            Bab Zuweila </a>
-                                    </h3>
-
-                                    <div class="blog-date">
-                                        <i class="la la-calendar"></i>
-                                        <span>Mon, 05 Aug 2019</span>
-                                    </div>
-
-                                    <div class="blog-description">
-                                        <p>Bab Zuweila Built in the 11th century, Bab Zuweila was an execution site during
-                                            Mamluk times, it is considered as Part o</p>
-                                    </div>
-
-                                    <div class="blog-footer">
-                                        <a href="/blog/cairo-attractions/bab-zuweila" class="btn-blog">
-                                            Read More <i class="la la-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        @endforelse
                     </div>
 
-                    <!-- Pagination -->
-                    <div class="pagination-wrapper">
-
-                        <a href="/blog/?from=20" class="pagination-btn">
-                            Next Page <i class="la la-arrow-right"></i>
-                        </a>
-                    </div>
+                    @if (method_exists($articles, 'links') && $articles->hasPages())
+                        <div class="pagination-wrapper">
+                            {{ $articles->links() }}
+                        </div>
+                    @endif
                 </div>
 
-                <!-- Sidebar -->
                 <div class="col-lg-4">
-                    <!-- Search Widget -->
+
                     <div class="luxury-sidebar">
                         <div class="sidebar-widget">
-                            <h3 class="sidebar-title">Search Articles</h3>
-                            <form action="/search/" method="get" class="search-form">
+                            <h3 class="sidebar-title">{{ __('Search Articles') }}</h3>
+
+                            <form action="{{ $blogsRoute }}" method="get" class="search-form">
                                 <input type="text" name="keyword" class="search-input"
-                                    placeholder="Search for articles...">
-                                <input type="hidden" name="source" value="blog">
+                                    placeholder="{{ __('Search for articles...') }}" value="{{ request('keyword') }}">
+
                                 <button type="submit" class="search-btn">
                                     <i class="la la-search"></i>
                                 </button>
@@ -1764,110 +1201,226 @@
                         </div>
                     </div>
 
-                    <!-- Categories Widget -->
                     <div class="luxury-sidebar">
                         <div class="sidebar-widget">
-                            <h3 class="sidebar-title">Categories</h3>
+                            <h3 class="sidebar-title">{{ __('Categories') }}</h3>
+
                             <div class="category-tags">
-                                <a href="/blog/alexandria-attraction" class="category-tag">
-                                    Alexandria Attractions </a>
-                                <a href="/blog/egyptian-history" class="category-tag">
-                                    Ancient Egyptian History </a>
-                                <a href="/blog/aswan-attraction" class="category-tag">
-                                    Aswan Attractions </a>
-                                <a href="/blog/cairo-attractions" class="category-tag">
-                                    Cairo Attractions </a>
-                                <a href="/blog/egypt-pyramid" class="category-tag">
-                                    Egypt Pyramids </a>
-                                <a href="/blog/egypt-travel-guide" class="category-tag">
-                                    Egypt Travel Guide </a>
-                                <a href="/blog/general" class="category-tag">
-                                    General </a>
-                                <a href="/blog/jordan-best-travel-guide" class="category-tag">
-                                    Jordan Travel Guide </a>
-                                <a href="/blog/luxor-attraction" class="category-tag">
-                                    Luxor Attractions </a>
-                                <a href="/blog/morocco-travel-guide" class="category-tag">
-                                    Morocco Travel Guide </a>
-                                <a href="/blog/nile-valley-information" class="category-tag">
-                                    Nile Valley </a>
+                                @forelse ($categories as $blogCategory)
+                                    @php
+                                        $catTitle =
+                                            $blogCategory->display_title ??
+                                            ($blogCategory->title ?? ($blogCategory->name ?? __('Category')));
+
+                                        $catSlug = $blogCategory->slug ?? Str::slug($catTitle);
+
+                                        $catUrl = Route::has('website.blogs.category')
+                                            ? route('website.blogs.category', $catSlug)
+                                            : url('/blog/' . $catSlug);
+                                    @endphp
+
+                                    <a href="{{ $catUrl }}" class="category-tag">
+                                        {{ $catTitle }}
+                                    </a>
+                                @empty
+                                    <div class="empty-state">
+                                        {{ __('No categories found.') }}
+                                    </div>
+                                @endforelse
                             </div>
                         </div>
                     </div>
 
-                    <!-- Popular Articles Widget -->
                     <div class="luxury-sidebar">
                         <div class="sidebar-widget">
-                            <h3 class="sidebar-title">Popular Articles</h3>
-                            <div class="popular-article">
-                                <img src="https://www.luxorandaswan.com/../images/17519041161vessels-head2.jpg"
-                                    alt="" class="popular-img">
-                                <div class="popular-content">
-                                    <h4><a href="/blog/nile-valley-information/best-month-for-a-nile-river-cruise">Best
-                                            Month for a Nile River Cruise: When to Go and Why</a></h4>
-                                    <p class="popular-date">Mon, 07 Jul 2025</p>
+                            <h3 class="sidebar-title">{{ __('Popular Articles') }}</h3>
+
+                            @forelse ($popularArticles as $popular)
+                                @php
+                                    $popularTitle = $popular->display_title ?: __('Article');
+
+                                    $popularImage =
+                                        $popular->featured_image
+                                            ? asset('storage/' . ltrim($popular->featured_image, '/'))
+                                            : asset('website/photos/home2.webp');
+
+                                    $popularDate = $popular->published_at ?? ($popular->created_at ?? now());
+
+                                    $popularCategoryTitle =
+                                        $popular->category?->display_title ??
+                                        ($popular->category?->title ?? ($popular->category?->name ?? __('General')));
+
+                                    $popularCategorySlug =
+                                        $popular->category?->slug ?? Str::slug($popularCategoryTitle);
+
+                                    $popularUrl = Route::has('website.blogs.show.legacy')
+                                        ? route('website.blogs.show.legacy', [$popularCategorySlug, $popular->slug])
+                                        : (Route::has('website.blogs.show')
+                                            ? route('website.blogs.show', $popular->slug)
+                                            : url('/blogs/' . $popular->slug));
+                                @endphp
+
+                                <div class="popular-article">
+                                    <img src="{{ $popularImage }}" alt="{{ $popularTitle }}" class="popular-img"
+                                        loading="lazy">
+
+                                    <div class="popular-content">
+                                        <h4>
+                                            <a href="{{ $popularUrl }}">
+                                                {{ $popularTitle }}
+                                            </a>
+                                        </h4>
+
+                                        <p class="popular-date">
+                                            {{ \Carbon\Carbon::parse($popularDate)->locale(app()->getLocale())->translatedFormat('D, d M Y') }}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="popular-article">
-                                <img src="https://www.luxorandaswan.com/../images/17289450971AdobeStock_485657585.jpg"
-                                    alt="" class="popular-img">
-                                <div class="popular-content">
-                                    <h4><a
-                                            href="/blog/nile-valley-information/luxury-nile-cruise-a-journey-of-opulence-and-history">Luxury
-                                            Nile Cruise: A Journey of Opulence and History</a></h4>
-                                    <p class="popular-date">Mon, 14 Oct 2024</p>
+                            @empty
+                                <div class="empty-state">
+                                    {{ __('No popular articles found.') }}
                                 </div>
-                            </div>
-                            <div class="popular-article">
-                                <img src="https://www.luxorandaswan.com/../images/17237245321pyramids-of-egypt2.jpg"
-                                    alt="" class="popular-img">
-                                <div class="popular-content">
-                                    <h4><a href="/blog/egypt-travel-guide/what-is-the-best-way-to-see-egypt-in-9-days">What
-                                            is the best way to see Egypt in 9 days?</a></h4>
-                                    <p class="popular-date">Thu, 15 Aug 2024</p>
-                                </div>
-                            </div>
-                            <div class="popular-article">
-                                <img src="https://www.luxorandaswan.com/../images/16934689661pexels-maksim-romashkin-11104822.jpg"
-                                    alt="" class="popular-img">
-                                <div class="popular-content">
-                                    <h4><a href="/blog/general/5-types-of-houses-you-will-find-in-thailand">5 Types of
-                                            Houses You Will Find in Thailand</a></h4>
-                                    <p class="popular-date">Thu, 31 Aug 2023</p>
-                                </div>
-                            </div>
-                            <div class="popular-article">
-                                <img src="https://www.luxorandaswan.com/../images/169039154311.jpg" alt=""
-                                    class="popular-img">
-                                <div class="popular-content">
-                                    <h4><a href="/blog/general/indulgent-escapes-unforgettable-luxury-vacations-in-crete">Indulgent
-                                            Escapes: Unforgettable Luxury Vacations in Crete</a></h4>
-                                    <p class="popular-date">Wed, 26 Jul 2023</p>
-                                </div>
-                            </div>
+                            @endforelse
                         </div>
                     </div>
 
-                    <!-- Social Widget -->
                     <div class="luxury-sidebar">
                         <div class="sidebar-widget">
-                            <h3 class="sidebar-title">Follow & Connect</h3>
+                            <h3 class="sidebar-title">{{ __('Follow & Connect') }}</h3>
+
                             <div class="social-links">
-                                <a href="https://www.facebook.com/luxorandaswantravel" target="_blank"
-                                    class="social-link">
+                                <a href="https://www.facebook.com/" target="_blank" class="social-link">
                                     <i class="lab la-facebook-f"></i>
                                 </a>
-                                <a href="https://twitter.com/LuxorAswanTours" target="_blank" class="social-link">
+
+                                <a href="https://twitter.com/" target="_blank" class="social-link">
                                     <i class="lab la-twitter"></i>
                                 </a>
-                                <a href="https://www.instagram.com/luxor_and_aswan_travel" target="_blank"
-                                    class="social-link">
+
+                                <a href="https://www.instagram.com/" target="_blank" class="social-link">
                                     <i class="lab la-instagram"></i>
                                 </a>
-                                <a href="https://www.tripadvisor.com/Attraction_Review-g294205-d12148903-Reviews-Luxor_and_Aswan_Travel-Luxor_Nile_River_Valley.html"
-                                    target="_blank" class="social-link">
+
+                                <a href="https://www.tripadvisor.com/" target="_blank" class="social-link">
                                     <i class="la la-tripadvisor"></i>
                                 </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <div class="fixed-mobile-btn d-lg-none">
+        <a href="https://api.whatsapp.com/send?phone=201553383000" target="_blank" class="mobile-enquiry-btn">
+            <i class="lab la-whatsapp"></i>
+            {{ __('WhatsApp Us') }}
+        </a>
+    </div>
+
+    <section class="why-choose-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center mb-5">
+                    <h2 class="section-header">
+                        {{ __('Why Travel With Etro Tours?') }}
+                    </h2>
+                    <p class="section-subtitle">
+                        {{ __('Your entire vacation is designed around your requirements with expert guidance every step of the way.') }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="choose-card">
+                        <div class="choose-icon">
+                            <i class="la la-cog"></i>
+                        </div>
+
+                        <h3 class="choose-title">{{ __('100% Tailor Made') }}</h3>
+
+                        <div class="choose-features">
+                            <div class="feature-item">
+                                {{ __('Your entire vacation is designed around your requirements.') }}
+                            </div>
+                            <div class="feature-item">
+                                {{ __('Explore your interests at your own speed.') }}
+                            </div>
+                            <div class="feature-item">
+                                {{ __('Select your preferred style of accommodations.') }}
+                            </div>
+                            <div class="feature-item">
+                                {{ __('Create the perfect trip with the help of our specialists.') }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="choose-card">
+                        <div class="choose-icon">
+                            <i class="la la-lightbulb"></i>
+                        </div>
+
+                        <h3 class="choose-title">{{ __('Expert Knowledge') }}</h3>
+
+                        <div class="choose-features">
+                            <div class="feature-item">
+                                {{ __('Our specialists have traveled extensively across Egypt.') }}
+                            </div>
+                            <div class="feature-item">
+                                {{ __('The same specialist will handle your trip from start to finish.') }}
+                            </div>
+                            <div class="feature-item">
+                                {{ __('Make the most of your time and budget.') }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="choose-card">
+                        <div class="choose-icon">
+                            <i class="la la-user-graduate"></i>
+                        </div>
+
+                        <h3 class="choose-title">{{ __('The Best Guides') }}</h3>
+
+                        <div class="choose-features">
+                            <div class="feature-item">
+                                {{ __('Our guides make the difference between a good trip and an outstanding one.') }}
+                            </div>
+                            <div class="feature-item">
+                                {{ __('Safety and wellbeing are always our number one priority.') }}
+                            </div>
+                            <div class="feature-item">
+                                {{ __('Real insight into Egypt, not just dates and names.') }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="choose-card">
+                        <div class="choose-icon">
+                            <i class="la la-shield-alt"></i>
+                        </div>
+
+                        <h3 class="choose-title">{{ __('Fully Protected') }}</h3>
+
+                        <div class="choose-features">
+                            <div class="feature-item">
+                                {{ __('Trusted travel planning from arrival to departure.') }}
+                            </div>
+                            <div class="feature-item">
+                                {{ __('Professional support before and during your journey.') }}
+                            </div>
+                            <div class="feature-item">
+                                {{ __('Comfortable service standards and secure travel coordination.') }}
                             </div>
                         </div>
                     </div>
@@ -1875,6 +1428,48 @@
             </div>
         </div>
     </section>
+
+    <section class="luxury-cta-section">
+        <div class="container">
+            <div class="luxury-cta-content">
+                <div class="cta-icon-container">
+                    <i class="la la-phone"></i>
+                </div>
+
+                <div class="cta-content-wrapper">
+                    <div class="cta-text-content">
+                        <h2 class="cta-title">{{ __('Ready to Plan Your Dream Trip?') }}</h2>
+                        <p class="cta-subtitle">
+                            {{ __('Speak with our Egypt specialists for your perfect luxury journey.') }}
+                        </p>
+
+                        <div class="trust-features">
+                            <div class="trust-feature">
+                                <i class="la la-shield-alt"></i>
+                                <span>{{ __('Free Consultation') }}</span>
+                            </div>
+
+                            <div class="trust-feature">
+                                <i class="la la-clock"></i>
+                                <span>{{ __('24/7 Support') }}</span>
+                            </div>
+
+                            <div class="trust-feature">
+                                <i class="la la-award"></i>
+                                <span>{{ __('Best Price Guarantee') }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="{{ route('website.contact.index') }}" class="luxury-cta-btn">
+                        <i class="la la-calendar-check"></i>
+                        {{ __('Start Planning') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
 @endsection
 
 @section('js')
@@ -1883,23 +1478,24 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Smooth scrolling for anchor links
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function(e) {
-                    e.preventDefault();
                     const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        const offsetTop = target.offsetTop - 100;
-                        window.scrollTo({
-                            top: offsetTop,
-                            behavior: 'smooth'
-                        });
+
+                    if (!target) {
+                        return;
                     }
+
+                    e.preventDefault();
+
+                    window.scrollTo({
+                        top: target.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
                 });
             });
 
-            // Card hover effects
-            document.querySelectorAll('.cruise-card, .choose-card').forEach(card => {
+            document.querySelectorAll('.modern-blog-card, .choose-card').forEach(card => {
                 card.addEventListener('mouseenter', function() {
                     this.style.transform = 'translateY(-8px)';
                 });
@@ -1909,7 +1505,6 @@
                 });
             });
 
-            // Loading animation
             window.addEventListener('load', () => {
                 document.body.classList.add('loaded');
             });

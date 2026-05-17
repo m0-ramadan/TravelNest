@@ -1,0 +1,129 @@
+<?php
+
+namespace App\Http\Controllers\Website;
+
+use App\Models\Package;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
+class TourController extends BaseWebsiteController
+{
+    public function index(Request $request)
+    {
+        $tours = Package::query()
+            ->with(['currency', 'category', 'primaryCountry'])
+            ->where('is_active', true)
+            ->whereIn('package_type', ['day_tour', 'shore_excursion'])
+            ->when($request->filled('q'), function ($query) use ($request) {
+                $search = '%' . $request->q . '%';
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', $search)
+                        ->orWhere('subtitle', 'like', $search)
+                        ->orWhere('short_description', 'like', $search)
+                        ->orWhere('description', 'like', $search);
+                });
+            })
+            ->orderByDesc('is_featured')
+            ->orderByRaw('sort_order IS NULL, sort_order ASC')
+            ->paginate(12)
+            ->withQueryString();
+
+        return view('website.pages.tours.index', compact('tours'));
+    }
+
+    public function show(string $slug)
+    {
+        $tour = Package::query()
+            ->with([
+                'currency',
+                'category',
+                'primaryCountry',
+                'highlights',
+                'itineraries',
+                'inclusions',
+                'prices.currency',
+                'packageAttractions',
+                'reviews',
+                'testimonials',
+            ])
+            ->where('slug', $slug)
+            ->where('is_active', true)
+            ->firstOrFail();
+
+        $relatedTours = Package::query()
+            ->with(['currency'])
+            ->where('is_active', true)
+            ->where('id', '!=', $tour->id)
+            ->whereIn('package_type', ['day_tour', 'shore_excursion'])
+            ->limit(3)
+            ->get();
+
+        return view('website.pages.tours.show', compact('tour', 'relatedTours'));
+    }
+
+    public function legacyShow(string $country, string $slug)
+    {
+        return $this->show($slug);
+    }
+
+    public function offers()
+    {
+        $offers = Package::query()
+            ->with(['currency', 'primaryCountry', 'highlights', 'tags', 'prices'])
+            ->where('is_active', true)
+            ->whereNotNull('offer_price')
+            ->where('offer_price', '>', 0)
+            ->orderByDesc('is_featured')
+            ->orderByRaw('sort_order IS NULL, sort_order ASC')
+            ->latest('id')
+            ->paginate(9)
+            ->withQueryString();
+
+        $offers->getCollection()->transform(function (Package $package) {
+            $basePrice = $package->start_from_price;
+
+            if ($basePrice === null && $package->relationLoaded('prices')) {
+                $basePrice = $package->prices->first()?->amount;
+            }
+
+            $offerPrice = $package->offer_price;
+            $symbol = $package->currency?->symbol ?: '$';
+
+            $highlights = $package->relationLoaded('highlights')
+                ? $package->highlights
+                    ->take(2)
+                    ->map(fn ($item) => $this->translated($item->getRawOriginal('title') ?? $item->title))
+                    ->filter()
+                    ->values()
+                    ->all()
+                : [];
+
+            if (empty($highlights) && $package->relationLoaded('tags')) {
+                $highlights = $package->tags->take(2)->pluck('name')->filter()->values()->all();
+            }
+
+            return [
+                'title' => $this->translated($package->getRawOriginal('title') ?? $package->title),
+                'description' => $this->shortText(
+                    $package->getRawOriginal('short_description') ?: $package->getRawOriginal('description'),
+                    190
+                ),
+                'image' => $this->imageUrl($package->featured_image, 'website/photos/home2.webp'),
+                'url' => $this->packageRoute($package),
+                'country' => $this->translated($package->primaryCountry?->getRawOriginal('name') ?? $package->primaryCountry?->name) ?: __('Offer'),
+                'duration' => $this->packageDuration($package),
+                'tour_type' => trim((string) ($package->tour_type ?: Str::headline(str_replace('_', ' ', (string) $package->package_type)))),
+                'offer_price' => $symbol . number_format((float) $offerPrice, 0),
+                'regular_price' => $basePrice && (float) $basePrice > (float) $offerPrice
+                    ? $symbol . number_format((float) $basePrice, 0)
+                    : null,
+                'savings_percent' => $basePrice && (float) $basePrice > (float) $offerPrice
+                    ? (int) round((((float) $basePrice - (float) $offerPrice) / (float) $basePrice) * 100)
+                    : null,
+                'tags' => $highlights,
+            ];
+        });
+
+        return view('website.pages.offers', compact('offers'));
+    }
+}

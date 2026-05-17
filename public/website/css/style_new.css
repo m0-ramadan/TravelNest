@@ -524,6 +524,7 @@ overflow: hidden;
 .deal-price {
     position: absolute;
     top: 20px;
+        height: 42px;
     right: 20px;
     background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light));
     color: var(--primary-blue);

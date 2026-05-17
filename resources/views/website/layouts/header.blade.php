@@ -1,27 +1,36 @@
+  @php
+      $shoreExcursionsUrl = route('website.tours.all', ['type' => 'shore_excursion']);
+  @endphp
+
   <!-- Enhanced Navigation -->
   <nav class="navbar navbar-expand-lg">
       <div class="container">
           <a class="navbar-brand" href="{{ route('website.home') }}">
               <img class="d-none d-lg-block" src="{{ request()->root() }}/website/logo/logo-lat.png"
-                  alt="Luxor and Aswan Travel" width="200" height="64">
+                  alt="{{ __('Etro Tours') }}" width="200" height="64">
               <img class="d-lg-none" src="{{ request()->root() }}/website/logo/favicon-lat.webp"
-                  alt="Luxor and Aswan Travel" width="48" height="46">
+                  alt="{{ __('Etro Tours') }}" width="48" height="46">
           </a>
 
           <!-- Mobile Actions -->
           <div class="d-lg-none mobile-actions">
-              <a href="search/index.html" aria-label="Search" class="mobile-action-btn">
+              <button type="button" aria-label="{{ __('Dark Mode') }}" title="{{ __('Dark Mode') }}"
+                  class="mobile-action-btn theme-toggle-btn" data-theme-toggle data-dark-label="{{ __('Dark Mode') }}"
+                  data-light-label="{{ __('Light Mode') }}">
+                  <i class="la la-moon"></i>
+              </button>
+              <a href="{{ route('website.search.index') }}" aria-label="{{ __('Search') }}" class="mobile-action-btn">
                   <i class="la la-search"></i>
               </a>
-              <a href="tel:+19172678628" aria-label="Call Us" class="mobile-action-btn">
+              <a href="tel:+19172678628" aria-label="{{ __('Call Us') }}" class="mobile-action-btn">
                   <i class="la la-phone"></i>
               </a>
-              <a href="viber://chat?number=201004880015" target="_blank" aria-label="Viber"
+              <a href="viber://chat?number=201004880015" target="_blank" aria-label="{{ __('Viber') }}"
                   class="mobile-action-btn viber">
                   <i class="lab la-viber"></i>
               </a>
-              <a href="https://api.whatsapp.com/send?phone=19172678628" target="_blank" aria-label="WhatsApp"
-                  class="mobile-action-btn whatsapp">
+              <a href="https://api.whatsapp.com/send?phone=19172678628" target="_blank"
+                  aria-label="{{ __('WhatsApp') }}" class="mobile-action-btn whatsapp">
                   <i class="lab la-whatsapp"></i>
               </a>
           </div>
@@ -41,94 +50,101 @@
                   <li class="nav-item">
                       <a class="nav-link" href="{{ route('website.home') }}">
                           <i class="la la-home"></i>
-                          Home
+                          {{ __('Home') }}
                       </a>
                   </li>
                   <li class="nav-item dropdown">
                       <a class="nav-link dropdown-toggle" href="javascript:void(0)" data-bs-toggle="dropdown">
                           <i class="la la-globe"></i>
-                          Destinations
+                          {{-- <i class="la la-map-marker"></i> --}}
+                          {{ __('Destinations') }}
                       </a>
                       <ul class="dropdown-menu">
-                          <li><a class="dropdown-item" href="{{ route('website.destinations') }}">
-                                  <i class="la la-map-marker"></i> Egypt
+                          <li><a class="dropdown-item" href="{{ route('website.destinations.index') }}">
+                                  <i class="la la-map-marker"></i> {{ __('Egypt') }}
                               </a></li>
-                          <li><a class="dropdown-item" href="{{ route('website.destinations') }}">
-                                  <i class="la la-map-marker"></i> Jordan
+                          <li><a class="dropdown-item" href="{{ route('website.destinations.index') }}">
+                                  <i class="la la-map-marker"></i> {{ __('Jordan') }}
                               </a></li>
-                          <li><a class="dropdown-item" href="{{ route('website.destinations') }}">
-                                  <i class="la la-map-marker"></i> Dubai
+                          <li><a class="dropdown-item" href="{{ route('website.destinations.index') }}">
+                                  <i class="la la-map-marker"></i> {{ __('Dubai') }}
                               </a></li>
-                          <li><a class="dropdown-item" href="https://www.luxorandaswan.com/Morocco">
-                                  <i class="la la-map-marker"></i> Morocco
+                          <li><a class="dropdown-item" href="{{ route('website.destinations.show', 'morocco') }}">
+                                  <i class="la la-map-marker"></i> {{ __('Morocco') }}
                               </a></li>
-                          <li><a class="dropdown-item" href="https://www.luxorandaswan.com/Oman">
-                                  <i class="la la-map-marker"></i> Oman
+                          <li><a class="dropdown-item" href="{{ route('website.destinations.show', 'oman') }}">
+                                  <i class="la la-map-marker"></i> {{ __('Oman') }}
                               </a></li>
-                          <li><a class="dropdown-item" href="https://www.luxorandaswan.com/Turkey">
-                                  <i class="la la-map-marker"></i> Turkey
+                          <li><a class="dropdown-item" href="{{ route('website.destinations.show', 'turkey') }}">
+                                  <i class="la la-map-marker"></i> {{ __('Turkey') }}
                               </a></li>
-                          <li><a class="dropdown-item" href="https://www.luxorandaswan.com/African-Safari">
-                                  <i class="la la-binoculars"></i> African Safari
+                          <li><a class="dropdown-item"
+                                  href="{{ route('website.destinations.show', 'african-safari') }}">
+                                  <i class="la la-binoculars"></i> {{ __('African Safari') }}
                               </a></li>
                       </ul>
                   </li>
                   <li class="nav-item">
                       <a class="nav-link" href="{{ route('website.multi_country') }}">
                           <i class="la la-globe-americas"></i>
-                          Multi Country
+                          {{ __('Multi Country') }}
                       </a>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link" href="shore-excursion/index.html">
+                      <a class="nav-link" href="{{ $shoreExcursionsUrl }}">
                           <i class="la la-ship"></i>
-                          Shore Excursions
+                          {{ __('Shore Excursions') }}
                       </a>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link special-offer" href="latest-offers.html" style="width: max-content;">
+                      <a class="nav-link special-offer" href="{{ route('website.offers') }}"
+                          style="width: max-content;">
                           <i class="la la-fire"></i>
-                          Travel Deals
+                          {{ __('Travel Deals') }}
                       </a>
                   </li>
               </ul>
 
               <!-- Desktop Actions -->
               <div class="navbar-actions">
-                  <a href="search/index.html" class="action-btn" aria-label="Search">
+                  <button type="button" class="action-btn theme-toggle-btn" aria-label="{{ __('Dark Mode') }}"
+                      title="{{ __('Dark Mode') }}" data-theme-toggle data-dark-label="{{ __('Dark Mode') }}"
+                      data-light-label="{{ __('Light Mode') }}">
+                      <i class="la la-moon"></i>
+                  </button>
+                  <a href="{{ route('website.search.index') }}" class="action-btn" aria-label="{{ __('Search') }}">
                       <i class="la la-search"></i>
                   </a>
-                  <a href="tailor-made.php.html" class="btn-tailor">
+                  <a href="{{ url('tailor-made') }}" class="btn-tailor">
                       <i class="la la-magic"></i>
-                      Tailor-made
+                      {{ __('Tailor-made') }}
                   </a>
                   <div class="dropdown language-dropdown">
+                      @php
+                          $currentLocale = app()->getLocale();
+                          $activeLanguages = \Illuminate\Support\Facades\Cache::remember(
+                              'active_languages',
+                              3600,
+                              function () {
+                                  return \App\Models\Language::where('is_active', true)->orderBy('sort_order')->get();
+                              },
+                          );
+                      @endphp
                       <a class="language-toggle" href="javascript:void(0)" data-bs-toggle="dropdown">
                           <i class="la la-language"></i>
-                          <span>EN</span>
+                          <span>{{ strtoupper($currentLocale) }}</span>
                       </a>
                       <ul class="dropdown-menu dropdown-menu-end language-menu">
-                          <li><a class="dropdown-item nturl" href="index.html">
-                                  <span class="flag-icon flag-icon-us"></span> English
-                              </a></li>
-                          <li><a class="dropdown-item" href="https://fr.luxorandaswan.com/" target="_blank">
-                                  <span class="flag-icon flag-icon-fr"></span> French
-                              </a></li>
-                          <li><a class="dropdown-item" href="https://de.luxorandaswan.com/" target="_blank">
-                                  <span class="flag-icon flag-icon-de"></span> German
-                              </a></li>
-                          <li><a class="dropdown-item" href="https://es.luxorandaswan.com/" target="_blank">
-                                  <span class="flag-icon flag-icon-es"></span> Spanish
-                              </a></li>
-                          <li><a class="dropdown-item" href="https://it.luxorandaswan.com/" target="_blank">
-                                  <span class="flag-icon flag-icon-it"></span> Italian
-                              </a></li>
-                          <li><a class="dropdown-item" href="https://pt.luxorandaswan.com/" target="_blank">
-                                  <span class="flag-icon flag-icon-pt"></span> Portuguese
-                              </a></li>
-                          <li><a class="dropdown-item" href="https://ru.luxorandaswan.com/" target="_blank">
-                                  <span class="flag-icon flag-icon-ru"></span> Russian
-                              </a></li>
+                          @foreach ($activeLanguages as $lang)
+                              <li>
+                                  <a class="dropdown-item {{ $currentLocale === $lang->code ? 'active' : '' }}"
+                                      href="{{ route('website.lang.switch', $lang->code) }}">
+                                      <span
+                                          class="flag-icon flag-icon-{{ $lang->code == 'en' ? 'us' : strtolower($lang->code) }}"></span>
+                                      {{ $lang->name }}
+                                  </a>
+                              </li>
+                          @endforeach
                       </ul>
                   </div>
               </div>
@@ -140,11 +156,11 @@
   <div class="modern-mobile-menu" id="modernMobileMenu">
       <div class="mobile-menu-header">
           <div class="mobile-menu-brand">
-              <img src="{{ request()->root() }}/website/logo/favicon-lat.webp" alt="Logo" width="40"
-                  height="30">
-              <span>Luxor & Aswan Travel</span>
+              <img src="{{ request()->root() }}/website/logo/favicon-lat.webp" alt="{{ __('Logo') }}"
+                  width="40" height="30">
+              <span>{{ __('Etro Tours') }}</span>
           </div>
-          <button class="mobile-close-btn" onclick="toggleMobileMenu()" aria-label="Close Menu">
+          <button class="mobile-close-btn" onclick="toggleMobileMenu()" aria-label="{{ __('Close Menu') }}">
               <i class="la la-times"></i>
           </button>
       </div>
@@ -152,7 +168,7 @@
       <div class="mobile-menu-content">
           <div class="mobile-nav-item">
               <a href="{{ route('website.home') }}" class="mobile-nav-link">
-                  <i class="la la-home"></i> Home
+                  <i class="la la-home"></i> {{ __('Home') }}
               </a>
           </div>
 
@@ -161,76 +177,77 @@
               <div class="mobile-destinations-toggle" onclick="toggleMobileDestinations()">
                   <div style="display: flex; align-items: center;">
                       <i class="la la-globe" style="margin-right: 15px;"></i>
-                      Destinations
+                      {{ __('Destinations') }}
                   </div>
                   <i class="la la-angle-down chevron"></i>
               </div>
               <div class="mobile-destinations-submenu" id="mobileDestinationsSubmenu">
                   <div class="mobile-submenu-item">
-                      <a href="https://www.luxorandaswan.com/Egypt" class="mobile-submenu-link">
-                          <i class="la la-map-marker"></i> Egypt
+                      <a href="{{ route('website.destinations.show', 'egypt') }}" class="mobile-submenu-link">
+                          <i class="la la-map-marker"></i> {{ __('Egypt') }}
                       </a>
                   </div>
                   <div class="mobile-submenu-item">
-                      <a href="https://www.luxorandaswan.com/Jordan" class="mobile-submenu-link">
-                          <i class="la la-map-marker"></i> Jordan
+                      <a href="{{ route('website.destinations.show', 'jordan') }}" class="mobile-submenu-link">
+                          <i class="la la-map-marker"></i> {{ __('Jordan') }}
                       </a>
                   </div>
                   <div class="mobile-submenu-item">
-                      <a href="https://www.luxorandaswan.com/Dubai" class="mobile-submenu-link">
-                          <i class="la la-map-marker"></i> Dubai
+                      <a href="{{ route('website.destinations.show', 'dubai') }}" class="mobile-submenu-link">
+                          <i class="la la-map-marker"></i> {{ __('Dubai') }}
                       </a>
                   </div>
                   <div class="mobile-submenu-item">
-                      <a href="https://www.luxorandaswan.com/Morocco" class="mobile-submenu-link">
-                          <i class="la la-map-marker"></i> Morocco
+                      <a href="{{ route('website.destinations.show', 'morocco') }}" class="mobile-submenu-link">
+                          <i class="la la-map-marker"></i> {{ __('Morocco') }}
                       </a>
                   </div>
                   <div class="mobile-submenu-item">
-                      <a href="https://www.luxorandaswan.com/Oman" class="mobile-submenu-link">
-                          <i class="la la-map-marker"></i> Oman
+                      <a href="{{ route('website.destinations.show', 'oman') }}" class="mobile-submenu-link">
+                          <i class="la la-map-marker"></i> {{ __('Oman') }}
                       </a>
                   </div>
                   <div class="mobile-submenu-item">
-                      <a href="https://www.luxorandaswan.com/Turkey" class="mobile-submenu-link">
-                          <i class="la la-map-marker"></i> Turkey
+                      <a href="{{ route('website.destinations.show', 'turkey') }}" class="mobile-submenu-link">
+                          <i class="la la-map-marker"></i> {{ __('Turkey') }}
                       </a>
                   </div>
-                  <div class="mobile-submenu-item">
-                      <a href="https://www.luxorandaswan.com/African-Safari" class="mobile-submenu-link">
-                          <i class="la la-binoculars"></i> African Safari
+                  {{-- <div class="mobile-submenu-item">
+                      <a href="{{ route('website.destinations.show', 'african-safari') }}"
+                          class="mobile-submenu-link">
+                          <i class="la la-binoculars"></i> {{ __('African Safari') }}
                       </a>
-                  </div>
+                  </div> --}}
               </div>
           </div>
 
           <div class="mobile-nav-item">
-              <a href="multicountries/index.html" class="mobile-nav-link">
-                  <i class="la la-globe-americas"></i> Multi Country
+              <a href="{{ route('website.multi_country') }}" class="mobile-nav-link">
+                  <i class="la la-globe-americas"></i> {{ __('Multi Country') }}
               </a>
           </div>
 
           <div class="mobile-nav-item">
-              <a href="shore-excursion/index.html" class="mobile-nav-link">
-                  <i class="la la-ship"></i> Shore Excursions
+              <a href="{{ $shoreExcursionsUrl }}" class="mobile-nav-link">
+                  <i class="la la-ship"></i> {{ __('Shore Excursions') }}
               </a>
           </div>
 
           <div class="mobile-nav-item">
-              <a href="latest-offers.html" class="mobile-nav-link special-deals">
-                  <i class="la la-fire"></i> Travel Deals
+              <a href="{{ route('website.offers') }}" class="mobile-nav-link special-deals">
+                  <i class="la la-fire"></i> {{ __('Travel Deals') }}
               </a>
           </div>
 
           <div class="mobile-nav-item">
-              <a href="Contact-Us.html" class="mobile-nav-link">
-                  <i class="la la-envelope"></i> Contact Us
+              <a href="{{ route('website.contact.index') }}" class="mobile-nav-link">
+                  <i class="la la-envelope"></i> {{ __('Contact Us') }}
               </a>
           </div>
 
           <div class="mobile-nav-item">
-              <a href="tailor-made.php.html" class="mobile-nav-link">
-                  <i class="la la-magic"></i> Tailor-made Trips
+              <a href="{{ url('tailor-made') }}" class="mobile-nav-link">
+                  <i class="la la-magic"></i> {{ __('Tailor-made Trips') }}
               </a>
           </div>
 
@@ -239,63 +256,45 @@
               <div class="mobile-language-toggle" onclick="toggleMobileLanguage()">
                   <div style="display: flex; align-items: center;">
                       <i class="la la-language" style="margin-right: 12px;"></i>
-                      Language
+                      {{ __('Language') }}
                   </div>
                   <i class="la la-angle-down chevron"></i>
               </div>
               <div class="mobile-language-submenu" id="mobileLanguageSubmenu">
-                  <div class="mobile-language-item">
-                      <a href="index.html" class="mobile-language-link nturl">
-                          <span class="flag-icon flag-icon-us"></span> English
-                      </a>
-                  </div>
-                  <div class="mobile-language-item">
-                      <a href="https://fr.luxorandaswan.com/" target="_blank" class="mobile-language-link">
-                          <span class="flag-icon flag-icon-fr"></span> French
-                      </a>
-                  </div>
-                  <div class="mobile-language-item">
-                      <a href="https://de.luxorandaswan.com/" target="_blank" class="mobile-language-link">
-                          <span class="flag-icon flag-icon-de"></span> German
-                      </a>
-                  </div>
-                  <div class="mobile-language-item">
-                      <a href="https://es.luxorandaswan.com/" target="_blank" class="mobile-language-link">
-                          <span class="flag-icon flag-icon-es"></span> Spanish
-                      </a>
-                  </div>
-                  <div class="mobile-language-item">
-                      <a href="https://it.luxorandaswan.com/" target="_blank" class="mobile-language-link">
-                          <span class="flag-icon flag-icon-it"></span> Italian
-                      </a>
-                  </div>
-                  <div class="mobile-language-item">
-                      <a href="https://pt.luxorandaswan.com/" target="_blank" class="mobile-language-link">
-                          <span class="flag-icon flag-icon-pt"></span> Portuguese
-                      </a>
-                  </div>
-                  <div class="mobile-language-item">
-                      <a href="https://ru.luxorandaswan.com/" target="_blank" class="mobile-language-link">
-                          <span class="flag-icon flag-icon-ru"></span> Russian
-                      </a>
-                  </div>
+                  @foreach ($activeLanguages as $lang)
+                      <div class="mobile-language-item">
+                          <a href="{{ route('website.lang.switch', $lang->code) }}"
+                              class="mobile-language-link {{ $currentLocale === $lang->code ? 'active' : '' }}">
+                              <span
+                                  class="flag-icon flag-icon-{{ $lang->code == 'en' ? 'us' : strtolower($lang->code) }}"></span>
+                              {{ $lang->name }}
+                          </a>
+                      </div>
+                  @endforeach
               </div>
           </div>
 
           <div class="mobile-actions-grid">
+              <button type="button" class="mobile-action-card theme-toggle-btn" data-theme-toggle
+                  aria-label="{{ __('Dark Mode') }}" title="{{ __('Dark Mode') }}"
+                  data-dark-label="{{ __('Dark Mode') }}" data-light-label="{{ __('Light Mode') }}">
+                  <i class="la la-moon"></i>
+                  {{ __('Toggle Theme') }}
+              </button>
+
               <a href="tel:+19172678628" class="mobile-action-card">
                   <i class="la la-phone"></i>
-                  Call Us
+                  {{ __('Call Us') }}
               </a>
 
-              <a href="search/index.html" class="mobile-action-card">
+              <a href="{{ route('website.search.index') }}" class="mobile-action-card">
                   <i class="la la-search"></i>
-                  Search
+                  {{ __('Search') }}
               </a>
           </div>
 
-          <a href="tailor-made.php.html" class="mobile-enquiry-btn2">
-              <i class="la la-paper-plane"></i> Plan Your Journey
+          <a href="{{ route('website.tailor_made.index') }}" class="mobile-enquiry-btn2">
+              <i class="la la-paper-plane"></i> {{ __('Plan Your Journey') }}
           </a>
       </div>
   </div>
