@@ -15,9 +15,10 @@
     <meta property="og:title" content="Etro Tours - Egypt's Premier Luxury Travel Experience">
     <meta property="og:description"
         content="Discover Egypt's wonders with luxury tours, premium Nile cruises between Luxor and Aswan, and expert Egyptologist guides. Award-winning travel experiences since 2008.">
-    <meta property="og:image" content="https://www.luxorandaswan.com/website/photos/home2.jpg">
-    <meta property="og:url" content="https://www.luxorandaswan.com/">
+    <meta property="og:image" content="https://etrotours.com/website/logo/logo-lat.png">
+    <meta property="og:url" content="https://etrotours.com/website">
     <meta name="twitter:card" content="summary_large_image">
+    
     <script>
         (function() {
             const storageKey = 'website-theme';

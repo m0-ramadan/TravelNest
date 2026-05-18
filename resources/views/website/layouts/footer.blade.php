@@ -11,11 +11,11 @@
                         {{ __('Luxor, Egypt') }}
                     </li>
                     <li><i class="la la-phone" style="color: var(--rich-gold); margin-right: 8px;"></i><a
-                            href="tel:+19172678628">+1 0000008</a></li>
-                    <li><i class="la la-phone" style="color: var(--rich-gold); margin-right: 8px;"></i><a
-                            href="tel:+201004880015">+2010000000</a></li>
+                            href="tel:+201553383000">+20 15 53383000</a></li>
+                    <li><i class="lab la-whatsapp" style="color: var(--rich-gold); margin-right: 8px;"></i><a
+                            href="https://wa.me/201553383000" target="_blank">+20 15 53383000</a></li>
                     <li><i class="la la-envelope" style="color: var(--rich-gold); margin-right: 8px;"></i><a
-                            href="https://www.luxorandaswan.com/cdn-cgi/l/email-protection#c2abaca4ad82aeb7baadb0a3aca6a3b1b5a3aceca1adaf"><span
+                            href="https://etrotours.com/cdn-cgi/l/email-protection#c2abaca4ad82aeb7baadb0a3aca6a3b1b5a3aceca1adaf"><span
                                 class="__cf_email__"
                                 data-cfemail="b5dcdbd3daf5d9c0cddac7d4dbd1d4c6c2d4db9bd6dad8">{{ __('[email protected]') }}</span></a>
                     </li>
@@ -68,16 +68,16 @@
                 <div class="tripadvisor-award">
                     <div class="award-header">
                         <i class="la la-trophy award-trophy"></i>
-                        <span class="award-badge">2025</span>
+                        <span class="award-badge">2026</span>
                     </div>
                     <div class="award-image-container">
-                        <img loading="lazy" src="{{ request()->root() }}/website/photos/tripadvisor/TC_L_2025.svg"
-                            alt="{{ __('Tripadvisor 2025 Travelers\' Choice Award') }}" class="award-image">
+                        <img loading="lazy" src="{{ request()->root() }}/website/photos/tripadvisor/TC_L_2026.svg"
+                            alt="{{ __('Tripadvisor 2026 Travelers\' Choice Award') }}" class="award-image">
                         <div class="award-glow"></div>
                     </div>
                     <div class="award-content">
                         <h3 class="award-title">
-                            <a href="https://www.tripadvisor.com/Attraction_Review-g294205-d12148903-Reviews-Luxor_and_Aswan_Travel-Luxor_Nile_River_Valley.html"
+                            <a href="https://www.tripadvisor.com/"
                                 target="_blank">
                                 {{ __('Travelers\' Choice Award') }}
                             </a>
@@ -120,19 +120,15 @@
                     <div class="social-links" style="text-align: right;">
                         <ul
                             style="display: flex; list-style: none; padding: 0; margin: 0; gap: 15px; justify-content: flex-end;">
-                            <li><a href="https://www.facebook.com/luxorandaswantravel" target="_blank"
+                            <li><a href="https://www.facebook.com/share/1CwkGsZJXe/?mibextid=wwXIfr" target="_blank"
                                     aria-label="{{ __('Facebook') }}"
                                     style="color: var(--rich-gold); font-size: 1.5rem; transition: all 0.3s ease;"><i
                                         class="lab la-facebook-f"></i></a></li>
-                            <li><a href="https://twitter.com/LuxorAswanTours" target="_blank"
-                                    aria-label="{{ __('Twitter') }}"
-                                    style="color: var(--rich-gold); font-size: 1.5rem; transition: all 0.3s ease;"><i
-                                        class="lab la-twitter"></i></a></li>
-                            <li><a href="https://www.instagram.com/luxor_and_aswan_travel" target="_blank"
+                            <li><a href="https://www.instagram.com/etro_tours?igsh=MTl5cXpqeXlpMWtvZg%3D%3D&utm_source=qr" target="_blank"
                                     aria-label="{{ __('Instagram') }}"
                                     style="color: var(--rich-gold); font-size: 1.5rem; transition: all 0.3s ease;"><i
                                         class="lab la-instagram"></i></a></li>
-                            <li><a href="https://www.tripadvisor.com/Attraction_Review-g294205-d12148903-Reviews-Luxor_and_Aswan_Travel-Luxor_Nile_River_Valley.html"
+                            <li><a href="https://www.tripadvisor.com/"
                                     target="_blank" aria-label="{{ __('TripAdvisor') }}"
                                     style="color: var(--rich-gold); font-size: 1.5rem; transition: all 0.3s ease;"><i
                                         class="la la-tripadvisor"></i></a></li>
@@ -147,7 +143,7 @@
             <div class="row align-items-center">
                 <div class="col-lg-7">
                     <p style="margin: 0; opacity: 0.8; font-size: 0.95rem;">
-                        {{ __('© 2025 Copyright to') }} <a href="{{ route('website.home') }}"
+                        {{ __('© 2026 Copyright to') }} <a href="{{ route('website.home') }}"
                             style="font-weight: 700; color: var(--rich-gold); text-decoration: none;">{{ __('Etro Tours') }}</a>
                     </p>
                 </div>
@@ -163,8 +159,7 @@
         </div>
 
     </div>
-    <!--Start of Tawk.to Script-->
-    <script data-cfasync="false" src="cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+
 
 
 </footer>

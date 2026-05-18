@@ -91,7 +91,7 @@
                                          <h6 class="mb-1">انضمام متسخدم جديد</h6>
                                          <p class="mb-0">انضم مستخدم جديد الى المنصة</p>
 
-                                         <small class="text-muted text-nowrap">2025-08-11
+                                         <small class="text-muted text-nowrap">2026-08-11
                                              13:53:34</small>
                                      </div>
 
