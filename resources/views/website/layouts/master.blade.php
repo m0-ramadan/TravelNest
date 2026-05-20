@@ -2,22 +2,99 @@
 <html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" data-theme="dark">
 
 <head>
+    @php
+        $siteName = 'Etro Tours';
+        $siteUrl = rtrim(config('app.url') ?: request()->root(), '/');
+        $logoUrl = asset('website/logo/logo-lat.png');
+        $defaultTitle = "Etro Tours | Luxury Egypt Tours, Nile Cruises & Tailor-Made Travel";
+        $defaultDescription = "Plan luxury Egypt tours, Nile cruises, private day trips, and tailor-made holidays with Etro Tours. Explore Cairo, Luxor, Aswan, and beyond with expert local travel specialists.";
+        $defaultKeywords = 'Etro Tours, Egypt tours, luxury Egypt tours, Nile cruises, Egypt travel packages, Cairo tours, Luxor tours, Aswan tours, tailor made Egypt holidays';
+        $rawTitle = trim($__env->yieldContent('title'));
+        $rawDescription = trim(preg_replace('/\s+/', ' ', strip_tags($__env->yieldContent('description'))));
+        $rawKeywords = trim(preg_replace('/\s+/', ' ', strip_tags($__env->yieldContent('keywords'))));
+        $rawCanonical = trim($__env->yieldContent('canonical'));
+        $rawImage = trim($__env->yieldContent('image'));
+        $rawRobots = trim($__env->yieldContent('robots'));
+        $rawOgType = trim($__env->yieldContent('og_type'));
+        $rawTwitterCard = trim($__env->yieldContent('twitter_card'));
+        $pageTitle = $rawTitle !== '' ? $rawTitle : $defaultTitle;
+        $pageDescription = $rawDescription !== '' ? \Illuminate\Support\Str::limit($rawDescription, 170, '...') : $defaultDescription;
+        $pageKeywords = $rawKeywords !== '' ? $rawKeywords : $defaultKeywords;
+        $pageCanonical = $rawCanonical !== '' ? $rawCanonical : url()->current();
+        $pageImage = $rawImage !== '' ? $rawImage : $logoUrl;
+        $pageImage = \Illuminate\Support\Str::startsWith($pageImage, ['http://', 'https://']) ? $pageImage : asset(ltrim($pageImage, '/'));
+        $pageRobots = $rawRobots !== '' ? $rawRobots : 'index, follow, max-image-preview:large';
+        $pageOgType = $rawOgType !== '' ? $rawOgType : (request()->routeIs('website.blogs.show*') ? 'article' : 'website');
+        $twitterCard = $rawTwitterCard !== '' ? $rawTwitterCard : 'summary_large_image';
+        $ogLocale = app()->getLocale() === 'ar' ? 'ar_AR' : 'en_US';
+        $alternateLocale = app()->getLocale() === 'ar' ? 'en_US' : 'ar_AR';
+        $organizationSchema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'TravelAgency',
+            'name' => $siteName,
+            'url' => $siteUrl,
+            'logo' => $logoUrl,
+            'image' => $logoUrl,
+            'telephone' => '+1-917-267-8628',
+            'email' => 'hello@etrotours.com',
+            'address' => [
+                '@type' => 'PostalAddress',
+                'addressLocality' => 'Luxor',
+                'addressCountry' => 'EG',
+            ],
+        ];
+        $websiteSchema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'WebSite',
+            'name' => $siteName,
+            'url' => $siteUrl,
+            'inLanguage' => app()->getLocale(),
+            'potentialAction' => [
+                '@type' => 'SearchAction',
+                'target' => route('website.search.index') . '?keyword={search_term_string}',
+                'query-input' => 'required name=search_term_string',
+            ],
+        ];
+    @endphp
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="theme-color" content="#0b1220" data-theme-color-meta>
-    <title>@yield('title')</title>
-    <link rel="canonical" href="{{ route('website.home') }}">
-    <meta name="keywords"
-        content="luxury egypt tours,nile cruise luxor aswan,egypt travel packages,private egyptologist guide,luxury nile cruise,cairo luxor aswan tours,custom egypt holidays">
-    <meta name="description"
-        content="Discover Egypt's wonders with luxury tours, premium Nile cruises between Luxor and Aswan, and expert Egyptologist guides. Award-winning travel experiences since 2008.">
-    <meta property="og:title" content="Etro Tours - Egypt's Premier Luxury Travel Experience">
-    <meta property="og:description"
-        content="Discover Egypt's wonders with luxury tours, premium Nile cruises between Luxor and Aswan, and expert Egyptologist guides. Award-winning travel experiences since 2008.">
-    <meta property="og:image" content="https://etrotours.com/website/logo/logo-lat.png">
-    <meta property="og:url" content="https://etrotours.com/website">
-    <meta name="twitter:card" content="summary_large_image">
+    <title>{{ $pageTitle }}</title>
+    <link rel="canonical" href="{{ $pageCanonical }}">
+    <meta name="robots" content="{{ $pageRobots }}">
+    <meta name="author" content="{{ $siteName }}">
+    <meta name="application-name" content="{{ $siteName }}">
+    <meta name="keywords" content="{{ $pageKeywords }}">
+    <meta name="description" content="{{ $pageDescription }}">
+    <meta property="og:type" content="{{ $pageOgType }}">
+    <meta property="og:site_name" content="{{ $siteName }}">
+    <meta property="og:locale" content="{{ $ogLocale }}">
+    <meta property="og:locale:alternate" content="{{ $alternateLocale }}">
+    <meta property="og:title" content="{{ $pageTitle }}">
+    <meta property="og:description" content="{{ $pageDescription }}">
+    <meta property="og:image" content="{{ $pageImage }}">
+    <meta property="og:image:alt" content="{{ $pageTitle }}">
+    <meta property="og:url" content="{{ $pageCanonical }}">
+    <meta name="twitter:card" content="{{ $twitterCard }}">
+    <meta name="twitter:title" content="{{ $pageTitle }}">
+    <meta name="twitter:description" content="{{ $pageDescription }}">
+    <meta name="twitter:image" content="{{ $pageImage }}">
+    @hasSection('published_time')
+        <meta property="article:published_time" content="@yield('published_time')">
+    @endif
+    @hasSection('modified_time')
+        <meta property="article:modified_time" content="@yield('modified_time')">
+    @endif
+    <script type="application/ld+json">
+        {!! json_encode($organizationSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
+    <script type="application/ld+json">
+        {!! json_encode($websiteSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
+    @hasSection('schema')
+        @yield('schema')
+    @endif
     
     <script>
         (function() {

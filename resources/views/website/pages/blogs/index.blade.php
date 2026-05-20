@@ -22,6 +22,9 @@
 @endphp
 
 @section('title', $pageTitle)
+@section('description', $heroSubtitle)
+@section('keywords', trim(collect([$heroTitle, 'Etro Tours blog', 'Egypt travel blog', 'destination guides'])->filter()->implode(', '), ', '))
+@section('image', asset('website/photos/home2.webp'))
 
 @section('css')
     <style>

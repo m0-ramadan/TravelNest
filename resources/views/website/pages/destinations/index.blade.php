@@ -1,6 +1,9 @@
 @extends('website.layouts.master')
 
 @section('title', ($pageTitle ?? __('Destinations')) . ' - Etro Tours')
+@section('description', $overviewText ?? $heroSubtitle)
+@section('keywords', trim(collect([$pageTitle ?? __('Destinations'), 'Etro Tours', 'Egypt destinations', 'travel experiences'])->filter()->implode(', '), ', '))
+@section('image', $heroImage)
 
 @section('css')
     <style>

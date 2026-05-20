@@ -1,6 +1,9 @@
 @extends('website.layouts.master')
 
 @section('title', $seoTitle)
+@section('description', $pageExcerpt)
+@section('keywords', trim(collect([$pageTitle, 'Etro Tours', 'Egypt travel'])->implode(', '), ', '))
+@section('image', $heroImage)
 
 @section('css')
     <style>

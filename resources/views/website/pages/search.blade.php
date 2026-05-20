@@ -1,6 +1,11 @@
 @extends('website.layouts.master')
 
 @section('title', __('Search Egypt Tours') . ' - Etro Tours')
+@section('description', __('Search Etro Tours packages, Nile cruises, day trips, and tailor-made travel ideas across Egypt and nearby destinations.'))
+@section('keywords', 'search Egypt tours, Etro Tours search, find Nile cruises, Egypt package search')
+@section('canonical', route('website.search.index'))
+@section('robots', 'noindex, follow')
+@section('image', asset('website/logo/logo-lat.png'))
 
 @section('css')
     <style>

@@ -1,6 +1,9 @@
 @extends('website.layouts.master')
 
 @section('title', __('Multi Country Tours') . ' - Etro Tours')
+@section('description', $pageContent['description'] ?? $pageContent['overview_text'])
+@section('keywords', 'multi country tours, Egypt and Jordan tours, combined Middle East tours, Etro Tours itineraries, luxury multi destination travel')
+@section('image', $heroImage)
 
 @section('css')
     <style>

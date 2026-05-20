@@ -1,6 +1,9 @@
 @extends('website.layouts.master')
 
 @section('title', __('Tailor-Made Travel Experiences') . ' - Etro Tours')
+@section('description', __('Plan a tailor-made journey with Etro Tours and get a custom itinerary designed around your budget, interests, travel style, and dream destinations.'))
+@section('keywords', 'tailor made Egypt tours, custom travel itinerary, private Egypt holidays, luxury bespoke travel, Etro Tours')
+@section('image', asset('website/photos/home2.webp'))
 
 @section('css')
 

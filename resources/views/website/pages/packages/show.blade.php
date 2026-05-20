@@ -2,6 +2,8 @@
 
 @section('title', $package->getTranslation('seo_title') ?: $title . ' - Etro Tours')
 @section('description', $package->getTranslation('seo_description') ?: $shortDescription)
+@section('keywords', trim(collect([$title, $package->tour_type ?? null, $package->primaryCountry?->display_name ?? null, 'Etro Tours'])->filter()->implode(', '), ', '))
+@section('image', $heroImage)
 
 @section('css')
     <style>
@@ -820,6 +822,25 @@
             }
         }
     </style>
+@endsection
+
+@section('schema')
+    <script type="application/ld+json">
+        {!! json_encode([
+            '@context' => 'https://schema.org',
+            '@type' => 'TouristTrip',
+            'name' => $title,
+            'description' => trim(preg_replace('/\s+/', ' ', strip_tags($shortDescription ?: $title))),
+            'image' => $heroImage,
+            'url' => request()->fullUrl(),
+            'provider' => [
+                '@type' => 'TravelAgency',
+                'name' => 'Etro Tours',
+                'url' => url('/'),
+            ],
+            'touristType' => $package->tour_type ?: 'Private',
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
 @endsection
 
 @section('content')

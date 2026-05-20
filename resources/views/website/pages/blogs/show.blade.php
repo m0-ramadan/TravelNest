@@ -22,6 +22,11 @@
 
 @section('title', $article->display_seo_title ?: $title . ' - Etro Tours')
 @section('description', $description)
+@section('keywords', trim(collect([$title, $categoryTitle, 'Etro Tours blog', 'Egypt travel guide'])->filter()->implode(', '), ', '))
+@section('image', $image)
+@section('og_type', 'article')
+@section('published_time', optional($date)->toIso8601String())
+@section('modified_time', optional($article->updated_at)->toIso8601String())
 
 @section('css')
     <style>
@@ -516,6 +521,34 @@
         }
     </style>
 @endsection
+
+@section('schema')
+    <script type="application/ld+json">
+        {!! json_encode([
+            '@context' => 'https://schema.org',
+            '@type' => 'Article',
+            'headline' => $title,
+            'description' => $description,
+            'image' => [$image],
+            'datePublished' => optional($date)->toIso8601String(),
+            'dateModified' => optional($article->updated_at)->toIso8601String(),
+            'author' => [
+                '@type' => 'Person',
+                'name' => $authorName,
+            ],
+            'publisher' => [
+                '@type' => 'Organization',
+                'name' => 'Etro Tours',
+                'logo' => [
+                    '@type' => 'ImageObject',
+                    'url' => asset('website/logo/logo-lat.png'),
+                ],
+            ],
+            'mainEntityOfPage' => request()->fullUrl(),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
+@endsection
+
 @section('content')
 
     <section class="article-hero">

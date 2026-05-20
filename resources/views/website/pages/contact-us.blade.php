@@ -1,6 +1,9 @@
 @extends('website.layouts.master')
 
 @section('title', __('Contact Us') . ' - Etro Tours')
+@section('description', __('Contact Etro Tours for luxury Egypt tours, tailor-made itineraries, Nile cruises, and fast support from our travel specialists.'))
+@section('keywords', 'contact Etro Tours, Egypt travel experts, luxury travel support, Nile cruise booking, tailor made Egypt tours')
+@section('image', asset('website/photos/home2.webp'))
 
 @section('css')
     <style>

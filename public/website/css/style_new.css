@@ -1,6 +1,6 @@
 /* Custom Variables - Blue & White Theme */
 :root {
-    --primary-blue: #1a365d;
+    --primary-blue: #2358e6eb; 
     --secondary-blue: #2c5282;
     --light-blue: #4299e1;
     --soft-blue: #ebf8ff;
@@ -898,7 +898,7 @@ html {
 
 /* Blue & White Theme Variables */
 :root {
-    --primary-blue: #1a365d;
+    --primary-blue: #2358e6eb; 
     --secondary-blue: #2c5282;
     --light-blue: #4299e1;
     --soft-blue: #ebf8ff;
@@ -940,7 +940,7 @@ html {
 
 .navbar.scrolled {
     padding: 8px 0;
-    background: rgba(26, 54, 93, 0.95);
+    background: #2358e6eb;
     backdrop-filter: blur(20px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }

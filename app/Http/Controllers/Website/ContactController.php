@@ -180,7 +180,7 @@ class ContactController extends BaseWebsiteController
             ->where('is_active', true)
             ->orderByRaw('sort_order IS NULL, sort_order ASC')
             ->get()
-            ->map(fn (Country $country) => $country->display_name)
+            ->map(fn(Country $country) => $country->display_name)
             ->filter()
             ->values();
 

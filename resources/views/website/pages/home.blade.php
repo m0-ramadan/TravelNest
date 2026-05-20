@@ -1,6 +1,9 @@
 @extends('website.layouts.master')
 
 @section('title', __('Home - Etro Tours'))
+@section('description', __('Luxury Egypt tours, Nile cruises, private day trips, and tailor-made travel experiences curated by Etro Tours across Cairo, Luxor, Aswan, and beyond.'))
+@section('keywords', 'Etro Tours, luxury Egypt tours, Nile cruises, Egypt holidays, Cairo tours, Luxor tours, Aswan tours, tailor made travel')
+@section('image', asset('website/photos/home2.webp'))
 
 @section('css')
     <style>

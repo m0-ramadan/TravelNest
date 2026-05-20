@@ -8,6 +8,9 @@
 @endphp
 
 @section('title', $pageContent['title'] . ' - Etro Tours')
+@section('description', $pageContent['description'] ?? $pageContent['overview_text'])
+@section('keywords', trim(collect([$pageContent['title'] ?? null, 'Etro Tours', 'Egypt tours', 'travel packages'])->filter()->implode(', '), ', '))
+@section('image', $heroImage)
 
 @section('css')
     <style>

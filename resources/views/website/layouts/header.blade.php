@@ -6,10 +6,10 @@
   <nav class="navbar navbar-expand-lg">
       <div class="container">
           <a class="navbar-brand" href="{{ route('website.home') }}">
-              <img class="d-none d-lg-block" src="{{ request()->root() }}/website/logo/logo-lat.png"
+              <img class="d-none d-lg-block" src="{{ asset('website/logo/logo-lat.png') }}"
                   alt="{{ __('Etro Tours') }}" width="200" height="64">
-              <img class="d-lg-none" src="{{ request()->root() }}/website/logo/favicon-lat.webp"
-                  alt="{{ __('Etro Tours') }}" width="48" height="46">
+              <img class="d-lg-none" src="{{ asset('website/logo/logo-lat.png') }}"
+                  alt="{{ __('Etro Tours') }}" width="148" height="48">
           </a>
 
           <!-- Mobile Actions -->
@@ -156,9 +156,8 @@
   <div class="modern-mobile-menu" id="modernMobileMenu">
       <div class="mobile-menu-header">
           <div class="mobile-menu-brand">
-              <img src="{{ request()->root() }}/website/logo/favicon-lat.webp" alt="{{ __('Logo') }}"
-                  width="40" height="30">
-              <span>{{ __('Etro Tours') }}</span>
+              <img src="{{ asset('website/logo/logo-lat.png') }}" alt="{{ __('Etro Tours') }}"
+                  width="132" height="42">
           </div>
           <button class="mobile-close-btn" onclick="toggleMobileMenu()" aria-label="{{ __('Close Menu') }}">
               <i class="la la-times"></i>

@@ -1,6 +1,9 @@
 @extends('website.layouts.master')
 
 @section('title', __('Travel Deals') . ' - Etro Tours')
+@section('description', __('Explore the latest Etro Tours travel deals, limited-time Egypt tour offers, luxury escapes, and curated savings on unforgettable journeys.'))
+@section('keywords', 'Egypt travel deals, Etro Tours offers, luxury tour discounts, Nile cruise deals, Egypt holiday promotions')
+@section('image', asset('website/photos/home2.webp'))
 
 @section('css')
     <style>
