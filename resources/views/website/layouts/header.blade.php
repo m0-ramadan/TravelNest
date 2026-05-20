@@ -29,7 +29,7 @@
                   class="mobile-action-btn viber">
                   <i class="lab la-viber"></i>
               </a>
-              <a href="https://api.whatsapp.com/send?phone=19172678628" target="_blank"
+              <a href="https://wa.me/201553383000" target="_blank"
                   aria-label="{{ __('WhatsApp') }}" class="mobile-action-btn whatsapp">
                   <i class="lab la-whatsapp"></i>
               </a>

@@ -696,7 +696,7 @@
     @yield('content')
 
     <!-- Fixed WhatsApp Button -->
-    <a href="https://api.whatsapp.com/send?phone=19172678628" target="_blank" class="whatsapp-fixed">
+    <a href="https://wa.me/201553383000" target="_blank" class="whatsapp-fixed">
         <i class="lab la-whatsapp"></i>
     </a>
 

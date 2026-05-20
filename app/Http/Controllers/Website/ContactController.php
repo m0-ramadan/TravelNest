@@ -35,7 +35,7 @@ class ContactController extends BaseWebsiteController
                     'title' => __('WhatsApp Chat'),
                     'description' => __('Get quick responses and share your travel preferences with our team through WhatsApp.'),
                     'highlight' => __('Instant responses'),
-                    'url' => 'https://api.whatsapp.com/send?phone=19172678628',
+                    'url' => 'https://wa.me/201553383000',
                     'label' => __('Start WhatsApp Chat'),
                     'external' => true,
                 ],
