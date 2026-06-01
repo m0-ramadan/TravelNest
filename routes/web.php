@@ -9,6 +9,7 @@ use App\Http\Controllers\Website\NewsletterController;
 use App\Http\Controllers\Website\PackageController;
 use App\Http\Controllers\Website\PageController;
 use App\Http\Controllers\Website\SearchController;
+use App\Http\Controllers\Website\SitemapController;
 use App\Http\Controllers\Website\TailorMadeController;
 use App\Http\Controllers\Website\TourController;
 use App\Http\Controllers\Website\TripController;
@@ -31,6 +32,7 @@ Route::name('website.')->group(function () {
             app(\App\Services\JsonTranslationFileService::class)->ensureLocaleFile($locale);
             $request->session()->put('locale', $locale);
         }
+
         return redirect()->back();
     })->name('lang.switch');
 
@@ -46,6 +48,8 @@ Route::name('website.')->group(function () {
     | Home
     |--------------------------------------------------------------------------
     */
+    Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+
     Route::get('/', [HomeController::class, 'index'])->name('home');
 
     /*

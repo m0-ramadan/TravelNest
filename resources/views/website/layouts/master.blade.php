@@ -762,6 +762,7 @@
             }
         </style>
     @endif
+    <meta name="google-site-verification" content="OKwZFMPi1pE0RpnHtt6lJnyE_qPXCNqW8E7-U4BHPRw" />
 </head>
 
 <body class="{{ app()->getLocale() === 'ar' ? 'website-rtl' : 'website-ltr' }}">
