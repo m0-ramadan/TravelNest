@@ -1,3 +1,7 @@
+@php
+    $navigationDestinations = collect($navigationDestinations ?? []);
+@endphp
+
 <!-- Footer -->
 <footer class="footer">
     <div class="container">
@@ -22,26 +26,18 @@
                 </ul>
             </div>
 
-            <div class="footer-section">
-                <h4>{{ __('Destinations') }}</h4>
-                <ul>
-                    <li><a href="{{ route('website.destinations.show', 'egypt') }}"><i
-                                class="las la-chevron-right mr-1"></i>{{ __('Egypt') }}</a></li>
-                    <li><a href="{{ route('website.destinations.show', 'jordan') }}"><i
-                                class="las la-chevron-right mr-1"></i>{{ __('Jordan') }}</a></li>
-                    <li><a href="{{ route('website.destinations.show', 'dubai') }}"><i
-                                class="las la-chevron-right mr-1"></i>{{ __('Dubai') }}</a></li>
-                    <li><a href="{{ route('website.destinations.show', 'morocco') }}"><i
-                                class="las la-chevron-right mr-1"></i>{{ __('Morocco') }}</a></li>
-                    <li><a href="{{ route('website.destinations.show', 'oman') }}"><i
-                                class="las la-chevron-right mr-1"></i>{{ __('Oman') }}</a></li>
-                    <li><a href="{{ route('website.destinations.show', 'turkey') }}"><i
-                                class="las la-chevron-right mr-1"></i>{{ __('Turkey') }}</a></li>
-                    <li><a href="{{ route('website.destinations.show', 'african-safari') }}"><i
-                                class="las la-chevron-right mr-1"></i>{{ __('African Safari') }}</a>
-                    </li>
-                </ul>
-            </div>
+	            <div class="footer-section">
+	                <h4>{{ __('Destinations') }}</h4>
+	                <ul>
+	                    @forelse ($navigationDestinations as $destination)
+	                        <li><a href="{{ $destination['url'] }}"><i
+	                                    class="las la-chevron-right mr-1"></i>{{ $destination['title'] }}</a></li>
+	                    @empty
+	                        <li><a href="{{ route('website.destinations.index') }}"><i
+	                                    class="las la-chevron-right mr-1"></i>{{ __('View Destinations') }}</a></li>
+	                    @endforelse
+	                </ul>
+	            </div>
 
             <div class="footer-section">
                 <h4>{{ __('General') }}</h4>

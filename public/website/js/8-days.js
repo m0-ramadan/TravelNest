@@ -5,26 +5,26 @@ function shouldLockDate(date) {
         return true;
     }
 
-const lockedDates = [
-    { year: 2025, month: 11, day: 20 },
-    { year: 2025, month: 11, day: 21 },
-    { year: 2025, month: 11, day: 22 },
-    { year: 2025, month: 11, day: 23 },
-    { year: 2025, month: 11, day: 24 },
-    { year: 2025, month: 11, day: 25 },
-    { year: 2025, month: 11, day: 26 },
-    { year: 2025, month: 11, day: 27 },
-    { year: 2025, month: 11, day: 28 },
-    { year: 2025, month: 11, day: 29 },
-    { year: 2025, month: 11, day: 30 },
-    { year: 2025, month: 11, day: 31 },
+    const lockedDates = [
+        { year: 2025, month: 11, day: 20 },
+        { year: 2025, month: 11, day: 21 },
+        { year: 2025, month: 11, day: 22 },
+        { year: 2025, month: 11, day: 23 },
+        { year: 2025, month: 11, day: 24 },
+        { year: 2025, month: 11, day: 25 },
+        { year: 2025, month: 11, day: 26 },
+        { year: 2025, month: 11, day: 27 },
+        { year: 2025, month: 11, day: 28 },
+        { year: 2025, month: 11, day: 29 },
+        { year: 2025, month: 11, day: 30 },
+        { year: 2025, month: 11, day: 31 },
 
-    { year: 2026, month: 0, day: 1 },
-    { year: 2026, month: 0, day: 2 },
-    { year: 2026, month: 0, day: 3 },
-    { year: 2026, month: 0, day: 4 },
-    { year: 2026, month: 0, day: 5 }
-];
+        { year: 2026, month: 0, day: 1 },
+        { year: 2026, month: 0, day: 2 },
+        { year: 2026, month: 0, day: 3 },
+        { year: 2026, month: 0, day: 4 },
+        { year: 2026, month: 0, day: 5 }
+    ];
 
 
     // Lock range: July 1, 2027 to August 31, 2027
@@ -90,7 +90,7 @@ const datepicker = new easepick.create({
 const datepicke2r = new easepick.create({
     element: document.getElementById('datepicker2'),
     css: [
-        "https://www.luxorandaswan.com/lite.css"
+        "/website/css/lite.css"
     ],
     zIndex: 10,
     firstDay: 6,

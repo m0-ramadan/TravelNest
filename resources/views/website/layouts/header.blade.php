@@ -1,6 +1,7 @@
-  @php
-      $shoreExcursionsUrl = route('website.tours.all', ['type' => 'shore_excursion']);
-  @endphp
+	  @php
+	      $shoreExcursionsUrl = route('website.tours.all', ['type' => 'shore_excursion']);
+	      $navigationDestinations = collect($navigationDestinations ?? []);
+	  @endphp
 
   <!-- Enhanced Navigation -->
   <nav class="navbar navbar-expand-lg">
@@ -58,32 +59,19 @@
                           <i class="la la-globe"></i>
                           {{-- <i class="la la-map-marker"></i> --}}
                           {{ __('Destinations') }}
-                      </a>
-                      <ul class="dropdown-menu">
-                          <li><a class="dropdown-item" href="{{ route('website.destinations.index') }}">
-                                  <i class="la la-map-marker"></i> {{ __('Egypt') }}
-                              </a></li>
-                          <li><a class="dropdown-item" href="{{ route('website.destinations.index') }}">
-                                  <i class="la la-map-marker"></i> {{ __('Jordan') }}
-                              </a></li>
-                          <li><a class="dropdown-item" href="{{ route('website.destinations.index') }}">
-                                  <i class="la la-map-marker"></i> {{ __('Dubai') }}
-                              </a></li>
-                          <li><a class="dropdown-item" href="{{ route('website.destinations.show', 'morocco') }}">
-                                  <i class="la la-map-marker"></i> {{ __('Morocco') }}
-                              </a></li>
-                          <li><a class="dropdown-item" href="{{ route('website.destinations.show', 'oman') }}">
-                                  <i class="la la-map-marker"></i> {{ __('Oman') }}
-                              </a></li>
-                          <li><a class="dropdown-item" href="{{ route('website.destinations.show', 'turkey') }}">
-                                  <i class="la la-map-marker"></i> {{ __('Turkey') }}
-                              </a></li>
-                          <li><a class="dropdown-item"
-                                  href="{{ route('website.destinations.show', 'african-safari') }}">
-                                  <i class="la la-binoculars"></i> {{ __('African Safari') }}
-                              </a></li>
-                      </ul>
-                  </li>
+	                      </a>
+	                      <ul class="dropdown-menu">
+	                          @forelse ($navigationDestinations as $destination)
+	                              <li><a class="dropdown-item" href="{{ $destination['url'] }}">
+	                                      <i class="la la-map-marker"></i> {{ $destination['title'] }}
+	                                  </a></li>
+	                          @empty
+	                              <li><a class="dropdown-item" href="{{ route('website.destinations.index') }}">
+	                                      <i class="la la-map"></i> {{ __('View Destinations') }}
+	                                  </a></li>
+	                          @endforelse
+	                      </ul>
+	                  </li>
                   <li class="nav-item">
                       <a class="nav-link" href="{{ route('website.multi_country') }}">
                           <i class="la la-globe-americas"></i>
@@ -134,17 +122,17 @@
                           <i class="la la-language"></i>
                           <span>{{ strtoupper($currentLocale) }}</span>
                       </a>
-                      <ul class="dropdown-menu dropdown-menu-end language-menu">
-                          @foreach ($activeLanguages as $lang)
-                              <li>
-                                  <a class="dropdown-item {{ $currentLocale === $lang->code ? 'active' : '' }}"
-                                      href="{{ route('website.lang.switch', $lang->code) }}">
-                                      <span
-                                          class="flag-icon flag-icon-{{ $lang->code == 'en' ? 'us' : strtolower($lang->code) }}"></span>
-                                      {{ $lang->name }}
-                                  </a>
-                              </li>
-                          @endforeach
+	                      <ul class="dropdown-menu dropdown-menu-end language-menu">
+	                          @foreach ($activeLanguages as $lang)
+	                              <li>
+	                                  <a class="dropdown-item {{ strtolower($currentLocale) === strtolower($lang->code) ? 'active' : '' }}"
+	                                      href="{{ route('website.lang.switch', $lang->code) }}">
+	                                      <span
+	                                          class="flag-icon flag-icon-{{ $lang->display_flag_code }}"></span>
+	                                      {{ $lang->display_name }}
+	                                  </a>
+	                              </li>
+	                          @endforeach
                       </ul>
                   </div>
               </div>
@@ -178,47 +166,24 @@
                       <i class="la la-globe" style="margin-right: 15px;"></i>
                       {{ __('Destinations') }}
                   </div>
-                  <i class="la la-angle-down chevron"></i>
-              </div>
-              <div class="mobile-destinations-submenu" id="mobileDestinationsSubmenu">
-                  <div class="mobile-submenu-item">
-                      <a href="{{ route('website.destinations.show', 'egypt') }}" class="mobile-submenu-link">
-                          <i class="la la-map-marker"></i> {{ __('Egypt') }}
-                      </a>
-                  </div>
-                  <div class="mobile-submenu-item">
-                      <a href="{{ route('website.destinations.show', 'jordan') }}" class="mobile-submenu-link">
-                          <i class="la la-map-marker"></i> {{ __('Jordan') }}
-                      </a>
-                  </div>
-                  <div class="mobile-submenu-item">
-                      <a href="{{ route('website.destinations.show', 'dubai') }}" class="mobile-submenu-link">
-                          <i class="la la-map-marker"></i> {{ __('Dubai') }}
-                      </a>
-                  </div>
-                  <div class="mobile-submenu-item">
-                      <a href="{{ route('website.destinations.show', 'morocco') }}" class="mobile-submenu-link">
-                          <i class="la la-map-marker"></i> {{ __('Morocco') }}
-                      </a>
-                  </div>
-                  <div class="mobile-submenu-item">
-                      <a href="{{ route('website.destinations.show', 'oman') }}" class="mobile-submenu-link">
-                          <i class="la la-map-marker"></i> {{ __('Oman') }}
-                      </a>
-                  </div>
-                  <div class="mobile-submenu-item">
-                      <a href="{{ route('website.destinations.show', 'turkey') }}" class="mobile-submenu-link">
-                          <i class="la la-map-marker"></i> {{ __('Turkey') }}
-                      </a>
-                  </div>
-                  {{-- <div class="mobile-submenu-item">
-                      <a href="{{ route('website.destinations.show', 'african-safari') }}"
-                          class="mobile-submenu-link">
-                          <i class="la la-binoculars"></i> {{ __('African Safari') }}
-                      </a>
-                  </div> --}}
-              </div>
-          </div>
+	                  <i class="la la-angle-down chevron"></i>
+	              </div>
+	              <div class="mobile-destinations-submenu" id="mobileDestinationsSubmenu">
+	                  @forelse ($navigationDestinations as $destination)
+	                      <div class="mobile-submenu-item">
+	                          <a href="{{ $destination['url'] }}" class="mobile-submenu-link">
+	                              <i class="la la-map-marker"></i> {{ $destination['title'] }}
+	                          </a>
+	                      </div>
+	                  @empty
+	                      <div class="mobile-submenu-item">
+	                          <a href="{{ route('website.destinations.index') }}" class="mobile-submenu-link">
+	                              <i class="la la-map"></i> {{ __('View Destinations') }}
+	                          </a>
+	                      </div>
+	                  @endforelse
+	              </div>
+	          </div>
 
           <div class="mobile-nav-item">
               <a href="{{ route('website.multi_country') }}" class="mobile-nav-link">
@@ -260,16 +225,16 @@
                   <i class="la la-angle-down chevron"></i>
               </div>
               <div class="mobile-language-submenu" id="mobileLanguageSubmenu">
-                  @foreach ($activeLanguages as $lang)
-                      <div class="mobile-language-item">
-                          <a href="{{ route('website.lang.switch', $lang->code) }}"
-                              class="mobile-language-link {{ $currentLocale === $lang->code ? 'active' : '' }}">
-                              <span
-                                  class="flag-icon flag-icon-{{ $lang->code == 'en' ? 'us' : strtolower($lang->code) }}"></span>
-                              {{ $lang->name }}
-                          </a>
-                      </div>
-                  @endforeach
+	                  @foreach ($activeLanguages as $lang)
+	                      <div class="mobile-language-item">
+	                          <a href="{{ route('website.lang.switch', $lang->code) }}"
+	                              class="mobile-language-link {{ strtolower($currentLocale) === strtolower($lang->code) ? 'active' : '' }}">
+	                              <span
+	                                  class="flag-icon flag-icon-{{ $lang->display_flag_code }}"></span>
+	                              {{ $lang->display_name }}
+	                          </a>
+	                      </div>
+	                  @endforeach
               </div>
           </div>
 

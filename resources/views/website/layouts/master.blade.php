@@ -6,6 +6,7 @@
         $siteName = 'Etro Tours';
         $siteUrl = rtrim(config('app.url') ?: request()->root(), '/');
         $logoUrl = asset('website/logo/logo-lat.png');
+        $faviconUrl = $logoUrl;
         $defaultTitle = "Etro Tours | Luxury Egypt Tours, Nile Cruises & Tailor-Made Travel";
         $defaultDescription = "Plan luxury Egypt tours, Nile cruises, private day trips, and tailor-made holidays with Etro Tours. Explore Cairo, Luxor, Aswan, and beyond with expert local travel specialists.";
         $defaultKeywords = 'Etro Tours, Egypt tours, luxury Egypt tours, Nile cruises, Egypt travel packages, Cairo tours, Luxor tours, Aswan tours, tailor made Egypt holidays';
@@ -13,7 +14,6 @@
         $rawDescription = trim(preg_replace('/\s+/', ' ', strip_tags($__env->yieldContent('description'))));
         $rawKeywords = trim(preg_replace('/\s+/', ' ', strip_tags($__env->yieldContent('keywords'))));
         $rawCanonical = trim($__env->yieldContent('canonical'));
-        $rawImage = trim($__env->yieldContent('image'));
         $rawRobots = trim($__env->yieldContent('robots'));
         $rawOgType = trim($__env->yieldContent('og_type'));
         $rawTwitterCard = trim($__env->yieldContent('twitter_card'));
@@ -21,8 +21,7 @@
         $pageDescription = $rawDescription !== '' ? \Illuminate\Support\Str::limit($rawDescription, 170, '...') : $defaultDescription;
         $pageKeywords = $rawKeywords !== '' ? $rawKeywords : $defaultKeywords;
         $pageCanonical = $rawCanonical !== '' ? $rawCanonical : url()->current();
-        $pageImage = $rawImage !== '' ? $rawImage : $logoUrl;
-        $pageImage = \Illuminate\Support\Str::startsWith($pageImage, ['http://', 'https://']) ? $pageImage : asset(ltrim($pageImage, '/'));
+        $pageImage = $logoUrl;
         $pageRobots = $rawRobots !== '' ? $rawRobots : 'index, follow, max-image-preview:large';
         $pageOgType = $rawOgType !== '' ? $rawOgType : (request()->routeIs('website.blogs.show*') ? 'article' : 'website');
         $twitterCard = $rawTwitterCard !== '' ? $rawTwitterCard : 'summary_large_image';
@@ -114,11 +113,10 @@
     </script>
 
     <!-- Favicons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('website/favicon/apple-touch-icon.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('website/favicon/favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('website/favicon/favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" href="{{ $faviconUrl }}">
+    <link rel="icon" type="image/png" href="{{ $faviconUrl }}">
     <link rel="manifest" href="{{ asset('website/favicon/manifest.json') }}">
-    <link rel="shortcut icon" href="{{ asset('website/favicon/favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ $faviconUrl }}">
 
 
     <!-- Modern CSS -->

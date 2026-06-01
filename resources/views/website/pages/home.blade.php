@@ -1,570 +1,934 @@
 @extends('website.layouts.master')
 
 @section('title', __('Home - Etro Tours'))
-@section('description', __('Luxury Egypt tours, Nile cruises, private day trips, and tailor-made travel experiences curated by Etro Tours across Cairo, Luxor, Aswan, and beyond.'))
-@section('keywords', 'Etro Tours, luxury Egypt tours, Nile cruises, Egypt holidays, Cairo tours, Luxor tours, Aswan tours, tailor made travel')
-@section('image', asset('website/photos/home2.webp'))
+@section('description', __('Luxury Egypt tours, Nile cruises, private day trips, and tailor-made travel experiences
+    curated by Etro Tours across Cairo, Luxor, Aswan, and beyond.'))
+@section('keywords', 'Etro Tours, luxury Egypt tours, Nile cruises, Egypt holidays, Cairo tours, Luxor tours, Aswan
+    tours, tailor made travel')
+@section('image', asset('website/logo/logo-lat.png'))
+
+@php($isRtl = app()->getLocale() === 'ar')
 
 @section('css')
     <style>
-        /* Hero Section */
-        .hero-section {
+        :root {
+            --tour-navy: #082f49;
+            --tour-blue: #0f5f8f;
+            --tour-sky: #38bdf8;
+            --tour-gold: #d6a354;
+            --tour-sand: #fff7ed;
+            --tour-cream: #f8efe2;
+            --tour-dark: #071923;
+            --tour-muted: #64748b;
+            --tour-white: #ffffff;
+            --tour-border: rgba(15, 95, 143, 0.14);
+            --tour-shadow: 0 22px 60px rgba(8, 47, 73, 0.12);
+            --tour-shadow-hover: 0 28px 80px rgba(8, 47, 73, 0.2);
+            --tour-radius: 28px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: #fff;
+            color: var(--tour-dark);
+        }
+
+        a {
+            transition: all .3s ease;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        .tour-page {
+            overflow: hidden;
+            background:
+                radial-gradient(circle at top left, rgba(56, 189, 248, .10), transparent 35%),
+                radial-gradient(circle at 90% 10%, rgba(214, 163, 84, .12), transparent 30%),
+                #fff;
+        }
+
+        .container {
             position: relative;
-            height: 100vh;
-            min-height: 600px;
+            z-index: 2;
+        }
+
+        .section-pad {
+            padding: 110px 0;
+            position: relative;
+        }
+
+        .light-section {
+            background:
+                linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+        }
+
+        .cream-section {
+            background:
+                radial-gradient(circle at 10% 10%, rgba(214, 163, 84, .14), transparent 34%),
+                linear-gradient(180deg, #fffaf2 0%, #ffffff 100%);
+        }
+
+        .section-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: rgba(56, 189, 248, .12);
+            color: var(--tour-blue);
+            font-weight: 800;
+            font-size: .82rem;
+            letter-spacing: .6px;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+        }
+
+        .section-kicker i {
+            color: var(--tour-gold);
+            font-size: 1.1rem;
+        }
+
+        .section-heading {
+            text-align: center;
+            max-width: 850px;
+            margin: 0 auto 55px;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            color: var(--tour-navy);
+            font-size: clamp(2rem, 4vw, 3.45rem);
+            line-height: 1.08;
+            font-weight: 800;
+            margin-bottom: 18px;
+        }
+
+        .section-subtitle {
+            color: var(--tour-muted);
+            font-size: 1.05rem;
+            line-height: 1.8;
+            max-width: 690px;
+            margin: 0 auto;
+        }
+
+        .gold-btn,
+        .outline-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            padding: 13px 24px;
+            border-radius: 999px;
+            font-weight: 800;
+            text-decoration: none;
+            border: 0;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+            white-space: nowrap;
+        }
+
+        .gold-btn {
+            color: #fff;
+            background: linear-gradient(135deg, #e7b762, #bd7f32);
+            box-shadow: 0 16px 34px rgba(214, 163, 84, .34);
+        }
+
+        .gold-btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #bd7f32, #e7b762);
+            opacity: 0;
+            z-index: -1;
+            transition: opacity .3s ease;
+        }
+
+        .gold-btn:hover {
+            color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 20px 46px rgba(214, 163, 84, .42);
+        }
+
+        .gold-btn:hover::before {
+            opacity: 1;
+        }
+
+        .outline-btn {
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, .38);
+            background: rgba(255, 255, 255, .12);
+            backdrop-filter: blur(14px);
+        }
+
+        .outline-btn:hover {
+            color: var(--tour-navy);
+            background: #fff;
+            transform: translateY(-3px);
+        }
+
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(35px);
+            transition: opacity .75s ease, transform .75s ease;
+        }
+
+        .reveal-up.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .hero-section {
+            min-height: 100vh;
             display: flex;
             align-items: center;
-            background: linear-gradient(rgba(28, 50, 92, 0.4), rgba(28, 50, 92, 0.6)), url('{{ asset('website/photos/home2.webp') }}');
+            position: relative;
+            margin-top: -85px;
+            padding: 150px 0 90px;
+            color: #fff;
+            overflow: hidden;
+            background:
+                linear-gradient(110deg, rgba(4, 25, 43, .92) 0%, rgba(8, 47, 73, .72) 48%, rgba(8, 47, 73, .24) 100%),
+                url('{{ asset('website/photos/home2.webp') }}');
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
-            margin-top: -85px;
+        }
+
+        .hero-section::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 25%, rgba(56, 189, 248, .26), transparent 32%),
+                radial-gradient(circle at 75% 28%, rgba(214, 163, 84, .22), transparent 30%),
+                linear-gradient(180deg, transparent 68%, rgba(255, 255, 255, 1) 100%);
+            pointer-events: none;
+        }
+
+        .hero-section::after {
+            content: "";
+            position: absolute;
+            left: -7%;
+            bottom: -80px;
+            width: 115%;
+            height: 155px;
+            background: #fff;
+            border-radius: 50% 50% 0 0;
+            transform: rotate(-2deg);
             z-index: 1;
         }
 
+        .hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.08fr) minmax(320px, .72fr);
+            gap: 45px;
+            align-items: center;
+            padding-top: 70px;
+        }
+
         .hero-content {
-            color: white;
-            max-width: 800px;
-            padding-top: 85px;
+            position: relative;
+            z-index: 3;
+            max-width: 820px;
+            text-align: start;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .14);
+            border: 1px solid rgba(255, 255, 255, .22);
+            backdrop-filter: blur(16px);
+            margin-bottom: 24px;
+            font-weight: 800;
+            animation: fadeInUp .8s ease both;
+        }
+
+        .hero-badge i {
+            color: var(--tour-gold);
+            font-size: 1.15rem;
         }
 
         .hero-title {
-            font-size: 4rem;
-            font-weight: 700;
-            margin-bottom: 20px;
             font-family: 'Playfair Display', serif;
-            animation: fadeInUp 1s ease;
+            font-size: clamp(3rem, 7vw, 6.2rem);
+            line-height: .95;
+            letter-spacing: -2.5px;
+            font-weight: 900;
+            margin-bottom: 26px;
+            animation: fadeInUp .9s ease .12s both;
+        }
+
+        .hero-title span {
+            display: block;
+            background: linear-gradient(135deg, #fff 0%, #f8d28a 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
 
         .hero-subtitle {
-            font-size: 1.2rem;
-            margin-bottom: 40px;
-            line-height: 1.6;
-            opacity: 0.9;
-            animation: fadeInUp 1s ease 0.2s;
-            animation-fill-mode: both;
+            max-width: 670px;
+            font-size: 1.16rem;
+            line-height: 1.85;
+            color: rgba(255, 255, 255, .86);
+            margin-bottom: 34px;
+            animation: fadeInUp .9s ease .24s both;
         }
 
-        .hero-cta {
-            display: inline-flex;
-            align-items: center;
-            padding: 15px 35px;
-            background: var(--rich-gold);
-            color: white;
-            border-radius: 30px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            animation: fadeInUp 1s ease 0.4s;
-            animation-fill-mode: both;
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            animation: fadeInUp .9s ease .36s both;
         }
 
-        .hero-cta:hover {
-            background: white;
-            color: var(--deep-blue);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 42px;
+            max-width: 680px;
+            animation: fadeInUp .9s ease .48s both;
         }
 
-        .hero-cta i {
-            margin-right: 10px;
-            font-size: 1.2rem;
+        .hero-stat {
+            padding: 18px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, .12);
+            border: 1px solid rgba(255, 255, 255, .18);
+            backdrop-filter: blur(14px);
         }
 
-        /* Trust Indicators */
-        .trust-section {
-            background: white;
-            padding: 30px 0;
-            margin-top: -50px;
+        .hero-stat strong {
+            display: block;
+            font-size: 1.55rem;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .hero-stat span {
+            font-size: .86rem;
+            color: rgba(255, 255, 255, .78);
+        }
+
+        .hero-floating-card {
             position: relative;
-            z-index: 2;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            z-index: 3;
+            padding: 18px;
+            border-radius: 34px;
+            background: rgba(255, 255, 255, .16);
+            border: 1px solid rgba(255, 255, 255, .22);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, .22);
+            animation: floatY 5s ease-in-out infinite;
+        }
+
+        .hero-floating-card-inner {
+            border-radius: 26px;
+            overflow: hidden;
+            background: #fff;
+            color: var(--tour-dark);
+        }
+
+        .hero-floating-card img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+        }
+
+        .floating-info {
+            padding: 22px;
+            text-align: start;
+        }
+
+        .floating-info h3 {
+            color: var(--tour-navy);
+            font-size: 1.15rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+
+        .floating-info p {
+            color: var(--tour-muted);
+            margin-bottom: 16px;
+            line-height: 1.7;
+        }
+
+        .mini-route {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            color: var(--tour-blue);
+            font-weight: 800;
+            font-size: .9rem;
+            direction: ltr;
+        }
+
+        .mini-route i {
+            color: var(--tour-gold);
+        }
+
+        .trust-section {
+            position: relative;
+            z-index: 4;
+            margin-top: -70px;
+            padding: 0 0 35px;
+        }
+
+        .trust-box {
+            background: rgba(255, 255, 255, .88);
+            border: 1px solid rgba(8, 47, 73, .08);
+            box-shadow: var(--tour-shadow);
+            border-radius: 30px;
+            padding: 22px;
+            backdrop-filter: blur(18px);
         }
 
         .trust-content {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            align-items: center;
-            gap: 20px;
+            gap: 14px;
         }
 
         .trust-item {
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: var(--deep-blue);
-            font-weight: 600;
-            text-align: center;
+            gap: 14px;
+            padding: 18px;
+            border-radius: 22px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            border: 1px solid rgba(8, 47, 73, .07);
+            color: var(--tour-navy);
+            font-weight: 900;
+            min-height: 86px;
         }
 
         .trust-item i {
-            color: var(--rich-gold);
-            font-size: 2rem;
-            margin-right: 15px;
+            width: 44px;
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            color: #fff;
+            background: linear-gradient(135deg, var(--tour-blue), var(--tour-sky));
+            font-size: 1.45rem;
+            flex: 0 0 auto;
         }
 
-        /* Common Section Styles */
-        .section-pad {
-            padding: 80px 0;
+        .tripadvisor-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 22px;
+            margin-top: 35px;
         }
 
-        .section-title {
-            font-family: 'Playfair Display', serif;
-            color: var(--deep-blue);
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .section-subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 50px;
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .light-section {
-            background-color: #f8f9fa;
-        }
-
-        .cream-section {
-            background-color: #faf7f2;
-        }
-
-        /* Feature Cards */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 40px 30px;
-            border-radius: 15px;
-            text-align: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .feature-icon {
-            width: 70px;
-            height: 70px;
-            background: rgba(197, 149, 91, 0.1);
-            color: var(--rich-gold);
-            border-radius: 50%;
+        .certificate-card {
+            width: 145px;
+            height: 145px;
+            border-radius: 26px;
+            background: #fff;
+            border: 1px solid rgba(8, 47, 73, .08);
+            box-shadow: 0 15px 40px rgba(8, 47, 73, .09);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            margin: 0 auto 20px;
-            transition: all 0.3s ease;
+            padding: 18px;
+            transition: all .35s ease;
+        }
+
+        .certificate-card:hover {
+            transform: translateY(-10px) rotate(-2deg);
+            box-shadow: var(--tour-shadow-hover);
+        }
+
+        .certificate-img {
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .features-grid,
+        .cards-grid,
+        .destinations-grid,
+        .articles-grid,
+        .testimonials-grid {
+            display: grid;
+            gap: 28px;
+        }
+
+        .features-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .cards-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .destinations-grid,
+        .articles-grid,
+        .testimonials-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .feature-card,
+        .deal-card,
+        .destination-card,
+        .article-card,
+        .testimonial-card {
+            background: rgba(255, 255, 255, .94);
+            border: 1px solid rgba(8, 47, 73, .08);
+            border-radius: var(--tour-radius);
+            box-shadow: 0 18px 45px rgba(8, 47, 73, .08);
+            transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before,
+        .deal-card::before,
+        .destination-card::before,
+        .article-card::before,
+        .testimonial-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(56, 189, 248, .12), transparent 40%, rgba(214, 163, 84, .13));
+            opacity: 0;
+            transition: opacity .35s ease;
+            pointer-events: none;
+        }
+
+        .feature-card:hover,
+        .deal-card:hover,
+        .destination-card:hover,
+        .article-card:hover,
+        .testimonial-card:hover {
+            transform: translateY(-12px);
+            box-shadow: var(--tour-shadow-hover);
+            border-color: rgba(56, 189, 248, .24);
+        }
+
+        .feature-card:hover::before,
+        .deal-card:hover::before,
+        .destination-card:hover::before,
+        .article-card:hover::before,
+        .testimonial-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card {
+            padding: 34px 24px;
+            text-align: center;
+        }
+
+        .feature-icon {
+            width: 76px;
+            height: 76px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 26px;
+            color: #fff;
+            font-size: 2.1rem;
+            background: linear-gradient(135deg, var(--tour-blue), var(--tour-sky));
+            margin-bottom: 24px;
+            box-shadow: 0 16px 34px rgba(15, 95, 143, .24);
+            transition: all .35s ease;
         }
 
         .feature-card:hover .feature-icon {
-            background: var(--rich-gold);
-            color: white;
+            transform: rotate(-5deg) scale(1.08);
+            background: linear-gradient(135deg, var(--tour-gold), #bd7f32);
         }
 
         .feature-title {
-            color: var(--deep-blue);
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 15px;
+            color: var(--tour-navy);
+            font-size: 1.18rem;
+            font-weight: 900;
+            margin-bottom: 13px;
         }
 
         .feature-description {
-            color: #666;
-            font-size: 0.95rem;
-            line-height: 1.6;
+            color: var(--tour-muted);
+            line-height: 1.75;
             margin: 0;
+            font-size: .96rem;
         }
 
-        /* Deal Cards */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 30px;
-        }
-
-        .deal-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
+        .deal-card,
+        .destination-card,
+        .article-card {
             display: flex;
             flex-direction: column;
             height: 100%;
         }
 
-        .deal-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-
         .card-image {
             position: relative;
-            height: 240px;
+            height: 255px;
             overflow: hidden;
+            background: #e2e8f0;
+        }
+
+        .card-image::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0, 0, 0, .02), rgba(0, 0, 0, .48));
+            opacity: .68;
+            transition: opacity .35s ease;
+        }
+
+        .deal-card:hover .card-image::after,
+        .destination-card:hover .card-image::after,
+        .article-card:hover .card-image::after {
+            opacity: .4;
         }
 
         .card-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.5s ease;
+            transition: transform .75s ease;
         }
 
-        .deal-card:hover .card-image img {
-            transform: scale(1.1);
+        .deal-card:hover .card-image img,
+        .destination-card:hover .card-image img,
+        .article-card:hover .card-image img {
+            transform: scale(1.12);
+        }
+
+        .badge-top,
+        .deal-price {
+            position: absolute;
+            z-index: 3;
+            border-radius: 999px;
+            font-weight: 900;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, .14);
         }
 
         .badge-top {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: var(--rich-gold);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            z-index: 2;
+            top: 18px;
+            inset-inline-start: 18px;
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, .92);
+            color: var(--tour-navy);
+            backdrop-filter: blur(12px);
+            font-size: .78rem;
         }
 
         .deal-price {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            background: white;
-            color: var(--deep-blue);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: 700;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 2;
+            inset-inline-end: 18px;
+            bottom: 18px;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, var(--tour-gold), #bd7f32);
+            color: #fff;
+            font-size: .92rem;
         }
 
         .card-body {
-            padding: 25px;
-            flex-grow: 1;
+            padding: 26px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 2;
+            text-align: start;
         }
 
-        .deal-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 15px;
+        .deal-title,
+        .destination-title,
+        .article-title {
+            font-size: 1.24rem;
+            font-weight: 900;
+            line-height: 1.35;
+            margin-bottom: 14px;
         }
 
-        .deal-title a {
-            color: var(--deep-blue);
+        .deal-title a,
+        .destination-title a,
+        .article-title a {
+            color: var(--tour-navy);
             text-decoration: none;
-            transition: color 0.3s ease;
         }
 
-        .deal-title a:hover {
-            color: var(--rich-gold);
+        .deal-title a:hover,
+        .destination-title a:hover,
+        .article-title a:hover {
+            color: var(--tour-blue);
         }
 
         .deal-meta {
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 15px;
-            color: #666;
-            font-size: 0.9rem;
+            gap: 10px;
+            margin-bottom: 16px;
         }
 
         .deal-meta span {
-            display: flex;
+            display: inline-flex;
             align-items: center;
+            gap: 6px;
+            color: var(--tour-muted);
+            font-size: .86rem;
+            font-weight: 700;
+            padding: 7px 10px;
+            background: #f8fafc;
+            border-radius: 999px;
         }
 
-        .deal-meta i {
-            color: var(--rich-gold);
-            margin-right: 5px;
+        .deal-meta i,
+        .destination-meta i,
+        .article-date i {
+            color: var(--tour-gold);
         }
 
-        .deal-description {
-            color: #666;
-            font-size: 0.95rem;
-            line-height: 1.6;
+        .deal-description,
+        .destination-description,
+        .article-excerpt {
+            color: var(--tour-muted);
+            line-height: 1.75;
+            font-size: .96rem;
             margin-bottom: 20px;
             display: -webkit-box;
-            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
+        }
+
+        .deal-description,
+        .article-excerpt {
+            -webkit-line-clamp: 3;
+        }
+
+        .destination-description {
+            -webkit-line-clamp: 2;
         }
 
         .tag-list {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            margin-bottom: 25px;
+            margin-bottom: 24px;
         }
 
         .feature-tag {
-            background: #f8f9fa;
-            color: var(--deep-blue);
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .deal-btn {
-            margin-top: auto;
-            width: 100%;
-            text-align: center;
-            justify-content: center;
-        }
-
-        /* Buttons */
-        .gold-btn {
             display: inline-flex;
-            align-items: center;
-            padding: 12px 25px;
-            background: var(--rich-gold);
-            color: white;
-            border-radius: 25px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(56, 189, 248, .1);
+            color: var(--tour-blue);
+            font-size: .78rem;
+            font-weight: 900;
         }
 
-        .gold-btn:hover {
-            background: #b0824b;
-            color: white;
-        }
-
-        .gold-btn i {
-            margin-left: 8px;
-        }
-
-        /* Quote Section */
-        .quote-section {
-            background: linear-gradient(rgba(28, 50, 92, 0.9), rgba(28, 50, 92, 0.9)), url('{{ asset('website/photos/bg-pattern.jpg') }}');
-            padding: 80px 0;
-            color: white;
-            text-align: center;
-        }
-
-        .quote-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            color: white;
-        }
-
-        .quote-features {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 30px;
-            margin: 40px 0;
-        }
-
-        .quote-feature {
-            display: flex;
-            align-items: center;
-            font-size: 1.1rem;
-        }
-
-        .quote-feature i {
-            color: var(--rich-gold);
-            font-size: 1.5rem;
-            margin-right: 10px;
-        }
-
-        /* Destinations Grid */
-        .destinations-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-        }
-
-        .destination-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .destination-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .destination-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .destination-title a {
-            color: var(--deep-blue);
-            text-decoration: none;
-        }
-
-        .destination-description {
-            color: #666;
-            font-size: 0.95rem;
-            margin-bottom: 20px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+        .deal-btn,
+        .destination-btn {
+            width: 100%;
+            margin-top: auto;
         }
 
         .destination-meta {
             display: flex;
             justify-content: space-between;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-            margin-bottom: 20px;
-            color: #666;
-            font-size: 0.9rem;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding-top: 18px;
+            border-top: 1px solid rgba(8, 47, 73, .08);
+            margin-bottom: 22px;
+            color: var(--tour-muted);
+            font-size: .9rem;
+            font-weight: 800;
         }
 
-        .destination-btn {
-            width: 100%;
-            justify-content: center;
-            background: white;
-            color: var(--deep-blue);
-            border: 1px solid var(--deep-blue);
-            text-decoration: none;
-        }
-
-        .destination-btn:hover {
-            background: #274a7a;
-            color: #f8fbff !important;
-            border-color: #274a7a;
-            box-shadow: 0 10px 20px rgba(28, 50, 92, 0.18);
-            text-decoration: none;
-        }
-
-        .destination-btn:hover i,
-        .destination-btn:focus,
-        .destination-btn:focus i {
-            color: white !important;
-        }
-
-        /* Articles Grid */
-        .articles-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-
-        .article-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        .destination-meta span,
+        .article-date {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .article-date {
-            color: var(--rich-gold);
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 10px;
+            color: var(--tour-blue);
+            font-size: .9rem;
+            font-weight: 900;
+            margin-bottom: 12px;
         }
 
-        .article-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-            line-height: 1.4;
+        .hero-subtitle,
+        .deal-meta span,
+        .destination-meta span,
+        .deal-description,
+        .destination-description,
+        .article-date,
+        .article-excerpt,
+        .testimonial-text,
+        .mini-route span {
+            unicode-bidi: plaintext;
         }
 
-        .article-title a {
-            color: var(--deep-blue);
-            text-decoration: none;
-        }
-
-        .article-excerpt {
-            color: #666;
-            font-size: 0.95rem;
-            margin-bottom: 20px;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
+        .quote-section {
+            position: relative;
+            padding: 120px 0;
+            color: #fff;
             overflow: hidden;
+            background:
+                linear-gradient(135deg, rgba(4, 25, 43, .96), rgba(15, 95, 143, .9)),
+                url('{{ asset('website/photos/bg-pattern.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
 
-        /* Testimonials */
-        .testimonials-grid {
+        .quote-section::before {
+            content: "";
+            position: absolute;
+            width: 520px;
+            height: 520px;
+            border-radius: 50%;
+            right: -160px;
+            top: -180px;
+            background: rgba(56, 189, 248, .18);
+            filter: blur(4px);
+        }
+
+        .quote-section::after {
+            content: "";
+            position: absolute;
+            width: 440px;
+            height: 440px;
+            border-radius: 50%;
+            left: -160px;
+            bottom: -180px;
+            background: rgba(214, 163, 84, .16);
+            filter: blur(4px);
+        }
+
+        .quote-card {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 52px;
+            text-align: center;
+            border-radius: 38px;
+            background: rgba(255, 255, 255, .12);
+            border: 1px solid rgba(255, 255, 255, .22);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 30px 90px rgba(0, 0, 0, .18);
+            position: relative;
+            z-index: 2;
+        }
+
+        .quote-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.2rem, 4vw, 4rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            color: #fff;
+        }
+
+        .quote-card>p {
+            max-width: 700px;
+            margin: 0 auto;
+            color: rgba(255, 255, 255, .84);
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+
+        .quote-features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin: 38px 0;
+        }
+
+        .quote-feature {
+            padding: 18px 14px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, .1);
+            border: 1px solid rgba(255, 255, 255, .16);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 9px;
+            font-weight: 800;
+        }
+
+        .quote-feature i {
+            width: 46px;
+            height: 46px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            background: rgba(214, 163, 84, .2);
+            color: #f8d28a;
+            font-size: 1.55rem;
         }
 
         .testimonial-card {
-            background: white;
             padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
 
         .rating-stars {
             color: #fbbc04;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
+            font-size: 1.18rem;
+            margin-bottom: 18px;
         }
 
         .verified-badge {
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-left: 10px;
+            display: inline-flex;
+            margin-left: 8px;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: #dcfce7;
+            color: #15803d;
+            font-size: .75rem;
+            font-weight: 900;
             vertical-align: middle;
         }
 
         .testimonial-text {
-            color: #444;
+            color: #334155;
             font-style: italic;
-            font-size: 1.05rem;
-            line-height: 1.6;
-            margin-bottom: 25px;
+            font-size: 1.03rem;
+            line-height: 1.85;
+            margin-bottom: 24px;
         }
 
         .author-section {
             display: flex;
             align-items: center;
-            gap: 15px;
-            border-top: 1px solid #eee;
+            gap: 14px;
             padding-top: 20px;
+            border-top: 1px solid rgba(8, 47, 73, .08);
         }
 
         .author-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--deep-blue);
-            color: white;
-            display: flex;
+            width: 56px;
+            height: 56px;
+            border-radius: 20px;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--tour-blue), var(--tour-sky));
+            color: #fff;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            font-size: 1.2rem;
-            overflow: hidden;
+            font-weight: 900;
+            font-size: 1.15rem;
+            flex: 0 0 auto;
         }
 
         .author-avatar img {
@@ -574,65 +938,178 @@
         }
 
         .author-name {
-            font-weight: 700;
-            color: var(--deep-blue);
-            margin-bottom: 2px;
+            color: var(--tour-navy);
+            font-weight: 900;
+            margin: 0 0 4px;
         }
 
-        /* Newsletter Box */
         .newsletter-box {
-            max-width: 600px;
+            max-width: 820px;
             margin: 0 auto;
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            padding: 52px;
+            border-radius: 38px;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(255, 255, 255, .9));
+            border: 1px solid rgba(8, 47, 73, .08);
+            box-shadow: var(--tour-shadow);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .newsletter-box::before {
+            content: "";
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: rgba(56, 189, 248, .14);
+            right: -80px;
+            top: -100px;
         }
 
         .newsletter-form {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             margin-top: 30px;
+            position: relative;
+            z-index: 2;
         }
 
         .newsletter-form input {
-            flex-grow: 1;
-            padding: 12px 20px;
-            border: 1px solid #ddd;
-            border-radius: 25px;
+            flex: 1;
+            min-height: 56px;
+            border: 1px solid rgba(8, 47, 73, .12);
+            background: #fff;
+            border-radius: 999px;
+            padding: 0 22px;
             outline: none;
+            color: var(--tour-dark);
+            box-shadow: 0 12px 30px rgba(8, 47, 73, .06);
         }
 
         .newsletter-form input:focus {
-            border-color: var(--rich-gold);
+            border-color: var(--tour-sky);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, .14);
         }
 
-        /* Certificate Images */
-        .tripadvisor-row {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 40px;
+        .empty-state {
+            grid-column: 1 / -1;
+            padding: 34px;
+            border-radius: 24px;
+            background: #fff;
+            border: 1px dashed rgba(15, 95, 143, .28);
+            color: var(--tour-muted);
+            text-align: center;
+            font-weight: 800;
         }
 
-        .certificate-img {
-            height: 110px;
-            width: auto;
-            object-fit: contain;
-            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
-            transition: transform 0.3s ease;
+        .modal-content {
+            border: 0;
+            border-radius: 30px !important;
+            overflow: hidden;
+            box-shadow: var(--tour-shadow-hover);
         }
 
-        .certificate-img:hover {
-            transform: scale(1.1);
+        .modal-header {
+            background: linear-gradient(135deg, var(--tour-navy), var(--tour-blue));
+            color: #fff;
+            border: 0;
+            padding: 22px 28px;
         }
 
-        /* Animations */
+        .modal-title {
+            font-weight: 900;
+        }
+
+        .modal-body {
+            padding: 28px;
+        }
+
+        .modal-footer {
+            padding: 20px 28px 28px;
+            border: 0;
+        }
+
+        .form-control {
+            min-height: 52px;
+            border-radius: 16px;
+            border-color: rgba(8, 47, 73, .12);
+            box-shadow: none !important;
+            text-align: start;
+        }
+
+        textarea.form-control {
+            min-height: 130px;
+        }
+
+        .form-control:focus {
+            border-color: var(--tour-sky);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, .12) !important;
+        }
+
+        .btn-close {
+            filter: invert(1);
+            opacity: .9;
+        }
+
+        .text-muted {
+            color: var(--tour-muted) !important;
+        }
+
+        .newsletter-form input[type="email"],
+        .form-control[type="email"],
+        .form-control[type="number"],
+        .form-control[type="date"],
+        .form-control[name="phone"] {
+            direction: ltr;
+            text-align: left;
+        }
+
+        html[dir="rtl"] .section-kicker {
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        html[dir="rtl"] .hero-content,
+        html[dir="rtl"] .floating-info,
+        html[dir="rtl"] .card-body,
+        html[dir="rtl"] .article-date,
+        html[dir="rtl"] .rating-stars {
+            text-align: right;
+        }
+
+        html[dir="rtl"] .tour-page .gold-btn,
+        html[dir="rtl"] .tour-page .outline-btn,
+        html[dir="rtl"] .hero-badge,
+        html[dir="rtl"] .deal-meta span,
+        html[dir="rtl"] .destination-meta span,
+        html[dir="rtl"] .article-date,
+        html[dir="rtl"] .author-section {
+            flex-direction: row-reverse;
+        }
+
+        html[dir="rtl"] .hero-grid {
+            direction: rtl;
+        }
+
+        html[dir="rtl"] .hero-content,
+        html[dir="rtl"] .hero-floating-card {
+            direction: rtl;
+        }
+
+        html[dir="rtl"] .mini-route {
+            direction: rtl;
+        }
+
+        html[dir="rtl"] .destination-meta {
+            direction: rtl;
+        }
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(26px);
             }
 
             to {
@@ -641,19 +1118,112 @@
             }
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5rem;
+        @keyframes floatY {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-16px);
+            }
+        }
+
+        @media (max-width: 1199px) {
+
+            .features-grid,
+            .cards-grid,
+            .destinations-grid,
+            .articles-grid,
+            .testimonials-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .hero-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-floating-card {
+                max-width: 520px;
+            }
+
+            .quote-features {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 991px) {
+            .hero-section {
+                min-height: auto;
+                padding: 135px 0 120px;
+                margin-top: -70px;
+                background-attachment: scroll;
             }
 
             .trust-content {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
+            .section-pad {
+                padding: 80px 0;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .hero-title {
+                letter-spacing: -1px;
+            }
+
+            .hero-stats,
+            .features-grid,
+            .cards-grid,
+            .destinations-grid,
+            .articles-grid,
+            .testimonials-grid,
+            .trust-content,
+            .quote-features {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .hero-actions a {
+                width: 100%;
+            }
+
+            .hero-stat {
+                text-align: center;
+            }
+
+            .hero-floating-card {
+                display: none;
+            }
+
+            .trust-section {
+                margin-top: -50px;
+            }
+
+            .trust-box {
+                padding: 14px;
+                border-radius: 24px;
+            }
+
             .trust-item {
-                justify-content: flex-start;
-                text-align: left;
+                min-height: auto;
+            }
+
+            .card-image {
+                height: 230px;
+            }
+
+            .quote-card,
+            .newsletter-box {
+                padding: 32px 22px;
+                border-radius: 28px;
             }
 
             .newsletter-form {
@@ -662,343 +1232,614 @@
 
             .newsletter-form button {
                 width: 100%;
-                justify-content: center;
             }
 
-            .certificate-img {
-                height: 90px;
+            .certificate-card {
+                width: 125px;
+                height: 125px;
+                border-radius: 22px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .section-heading {
+                margin-bottom: 38px;
+            }
+
+            .card-body {
+                padding: 22px;
+            }
+
+            .hero-section {
+                padding-bottom: 100px;
             }
         }
     </style>
 @endsection
 
 @section('content')
-    <section class="hero-section" id="home">
-        <div class="container">
-            <div class="hero-content">
-                <h1 class="hero-title">{{ __('Etro Tours') }}</h1>
-                <p class="hero-subtitle">
-                    {{ __('Discover Egypt like never before with Etro Tours — your trusted partner for unforgettable travel experiences, luxury services, and personalized journeys across Egypt.') }}
-                </p>
-                <a href="#deals" class="hero-cta">
-                    <i class="la la-compass"></i>
-                    {{ __('Discover Egypt') }}
-                </a>
-            </div>
-        </div>
-    </section>
+    <div class="tour-page">
 
-    <section class="trust-section">
-        <div class="container">
-            <div class="trust-content">
-                <div class="trust-item"><i class="la la-trophy"></i><span>{{ __('Award-Winning Service') }}</span></div>
-                <div class="trust-item"><i class="la la-certificate"></i><span>{{ __('Licensed & Certified') }}</span></div>
-                <div class="trust-item"><i class="la la-clock"></i><span>{{ __('24/7 Support') }}</span></div>
-                <div class="trust-item"><i class="la la-credit-card"></i><span>{{ __('Secure Payment') }}</span></div>
-            </div>
-        </div>
-    </section>
+        <section class="hero-section" id="home">
+            <div class="container">
+                <div class="hero-grid">
+                    <div class="hero-content" dir="{{ $isRtl ? 'rtl' : 'ltr' }}"
+                        style="text-align: {{ $isRtl ? 'right' : 'left' }} !important;">
+                        <div class="hero-badge">
+                            <i class="la la-map-marked"></i>
+                            <span>{{ __('Luxury Egypt Travel Experiences') }}</span>
+                        </div>
 
-    <section class="section-pad light-section">
-        <div class="container">
-            <h2 class="section-title">{{ __('TripAdvisor Hall of Fame') }}</h2>
-            <p class="section-subtitle" style="text-align: center;">
-                {{ __('Consistently recognized for excellence in travel experiences') }}</p>
-            <div class="tripadvisor-row">
-                @foreach (['Travellers-Choice-2019-.png', 'Travellers-Choice-2020.png', 'Travellers-Choice-2021.png', 'Travellers-Choice-2025.png', 'Travellers-Choice-2022.png', 'Travellers-Choice-2023.png', 'Travellers-Choice-2024-.png'] as $award)
-                    <img loading="lazy" src="{{ asset('website/photos/tripadvisor/' . $award) }}"
-                        alt="{{ __('TripAdvisor Award') }}" class="certificate-img">
-                @endforeach
-            </div>
-        </div>
-    </section>
+                        <h1 class="hero-title">
+                            {{ __('Explore Egypt') }}
+                            <span>{{ __('With Etro Tours') }}</span>
+                        </h1>
 
-    <section class="section-pad">
-        <div class="container">
-            <h2 class="section-title">{{ __('Why Choose Us') }}</h2>
-            <p class="section-subtitle"style="text-align: center;">
-                {{ __('Experience the difference that makes us Egypt\'s premier travel company') }}
-            </p>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="la la-user-graduate"></i></div>
-                    <h3 class="feature-title">{{ __('Expert Egyptologists') }}</h3>
-                    <p class="feature-description">
-                        {{ __('Certified Egyptologist guides bring ancient history to life with deep knowledge and passionate storytelling.') }}
-                    </p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="la la-shield-alt"></i></div>
-                    <h3 class="feature-title">{{ __('Safety & Security') }}</h3>
-                    <p class="feature-description">
-                        {{ __('Modern vehicles, trusted operations, and support standards designed for a smooth travel experience.') }}
-                    </p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="la la-star"></i></div>
-                    <h3 class="feature-title">{{ __('Luxury Experience') }}</h3>
-                    <p class="feature-description">
-                        {{ __('Premium experiences, curated itineraries, and attention to every detail from arrival to departure.') }}
-                    </p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="la la-headset"></i></div>
-                    <h3 class="feature-title">{{ __('Personalized Service') }}</h3>
-                    <p class="feature-description">
-                        {{ __('Every journey can be tailored around your timing, budget, preferred style, and interests.') }}
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
+                        <p class="hero-subtitle">
+                            {{ __('Discover timeless monuments, Nile cruises, desert escapes, and private journeys designed with comfort, style, and local expertise from arrival to departure.') }}
+                        </p>
 
-    <section id="deals" class="section-pad cream-section">
-        <div class="container">
-            <h2 class="section-title">{{ __('Featured Experiences') }}</h2>
-            <p class="section-subtitle" style="text-align: center;">
-                {{ __('Discover our most popular tours and create memories that last a lifetime') }}</p>
-            <div class="cards-grid">
-                @forelse ($featuredPackages as $package)
-                    <div class="deal-card">
-                        <div class="card-image">
-                            @if ($package['is_ultra_luxury'])
-                                <div class="badge-top">{{ __('Ultra Luxury') }}</div>
-                            @elseif ($package['is_best_seller'])
-                                <div class="badge-top">{{ __('Best Seller') }}</div>
-                            @endif
-                            <div class="deal-price">{{ $package['price'] }}</div>
-                            <a href="{{ $package['url'] }}">
-                                <img src="{{ $package['image'] }}" alt="{{ $package['title'] }}" loading="lazy">
+                        <div class="hero-actions">
+                            <a href="#deals" class="gold-btn">
+                                <i class="la la-compass"></i>
+                                {{ __('Discover Experiences') }}
+                            </a>
+                            <a href="#quote" class="outline-btn">
+                                <i class="la la-paper-plane"></i>
+                                {{ __('Plan My Trip') }}
                             </a>
                         </div>
-                        <div class="card-body d-flex flex-column">
-                            <h3 class="deal-title"><a href="{{ $package['url'] }}">{{ $package['title'] }}</a></h3>
-                            <div class="deal-meta">
-                                <span><i class="la la-clock"></i>{{ $package['duration'] }}</span>
-                                <span><i class="la la-users"></i>{{ $package['tour_type'] }}</span>
-                                @if ($package['route_text'])
-                                    <span><i class="la la-map-marker"></i>{{ $package['route_text'] }}</span>
-                                @endif
+
+                        <div class="hero-stats">
+                            <div class="hero-stat">
+                                <strong>10+</strong>
+                                <span>{{ __('Years Experience') }}</span>
                             </div>
-                            <p class="deal-description">{{ $package['description'] }}</p>
-                            @if (!empty($package['tags']))
-                                <div class="tag-list">
-                                    @foreach ($package['tags'] as $tag)
-                                        <span class="feature-tag">{{ $tag }}</span>
-                                    @endforeach
-                                </div>
-                            @endif
-                            <a href="{{ $package['url'] }}" class="gold-btn deal-btn">{{ __('Explore Journey') }} <i
-                                    class="la la-arrow-right"></i></a>
-                        </div>
-                    </div>
-                @empty
-                    <div class="empty-state">
-                        {{ __('No featured packages found. Add active packages from the admin panel.') }}</div>
-                @endforelse
-            </div>
-        </div>
-    </section>
-
-    <section class="quote-section">
-        <div class="container">
-            <div class="quote-card">
-                <h2 class="quote-title">{{ __('Need help planning your trip?') }}</h2>
-                <p>{{ __('Get in touch with our travel experts to create a personalized Egypt experience based on your interests and preferences.') }}
-                </p>
-                <div class="quote-features">
-                    <div class="quote-feature"><i
-                            class="la la-check-circle"></i><span>{{ __('100% Customizable Itineraries') }}</span>
-                    </div>
-                    <div class="quote-feature"><i
-                            class="la la-user-graduate"></i><span>{{ __('Expert Egyptologist Guides') }}</span>
-                    </div>
-                    <div class="quote-feature"><i class="la la-headset"></i><span>{{ __('24/7 Local Support') }}</span>
-                    </div>
-                    <div class="quote-feature"><i class="la la-dollar"></i><span>{{ __('Best Price Guarantee') }}</span>
-                    </div>
-                </div>
-                <button class="gold-btn" data-bs-toggle="modal" data-bs-target="#quoteModal"><i
-                        class="la la-paper-plane"></i> {{ __('Get Custom Quote') }}</button>
-            </div>
-        </div>
-    </section>
-
-    <section class="section-pad light-section">
-        <div class="container">
-            <h2 class="section-title">{{ __('Explore Extraordinary Destinations') }}</h2>
-            <p class="section-subtitle">
-                {{ __('Explore the best Egyptian cities, attractions, and journeys connected directly from your database.') }}
-            </p>
-            <div class="destinations-grid">
-                @forelse ($destinations as $destination)
-                    <div class="destination-card">
-                        <div class="card-image">
-                            <div class="badge-top">{{ $destination['country'] ?: __('Destination') }}</div>
-                            <a href="{{ $destination['url'] }}">
-                                <img src="{{ $destination['image'] }}" alt="{{ $destination['title'] }}"
-                                    loading="lazy">
-                            </a>
-                        </div>
-                        <div class="card-body">
-                            <h3 class="destination-title"><a
-                                    href="{{ $destination['url'] }}">{{ $destination['title'] }}</a></h3>
-                            <p class="destination-description">{{ $destination['description'] }}</p>
-                            <div class="destination-meta">
-                                <span><i class="la la-map-marker"></i>{{ $destination['sites_count'] }}
-                                    {{ __('Sites') }}</span>
-                                <span><i class="la la-suitcase"></i>{{ $destination['packages_count'] }}
-                                    {{ __('Trips') }}</span>
+                            <div class="hero-stat">
+                                <strong>24/7</strong>
+                                <span>{{ __('Local Support') }}</span>
                             </div>
-                            <a href="{{ $destination['url'] }}" class="gold-btn destination-btn">{{ __('Discover') }} <i
-                                    class="la la-arrow-right"></i></a>
-                        </div>
-                    </div>
-                @empty
-                    <div class="empty-state">
-                        {{ __('No active destinations found. Add active cities from the admin panel.') }}</div>
-                @endforelse
-            </div>
-        </div>
-    </section>
-
-    <section class="section-pad">
-        <div class="container">
-            <h2 class="section-title">{{ __('Latest Travel Guides') }}</h2>
-            <p class="section-subtitle" style="text-align: center;">
-                {{ __('Useful guides and stories connected from the articles table.') }}</p>
-            <div class="articles-grid">
-                @forelse ($latestArticles as $article)
-                    <div class="article-card">
-                        <div class="card-image">
-                            <a href="{{ $article['url'] }}"><img src="{{ $article['image'] }}"
-                                    alt="{{ $article['title'] }}" loading="lazy"></a>
-                        </div>
-                        <div class="card-body">
-                            <div class="article-date"><i class="la la-calendar"></i> {{ $article['date'] }}</div>
-                            <h3 class="article-title"><a href="{{ $article['url'] }}">{{ $article['title'] }}</a></h3>
-                            <p class="article-excerpt">{{ $article['excerpt'] }}</p>
-                            <a href="{{ $article['url'] }}" class="gold-btn">{{ __('Read More') }} <i
-                                    class="la la-arrow-right"></i></a>
-                        </div>
-                    </div>
-                @empty
-                    <div class="empty-state">{{ __('No active articles found.') }}</div>
-                @endforelse
-            </div>
-        </div>
-    </section>
-
-    <section class="section-pad light-section">
-        <div class="container">
-            <div class="text-center mb-5">
-                <div
-                    style="background:#2358e6eb;color:#fff;padding:10px 20px;border-radius:25px;font-size:.9rem;font-weight:700;display:inline-flex;align-items:center;gap:8px;margin-bottom:25px;">
-                    <i class="la la-tripadvisor"></i> {{ __('TripAdvisor Certified Excellence') }}
-                </div>
-                <h2 class="section-title">{{ __('Guest Experiences') }}</h2>
-                <p class="section-subtitle" style="text-align: center;">
-                    {{ __('Hear from travelers who have experienced the magic of Egypt with us') }}</p>
-            </div>
-
-            <div class="testimonials-grid">
-                @forelse ($testimonials as $testimonial)
-                    <div class="testimonial-card">
-                        <div class="rating-stars">
-                            @for ($i = 1; $i <= 5; $i++)
-                                <i class="la {{ $i <= $testimonial['rating'] ? 'la-star' : 'la-star-o' }}"></i>
-                            @endfor
-                            @if ($testimonial['is_verified'])
-                                <span class="verified-badge">{{ __('Verified') }}</span>
-                            @endif
-                        </div>
-                        <p class="testimonial-text">“{{ $testimonial['content'] }}”</p>
-                        <div class="author-section">
-                            <div class="author-avatar">
-                                @if ($testimonial['avatar'])
-                                    <img src="{{ $testimonial['avatar'] }}" alt="{{ $testimonial['name'] }}">
-                                @else
-                                    {{ $testimonial['initials'] }}
-                                @endif
+                            <div class="hero-stat">
+                                <strong>5★</strong>
+                                <span>{{ __('Guest Reviews') }}</span>
                             </div>
-                            <div>
-                                <h5 class="author-name">{{ $testimonial['name'] }}</h5>
-                                <p class="mb-0 text-muted"><i class="la la-check-circle"></i> {{ __('Guest Review') }}
+                        </div>
+                    </div>
+
+                    <div class="hero-floating-card">
+                        <div class="hero-floating-card-inner">
+                            <img src="{{ asset('website/photos/home2.webp') }}" alt="{{ __('Egypt Tour') }}">
+                            <div class="floating-info">
+                                <h3>{{ __('Private Egypt Journey') }}</h3>
+                                <p>{{ __('Premium tours, hand-picked guides, comfortable transfers, and carefully curated routes.') }}
                                 </p>
+                                <div class="mini-route">
+                                    @if ($isRtl)
+                                        <span>{{ __('Aswan') }}</span>
+                                        <span><i class="la la-long-arrow-left"></i></span>
+                                        <span>{{ __('Luxor') }}</span>
+                                        <span><i class="la la-long-arrow-left"></i></span>
+                                        <span><i class="la la-map-marker"></i> {{ __('Cairo') }}</span>
+                                    @else
+                                        <span><i class="la la-map-marker"></i> {{ __('Cairo') }}</span>
+                                        <span><i class="la la-long-arrow-right"></i></span>
+                                        <span>{{ __('Luxor') }}</span>
+                                        <span><i class="la la-long-arrow-right"></i></span>
+                                        <span>{{ __('Aswan') }}</span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>
-                @empty
-                    <div class="empty-state">
-                        {{ __('No testimonials found. Add active testimonials from the admin panel.') }}</div>
-                @endforelse
-            </div>
-
-            <div class="text-center mt-5">
-                <a href="https://www.tripadvisor.com/Attraction_Review-g294205-d12148903-Reviews-Luxor_and_Aswan_Travel-Luxor_Nile_River_Valley.html"
-                    target="_blank" class="gold-btn">
-                    <i class="la la-external-link"></i> {{ __('Read All Reviews on TripAdvisor') }}
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <section class="section-pad cream-section">
-        <div class="container">
-            <div class="newsletter-box text-center">
-                <h2 class="section-title">{{ __('Get Our Latest Travel Deals') }}</h2>
-                <p class="section-subtitle" style="text-align: center;">
-                    {{ __('Subscribe to receive updates, new packages, and special offers.') }}
-                </p>
-                <form action="{{ route('website.newsletter.store') }}" method="POST" class="newsletter-form">
-                    @csrf
-                    <input type="email" name="email" placeholder="{{ __('Enter your email address') }}" required>
-                    <button type="submit" class="gold-btn">{{ __('Subscribe') }}</button>
-                </form>
-            </div>
-        </div>
-    </section>
-
-    <div class="modal fade" id="quoteModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content" style="border-radius:22px;overflow:hidden;">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ __('Get Custom Quote') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="{{ __('Close') }}"></button>
                 </div>
-                <form action="{{ route('website.inquiries.store') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="inquiry_type" value="custom_quote">
-                    <div class="modal-body">
-                        <div class="row g-3">
-                            <div class="col-md-6"><input class="form-control" name="full_name"
-                                    placeholder="{{ __('Full name') }}" required></div>
-                            <div class="col-md-6"><input class="form-control" type="email" name="email"
-                                    placeholder="{{ __('Email address') }}" required></div>
-                            <div class="col-md-6"><input class="form-control" name="phone"
-                                    placeholder="{{ __('Phone / WhatsApp') }}"></div>
-                            <div class="col-md-6"><input class="form-control" name="country_name"
-                                    placeholder="{{ __('Country') }}">
-                            </div>
-                            <div class="col-md-4"><input class="form-control" type="date" name="travel_date"></div>
-                            <div class="col-md-4"><input class="form-control" type="number" min="1"
-                                    name="adults" placeholder="{{ __('Adults') }}"></div>
-                            <div class="col-md-4"><input class="form-control" type="number" min="0"
-                                    name="children" placeholder="{{ __('Children') }}"></div>
-                            <div class="col-12">
-                                <textarea class="form-control" name="message" rows="4"
-                                    placeholder="{{ __('Tell us about your preferred trip') }}"></textarea>
-                            </div>
+            </div>
+        </section>
+
+        <section class="trust-section">
+            <div class="container">
+                <div class="trust-box reveal-up">
+                    <div class="trust-content">
+                        <div class="trust-item">
+                            <i class="la la-trophy"></i>
+                            <span>{{ __('Award-Winning Service') }}</span>
+                        </div>
+                        <div class="trust-item">
+                            <i class="la la-certificate"></i>
+                            <span>{{ __('Licensed & Certified') }}</span>
+                        </div>
+                        <div class="trust-item">
+                            <i class="la la-clock"></i>
+                            <span>{{ __('24/7 Travel Support') }}</span>
+                        </div>
+                        <div class="trust-item">
+                            <i class="la la-credit-card"></i>
+                            <span>{{ __('Secure Payment') }}</span>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light"
-                            data-bs-dismiss="modal">{{ __('Close') }}</button>
-                        <button type="submit" class="gold-btn">{{ __('Send Request') }}</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-pad light-section">
+            <div class="container">
+                <div class="section-heading reveal-up">
+                    <div class="section-kicker">
+                        <i class="la la-tripadvisor"></i>
+                        {{ __('Trusted Excellence') }}
                     </div>
-                </form>
+                    <h2 class="section-title">{{ __('TripAdvisor Hall of Fame') }}</h2>
+                    <p class="section-subtitle">
+                        {{ __('Consistently recognized for excellence in travel experiences and unforgettable journeys across Egypt.') }}
+                    </p>
+                </div>
+
+                <div class="tripadvisor-row">
+                    @foreach (['Travellers-Choice-2019-.png', 'Travellers-Choice-2020.png', 'Travellers-Choice-2021.png', 'Travellers-Choice-2025.png', 'Travellers-Choice-2022.png', 'Travellers-Choice-2023.png', 'Travellers-Choice-2024-.png'] as $award)
+                        <div class="certificate-card reveal-up">
+                            <img loading="lazy" src="{{ asset('website/photos/tripadvisor/' . $award) }}"
+                                alt="{{ __('TripAdvisor Award') }}" class="certificate-img">
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <section class="section-pad">
+            <div class="container">
+                <div class="section-heading reveal-up">
+                    <div class="section-kicker">
+                        <i class="la la-star"></i>
+                        {{ __('Why Etro Tours') }}
+                    </div>
+                    <h2 class="section-title">{{ __('Travel Egypt With Confidence') }}</h2>
+                    <p class="section-subtitle">
+                        {{ __('A modern tourism experience combining expert planning, premium service, authentic culture, and smooth operations.') }}
+                    </p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card reveal-up">
+                        <div class="feature-icon"><i class="la la-user-graduate"></i></div>
+                        <h3 class="feature-title">{{ __('Expert Egyptologists') }}</h3>
+                        <p class="feature-description">
+                            {{ __('Certified guides bring temples, tombs, museums, and ancient stories to life with rich knowledge.') }}
+                        </p>
+                    </div>
+
+                    <div class="feature-card reveal-up">
+                        <div class="feature-icon"><i class="la la-shield-alt"></i></div>
+                        <h3 class="feature-title">{{ __('Safe Operations') }}</h3>
+                        <p class="feature-description">
+                            {{ __('Trusted transport, organized itineraries, and reliable local support for a comfortable journey.') }}
+                        </p>
+                    </div>
+
+                    <div class="feature-card reveal-up">
+                        <div class="feature-icon"><i class="la la-gem"></i></div>
+                        <h3 class="feature-title">{{ __('Luxury Touch') }}</h3>
+                        <p class="feature-description">
+                            {{ __('Premium experiences, carefully selected services, and details designed for a refined holiday.') }}
+                        </p>
+                    </div>
+
+                    <div class="feature-card reveal-up">
+                        <div class="feature-icon"><i class="la la-headset"></i></div>
+                        <h3 class="feature-title">{{ __('Tailor-Made Service') }}</h3>
+                        <p class="feature-description">
+                            {{ __('Every trip can be customized around your schedule, budget, interests, and travel style.') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="deals" class="section-pad cream-section">
+            <div class="container">
+                <div class="section-heading reveal-up">
+                    <div class="section-kicker">
+                        <i class="la la-suitcase"></i>
+                        {{ __('Featured Tours') }}
+                    </div>
+                    <h2 class="section-title">{{ __('Signature Egypt Experiences') }}</h2>
+                    <p class="section-subtitle">
+                        {{ __('Discover our most requested journeys, from iconic landmarks to luxurious Nile adventures.') }}
+                    </p>
+                </div>
+
+                <div class="cards-grid">
+                    @forelse ($featuredPackages as $package)
+                        <div class="deal-card reveal-up">
+                            <div class="card-image">
+                                @if ($package['is_ultra_luxury'])
+                                    <div class="badge-top">{{ __('Ultra Luxury') }}</div>
+                                @elseif ($package['is_best_seller'])
+                                    <div class="badge-top">{{ __('Best Seller') }}</div>
+                                @endif
+
+                                <div class="deal-price">{{ $package['price'] }}</div>
+
+                                <a href="{{ $package['url'] }}">
+                                    <img src="{{ $package['image'] }}" alt="{{ $package['title'] }}" loading="lazy">
+                                </a>
+                            </div>
+
+                            <div class="card-body">
+                                <h3 class="deal-title">
+                                    <a href="{{ $package['url'] }}">{{ $package['title'] }}</a>
+                                </h3>
+
+                                <div class="deal-meta">
+                                    <span><i class="la la-clock"></i>{{ $package['duration'] }}</span>
+                                    <span><i class="la la-users"></i>{{ $package['tour_type'] }}</span>
+                                    @if ($package['route_text'])
+                                        <span><i class="la la-map-marker"></i>{{ $package['route_text'] }}</span>
+                                    @endif
+                                </div>
+
+                                <p class="deal-description">{{ $package['description'] }}</p>
+
+                                @if (!empty($package['tags']))
+                                    <div class="tag-list">
+                                        @foreach ($package['tags'] as $tag)
+                                            <span class="feature-tag">{{ $tag }}</span>
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                <a href="{{ $package['url'] }}" class="gold-btn deal-btn">
+                                    {{ __('Explore Journey') }}
+                                    <i class="la la-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="empty-state">
+                            {{ __('No featured packages found. Add active packages from the admin panel.') }}
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        </section>
+
+        <section class="quote-section" id="quote">
+            <div class="container">
+                <div class="quote-card reveal-up">
+                    <h2 class="quote-title">{{ __('Need Help Planning Your Trip?') }}</h2>
+                    <p>
+                        {{ __('Tell us your travel dates, interests, number of guests, and preferred style. Our travel experts will create a personalized Egypt experience for you.') }}
+                    </p>
+
+                    <div class="quote-features">
+                        <div class="quote-feature">
+                            <i class="la la-check-circle"></i>
+                            <span>{{ __('Custom Itineraries') }}</span>
+                        </div>
+                        <div class="quote-feature">
+                            <i class="la la-user-graduate"></i>
+                            <span>{{ __('Expert Guides') }}</span>
+                        </div>
+                        <div class="quote-feature">
+                            <i class="la la-headset"></i>
+                            <span>{{ __('24/7 Support') }}</span>
+                        </div>
+                        <div class="quote-feature">
+                            <i class="la la-dollar"></i>
+                            <span>{{ __('Best Value') }}</span>
+                        </div>
+                    </div>
+
+                    <button class="gold-btn" data-bs-toggle="modal" data-bs-target="#quoteModal">
+                        <i class="la la-paper-plane"></i>
+                        {{ __('Get Custom Quote') }}
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-pad light-section">
+            <div class="container">
+                <div class="section-heading reveal-up">
+                    <div class="section-kicker">
+                        <i class="la la-map"></i>
+                        {{ __('Destinations') }}
+                    </div>
+                    <h2 class="section-title">{{ __('Explore Extraordinary Places') }}</h2>
+                    <p class="section-subtitle">
+                        {{ __('From Cairo and Giza to Luxor, Aswan, the Red Sea, and hidden gems across Egypt.') }}
+                    </p>
+                </div>
+
+                <div class="destinations-grid">
+                    @forelse ($destinations as $destination)
+                        <div class="destination-card reveal-up">
+                            <div class="card-image">
+                                <div class="badge-top">{{ $destination['country'] ?: __('Destination') }}</div>
+                                <a href="{{ $destination['url'] }}">
+                                    <img src="{{ $destination['image'] }}" alt="{{ $destination['title'] }}"
+                                        loading="lazy">
+                                </a>
+                            </div>
+
+                            <div class="card-body">
+                                <h3 class="destination-title">
+                                    <a href="{{ $destination['url'] }}">{{ $destination['title'] }}</a>
+                                </h3>
+
+                                <p class="destination-description">{{ $destination['description'] }}</p>
+
+                                <div class="destination-meta">
+                                    <span>
+                                        <i class="la la-map-marker"></i>
+                                        {{ $destination['sites_count'] }} {{ __('Sites') }}
+                                    </span>
+                                    <span>
+                                        <i class="la la-suitcase"></i>
+                                        {{ $destination['packages_count'] }} {{ __('Trips') }}
+                                    </span>
+                                </div>
+
+                                <a href="{{ $destination['url'] }}" class="gold-btn destination-btn">
+                                    {{ __('Discover') }}
+                                    <i class="la la-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="empty-state">
+                            {{ __('No active destinations found. Add active cities from the admin panel.') }}
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        </section>
+
+        <section class="section-pad">
+            <div class="container">
+                <div class="section-heading reveal-up">
+                    <div class="section-kicker">
+                        <i class="la la-newspaper"></i>
+                        {{ __('Travel Guides') }}
+                    </div>
+                    <h2 class="section-title">{{ __('Latest Egypt Travel Stories') }}</h2>
+                    <p class="section-subtitle">
+                        {{ __('Useful tips, destination insights, and inspiring stories for planning your Egypt journey.') }}
+                    </p>
+                </div>
+
+                <div class="articles-grid">
+                    @forelse ($latestArticles as $article)
+                        <div class="article-card reveal-up">
+                            <div class="card-image">
+                                <a href="{{ $article['url'] }}">
+                                    <img src="{{ $article['image'] }}" alt="{{ $article['title'] }}" loading="lazy">
+                                </a>
+                            </div>
+
+                            <div class="card-body">
+                                <div class="article-date">
+                                    <i class="la la-calendar"></i>
+                                    {{ $article['date'] }}
+                                </div>
+
+                                <h3 class="article-title">
+                                    <a href="{{ $article['url'] }}">{{ $article['title'] }}</a>
+                                </h3>
+
+                                <p class="article-excerpt">{{ $article['excerpt'] }}</p>
+
+                                <a href="{{ $article['url'] }}" class="gold-btn">
+                                    {{ __('Read More') }}
+                                    <i class="la la-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="empty-state">{{ __('No active articles found.') }}</div>
+                    @endforelse
+                </div>
+            </div>
+        </section>
+
+        <section class="section-pad light-section">
+            <div class="container">
+                <div class="section-heading reveal-up">
+                    <div class="section-kicker">
+                        <i class="la la-comments"></i>
+                        {{ __('Guest Reviews') }}
+                    </div>
+                    <h2 class="section-title">{{ __('Travelers Love Etro Tours') }}</h2>
+                    <p class="section-subtitle">
+                        {{ __('Real experiences from guests who discovered the magic of Egypt with our team.') }}
+                    </p>
+                </div>
+
+                <div class="testimonials-grid">
+                    @forelse ($testimonials as $testimonial)
+                        <div class="testimonial-card reveal-up">
+                            <div class="rating-stars">
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <i class="la {{ $i <= $testimonial['rating'] ? 'la-star' : 'la-star-o' }}"></i>
+                                @endfor
+
+                                @if ($testimonial['is_verified'])
+                                    <span class="verified-badge">{{ __('Verified') }}</span>
+                                @endif
+                            </div>
+
+                            <p class="testimonial-text">“{{ $testimonial['content'] }}”</p>
+
+                            <div class="author-section">
+                                <div class="author-avatar">
+                                    @if ($testimonial['avatar'])
+                                        <img src="{{ $testimonial['avatar'] }}" alt="{{ $testimonial['name'] }}">
+                                    @else
+                                        {{ $testimonial['initials'] }}
+                                    @endif
+                                </div>
+
+                                <div>
+                                    <h5 class="author-name">{{ $testimonial['name'] }}</h5>
+                                    <p class="mb-0 text-muted">
+                                        <i class="la la-check-circle"></i>
+                                        {{ __('Guest Review') }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="empty-state">
+                            {{ __('No testimonials found. Add active testimonials from the admin panel.') }}
+                        </div>
+                    @endforelse
+                </div>
+
+                <div class="text-center mt-5 reveal-up">
+                    <a href="https://www.tripadvisor.com/Attraction_Review-g294205-d12148903-Reviews-Luxor_and_Aswan_Travel-Luxor_Nile_River_Valley.html"
+                        target="_blank" class="gold-btn">
+                        <i class="la la-external-link"></i>
+                        {{ __('Read All Reviews on TripAdvisor') }}
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-pad cream-section">
+            <div class="container">
+                <div class="newsletter-box reveal-up">
+                    <div class="section-kicker">
+                        <i class="la la-envelope"></i>
+                        {{ __('Newsletter') }}
+                    </div>
+
+                    <h2 class="section-title">{{ __('Get Our Latest Travel Deals') }}</h2>
+
+                    <p class="section-subtitle">
+                        {{ __('Subscribe to receive updates, new packages, seasonal offers, and useful Egypt travel tips.') }}
+                    </p>
+
+                    <form action="{{ route('website.newsletter.store') }}" method="POST" class="newsletter-form">
+                        @csrf
+                        <input type="email" name="email" placeholder="{{ __('Enter your email address') }}"
+                            required>
+                        <button type="submit" class="gold-btn">
+                            {{ __('Subscribe') }}
+                            <i class="la la-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <div class="modal fade" id="quoteModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ __('Get Custom Quote') }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="{{ __('Close') }}"></button>
+                    </div>
+
+                    <form action="{{ route('website.inquiries.store') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="inquiry_type" value="custom_quote">
+
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <input class="form-control" name="full_name" placeholder="{{ __('Full name') }}"
+                                        required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <input class="form-control" type="email" name="email"
+                                        placeholder="{{ __('Email address') }}" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <input class="form-control" name="phone"
+                                        placeholder="{{ __('Phone / WhatsApp') }}">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <input class="form-control" name="country_name" placeholder="{{ __('Country') }}">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <input class="form-control" type="date" name="travel_date">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <input class="form-control" type="number" min="1" name="adults"
+                                        placeholder="{{ __('Adults') }}">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <input class="form-control" type="number" min="0" name="children"
+                                        placeholder="{{ __('Children') }}">
+                                </div>
+
+                                <div class="col-12">
+                                    <textarea class="form-control" name="message" rows="4"
+                                        placeholder="{{ __('Tell us about your preferred trip') }}"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                                {{ __('Close') }}
+                            </button>
+
+                            <button type="submit" class="gold-btn">
+                                {{ __('Send Request') }}
+                                <i class="la la-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
+
     </div>
+@endsection
+
+@section('js')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const revealItems = document.querySelectorAll('.reveal-up');
+
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, {
+                    threshold: 0.12
+                });
+
+                revealItems.forEach(function(item, index) {
+                    item.style.transitionDelay = (index % 4) * 80 + 'ms';
+                    observer.observe(item);
+                });
+            } else {
+                revealItems.forEach(function(item) {
+                    item.classList.add('is-visible');
+                });
+            }
+
+            const hero = document.querySelector('.hero-section');
+
+            if (hero && window.innerWidth > 991) {
+                window.addEventListener('scroll', function() {
+                    const offset = window.pageYOffset || document.documentElement.scrollTop;
+                    hero.style.backgroundPositionY = (offset * 0.25) + 'px';
+                }, {
+                    passive: true
+                });
+            }
+        });
+    </script>
 @endsection

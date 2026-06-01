@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Website;
 
 use App\Models\Article;
-use App\Models\City;
 use App\Models\Package;
 use App\Models\Testimonial;
+use App\Services\WebsiteDestinationService;
 
 class HomeController extends BaseWebsiteController
 {
-    public function index()
+    public function index(WebsiteDestinationService $websiteDestinationService)
     {
         $packages = Package::query()
             ->with(['currency', 'highlights', 'tags', 'prices'])
@@ -23,25 +23,7 @@ class HomeController extends BaseWebsiteController
 
         $featuredPackages = $packages->map(fn(Package $package) => $this->packageCard($package));
 
-        $destinations = City::query()
-            ->with('country')
-            ->withCount(['attractions', 'packages'])
-            ->where('is_active', true)
-            ->orderByDesc('is_featured')
-            ->orderBy('sort_order')
-            ->limit(6)
-            ->get()
-            ->map(function (City $city) {
-                return [
-                    'title' => $this->translated($city->getRawOriginal('name') ?? $city->name),
-                    'description' => $this->shortText($city->getRawOriginal('short_description') ?: $city->getRawOriginal('description'), 190),
-                    'image' => $this->imageUrl($city->featured_image ?: $city->hero_image, 'website/photos/Dest/Egypt.jpg'),
-                    'url' => route('website.destinations.show', $city->slug),
-                    'country' => $this->translated($city->country?->getRawOriginal('name') ?? $city->country?->name),
-                    'sites_count' => $city->attractions_count,
-                    'packages_count' => $city->packages_count,
-                ];
-            });
+        $destinations = $websiteDestinationService->homeDestinations();
 
         $latestArticles = Article::query()
             ->where('is_active', true)
