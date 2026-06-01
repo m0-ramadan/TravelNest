@@ -1106,6 +1106,124 @@
             direction: rtl;
         }
 
+        html[data-theme='dark'] .tour-page {
+            background:
+                radial-gradient(circle at top left, rgba(56, 189, 248, .16), transparent 34%),
+                radial-gradient(circle at 88% 12%, rgba(214, 163, 84, .14), transparent 28%),
+                linear-gradient(180deg, #081120 0%, #0b1220 46%, #111827 100%);
+        }
+
+        html[data-theme='dark'] .hero-section {
+            background:
+                linear-gradient(110deg, rgba(2, 6, 23, .95) 0%, rgba(8, 47, 73, .86) 46%, rgba(15, 95, 143, .48) 100%),
+                url('{{ asset('website/photos/home2.webp') }}');
+            background-size: cover;
+            background-position: center;
+            box-shadow: inset 0 -90px 120px rgba(2, 6, 23, .3);
+        }
+
+        html[data-theme='dark'] .hero-section::before {
+            background:
+                radial-gradient(circle at 20% 25%, rgba(56, 189, 248, .18), transparent 32%),
+                radial-gradient(circle at 75% 28%, rgba(214, 163, 84, .16), transparent 30%),
+                linear-gradient(180deg, transparent 60%, rgba(11, 18, 32, .97) 100%);
+        }
+
+        html[data-theme='dark'] .hero-section::after {
+            background: #0b1220;
+        }
+
+        html[data-theme='dark'] .hero-title span {
+            color: transparent !important;
+            -webkit-text-fill-color: transparent;
+        }
+
+        html[data-theme='dark'] .hero-subtitle {
+            color: rgba(226, 232, 240, .82) !important;
+        }
+
+        html[data-theme='dark'] .hero-badge,
+        html[data-theme='dark'] .hero-stat,
+        html[data-theme='dark'] .hero-floating-card {
+            background: rgba(15, 23, 42, .42);
+            border-color: rgba(148, 163, 184, .22);
+            box-shadow: 0 20px 55px rgba(0, 0, 0, .24);
+        }
+
+        html[data-theme='dark'] .hero-badge span {
+            color: rgba(248, 250, 252, .92) !important;
+        }
+
+        html[data-theme='dark'] .hero-stat span {
+            color: rgba(226, 232, 240, .76) !important;
+        }
+
+        html[data-theme='dark'] .hero-floating-card-inner {
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        html[data-theme='dark'] .floating-info h3 {
+            color: #f8fafc !important;
+        }
+
+        html[data-theme='dark'] .floating-info p {
+            color: #94a3b8 !important;
+        }
+
+        html[data-theme='dark'] .mini-route {
+            color: #7dd3fc;
+        }
+
+        html[data-theme='dark'] .mini-route span {
+            color: inherit !important;
+        }
+
+        html[data-theme='dark'] .outline-btn {
+            color: #fff;
+            border-color: rgba(255, 255, 255, .18);
+            background: rgba(15, 23, 42, .28);
+        }
+
+        html[data-theme='dark'] .outline-btn:hover {
+            color: #f8fafc;
+            background: rgba(255, 255, 255, .12);
+        }
+
+        html[data-theme='dark'] .trust-section {
+            background: transparent !important;
+        }
+
+        html[data-theme='dark'] .trust-box {
+            background: linear-gradient(135deg, rgba(15, 23, 42, .92), rgba(23, 32, 51, .84));
+            border-color: rgba(148, 163, 184, .16);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, .32);
+        }
+
+        html[data-theme='dark'] .trust-item {
+            background: linear-gradient(180deg, rgba(15, 23, 42, .94) 0%, rgba(17, 24, 39, .88) 100%) !important;
+            border-color: rgba(148, 163, 184, .12) !important;
+            color: #f8fafc !important;
+        }
+
+        html[data-theme='dark'] .light-section .tripadvisor-row {
+            gap: 18px;
+        }
+
+        html[data-theme='dark'] .certificate-card {
+            background: linear-gradient(180deg, #0f172a 0%, #172033 100%);
+            border-color: rgba(244, 195, 106, .18);
+            box-shadow: 0 18px 42px rgba(0, 0, 0, .32);
+        }
+
+        html[data-theme='dark'] .certificate-card:hover {
+            box-shadow: 0 22px 54px rgba(0, 0, 0, .4);
+        }
+
+        html[data-theme='dark'] .certificate-img {
+            filter: drop-shadow(0 8px 24px rgba(244, 195, 106, .14));
+        }
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -1161,6 +1279,20 @@
                 background-attachment: scroll;
             }
 
+            .hero-grid {
+                gap: 32px;
+                padding-top: 34px;
+            }
+
+            .hero-content {
+                max-width: 100%;
+            }
+
+            .hero-floating-card {
+                width: min(100%, 520px);
+                margin-inline: auto;
+            }
+
             .trust-content {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
@@ -1171,8 +1303,45 @@
         }
 
         @media (max-width: 767px) {
+            .hero-section {
+                padding: 118px 0 92px;
+                margin-top: -58px;
+                background-position: center top;
+            }
+
+            .hero-section::after {
+                height: 118px;
+                bottom: -72px;
+            }
+
+            .hero-grid {
+                gap: 24px;
+                padding-top: 8px;
+            }
+
+            .hero-badge {
+                padding: 9px 14px;
+                font-size: .76rem;
+                margin-bottom: 18px;
+            }
+
             .hero-title {
+                font-size: clamp(2.35rem, 12vw, 3.6rem);
+                line-height: 1.02;
                 letter-spacing: -1px;
+                margin-bottom: 18px;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+                line-height: 1.72;
+                margin-bottom: 24px;
+            }
+
+            .gold-btn,
+            .outline-btn {
+                min-height: 52px;
+                padding: 12px 18px;
             }
 
             .hero-stats,
@@ -1189,14 +1358,33 @@
             .hero-actions {
                 flex-direction: column;
                 align-items: stretch;
+                gap: 10px;
             }
 
             .hero-actions a {
                 width: 100%;
             }
 
+            .hero-stats {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 10px;
+                margin-top: 28px;
+            }
+
             .hero-stat {
+                padding: 14px 10px;
+                border-radius: 18px;
                 text-align: center;
+            }
+
+            .hero-stat strong {
+                font-size: 1.2rem;
+            }
+
+            .hero-stat span {
+                display: block;
+                font-size: .76rem;
+                line-height: 1.45;
             }
 
             .hero-floating-card {
@@ -1204,16 +1392,33 @@
             }
 
             .trust-section {
-                margin-top: -50px;
+                margin-top: -34px;
+                padding-bottom: 20px;
             }
 
             .trust-box {
-                padding: 14px;
-                border-radius: 24px;
+                padding: 12px;
+                border-radius: 22px;
             }
 
             .trust-item {
+                padding: 15px;
+                gap: 12px;
+                border-radius: 18px;
                 min-height: auto;
+            }
+
+            .trust-item i {
+                width: 40px;
+                height: 40px;
+                border-radius: 14px;
+                font-size: 1.2rem;
+            }
+
+            .tripadvisor-row {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 14px;
             }
 
             .card-image {
@@ -1235,23 +1440,71 @@
             }
 
             .certificate-card {
-                width: 125px;
-                height: 125px;
-                border-radius: 22px;
+                width: 100%;
+                max-width: none;
+                height: 118px;
+                border-radius: 20px;
+                padding: 14px;
+            }
+        }
+
+        @media (max-width: 575px) {
+            .hero-section {
+                padding: 110px 0 86px;
+            }
+
+            .hero-section::after {
+                height: 104px;
+                bottom: -64px;
+            }
+
+            .hero-badge {
+                width: 100%;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .hero-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .hero-stat:last-child {
+                grid-column: 1 / -1;
             }
         }
 
         @media (max-width: 480px) {
+            .section-pad {
+                padding: 68px 0;
+            }
+
             .section-heading {
-                margin-bottom: 38px;
+                margin-bottom: 32px;
             }
 
             .card-body {
-                padding: 22px;
+                padding: 20px;
             }
 
             .hero-section {
-                padding-bottom: 100px;
+                padding-bottom: 82px;
+            }
+
+            .hero-title {
+                font-size: clamp(2.1rem, 11.5vw, 3rem);
+            }
+
+            .hero-subtitle {
+                font-size: .95rem;
+            }
+
+            .quote-card,
+            .newsletter-box {
+                padding: 28px 18px;
+            }
+
+            .tripadvisor-row {
+                grid-template-columns: 1fr;
             }
         }
     </style>
