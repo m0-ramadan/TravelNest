@@ -6,7 +6,7 @@
         $siteName = 'Etro Tours';
         $siteUrl = rtrim(config('app.url') ?: request()->root(), '/');
         $logoUrl = asset('website/logo/logo-lat.png');
-        $faviconUrl = $logoUrl;
+        $brandThemeColor = '#1f5fbf';
         $defaultTitle = "Etro Tours | Luxury Egypt Tours, Nile Cruises & Tailor-Made Travel";
         $defaultDescription = "Plan luxury Egypt tours, Nile cruises, private day trips, and tailor-made holidays with Etro Tours. Explore Cairo, Luxor, Aswan, and beyond with expert local travel specialists.";
         $defaultKeywords = 'Etro Tours, Egypt tours, luxury Egypt tours, Nile cruises, Egypt travel packages, Cairo tours, Luxor tours, Aswan tours, tailor made Egypt holidays';
@@ -58,7 +58,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta name="theme-color" content="#0b1220" data-theme-color-meta>
+    <meta name="theme-color" content="{{ $brandThemeColor }}" data-theme-color-meta>
     <title>{{ $pageTitle }}</title>
     <link rel="canonical" href="{{ $pageCanonical }}">
     <meta name="robots" content="{{ $pageRobots }}">
@@ -113,10 +113,13 @@
     </script>
 
     <!-- Favicons -->
-    <link rel="apple-touch-icon" href="{{ $faviconUrl }}">
-    <link rel="icon" type="image/png" href="{{ $faviconUrl }}">
-    <link rel="manifest" href="{{ asset('website/favicon/manifest.json') }}">
-    <link rel="shortcut icon" href="{{ $faviconUrl }}">
+    <link rel="icon" type="image/png" sizes="48x48" href="{{ asset('favicon-48x48.png') }}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('favicon-96x96.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('favicon-192x192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('favicon-512x512.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
 
 
     <!-- Modern CSS -->
@@ -974,7 +977,7 @@
                 document.documentElement.setAttribute('data-theme', theme);
                 document.documentElement.style.colorScheme = theme;
                 if (themeColorMeta) {
-                    themeColorMeta.setAttribute('content', theme === 'dark' ? '#0b1220' : '#f7fafc');
+                    themeColorMeta.setAttribute('content', '{{ $brandThemeColor }}');
                 }
                 updateThemeButtons(theme);
             }

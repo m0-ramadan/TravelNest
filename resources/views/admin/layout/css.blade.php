@@ -1,5 +1,6 @@
 <!-- Favicon -->
-<link rel="icon" type="image/x-icon" href="#assets/img/favicon/favicon.ico" />
+<link rel="icon" type="image/png" sizes="48x48" href="{{ asset('favicon-48x48.png') }}" />
+<link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
