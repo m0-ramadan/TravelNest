@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" data-theme="dark">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}"
+    data-theme="@yield('preferred_theme', 'dark')">
 
 <head>
     @php
@@ -7,9 +8,11 @@
         $siteUrl = rtrim(config('app.url') ?: request()->root(), '/');
         $logoUrl = asset('website/logo/logo-lat.png');
         $brandThemeColor = '#1f5fbf';
-        $defaultTitle = "Etro Tours | Luxury Egypt Tours, Nile Cruises & Tailor-Made Travel";
-        $defaultDescription = "Plan luxury Egypt tours, Nile cruises, private day trips, and tailor-made holidays with Etro Tours. Explore Cairo, Luxor, Aswan, and beyond with expert local travel specialists.";
-        $defaultKeywords = 'Etro Tours, Egypt tours, luxury Egypt tours, Nile cruises, Egypt travel packages, Cairo tours, Luxor tours, Aswan tours, tailor made Egypt holidays';
+        $defaultTitle = 'Etro Tours | Luxury Egypt Tours, Nile Cruises & Tailor-Made Travel';
+        $defaultDescription =
+            'Plan luxury Egypt tours, Nile cruises, private day trips, and tailor-made holidays with Etro Tours. Explore Cairo, Luxor, Aswan, and beyond with expert local travel specialists.';
+        $defaultKeywords =
+            'Etro Tours, Egypt tours, luxury Egypt tours, Nile cruises, Egypt travel packages, Cairo tours, Luxor tours, Aswan tours, tailor made Egypt holidays';
         $rawTitle = trim($__env->yieldContent('title'));
         $rawDescription = trim(preg_replace('/\s+/', ' ', strip_tags($__env->yieldContent('description'))));
         $rawKeywords = trim(preg_replace('/\s+/', ' ', strip_tags($__env->yieldContent('keywords'))));
@@ -18,15 +21,20 @@
         $rawOgType = trim($__env->yieldContent('og_type'));
         $rawTwitterCard = trim($__env->yieldContent('twitter_card'));
         $pageTitle = $rawTitle !== '' ? $rawTitle : $defaultTitle;
-        $pageDescription = $rawDescription !== '' ? \Illuminate\Support\Str::limit($rawDescription, 170, '...') : $defaultDescription;
+        $pageDescription =
+            $rawDescription !== '' ? \Illuminate\Support\Str::limit($rawDescription, 170, '...') : $defaultDescription;
         $pageKeywords = $rawKeywords !== '' ? $rawKeywords : $defaultKeywords;
         $pageCanonical = $rawCanonical !== '' ? $rawCanonical : url()->current();
         $pageImage = $logoUrl;
         $pageRobots = $rawRobots !== '' ? $rawRobots : 'index, follow, max-image-preview:large';
-        $pageOgType = $rawOgType !== '' ? $rawOgType : (request()->routeIs('website.blogs.show*') ? 'article' : 'website');
+        $pageOgType =
+            $rawOgType !== '' ? $rawOgType : (request()->routeIs('website.blogs.show*') ? 'article' : 'website');
         $twitterCard = $rawTwitterCard !== '' ? $rawTwitterCard : 'summary_large_image';
         $ogLocale = app()->getLocale() === 'ar' ? 'ar_AR' : 'en_US';
         $alternateLocale = app()->getLocale() === 'ar' ? 'en_US' : 'ar_AR';
+        $preferredThemeValue = trim($__env->yieldContent('preferred_theme', 'dark'));
+        $preferredTheme = in_array($preferredThemeValue, ['light', 'dark'], true) ? $preferredThemeValue : 'dark';
+        $bodyClass = trim($__env->yieldContent('body_class'));
         $organizationSchema = [
             '@context' => 'https://schema.org',
             '@type' => 'TravelAgency',
@@ -94,11 +102,11 @@
     @hasSection('schema')
         @yield('schema')
     @endif
-    
+
     <script>
         (function() {
             const storageKey = 'website-theme';
-            let theme = 'dark';
+            let theme = @json($preferredTheme);
 
             try {
                 const storedTheme = localStorage.getItem(storageKey);
@@ -516,7 +524,7 @@
             outline-offset: 2px;
         }
 
-        /* Fix Destinations Dropdown */
+        /* Fix Navbar Dropdowns */
         .navbar .dropdown {
             position: relative;
         }
@@ -547,6 +555,11 @@
             visibility: visible;
             transform: translateY(0);
             pointer-events: auto;
+        }
+
+        .navbar .dropdown-menu.dropdown-menu-end {
+            left: auto;
+            right: 0;
         }
 
         .navbar .dropdown-item {
@@ -606,6 +619,1227 @@
                 display: block;
             }
         }
+
+        html[data-theme='light'] {
+            --website-shell-bg: linear-gradient(180deg, #f7fbff 0%, #fffaf1 100%);
+            --website-shell-alt-bg: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+            --website-shell-accent-bg:
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.1), transparent 34%),
+                radial-gradient(circle at 90% 12%, rgba(214, 163, 84, 0.12), transparent 28%),
+                #ffffff;
+            --website-shell-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 250, 243, 0.95) 100%);
+            --website-shell-surface-soft: rgba(255, 255, 255, 0.88);
+            --website-shell-border: rgba(8, 47, 73, 0.1);
+            --website-shell-border-strong: rgba(214, 163, 84, 0.28);
+            --website-shell-shadow: 0 20px 52px rgba(8, 47, 73, 0.1);
+            --website-shell-shadow-hover: 0 30px 78px rgba(8, 47, 73, 0.16);
+            --website-shell-heading: #082f49;
+            --website-shell-text: #0d2748;
+            --website-shell-muted: #5f7389;
+            --website-shell-breadcrumb-bg: rgba(255, 255, 255, 0.86);
+            --website-shell-badge-bg: rgba(5, 27, 51, 0.72);
+            --website-shell-badge-border: rgba(239, 191, 96, 0.46);
+            --website-shell-badge-text: #f4cb78;
+            --website-shell-hero-card: rgba(255, 255, 255, 0.12);
+            --website-shell-hero-card-border: rgba(255, 255, 255, 0.22);
+            --website-shell-hero-title: #ffffff;
+            --website-shell-hero-subtitle: rgba(255, 255, 255, 0.9);
+            --website-shell-tag-bg: rgba(214, 163, 84, 0.12);
+            --website-shell-tag-text: #9b6a2c;
+            --website-shell-input-bg: rgba(255, 255, 255, 0.96);
+            --website-shell-input-border: rgba(8, 47, 73, 0.14);
+            --website-nav-bg:
+                radial-gradient(circle at 12% 0%, rgba(40, 86, 128, 0.28), transparent 24%),
+                linear-gradient(90deg, #061a34 0%, #06213f 52%, #03172e 100%);
+            --website-nav-border: rgba(218, 170, 85, 0.34);
+            --website-nav-shadow: 0 8px 28px rgba(1, 12, 27, 0.18);
+            --website-nav-control-bg: rgba(255, 255, 255, 0.025);
+            --website-nav-control-hover-bg: rgba(255, 255, 255, 0.07);
+            --website-nav-control-border: rgba(218, 170, 85, 0.25);
+            --website-nav-link-color: rgba(255, 255, 255, 0.94);
+            --website-nav-link-icon: rgba(255, 255, 255, 0.9);
+            --website-nav-link-hover: #f5cf7d;
+            --website-nav-special-bg: rgba(255, 255, 255, 0.025);
+            --website-nav-special-text: #ffffff;
+            --website-nav-special-hover-bg: rgba(255, 255, 255, 0.06);
+            --website-nav-dropdown-bg: rgba(6, 27, 52, 0.98);
+            --website-nav-dropdown-border: rgba(218, 170, 85, 0.25);
+            --website-mobile-menu-bg: linear-gradient(145deg, rgba(6, 23, 43, 0.99) 0%, rgba(3, 23, 46, 0.98) 100%);
+            --website-mobile-menu-border: rgba(218, 170, 85, 0.18);
+            --website-mobile-card-bg: rgba(255, 255, 255, 0.04);
+            --website-mobile-card-hover: rgba(255, 255, 255, 0.08);
+            --website-mobile-submenu-bg: rgba(255, 255, 255, 0.03);
+            --website-mobile-submenu-hover: rgba(242, 189, 91, 0.12);
+            --website-shell-icon-primary: linear-gradient(135deg, #0f5f8f 0%, #38bdf8 100%);
+            --website-shell-icon-primary-shadow: 0 16px 34px rgba(15, 95, 143, 0.24);
+            --website-shell-icon-dark: linear-gradient(145deg, #092a51 0%, #031a35 100%);
+            --website-shell-icon-dark-shadow: 0 12px 24px rgba(3, 24, 48, 0.18);
+            --website-shell-icon-gold: linear-gradient(135deg, #e7b762 0%, #bd7f32 100%);
+            --website-shell-icon-gold-shadow: 0 14px 30px rgba(214, 163, 84, 0.24);
+        }
+
+        html[data-theme='dark'] {
+            --website-shell-bg: linear-gradient(180deg, #06101e 0%, #0b1220 46%, #111827 100%);
+            --website-shell-alt-bg: linear-gradient(180deg, rgba(10, 18, 32, 0.98) 0%, rgba(15, 23, 42, 0.98) 100%);
+            --website-shell-accent-bg:
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 34%),
+                radial-gradient(circle at 88% 12%, rgba(214, 163, 84, 0.12), transparent 28%),
+                linear-gradient(180deg, #081120 0%, #0b1220 42%, #111827 100%);
+            --website-shell-surface: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(17, 24, 39, 0.93) 100%);
+            --website-shell-surface-soft: rgba(15, 23, 42, 0.8);
+            --website-shell-border: rgba(148, 163, 184, 0.16);
+            --website-shell-border-strong: rgba(244, 195, 106, 0.22);
+            --website-shell-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+            --website-shell-shadow-hover: 0 32px 86px rgba(0, 0, 0, 0.44);
+            --website-shell-heading: #f8fafc;
+            --website-shell-text: #e5edf9;
+            --website-shell-muted: #9fb0c5;
+            --website-shell-breadcrumb-bg: rgba(10, 18, 32, 0.76);
+            --website-shell-badge-bg: rgba(5, 16, 28, 0.84);
+            --website-shell-badge-border: rgba(244, 195, 106, 0.26);
+            --website-shell-badge-text: #f4cb78;
+            --website-shell-hero-card: rgba(15, 23, 42, 0.34);
+            --website-shell-hero-card-border: rgba(148, 163, 184, 0.18);
+            --website-shell-hero-title: #ffffff;
+            --website-shell-hero-subtitle: rgba(226, 232, 240, 0.84);
+            --website-shell-tag-bg: rgba(244, 195, 106, 0.12);
+            --website-shell-tag-text: #f4d488;
+            --website-shell-input-bg: rgba(15, 23, 42, 0.94);
+            --website-shell-input-border: rgba(148, 163, 184, 0.24);
+            --website-nav-bg:
+                radial-gradient(circle at 12% 0%, rgba(40, 86, 128, 0.18), transparent 24%),
+                linear-gradient(90deg, rgba(4, 13, 25, 0.98) 0%, rgba(5, 18, 34, 0.98) 52%, rgba(3, 12, 23, 0.98) 100%);
+            --website-nav-border: rgba(102, 136, 181, 0.22);
+            --website-nav-shadow: 0 10px 32px rgba(1, 8, 18, 0.3);
+            --website-nav-control-bg: rgba(255, 255, 255, 0.02);
+            --website-nav-control-hover-bg: rgba(255, 255, 255, 0.06);
+            --website-nav-control-border: rgba(102, 136, 181, 0.22);
+            --website-nav-link-color: rgba(255, 255, 255, 0.94);
+            --website-nav-link-icon: #f3c768;
+            --website-nav-link-hover: #f5cf7d;
+            --website-nav-special-bg: linear-gradient(135deg, rgba(55, 41, 20, 0.94), rgba(31, 23, 12, 0.9));
+            --website-nav-special-text: #f5c96f;
+            --website-nav-special-hover-bg: linear-gradient(135deg, rgba(65, 47, 23, 0.96), rgba(36, 27, 14, 0.94));
+            --website-nav-dropdown-bg: rgba(6, 18, 35, 0.98);
+            --website-nav-dropdown-border: rgba(102, 136, 181, 0.22);
+            --website-mobile-menu-bg: linear-gradient(145deg, rgba(4, 13, 25, 0.99) 0%, rgba(7, 18, 32, 0.98) 100%);
+            --website-mobile-menu-border: rgba(102, 136, 181, 0.18);
+            --website-mobile-card-bg: rgba(255, 255, 255, 0.04);
+            --website-mobile-card-hover: rgba(255, 255, 255, 0.08);
+            --website-mobile-submenu-bg: rgba(255, 255, 255, 0.03);
+            --website-mobile-submenu-hover: rgba(242, 189, 91, 0.12);
+            --website-shell-icon-primary: linear-gradient(135deg, #0f5f8f 0%, #38bdf8 100%);
+            --website-shell-icon-primary-shadow: 0 16px 34px rgba(8, 47, 73, 0.28);
+            --website-shell-icon-dark: linear-gradient(145deg, #13243f 0%, #091423 100%);
+            --website-shell-icon-dark-shadow: 0 14px 28px rgba(0, 0, 0, 0.26);
+            --website-shell-icon-gold: linear-gradient(135deg, #e7b762 0%, #bd7f32 100%);
+            --website-shell-icon-gold-shadow: 0 14px 30px rgba(214, 163, 84, 0.22);
+        }
+
+        body.website-theme-shell {
+            background: var(--website-shell-bg);
+            color: var(--website-shell-text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.65;
+        }
+
+        body.website-theme-shell .navbar {
+            min-height: 90px;
+            padding: 8px 0;
+            background: var(--website-nav-bg) !important;
+            border-bottom: 1px solid var(--website-nav-border) !important;
+            box-shadow: var(--website-nav-shadow) !important;
+            backdrop-filter: blur(18px);
+            opacity: 1 !important;
+            transform: none !important;
+            animation: none !important;
+        }
+
+        body.website-theme-shell .navbar>.container,
+        body.website-theme-shell .hero-section>.container,
+        body.website-theme-shell .offers-hero>.container,
+        body.website-theme-shell .contact-hero>.container,
+        body.website-theme-shell .listing-hero>.container,
+        body.website-theme-shell .package-hero>.container,
+        body.website-theme-shell .article-hero>.container,
+        body.website-theme-shell .tailor-hero>.container,
+        body.website-theme-shell .static-page-hero>.container,
+        body.website-theme-shell .search-hero>.container {
+            max-width: 1400px;
+        }
+
+        body.website-theme-shell .navbar-brand {
+            padding: 0;
+        }
+
+        body.website-theme-shell .navbar-brand img,
+        body.website-theme-shell .mobile-menu-brand img {
+            content: url('{{ asset('website/logo/logo-lat-gold.png') }}');
+            object-fit: contain;
+            filter: none;
+        }
+
+
+        body.website-theme-shell .navbar-nav {
+            align-items: center;
+            gap: 4px;
+        }
+
+        body.website-theme-shell .navbar-nav .nav-link {
+            color: var(--website-nav-link-color) !important;
+            background: transparent !important;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 11px 13px;
+            margin: 0 1px;
+            border-radius: 12px;
+            transition: color 0.25s ease, background-color 0.25s ease, transform 0.25s ease;
+        }
+
+        body.website-theme-shell .navbar-nav .nav-link i {
+            color: var(--website-nav-link-icon) !important;
+            transition: color 0.25s ease, transform 0.25s ease;
+        }
+
+        body.website-theme-shell .navbar-nav .nav-link::after {
+            display: none !important;
+        }
+
+        body.website-theme-shell .navbar-nav .nav-link::before {
+            bottom: -4px;
+            height: 2px;
+            background: linear-gradient(90deg, #d69a36, #f4cd7a) !important;
+        }
+
+        body.website-theme-shell .navbar-nav .nav-link.is-active,
+        body.website-theme-shell .navbar-nav .nav-link:hover {
+            color: var(--website-nav-link-hover) !important;
+            background: var(--website-nav-control-hover-bg) !important;
+            transform: translateY(-1px);
+        }
+
+        body.website-theme-shell .navbar-nav .nav-link.is-active::before,
+        body.website-theme-shell .navbar-nav .nav-link:hover::before {
+            width: 58%;
+        }
+
+        body.website-theme-shell .navbar-nav .nav-link.is-active i,
+        body.website-theme-shell .navbar-nav .nav-link:hover i {
+            color: #f2bd5b !important;
+            transform: translateY(-1px);
+        }
+
+        body.website-theme-shell .nav-link.special-offer {
+            min-height: 46px;
+            padding: 10px 20px;
+            margin-inline: 8px;
+            color: var(--website-nav-special-text) !important;
+            background: var(--website-nav-special-bg) !important;
+            border: 1px solid rgba(218, 170, 85, 0.27);
+            border-radius: 999px;
+            box-shadow: inset 0 0 18px rgba(109, 76, 32, 0.16);
+            animation: none;
+        }
+
+        body.website-theme-shell .nav-link.special-offer::before {
+            display: none !important;
+        }
+
+        body.website-theme-shell .nav-link.special-offer i {
+            color: #f2bd5b !important;
+        }
+
+        body.website-theme-shell .nav-link.special-offer.is-active,
+        body.website-theme-shell .nav-link.special-offer:hover {
+            color: #f7d48b !important;
+            background: var(--website-nav-special-hover-bg) !important;
+            border-color: rgba(242, 189, 91, 0.5) !important;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+            transform: translateY(-2px);
+        }
+
+        body.website-theme-shell .navbar-actions {
+            gap: 10px;
+        }
+
+        body.website-theme-shell .action-btn {
+            width: 46px;
+            height: 46px;
+            color: #ffffff !important;
+            background: var(--website-nav-control-bg) !important;
+            border: 1px solid var(--website-nav-control-border) !important;
+            border-radius: 50%;
+            box-shadow: none !important;
+        }
+
+        body.website-theme-shell .action-btn::before {
+            display: none;
+        }
+
+        body.website-theme-shell .action-btn:hover {
+            color: #f4c869 !important;
+            background: var(--website-nav-control-hover-bg) !important;
+            border-color: rgba(242, 189, 91, 0.38) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18) !important;
+        }
+
+        body.website-theme-shell .btn-tailor {
+            min-height: 48px;
+            padding: 10px 24px;
+            color: #08213f !important;
+            background: linear-gradient(135deg, #e8b34d 0%, #ffd778 100%);
+            border: 1px solid rgba(255, 224, 158, 0.6);
+            border-radius: 999px;
+            box-shadow: 0 10px 28px rgba(214, 154, 54, 0.24);
+            animation: none;
+            width: max-content;
+        }
+
+        body.website-theme-shell .btn-tailor.is-active,
+        body.website-theme-shell .btn-tailor:hover {
+            color: #08213f !important;
+            background: linear-gradient(135deg, #efbf61 0%, #ffe3a2 100%);
+            border-color: #f5cf7f;
+            transform: translateY(-2px);
+            box-shadow: 0 14px 32px rgba(214, 154, 54, 0.34) !important;
+        }
+
+        body.website-theme-shell .language-toggle {
+            min-height: 46px;
+            padding: 9px 15px;
+            color: #ffffff !important;
+            background: var(--website-nav-control-bg) !important;
+            border: 1px solid var(--website-nav-control-border) !important;
+            border-radius: 999px;
+            box-shadow: none !important;
+            gap: 8px;
+        }
+
+        body.website-theme-shell .language-toggle span {
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        body.website-theme-shell .language-toggle:hover {
+            color: #f4c869 !important;
+            background: var(--website-nav-control-hover-bg) !important;
+            border-color: rgba(242, 189, 91, 0.38) !important;
+        }
+
+        body.website-theme-shell .mobile-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-inline-end: 10px;
+        }
+
+        body.website-theme-shell .mobile-actions .mobile-action-btn {
+            width: 46px;
+            height: 46px;
+            min-height: 46px;
+            padding: 0;
+            color: #ffffff !important;
+            background: var(--website-nav-control-bg) !important;
+            border: 1px solid var(--website-nav-control-border) !important;
+            border-radius: 50%;
+            box-shadow: none !important;
+        }
+
+        body.website-theme-shell .mobile-actions .mobile-action-btn:hover {
+            color: #f4c869 !important;
+            background: var(--website-nav-control-hover-bg) !important;
+            border-color: rgba(242, 189, 91, 0.38) !important;
+            transform: translateY(-2px);
+        }
+
+        body.website-theme-shell .mobile-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 46px;
+            height: 46px;
+            background: var(--website-nav-control-bg) !important;
+            border: 1px solid var(--website-nav-control-border) !important;
+            border-radius: 14px;
+            transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+        }
+
+        body.website-theme-shell .mobile-toggle:hover {
+            background: var(--website-nav-control-hover-bg) !important;
+            border-color: rgba(242, 189, 91, 0.38) !important;
+            transform: translateY(-2px);
+        }
+
+        body.website-theme-shell .hamburger span {
+            background: #efc46d;
+        }
+
+        body.website-theme-shell .navbar .dropdown-menu {
+            background: var(--website-nav-dropdown-bg) !important;
+            border-color: var(--website-nav-dropdown-border) !important;
+            box-shadow: 0 20px 42px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        body.website-theme-shell .navbar .dropdown-item {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+
+        body.website-theme-shell .navbar .dropdown-item i {
+            color: #f2bd5b !important;
+        }
+
+        body.website-theme-shell .navbar .dropdown-item:hover,
+        body.website-theme-shell .navbar .dropdown-item.active {
+            color: #f5cf7d !important;
+            background: rgba(242, 189, 91, 0.1) !important;
+        }
+
+        body.website-theme-shell .modern-mobile-menu {
+            background: var(--website-mobile-menu-bg) !important;
+            backdrop-filter: blur(30px);
+        }
+
+        body.website-theme-shell .mobile-menu-header {
+            background: var(--website-mobile-menu-bg) !important;
+            border-bottom: 1px solid var(--website-mobile-menu-border) !important;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        body.website-theme-shell .mobile-menu-brand img {
+            animation: none;
+        }
+
+        body.website-theme-shell .mobile-close-btn {
+            background: var(--website-nav-control-bg) !important;
+            border: 1px solid var(--website-nav-control-border) !important;
+            border-radius: 14px;
+            color: #ffffff !important;
+        }
+
+        body.website-theme-shell .mobile-close-btn:hover {
+            background: var(--website-nav-control-hover-bg) !important;
+            color: #f5cf7d !important;
+            transform: rotate(90deg) scale(1.06);
+        }
+
+        body.website-theme-shell .mobile-menu-content {
+            max-width: 430px;
+        }
+
+        body.website-theme-shell .mobile-nav-link,
+        body.website-theme-shell .mobile-destinations-toggle,
+        body.website-theme-shell .mobile-language-toggle {
+            background: var(--website-mobile-card-bg) !important;
+            border: 1px solid var(--website-mobile-menu-border) !important;
+            color: #ffffff !important;
+            font-weight: 600;
+            border-radius: 16px;
+        }
+
+        body.website-theme-shell .mobile-nav-link::before,
+        body.website-theme-shell .mobile-destinations-toggle::before,
+        body.website-theme-shell .mobile-language-toggle::before {
+            background: linear-gradient(to bottom, #d69a36, #f4cd7a);
+        }
+
+        body.website-theme-shell .mobile-nav-link:hover,
+        body.website-theme-shell .mobile-nav-link.is-active,
+        body.website-theme-shell .mobile-destinations-toggle:hover,
+        body.website-theme-shell .mobile-destinations-toggle.is-active,
+        body.website-theme-shell .mobile-language-toggle:hover {
+            background: var(--website-mobile-card-hover) !important;
+            border-color: rgba(242, 189, 91, 0.34) !important;
+            color: #f5cf7d !important;
+            transform: translateX(12px);
+        }
+
+        body.website-theme-shell .mobile-nav-link i,
+        body.website-theme-shell .mobile-destinations-toggle>div i,
+        body.website-theme-shell .mobile-language-toggle>div i,
+        body.website-theme-shell .mobile-destinations-toggle i.chevron,
+        body.website-theme-shell .mobile-language-toggle i.chevron {
+            color: #f2bd5b !important;
+        }
+
+        body.website-theme-shell .mobile-submenu-link,
+        body.website-theme-shell .mobile-language-link {
+            background: var(--website-mobile-submenu-bg) !important;
+            border: 1px solid var(--website-mobile-menu-border) !important;
+            color: rgba(255, 255, 255, 0.88) !important;
+            font-weight: 600;
+        }
+
+        body.website-theme-shell .mobile-submenu-link:hover,
+        body.website-theme-shell .mobile-language-link:hover,
+        body.website-theme-shell .mobile-language-link.active {
+            background: var(--website-mobile-submenu-hover) !important;
+            border-color: rgba(242, 189, 91, 0.34) !important;
+            color: #f5cf7d !important;
+            transform: translateX(10px);
+        }
+
+        body.website-theme-shell .mobile-actions-grid {
+            border-top: 1px solid var(--website-mobile-menu-border);
+        }
+
+        body.website-theme-shell .mobile-action-card {
+            background: var(--website-mobile-card-bg) !important;
+            border: 1px solid var(--website-mobile-menu-border) !important;
+            color: #ffffff !important;
+            animation: none;
+        }
+
+        body.website-theme-shell .mobile-action-card:hover {
+            background: var(--website-mobile-card-hover) !important;
+            border-color: rgba(242, 189, 91, 0.34) !important;
+            color: #f5cf7d !important;
+            transform: translateY(-6px) scale(1.03);
+        }
+
+        body.website-theme-shell .mobile-action-card i {
+            color: #f2bd5b !important;
+        }
+
+        body.website-theme-shell .mobile-enquiry-btn2 {
+            background: linear-gradient(135deg, #e8b34d 0%, #ffd778 100%) !important;
+            color: #08213f !important;
+            box-shadow: 0 10px 28px rgba(214, 154, 54, 0.24);
+            animation: none;
+        }
+
+        body.website-theme-shell .mobile-enquiry-btn2:hover {
+            background: linear-gradient(135deg, #efbf61 0%, #ffe3a2 100%) !important;
+            color: #08213f !important;
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 14px 32px rgba(214, 154, 54, 0.34);
+        }
+
+        body.website-theme-shell .tour-page,
+        body.website-theme-shell .listing-overview,
+        body.website-theme-shell .listing-results,
+        body.website-theme-shell .offers-summary,
+        body.website-theme-shell .offers-section,
+        body.website-theme-shell .overview-section,
+        body.website-theme-shell .filters-section,
+        body.website-theme-shell .results-section,
+        body.website-theme-shell .contact-main-section,
+        body.website-theme-shell .contact-office-section,
+        body.website-theme-shell .article-content-area,
+        body.website-theme-shell .tailor-form-section,
+        body.website-theme-shell .static-page-section,
+        body.website-theme-shell .main-container,
+        body.website-theme-shell .card-area,
+        body.website-theme-shell .blog-card-area,
+        body.website-theme-shell .related-articles-section,
+        body.website-theme-shell .tours-section,
+        body.website-theme-shell .light-section,
+        body.website-theme-shell .cream-section {
+            background: var(--website-shell-accent-bg) !important;
+        }
+
+        body.website-theme-shell:not(.home-reference-page) .hero-section,
+        body.website-theme-shell:not(.home-reference-page) .offers-hero,
+        body.website-theme-shell:not(.home-reference-page) .contact-hero,
+        body.website-theme-shell:not(.home-reference-page) .listing-hero,
+        body.website-theme-shell:not(.home-reference-page) .package-hero,
+        body.website-theme-shell:not(.home-reference-page) .article-hero,
+        body.website-theme-shell:not(.home-reference-page) .tailor-hero,
+        body.website-theme-shell:not(.home-reference-page) .static-page-hero,
+        body.website-theme-shell:not(.home-reference-page) .search-hero {
+            isolation: isolate;
+            background-color: #081a33;
+            background-attachment: scroll !important;
+            border-bottom: 1px solid var(--website-shell-border-strong);
+            box-shadow: inset 0 -120px 120px rgba(2, 6, 23, 0.22);
+        }
+
+        body.website-theme-shell:not(.home-reference-page) .hero-content,
+        body.website-theme-shell:not(.home-reference-page) .contact-hero-content,
+        body.website-theme-shell:not(.home-reference-page) .offers-hero-content,
+        body.website-theme-shell:not(.home-reference-page) .listing-hero-content,
+        body.website-theme-shell:not(.home-reference-page) .static-page-hero-content,
+        body.website-theme-shell:not(.home-reference-page) .article-meta {
+            position: relative;
+            z-index: 3;
+        }
+
+        body.website-theme-shell:not(.home-reference-page) .hero-section .hero-title,
+        body.website-theme-shell:not(.home-reference-page) .offers-hero .offers-title,
+        body.website-theme-shell:not(.home-reference-page) .contact-hero .contact-title,
+        body.website-theme-shell:not(.home-reference-page) .listing-hero .listing-title,
+        body.website-theme-shell:not(.home-reference-page) .article-hero .article-title,
+        body.website-theme-shell:not(.home-reference-page) .tailor-hero .hero-title,
+        body.website-theme-shell:not(.home-reference-page) .static-page-hero .static-page-title,
+        body.website-theme-shell:not(.home-reference-page) .search-hero .hero-title {
+            font-family: 'Playfair Display', serif;
+            color: var(--website-shell-hero-title) !important;
+            background: none !important;
+            -webkit-text-fill-color: currentColor;
+            letter-spacing: -0.04em;
+            text-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+        }
+
+        body.website-theme-shell:not(.home-reference-page) .hero-section .hero-subtitle,
+        body.website-theme-shell:not(.home-reference-page) .hero-section .hero-description,
+        body.website-theme-shell:not(.home-reference-page) .offers-subtitle,
+        body.website-theme-shell:not(.home-reference-page) .contact-subtitle,
+        body.website-theme-shell:not(.home-reference-page) .listing-subtitle,
+        body.website-theme-shell:not(.home-reference-page) .static-page-subtitle,
+        body.website-theme-shell:not(.home-reference-page) .search-hero .hero-subtitle {
+            color: var(--website-shell-hero-subtitle) !important;
+            text-shadow: 0 3px 14px rgba(0, 0, 0, 0.24);
+        }
+
+        body.website-theme-shell .section-kicker,
+        body.website-theme-shell:not(.home-reference-page) .hero-badge,
+        body.website-theme-shell:not(.home-reference-page) .contact-badge,
+        body.website-theme-shell:not(.home-reference-page) .offers-badge,
+        body.website-theme-shell:not(.home-reference-page) .listing-badge,
+        body.website-theme-shell:not(.home-reference-page) .article-badge,
+        body.website-theme-shell:not(.home-reference-page) .static-page-badge,
+        body.website-theme-shell .contact-method-highlight,
+        body.website-theme-shell .offer-country-badge,
+        body.website-theme-shell .offer-save-badge,
+        body.website-theme-shell .price-badge,
+        body.website-theme-shell .tour-badge,
+        body.website-theme-shell .journey-badge,
+        body.website-theme-shell .city-country-badge,
+        body.website-theme-shell .badge-top,
+        body.website-theme-shell .feature-tag,
+        body.website-theme-shell .tour-tag,
+        body.website-theme-shell .offer-tag,
+        body.website-theme-shell .tag-item,
+        body.website-theme-shell .category-tag,
+        body.website-theme-shell .result-type {
+            background: var(--website-shell-badge-bg) !important;
+            color: var(--website-shell-badge-text) !important;
+            border: 1px solid var(--website-shell-badge-border) !important;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+            backdrop-filter: blur(12px);
+        }
+
+        body.website-theme-shell .section-kicker i,
+        body.website-theme-shell:not(.home-reference-page) .hero-badge i,
+        body.website-theme-shell:not(.home-reference-page) .contact-badge i,
+        body.website-theme-shell:not(.home-reference-page) .offers-badge i,
+        body.website-theme-shell:not(.home-reference-page) .listing-badge i,
+        body.website-theme-shell:not(.home-reference-page) .static-page-badge i,
+        body.website-theme-shell:not(.home-reference-page) .article-badge i {
+            color: var(--rich-gold) !important;
+        }
+
+        body.website-theme-shell:not(.home-reference-page) .hero-stat,
+        body.website-theme-shell:not(.home-reference-page) .listing-stat,
+        body.website-theme-shell:not(.home-reference-page) .info-item,
+        body.website-theme-shell:not(.home-reference-page) .hero-feature,
+        body.website-theme-shell:not(.home-reference-page) .search-form-container {
+            background: var(--website-shell-hero-card) !important;
+            border: 1px solid var(--website-shell-hero-card-border) !important;
+            box-shadow: 0 18px 40px rgba(2, 6, 23, 0.18);
+            backdrop-filter: blur(14px);
+        }
+
+        body.website-theme-shell:not(.home-reference-page) .hero-stat strong,
+        body.website-theme-shell:not(.home-reference-page) .listing-stat strong,
+        body.website-theme-shell:not(.home-reference-page) .hero-stat i,
+        body.website-theme-shell:not(.home-reference-page) .hero-feature i,
+        body.website-theme-shell:not(.home-reference-page) .info-item i {
+            color: var(--rich-gold) !important;
+        }
+
+        body.website-theme-shell .overview-card,
+        body.website-theme-shell .overview-content,
+        body.website-theme-shell .filters-card,
+        body.website-theme-shell .filters-container,
+        body.website-theme-shell .offers-summary-card,
+        body.website-theme-shell .offer-card,
+        body.website-theme-shell .journey-card,
+        body.website-theme-shell .result-card,
+        body.website-theme-shell .tour-card,
+        body.website-theme-shell .cruise-card,
+        body.website-theme-shell .contact-method,
+        body.website-theme-shell .contact-form-card,
+        body.website-theme-shell .contact-side-card,
+        body.website-theme-shell .office-card,
+        body.website-theme-shell .support-item,
+        body.website-theme-shell .office-detail,
+        body.website-theme-shell .article-content-wrapper,
+        body.website-theme-shell .article-footer,
+        body.website-theme-shell .static-page-card,
+        body.website-theme-shell .luxury-sidebar,
+        body.website-theme-shell .sidebar-widget,
+        body.website-theme-shell .related-article-card,
+        body.website-theme-shell .modern-blog-card,
+        body.website-theme-shell .content-section,
+        body.website-theme-shell .detail-item,
+        body.website-theme-shell .day-card,
+        body.website-theme-shell .included-box,
+        body.website-theme-shell .excluded-box,
+        body.website-theme-shell .price-box,
+        body.website-theme-shell .review-card,
+        body.website-theme-shell .sidebar,
+        body.website-theme-shell .related-card,
+        body.website-theme-shell .offers-empty,
+        body.website-theme-shell .empty-state,
+        body.website-theme-shell .no-results,
+        body.website-theme-shell .empty-tours-box,
+        body.website-theme-shell .main-form,
+        body.website-theme-shell .sidebar-card,
+        body.website-theme-shell .contact-card,
+        body.website-theme-shell .form-container,
+        body.website-theme-shell .choose-card,
+        body.website-theme-shell .newsletter-box,
+        body.website-theme-shell .search-suggestions-dropdown,
+        body.website-theme-shell .modal-content {
+            background: var(--website-shell-surface) !important;
+            border: 1px solid var(--website-shell-border) !important;
+            box-shadow: var(--website-shell-shadow) !important;
+            border-radius: 28px !important;
+        }
+
+        body.website-theme-shell .offer-card:hover,
+        body.website-theme-shell .journey-card:hover,
+        body.website-theme-shell .tour-card:hover,
+        body.website-theme-shell .cruise-card:hover,
+        body.website-theme-shell .result-card:hover,
+        body.website-theme-shell .contact-method:hover,
+        body.website-theme-shell .support-item:hover,
+        body.website-theme-shell .office-detail:hover,
+        body.website-theme-shell .related-article-card:hover,
+        body.website-theme-shell .related-card:hover,
+        body.website-theme-shell .modern-blog-card:hover,
+        body.website-theme-shell .choose-card:hover {
+            border-color: var(--website-shell-border-strong) !important;
+            box-shadow: var(--website-shell-shadow-hover) !important;
+        }
+
+        body.website-theme-shell .section-title,
+        body.website-theme-shell .section-heading h2,
+        body.website-theme-shell .section-header,
+        body.website-theme-shell .overview-card h2,
+        body.website-theme-shell .overview-title,
+        body.website-theme-shell .results-head h3,
+        body.website-theme-shell .feature-title,
+        body.website-theme-shell .filters-title,
+        body.website-theme-shell .form-title,
+        body.website-theme-shell .sidebar-title,
+        body.website-theme-shell .side-card-title,
+        body.website-theme-shell .office-title,
+        body.website-theme-shell .contact-method-title,
+        body.website-theme-shell .contact-card-title,
+        body.website-theme-shell .box-title,
+        body.website-theme-shell .step-title,
+        body.website-theme-shell .blog-card-title,
+        body.website-theme-shell .blog-card-title a,
+        body.website-theme-shell .card-title,
+        body.website-theme-shell .choose-title,
+        body.website-theme-shell .trust-title,
+        body.website-theme-shell .deal-title,
+        body.website-theme-shell .deal-title a,
+        body.website-theme-shell .cruise-title,
+        body.website-theme-shell .cruise-title a,
+        body.website-theme-shell .popular-content h4,
+        body.website-theme-shell .popular-content h4 a,
+        body.website-theme-shell .related-title,
+        body.website-theme-shell .related-title a,
+        body.website-theme-shell .day-title,
+        body.website-theme-shell .detail-label,
+        body.website-theme-shell .label-text,
+        body.website-theme-shell .cta-title,
+        body.website-theme-shell .award-title,
+        body.website-theme-shell .award-title a,
+        body.website-theme-shell .modal-title,
+        body.website-theme-shell .static-page-title,
+        body.website-theme-shell .tour-title a,
+        body.website-theme-shell .journey-title a,
+        body.website-theme-shell .offer-title a,
+        body.website-theme-shell .destination-title a,
+        body.website-theme-shell .article-title a,
+        body.website-theme-shell .related-card-title,
+        body.website-theme-shell .author-name,
+        body.website-theme-shell .static-page-body h1,
+        body.website-theme-shell .static-page-body h2,
+        body.website-theme-shell .static-page-body h3,
+        body.website-theme-shell .static-page-body h4,
+        body.website-theme-shell .article-content h2,
+        body.website-theme-shell .article-content h3,
+        body.website-theme-shell .article-content h4 {
+            color: var(--website-shell-heading) !important;
+        }
+
+        body.website-theme-shell .section-title,
+        body.website-theme-shell .section-heading h2,
+        body.website-theme-shell .section-header,
+        body.website-theme-shell .overview-card h2,
+        body.website-theme-shell .overview-title,
+        body.website-theme-shell .feature-title,
+        body.website-theme-shell .filters-title,
+        body.website-theme-shell .form-title,
+        body.website-theme-shell .sidebar-title,
+        body.website-theme-shell .side-card-title,
+        body.website-theme-shell .office-title,
+        body.website-theme-shell .contact-card-title,
+        body.website-theme-shell .contact-method-title,
+        body.website-theme-shell .box-title,
+        body.website-theme-shell .step-title,
+        body.website-theme-shell .blog-card-title,
+        body.website-theme-shell .deal-title,
+        body.website-theme-shell .deal-title a,
+        body.website-theme-shell .card-title,
+        body.website-theme-shell .choose-title,
+        body.website-theme-shell .trust-title,
+        body.website-theme-shell .offer-title,
+        body.website-theme-shell .offer-title a,
+        body.website-theme-shell .tour-title,
+        body.website-theme-shell .tour-title a,
+        body.website-theme-shell .journey-title,
+        body.website-theme-shell .journey-title a,
+        body.website-theme-shell .destination-title,
+        body.website-theme-shell .destination-title a,
+        body.website-theme-shell .article-title,
+        body.website-theme-shell .article-title a,
+        body.website-theme-shell .cruise-title,
+        body.website-theme-shell .cruise-title a,
+        body.website-theme-shell .related-title,
+        body.website-theme-shell .cta-title,
+        body.website-theme-shell .award-title,
+        body.website-theme-shell .award-title a,
+        body.website-theme-shell .modal-title,
+        body.website-theme-shell .day-title {
+            font-family: 'Playfair Display', serif !important;
+            letter-spacing: -0.02em;
+            line-height: 1.28;
+        }
+
+        body.website-theme-shell .section-subtitle,
+        body.website-theme-shell .section-heading p,
+        body.website-theme-shell .overview-card p,
+        body.website-theme-shell .results-head p,
+        body.website-theme-shell .offers-summary-card p,
+        body.website-theme-shell .offer-description,
+        body.website-theme-shell .tour-description,
+        body.website-theme-shell .journey-description,
+        body.website-theme-shell .destination-description,
+        body.website-theme-shell .article-excerpt,
+        body.website-theme-shell .testimonial-text,
+        body.website-theme-shell .search-stats,
+        body.website-theme-shell .detail-value,
+        body.website-theme-shell .detail-text,
+        body.website-theme-shell .contact-method-description,
+        body.website-theme-shell .contact-card-subtitle,
+        body.website-theme-shell .side-card-copy,
+        body.website-theme-shell .office-intro,
+        body.website-theme-shell .feature-description,
+        body.website-theme-shell .card-description,
+        body.website-theme-shell .feature-item,
+        body.website-theme-shell .support-item span,
+        body.website-theme-shell .office-detail-text,
+        body.website-theme-shell .office-detail-text a,
+        body.website-theme-shell .contact-info p,
+        body.website-theme-shell .static-page-meta,
+        body.website-theme-shell .static-page-body,
+        body.website-theme-shell .static-page-body p,
+        body.website-theme-shell .static-page-body li,
+        body.website-theme-shell .static-page-body blockquote,
+        body.website-theme-shell .article-content,
+        body.website-theme-shell .article-content p,
+        body.website-theme-shell .article-content li,
+        body.website-theme-shell .overview-text,
+        body.website-theme-shell .day-content,
+        body.website-theme-shell .styled-list li,
+        body.website-theme-shell .blog-date,
+        body.website-theme-shell .blog-description p,
+        body.website-theme-shell .journey-meta span,
+        body.website-theme-shell .offer-meta,
+        body.website-theme-shell .offer-meta span,
+        body.website-theme-shell .card-meta span,
+        body.website-theme-shell .meta-item,
+        body.website-theme-shell .journey-schedule,
+        body.website-theme-shell .trust-item-small span,
+        body.website-theme-shell .sidebar-feature span,
+        body.website-theme-shell .popular-date,
+        body.website-theme-shell .related-desc,
+        body.website-theme-shell .offer-price-label,
+        body.website-theme-shell .offer-price-regular,
+        body.website-theme-shell .suggestion-type {
+            color: var(--website-shell-muted) !important;
+        }
+
+        body.website-theme-shell p,
+        body.website-theme-shell li,
+        body.website-theme-shell label,
+        body.website-theme-shell input,
+        body.website-theme-shell textarea,
+        body.website-theme-shell select,
+        body.website-theme-shell button {
+            font-family: inherit;
+        }
+
+        body.website-theme-shell .offer-title a:hover,
+        body.website-theme-shell .tour-title a:hover,
+        body.website-theme-shell .journey-title a:hover,
+        body.website-theme-shell .destination-title a:hover,
+        body.website-theme-shell .article-title a:hover,
+        body.website-theme-shell .blog-card-title a:hover,
+        body.website-theme-shell .popular-content h4 a:hover,
+        body.website-theme-shell .related-title a:hover,
+        body.website-theme-shell .related-card-title:hover,
+        body.website-theme-shell .contact-method-link:hover,
+        body.website-theme-shell .office-detail-text a:hover,
+        body.website-theme-shell .static-page-body a:hover,
+        body.website-theme-shell .article-content a {
+            color: var(--rich-gold) !important;
+        }
+
+        body.website-theme-shell .breadcrumb-top-bar,
+        body.website-theme-shell .breadcrumb-section,
+        body.website-theme-shell .offers-breadcrumb {
+            background: var(--website-shell-breadcrumb-bg) !important;
+            border-bottom: 1px solid var(--website-shell-border) !important;
+            backdrop-filter: blur(12px);
+        }
+
+        body.website-theme-shell .breadcrumb a,
+        body.website-theme-shell .breadcrumb-list a,
+        body.website-theme-shell .breadcrumb-item a {
+            color: var(--website-shell-heading) !important;
+        }
+
+        body.website-theme-shell .breadcrumb-item.active,
+        body.website-theme-shell .breadcrumb-list li,
+        body.website-theme-shell .breadcrumb-item,
+        body.website-theme-shell .breadcrumb {
+            color: var(--website-shell-muted) !important;
+        }
+
+        body.website-theme-shell .gold-btn,
+        body.website-theme-shell .filter-btn,
+        body.website-theme-shell .search-btn,
+        body.website-theme-shell .submit-btn,
+        body.website-theme-shell .offer-btn,
+        body.website-theme-shell .destination-btn,
+        body.website-theme-shell .btn-blog,
+        body.website-theme-shell .btn-read-more {
+            background: linear-gradient(135deg, #e7b762 0%, #bd7f32 100%) !important;
+            color: #ffffff !important;
+            border: 1px solid rgba(255, 221, 173, 0.34) !important;
+            box-shadow: 0 16px 34px rgba(214, 163, 84, 0.34) !important;
+        }
+
+        body.website-theme-shell .gold-btn:hover,
+        body.website-theme-shell .filter-btn:hover,
+        body.website-theme-shell .search-btn:hover,
+        body.website-theme-shell .submit-btn:hover,
+        body.website-theme-shell .offer-btn:hover,
+        body.website-theme-shell .destination-btn:hover,
+        body.website-theme-shell .btn-blog:hover,
+        body.website-theme-shell .btn-read-more:hover {
+            color: #ffffff !important;
+            box-shadow: 0 22px 46px rgba(214, 163, 84, 0.42) !important;
+        }
+
+        body.website-theme-shell .outline-btn,
+        body.website-theme-shell .reset-btn,
+        body.website-theme-shell .country-filter,
+        body.website-theme-shell .btn-light {
+            background: var(--website-shell-surface-soft) !important;
+            color: var(--website-shell-heading) !important;
+            border: 1px solid var(--website-shell-border) !important;
+            box-shadow: none !important;
+            backdrop-filter: blur(12px);
+        }
+
+        body.website-theme-shell .outline-btn:hover,
+        body.website-theme-shell .reset-btn:hover,
+        body.website-theme-shell .country-filter:hover,
+        body.website-theme-shell .country-filter.active,
+        body.website-theme-shell .btn-light:hover {
+            background: rgba(255, 255, 255, 0.14) !important;
+            color: var(--rich-gold) !important;
+            border-color: var(--website-shell-border-strong) !important;
+        }
+
+        body.website-theme-shell .form-control,
+        body.website-theme-shell .form-select,
+        body.website-theme-shell .search-input,
+        body.website-theme-shell .filter-select,
+        body.website-theme-shell .newsletter-form input,
+        body.website-theme-shell input,
+        body.website-theme-shell textarea,
+        body.website-theme-shell select {
+            background: var(--website-shell-input-bg) !important;
+            color: var(--website-shell-text) !important;
+            border-color: var(--website-shell-input-border) !important;
+            border-radius: 18px !important;
+        }
+
+        body.website-theme-shell .form-control:focus,
+        body.website-theme-shell .form-select:focus,
+        body.website-theme-shell .search-input:focus,
+        body.website-theme-shell .filter-select:focus,
+        body.website-theme-shell input:focus,
+        body.website-theme-shell textarea:focus,
+        body.website-theme-shell select:focus {
+            border-color: rgba(231, 183, 98, 0.55) !important;
+            box-shadow: 0 0 0 0.22rem rgba(214, 163, 84, 0.16) !important;
+        }
+
+        body.website-theme-shell .form-control::placeholder,
+        body.website-theme-shell .search-input::placeholder,
+        body.website-theme-shell input::placeholder,
+        body.website-theme-shell textarea::placeholder {
+            color: var(--website-shell-muted) !important;
+        }
+
+        body.website-theme-shell .search-icon {
+            color: var(--website-shell-muted) !important;
+        }
+
+        body.website-theme-shell .search-suggestions-dropdown,
+        body.website-theme-shell .offer-price-panel {
+            background: var(--website-shell-surface) !important;
+            border-color: var(--website-shell-border) !important;
+            box-shadow: var(--website-shell-shadow) !important;
+        }
+
+        body.website-theme-shell .journey-meta span,
+        body.website-theme-shell .card-meta span,
+        body.website-theme-shell .offer-meta span,
+        body.website-theme-shell .meta-item,
+        body.website-theme-shell .journey-schedule,
+        body.website-theme-shell .sidebar-feature,
+        body.website-theme-shell .trust-item-small {
+            background: var(--website-shell-surface-soft) !important;
+            border: 1px solid var(--website-shell-border) !important;
+            box-shadow: none !important;
+        }
+
+        body.website-theme-shell .sidebar-feature:hover,
+        body.website-theme-shell .trust-item-small:hover {
+            border-color: var(--website-shell-border-strong) !important;
+            transform: translateY(-2px);
+        }
+
+        body.website-theme-shell .suggestion-item:hover,
+        body.website-theme-shell .suggestion-item.active,
+        body.website-theme-shell .dropdown-item:hover {
+            background: rgba(214, 163, 84, 0.1) !important;
+            color: var(--website-shell-heading) !important;
+        }
+
+        body.website-theme-shell .feature-icon,
+        body.website-theme-shell .contact-method-icon,
+        body.website-theme-shell .contact-icon,
+        body.website-theme-shell .cta-icon-container {
+            background: var(--website-shell-icon-primary) !important;
+            color: #ffffff !important;
+            box-shadow: var(--website-shell-icon-primary-shadow) !important;
+        }
+
+        body.website-theme-shell .choose-icon,
+        body.website-theme-shell .step-number,
+        body.website-theme-shell .share-button,
+        body.website-theme-shell .social-link,
+        body.website-theme-shell .detail-item i,
+        body.website-theme-shell .support-item i,
+        body.website-theme-shell .office-detail i {
+            background: var(--website-shell-icon-gold) !important;
+            color: #ffffff !important;
+            box-shadow: var(--website-shell-icon-gold-shadow) !important;
+        }
+
+        body.website-theme-shell .trust-icon,
+        body.website-theme-shell .day-number {
+            background: var(--website-shell-icon-dark) !important;
+            color: var(--rich-gold) !important;
+            box-shadow: var(--website-shell-icon-dark-shadow) !important;
+        }
+
+        body.website-theme-shell .trust-icon i,
+        body.website-theme-shell .day-number i,
+        body.website-theme-shell .day-number,
+        body.website-theme-shell .step-number {
+            color: inherit !important;
+        }
+
+        body.website-theme-shell .hero-feature i,
+        body.website-theme-shell .info-item i,
+        body.website-theme-shell .meta-item i,
+        body.website-theme-shell .offer-meta i,
+        body.website-theme-shell .card-meta i,
+        body.website-theme-shell .journey-meta i,
+        body.website-theme-shell .journey-schedule i,
+        body.website-theme-shell .destination-meta i,
+        body.website-theme-shell .article-date i,
+        body.website-theme-shell .blog-date i,
+        body.website-theme-shell .form-icon,
+        body.website-theme-shell .collapse-icon,
+        body.website-theme-shell .sidebar-feature i,
+        body.website-theme-shell .trust-item-small i,
+        body.website-theme-shell .breadcrumb-icon,
+        body.website-theme-shell .search-icon {
+            color: var(--rich-gold) !important;
+        }
+
+        body.website-theme-shell .meta-item,
+        body.website-theme-shell .offer-meta span,
+        body.website-theme-shell .card-meta span,
+        body.website-theme-shell .journey-meta span {
+            border-radius: 999px !important;
+            font-weight: 700;
+        }
+
+        body.website-theme-shell .feature-icon i,
+        body.website-theme-shell .contact-method-icon i,
+        body.website-theme-shell .contact-icon i,
+        body.website-theme-shell .cta-icon-container i,
+        body.website-theme-shell .choose-icon i,
+        body.website-theme-shell .share-button i,
+        body.website-theme-shell .social-link i,
+        body.website-theme-shell .detail-item i,
+        body.website-theme-shell .support-item i,
+        body.website-theme-shell .office-detail i {
+            color: inherit !important;
+        }
+
+        body.website-theme-shell .blog-date,
+        body.website-theme-shell .day-header,
+        body.website-theme-shell .price-table tr,
+        body.website-theme-shell .offer-price-panel,
+        body.website-theme-shell .popular-article:hover,
+        body.website-theme-shell .sidebar-widget-item {
+            background: var(--website-shell-surface-soft) !important;
+        }
+
+        body.website-theme-shell .day-header,
+        body.website-theme-shell .price-table tr,
+        body.website-theme-shell .support-item,
+        body.website-theme-shell .office-detail,
+        body.website-theme-shell .sidebar-widget,
+        body.website-theme-shell .popular-article,
+        body.website-theme-shell .styled-list li,
+        body.website-theme-shell .article-footer,
+        body.website-theme-shell .sidebar-widget-item {
+            border-color: var(--website-shell-border) !important;
+        }
+
+        body.website-theme-shell .offer-price-current,
+        body.website-theme-shell .price-table th,
+        body.website-theme-shell .price-table td:last-child,
+        body.website-theme-shell .country-filter,
+        body.website-theme-shell .contact-method-link,
+        body.website-theme-shell .office-detail strong,
+        body.website-theme-shell .support-item strong {
+            color: var(--website-shell-heading) !important;
+        }
+
+        body.website-theme-shell .meal-badge {
+            background: var(--website-shell-tag-bg) !important;
+            color: var(--website-shell-tag-text) !important;
+            border: 1px solid var(--website-shell-badge-border) !important;
+        }
+
+        body.website-theme-shell .pagination-wrapper .page-link,
+        body.website-theme-shell .listing-pagination .page-link,
+        body.website-theme-shell .offers-pagination .page-link,
+        body.website-theme-shell .pagination-wrap .page-link,
+        body.website-theme-shell .results-pagination .page-link {
+            background: var(--website-shell-surface) !important;
+            color: var(--website-shell-heading) !important;
+            border-color: var(--website-shell-border) !important;
+            box-shadow: none !important;
+        }
+
+        body.website-theme-shell .pagination-wrapper .page-item.active .page-link,
+        body.website-theme-shell .listing-pagination .page-item.active .page-link,
+        body.website-theme-shell .offers-pagination .page-item.active .page-link,
+        body.website-theme-shell .pagination-wrap .page-item.active .page-link,
+        body.website-theme-shell .results-pagination .page-item.active .page-link,
+        body.website-theme-shell .results-pagination .active>.page-link,
+        body.website-theme-shell .results-pagination .page-link.active {
+            background: linear-gradient(135deg, #e7b762 0%, #bd7f32 100%) !important;
+            color: #ffffff !important;
+            border-color: rgba(255, 221, 173, 0.34) !important;
+            box-shadow: 0 14px 30px rgba(214, 163, 84, 0.28) !important;
+        }
+
+        body.website-theme-shell .pagination-wrapper .page-link:hover,
+        body.website-theme-shell .listing-pagination .page-link:hover,
+        body.website-theme-shell .offers-pagination .page-link:hover,
+        body.website-theme-shell .pagination-wrap .page-link:hover,
+        body.website-theme-shell .results-pagination .page-link:hover {
+            color: var(--rich-gold) !important;
+            border-color: var(--website-shell-border-strong) !important;
+        }
+
+        @media (max-width: 991px) {
+            body.website-theme-shell .navbar {
+                min-height: 76px;
+            }
+
+            body.website-theme-shell .navbar-brand img {
+                width: 90px !important;
+                height: 32px !important;
+            }
+
+            body.website-theme-shell:not(.home-reference-page) .hero-section,
+            body.website-theme-shell:not(.home-reference-page) .offers-hero,
+            body.website-theme-shell:not(.home-reference-page) .contact-hero,
+            body.website-theme-shell:not(.home-reference-page) .listing-hero,
+            body.website-theme-shell:not(.home-reference-page) .package-hero,
+            body.website-theme-shell:not(.home-reference-page) .article-hero,
+            body.website-theme-shell:not(.home-reference-page) .tailor-hero,
+            body.website-theme-shell:not(.home-reference-page) .static-page-hero,
+            body.website-theme-shell:not(.home-reference-page) .search-hero {
+                min-height: auto;
+                padding-bottom: 64px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            body.website-theme-shell .mobile-actions {
+                gap: 8px;
+                margin-inline-end: 8px;
+            }
+
+            body.website-theme-shell .mobile-actions .mobile-action-btn,
+            body.website-theme-shell .mobile-toggle {
+                width: 42px;
+                height: 42px;
+                min-height: 42px;
+            }
+
+            body.website-theme-shell .mobile-menu-content {
+                padding: 110px 20px 150px;
+            }
+
+            body.website-theme-shell .mobile-menu-header {
+                padding: 15px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+
+            body.website-theme-shell .mobile-actions .mobile-action-btn,
+            body.website-theme-shell .mobile-toggle {
+                width: 40px;
+                height: 40px;
+                min-height: 40px;
+            }
+
+            body.website-theme-shell .mobile-menu-content {
+                padding: 100px 15px 150px;
+            }
+
+            body.website-theme-shell .mobile-menu-header {
+                padding: 12px 15px;
+            }
+        }
+
+        .listing-hero .container {
+            padding-top: 65px !important;
+        }
     </style>
     @if (app()->getLocale() === 'ar')
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap"
@@ -616,25 +1850,8 @@
                 text-align: right;
             }
 
-            body,
-            body div,
-            body span,
-            body p,
-            body a,
-            body li,
-            body label,
-            body small,
-            body strong,
-            body button,
-            body input,
-            body select,
-            body textarea,
-            body h1,
-            body h2,
-            body h3,
-            body h4,
-            body h5,
-            body h6 {
+            html[dir="rtl"] body,
+            html[dir="rtl"] body *:not(.la):not(.lab):not(.lar):not(.las):not([class^="la-"]):not([class*=" la-"]) {
                 font-family: "Cairo", sans-serif !important;
             }
 
@@ -675,8 +1892,8 @@
                 text-align: right;
             }
 
-            html[dir="rtl"] .mobile-destinations-toggle > div,
-            html[dir="rtl"] .mobile-language-toggle > div,
+            html[dir="rtl"] .mobile-destinations-toggle>div,
+            html[dir="rtl"] .mobile-language-toggle>div,
             html[dir="rtl"] .mobile-menu-brand,
             html[dir="rtl"] .footer-contact-list li,
             html[dir="rtl"] .deal-meta span,
@@ -698,8 +1915,8 @@
                 margin-left: 10px !important;
             }
 
-            html[dir="rtl"] .mobile-destinations-toggle > div i,
-            html[dir="rtl"] .mobile-language-toggle > div i {
+            html[dir="rtl"] .mobile-destinations-toggle>div i,
+            html[dir="rtl"] .mobile-language-toggle>div i {
                 margin-right: 0 !important;
                 margin-left: 12px !important;
             }
@@ -731,6 +1948,7 @@
             }
 
             @media (max-width: 768px) {
+
                 html[dir="rtl"] .luxury-cta-content,
                 html[dir="rtl"] .cta-content-wrapper {
                     text-align: center;
@@ -768,7 +1986,8 @@
     <meta name="google-site-verification" content="OKwZFMPi1pE0RpnHtt6lJnyE_qPXCNqW8E7-U4BHPRw" />
 </head>
 
-<body class="{{ app()->getLocale() === 'ar' ? 'website-rtl' : 'website-ltr' }}">
+<body
+    class="website-theme-shell {{ app()->getLocale() === 'ar' ? 'website-rtl' : 'website-ltr' }}{{ $bodyClass !== '' ? ' ' . $bodyClass : '' }}">
 
     @include('website.layouts.header')
 
@@ -912,7 +2131,8 @@
                             </div>
                             <div class="feature-item" style="padding: 12px 0; text-align: center;">
                                 <img loading="lazy" src="{{ asset('website/flags/cybersource.png') }}"
-                                    height="100" width="150" alt="{{ __('Cybersource Security') }}" style="opacity: 0.8;">
+                                    height="100" width="150" alt="{{ __('Cybersource Security') }}"
+                                    style="opacity: 0.8;">
                                 <img loading="lazy" src="{{ asset('website/flags/mpgs.webp') }}" height="100"
                                     width="150" alt="{{ __('Cybersource Security') }}" style="opacity: 0.8;">
                             </div>
@@ -930,7 +2150,8 @@
                 <div class="cta-content-wrapper">
                     <div class="cta-text-content">
                         <h2 class="cta-title">{{ __('Ready to Plan Your Dream Cruise?') }}</h2>
-                        <p class="cta-subtitle">{{ __('Speak with our Egypt specialists for your perfect luxury journey.') }}</p>
+                        <p class="cta-subtitle">
+                            {{ __('Speak with our Egypt specialists for your perfect luxury journey.') }}</p>
 
                         <div class="trust-features">
                             <div class="trust-feature">
@@ -999,7 +2220,8 @@
             }
 
             function toggleTheme() {
-                const currentTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+                const currentTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' :
+                    'light';
                 const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
                 try {
@@ -1033,13 +2255,13 @@
 
             /*
             |--------------------------------------------------------------------------
-            | Bootstrap Dropdown Fix
+            | Navbar Dropdown Fix
             |--------------------------------------------------------------------------
-            | This fixes the Destinations dropdown in case Bootstrap dropdown JS
-            | is not initializing correctly or CSS is hiding the menu.
+            | This keeps desktop dropdowns working even if Bootstrap dropdown JS
+            | is not initializing correctly or custom CSS is hiding the menu.
             */
 
-            document.querySelectorAll('.navbar .dropdown-toggle').forEach(function(toggle) {
+            document.querySelectorAll('.navbar [data-navbar-dropdown-toggle]').forEach(function(toggle) {
                 toggle.addEventListener('click', function(event) {
                     event.preventDefault();
                     event.stopPropagation();
@@ -1056,7 +2278,8 @@
                             item.classList.remove('show');
 
                             const otherMenu = item.querySelector('.dropdown-menu');
-                            const otherToggle = item.querySelector('.dropdown-toggle');
+                            const otherToggle = item.querySelector(
+                                '[data-navbar-dropdown-toggle]');
 
                             if (otherMenu) {
                                 otherMenu.classList.remove('show');
@@ -1085,7 +2308,7 @@
                     dropdown.classList.remove('show');
 
                     const menu = dropdown.querySelector('.dropdown-menu');
-                    const toggle = dropdown.querySelector('.dropdown-toggle');
+                    const toggle = dropdown.querySelector('[data-navbar-dropdown-toggle]');
 
                     if (menu) {
                         menu.classList.remove('show');

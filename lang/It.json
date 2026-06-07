@@ -1,5 +1,5 @@
 {
-    "' . __('No itinerary description added yet.') . '": "' . __('No itinerary description added yet.') . '",
+    "' . __('No itinerary description added yet.') . '": "' . __('Nessuna descrizione dell'itinerario ancora aggiunta.') . '",
     "'desktop', ])": "'desktop', ])",
     "'mobile'])": "'mobile'])",
     "5.0 Rating": "Valutazione 5.0",
