@@ -123,6 +123,73 @@ abstract class BaseWebsiteController extends Controller
             'tags' => $highlights,
         ];
     }
+
+    protected function packageListingCard(Package $package, ?string $buttonText = null): array
+    {
+        $highlights = $package->relationLoaded('highlights')
+            ? $package->highlights
+                ->take(2)
+                ->map(fn($item) => $this->translated($item->getRawOriginal('title') ?? $item->title))
+                ->filter()
+                ->values()
+                ->all()
+            : [];
+
+        if (empty($highlights) && $package->relationLoaded('tags')) {
+            $highlights = $package->tags->take(2)->pluck('name')->filter()->values()->all();
+        }
+
+        $tourType = trim((string) ($package->tour_type ?: Str::headline(str_replace('_', ' ', (string) $package->package_type))));
+        $schedule = trim((string) (
+            $package->relationLoaded('cruise') && $package->cruise?->sailing_days
+                ? $package->cruise->sailing_days
+                : $this->translated($package->getRawOriginal('schedule_text') ?? $package->schedule_text)
+        ));
+
+        return [
+            'title' => $this->translated($package->getRawOriginal('title') ?? $package->title),
+            'url' => $this->packageRoute($package),
+            'image' => $this->imageUrl($package->featured_image, 'website/photos/home2.webp'),
+            'price' => $this->packagePrice($package),
+            'badge' => $package->is_ultra_luxury
+                ? __('Ultra Luxury')
+                : ($package->is_best_seller ? __('Best Seller') : null),
+            'duration' => $this->packageDuration($package),
+            'tour_type' => __($tourType !== '' ? $tourType : $this->typeLabel((string) $package->package_type)),
+            'schedule' => $schedule,
+            'country' => $this->translated($package->primaryCountry?->getRawOriginal('name') ?? $package->primaryCountry?->name),
+            'description' => $this->shortText(
+                $package->getRawOriginal('short_description') ?: $package->getRawOriginal('description'),
+                170
+            ),
+            'highlights' => $highlights,
+            'button_text' => $buttonText ?: $this->packageButtonText($package),
+            'type_label' => $this->typeLabel((string) $package->package_type),
+        ];
+    }
+
+    protected function packageButtonText(Package $package): string
+    {
+        return match ($package->package_type) {
+            'day_tour', 'shore_excursion' => __('View Tour'),
+            default => __('View Journey'),
+        };
+    }
+
+    protected function typeLabel(string $type): string
+    {
+        return match ($type) {
+            'travel_package' => __('Travel Packages'),
+            'nile_cruise' => __('Nile Cruises'),
+            'day_tour' => __('Day Tours'),
+            'shore_excursion' => __('Shore Excursions'),
+            'multi_country' => __('Multi Country Tours'),
+            'deal' => __('Travel Deals'),
+            'custom' => __('Tailor-made Trips'),
+            default => Str::headline(str_replace('_', ' ', $type)),
+        };
+    }
+
     protected function lang(): string
     {
         return app()->getLocale() ?: 'en';

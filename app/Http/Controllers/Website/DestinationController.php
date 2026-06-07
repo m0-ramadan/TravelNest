@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Website;
 
+use App\Models\Attraction;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class DestinationController extends BaseWebsiteController
 {
@@ -107,7 +109,7 @@ class DestinationController extends BaseWebsiteController
         ));
     }
 
-    public function show(string $slug)
+    public function show(Request $request, string $slug): View
     {
         $destination = City::query()
             ->with(['country', 'attractions' => fn ($query) => $query->where('is_active', true)->orderBy('sort_order')])
@@ -119,15 +121,132 @@ class DestinationController extends BaseWebsiteController
             ->where('city_id', $destination->id)
             ->pluck('package_id');
 
+        $allowedTypes = [
+            'travel_package',
+            'nile_cruise',
+            'day_tour',
+            'shore_excursion',
+            'deal',
+            'multi_country',
+            'custom',
+        ];
+
+        $selectedType = $request->filled('type') && in_array($request->string('type')->toString(), $allowedTypes, true)
+            ? $request->string('type')->toString()
+            : null;
+
+        $search = trim((string) $request->input('q', ''));
+
+        $statsQuery = Package::query()
+            ->where('is_active', true)
+            ->whereIn('id', $packageIds);
+
         $packages = Package::query()
-            ->with(['currency'])
+            ->with(['currency', 'primaryCountry', 'highlights', 'tags', 'cruise', 'category'])
             ->where('is_active', true)
             ->whereIn('id', $packageIds)
+            ->when($selectedType, fn ($query) => $query->where('package_type', $selectedType))
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                        ->orWhere('subtitle', 'like', "%{$search}%")
+                        ->orWhere('short_description', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('schedule_text', 'like', "%{$search}%")
+                        ->orWhere('destinations_text', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%");
+                });
+            })
             ->orderByDesc('is_featured')
-            ->limit(9)
-            ->get();
+            ->orderByRaw('sort_order IS NULL, sort_order ASC')
+            ->latest('id')
+            ->paginate(9)
+            ->withQueryString();
 
-        return view('website.pages.destinations.show', compact('destination', 'packages'));
+        $packages->getCollection()->transform(
+            fn (Package $package) => $this->packageListingCard($package)
+        );
+
+        $heroImage = $this->imageUrl(
+            $destination->hero_image ?: $destination->featured_image,
+            asset('website/photos/home2.webp')
+        );
+
+        $shortDescription = trim(strip_tags(
+            $destination->display_short_description ?: $destination->display_description
+        ));
+
+        $descriptionHtml = $this->cleanHtml($destination->display_description ?: '');
+        $overviewText = Str::limit(
+            trim(strip_tags($descriptionHtml ?: $destination->display_short_description)),
+            420
+        );
+
+        $pageTitle = $destination->getTranslation('seo_title')
+            ?: $destination->display_name . ' ' . __('Tours & Trips');
+
+        $pageDescription = $destination->getTranslation('seo_description')
+            ?: Str::limit(
+                $shortDescription !== ''
+                    ? $shortDescription
+                    : __('Explore private tours, travel packages, and unforgettable attractions in :destination.', [
+                        'destination' => $destination->display_name,
+                    ]),
+                170
+            );
+
+        $attractions = $destination->attractions
+            ->take(6)
+            ->map(function (Attraction $attraction) {
+                return [
+                    'title' => $attraction->display_name,
+                    'description' => Str::limit(
+                        trim(strip_tags($attraction->display_short_description ?: $attraction->display_description)),
+                        130
+                    ),
+                    'image' => $this->imageUrl($attraction->image, 'website/photos/home2.webp'),
+                    'opening_hours' => $this->translated($attraction->getRawOriginal('opening_hours') ?? $attraction->opening_hours),
+                    'map_url' => trim((string) $attraction->map_url),
+                ];
+            })
+            ->values();
+
+        $availableTypes = (clone $statsQuery)
+            ->select('package_type')
+            ->distinct()
+            ->pluck('package_type')
+            ->filter()
+            ->values();
+
+        $typeOptions = $availableTypes
+            ->map(fn (string $type) => [
+                'value' => $type,
+                'label' => $this->typeLabel($type),
+            ])
+            ->values()
+            ->all();
+
+        $stats = [
+            'count' => (clone $statsQuery)->count(),
+            'featured' => (clone $statsQuery)->where('is_featured', true)->count(),
+            'attractions' => $destination->attractions->count(),
+        ];
+
+        return view('website.pages.destinations.show', compact(
+            'destination',
+            'packages',
+            'heroImage',
+            'pageTitle',
+            'pageDescription',
+            'descriptionHtml',
+            'overviewText',
+            'shortDescription',
+            'attractions',
+            'typeOptions',
+            'selectedType',
+            'search',
+            'stats'
+        ));
     }
 
     public function legacyShow(string $slug)

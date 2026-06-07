@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Website;
 use App\Models\Package;
 use App\Models\PackageCategory;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class PackageController extends BaseWebsiteController
@@ -100,7 +98,9 @@ class PackageController extends BaseWebsiteController
             ->paginate(12)
             ->withQueryString();
 
-        $packages->getCollection()->transform(fn (Package $package) => $this->mapListingCard($package, $pageContent['button_text']));
+        $packages->getCollection()->transform(
+            fn (Package $package) => $this->packageListingCard($package, $pageContent['button_text'])
+        );
 
         $typeOptions = collect($allowedTypes)->map(fn (string $type) => [
             'value' => $type,
@@ -133,55 +133,4 @@ class PackageController extends BaseWebsiteController
         ]);
     }
 
-    private function mapListingCard(Package $package, string $buttonText): array
-    {
-        $highlights = $package->highlights
-            ->take(2)
-            ->map(fn ($item) => $this->translated($item->getRawOriginal('title') ?? $item->title))
-            ->filter()
-            ->values()
-            ->all();
-
-        if (empty($highlights)) {
-            $highlights = $package->tags->take(2)->pluck('name')->filter()->values()->all();
-        }
-
-        $tourType = trim((string) ($package->tour_type ?: Str::headline(str_replace('_', ' ', (string) $package->package_type))));
-        $schedule = trim((string) ($package->cruise?->sailing_days ?: $this->translated($package->getRawOriginal('schedule_text') ?? $package->schedule_text)));
-
-        return [
-            'title' => $this->translated($package->getRawOriginal('title') ?? $package->title),
-            'url' => $this->packageRoute($package),
-            'image' => $this->imageUrl($package->featured_image, 'website/photos/home2.webp'),
-            'price' => $this->packagePrice($package),
-            'badge' => $package->is_ultra_luxury
-                ? __('Ultra Luxury')
-                : ($package->is_best_seller ? __('Best Seller') : null),
-            'duration' => $this->packageDuration($package),
-            'tour_type' => __($tourType !== '' ? $tourType : $this->typeLabel($package->package_type)),
-            'schedule' => $schedule,
-            'country' => $this->translated($package->primaryCountry?->getRawOriginal('name') ?? $package->primaryCountry?->name),
-            'description' => $this->shortText(
-                $package->getRawOriginal('short_description') ?: $package->getRawOriginal('description'),
-                170
-            ),
-            'highlights' => $highlights,
-            'button_text' => $buttonText,
-            'type_label' => $this->typeLabel($package->package_type),
-        ];
-    }
-
-    private function typeLabel(string $type): string
-    {
-        return match ($type) {
-            'travel_package' => __('Travel Packages'),
-            'nile_cruise' => __('Nile Cruises'),
-            'day_tour' => __('Day Tours'),
-            'shore_excursion' => __('Shore Excursions'),
-            'multi_country' => __('Multi Country Tours'),
-            'deal' => __('Travel Deals'),
-            'custom' => __('Tailor-made Trips'),
-            default => Str::headline(str_replace('_', ' ', $type)),
-        };
-    }
 }
