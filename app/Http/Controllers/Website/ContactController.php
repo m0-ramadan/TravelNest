@@ -28,7 +28,7 @@ class ContactController extends BaseWebsiteController
                     'description' => __('Speak directly with our travel specialists for immediate assistance and personalized recommendations.'),
                     'highlight' => __('Available 24/7'),
                     'url' => 'tel:+19172678628',
-                    'label' => '+1 (917) 267-8628',
+                    'label' => '-',
                 ],
                 [
                     'icon' => 'lab la-whatsapp',
@@ -88,7 +88,7 @@ class ContactController extends BaseWebsiteController
                     'icon' => 'la la-phone',
                     'title' => __('Phone Numbers'),
                     'lines' => [
-                        __('International: +1 (917) 267-8628'),
+                        __('International: -'),
                         __('Local: +20 100 488 0015'),
                     ],
                 ],
