@@ -70,7 +70,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         | Dashboard
         |--------------------------------------------------------------------------
         */
-        Route::get('/', [AdminAuthController::class, 'home'])->name('index');
+        Route::get('/admin', [AdminAuthController::class, 'home'])->name('index');
         Route::post('logout', [AdminAuthController::class, 'logout'])->name('logout');
 
         Route::get('visitors/chart', [VisitorController::class, 'chartData'])->name('visitors.chart');
