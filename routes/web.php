@@ -22,9 +22,9 @@ use Illuminate\Support\Facades\Route;
 | Clean routes without duplication
 | Includes legacy SEO support + aliases
 */
-use Spatie\Sitemap\SitemapGenerator;
+// use Spatie\Sitemap\SitemapGenerator;
 
-SitemapGenerator::create('https://etrotours.com')->writeToFile(public_path('sitemap.xml'));
+// SitemapGenerator::create('https://etrotours.com')->writeToFile(public_path('sitemap.xml'));
 
 Route::name('website.')->group(function () {
     Route::get('/lang/{locale}', function (Illuminate\Http\Request $request, $locale) {
