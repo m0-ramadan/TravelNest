@@ -17,6 +17,7 @@
         "maatwebsite/excel": "*",
         "spatie/laravel-image-optimizer": "*",
         "spatie/laravel-permission": "*",
+        "spatie/laravel-sitemap": "^7.3",
         "spatie/laravel-translatable": "^6.11",
         "symfony/css-selector": "^7.4",
         "symfony/dom-crawler": "^7.4",
