@@ -31,9 +31,9 @@
              <a href="{{ route('website.search.index') }}" aria-label="{{ __('Search') }}" class="mobile-action-btn">
                  <i class="la la-search"></i>
              </a>
-             <a href="tel:+19172678628" aria-label="{{ __('Call Us') }}" class="mobile-action-btn communication-btn">
-                 <i class="la la-phone"></i>
-             </a>
+            <a href="tel:+19172678628" aria-label="{{ __('Call Us') }}" class="mobile-action-btn call-btn">
+                <i class="la la-phone"></i>
+            </a>
              <a href="viber://chat?number=201004880015" target="_blank" aria-label="{{ __('Viber') }}"
                  class="mobile-action-btn viber communication-btn">
                  <i class="lab la-viber"></i>
@@ -86,7 +86,7 @@
                      <a class="nav-link{{ $isMultiCountryPage ? ' is-active' : '' }}"
                          href="{{ route('website.multi_country') }}">
                          <i class="la la-globe-americas"></i>
-                         {{ __('Multi Country') }}
+                        {{ __('Egypt Nile Cruise') }}
                      </a>
                  </li>
                  <li class="nav-item">
@@ -165,7 +165,8 @@
                  height: auto !important;
                  max-height: 32px !important;
           }
-          body.website-theme-shell .mobile-actions .communication-btn {
+          body.website-theme-shell .mobile-actions .viber,
+          body.website-theme-shell .mobile-actions .whatsapp {
               display: none !important;
           }
           body.website-theme-shell .mobile-actions .mobile-action-btn,
@@ -248,7 +249,7 @@
          <div class="mobile-nav-item">
              <a href="{{ route('website.multi_country') }}"
                  class="mobile-nav-link{{ $isMultiCountryPage ? ' is-active' : '' }}">
-                 <i class="la la-globe-americas"></i> {{ __('Multi Country') }}
+                <i class="la la-globe-americas"></i> {{ __('Egypt Nile Cruise') }}
              </a>
          </div>
 

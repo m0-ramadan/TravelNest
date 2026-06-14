@@ -1,8 +1,8 @@
 @extends('website.layouts.master')
 
-@section('title', __('Multi Country Tours') . ' - Etro Tours')
+@section('title', ($pageContent['title'] ?? __('Egypt Nile Cruise')) . ' - Etro Tours')
 @section('description', $pageContent['description'] ?? $pageContent['overview_text'])
-@section('keywords', 'multi country tours, Egypt and Jordan tours, combined Middle East tours, Etro Tours itineraries, luxury multi destination travel')
+@section('keywords', 'Egypt Nile Cruise, Nile cruises in Egypt, Luxor to Aswan cruise, luxury Nile cruise, Etro Tours Nile cruise')
 @section('image', $heroImage)
 
 @section('css')
@@ -36,8 +36,11 @@
         }
 
         .hero-pattern {
-            background: url('{{ asset('images/pages/multi-country.png') }}') repeat-x center;
-            opacity: 0.18;
+            background:
+                radial-gradient(circle at top left, rgba(255, 210, 125, 0.22), transparent 34%),
+                radial-gradient(circle at bottom right, rgba(103, 197, 255, 0.16), transparent 28%),
+                linear-gradient(135deg, rgba(8, 18, 36, 0.04), rgba(255, 255, 255, 0));
+            opacity: 1;
             z-index: 2;
         }
 
@@ -516,7 +519,7 @@
             <div class="breadcrumb-list">
                 <ul>
                     <li><a href="{{ route('website.home') }}">{{ __('Home') }}</a></li>
-                    <li>{{ __('Multi Country Tours') }}</li>
+                    <li>{{ $pageContent['breadcrumb_title'] ?? __('Egypt Nile Cruise') }}</li>
                 </ul>
             </div>
         </div>
@@ -540,15 +543,15 @@
                 <div class="hero-stats">
                     <div class="hero-stat">
                         <strong>{{ number_format($stats['count']) }}</strong>
-                        <span>{{ __('Trips') }}</span>
+                        <span>{{ $pageContent['stats_count_label'] ?? __('Cruises') }}</span>
                     </div>
                     <div class="hero-stat">
                         <strong>{{ number_format($stats['categories']) }}</strong>
-                        <span>{{ __('Categories') }}</span>
+                        <span>{{ $pageContent['stats_categories_label'] ?? __('Categories') }}</span>
                     </div>
                     <div class="hero-stat">
                         <strong>{{ number_format($stats['featured']) }}</strong>
-                        <span>{{ __('Featured Packages') }}</span>
+                        <span>{{ $pageContent['stats_featured_label'] ?? __('Featured Packages') }}</span>
                     </div>
                 </div>
             </div>
@@ -617,8 +620,8 @@
         <div class="container">
             <div class="results-head">
                 <div>
-                    <h3>{{ __('Matching Tours') }}</h3>
-                    <p>{{ number_format($stats['count']) }} {{ __('Trips') }}</p>
+                    <h3>{{ $pageContent['results_title'] ?? __('Matching Nile Cruises') }}</h3>
+                    <p>{{ number_format($stats['count']) }} {{ $pageContent['results_count_label'] ?? __('Cruises') }}</p>
                 </div>
             </div>
 
@@ -666,15 +669,15 @@
                             @endif
 
                             <a href="{{ $tour['url'] }}" class="view-btn">
-                                {{ __('View Trip') }}
+                                {{ $pageContent['cta_label'] ?? __('View Cruise') }}
                                 <i class="las la-arrow-right"></i>
                             </a>
                         </div>
                     </article>
                 @empty
                     <div class="empty-tours-box">
-                        <h3>{{ __('No multi-country tours found') }}</h3>
-                        <p>{{ __('Please change the filters or add multi-country packages from the admin panel.') }}</p>
+                        <h3>{{ $pageContent['empty_title'] ?? __('No Nile cruises found') }}</h3>
+                        <p>{{ $pageContent['empty_text'] ?? __('Please change the filters or add Nile cruise packages from the admin panel.') }}</p>
                     </div>
                 @endforelse
             </div>

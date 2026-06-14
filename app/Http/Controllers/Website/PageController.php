@@ -40,7 +40,7 @@ class PageController extends BaseWebsiteController
     {
         $featuredCategory = PackageCategory::query()
             ->where('is_active', true)
-            ->where('category_type', 'multi_country')
+            ->where('category_type', 'nile_cruise')
             ->orderByDesc('is_featured')
             ->orderBy('sort_order')
             ->first();
@@ -48,7 +48,7 @@ class PageController extends BaseWebsiteController
         $packages = Package::query()
             ->with(['currency', 'highlights', 'tags', 'primaryCountry', 'category'])
             ->where('is_active', true)
-            ->where('package_type', 'multi_country')
+            ->where('package_type', 'nile_cruise')
             ->when($request->filled('pricerange'), function ($query) use ($request) {
                 match ((string) $request->pricerange) {
                     '1' => $query->where('start_from_price', '<', 1500),
@@ -84,28 +84,35 @@ class PageController extends BaseWebsiteController
         );
 
         $pageContent = [
-            'badge' => __('Featured Escapes'),
-            'title' => $featuredCategory
-                ? $this->translated($featuredCategory->getRawOriginal('name') ?? $featuredCategory->name)
-                : __('Multi Country Tours'),
-            'subtitle' => __('Curated routes that connect iconic destinations across borders.'),
-            'overview_title' => __('Featured multi-country itineraries for bigger adventures'),
+            'badge' => __('Luxury Nile Journeys'),
+            'title' => __('Egypt Nile Cruise'),
+            'subtitle' => __('Sail through the heart of Egypt with elegant Nile cruise experiences between Luxor and Aswan.'),
+            'overview_title' => __('Curated Nile cruise itineraries across timeless Egyptian landmarks'),
             'overview_text' => $featuredCategory
                 ? $this->translated($featuredCategory->getRawOriginal('description') ?? $featuredCategory->description)
-                : __('Browse flexible travel packages designed for travelers who want more than one destination in a single seamless trip.'),
-            'description' => __('Explore handpicked journeys that blend cultures, landmarks, and unforgettable moments across multiple countries.'),
+                : __('Browse handpicked Nile cruise journeys designed around comfort, culture, scenic sailing, and unforgettable moments along the Nile.'),
+            'description' => __('Explore thoughtfully selected Nile cruises featuring ancient temples, riverfront sunsets, and seamless travel between Egypt’s most iconic cities.'),
+            'stats_count_label' => __('Cruises'),
+            'stats_categories_label' => __('Sailing Options'),
+            'stats_featured_label' => __('Featured Sailings'),
+            'results_title' => __('Matching Nile Cruises'),
+            'results_count_label' => __('Cruises'),
+            'cta_label' => __('View Cruise'),
+            'empty_title' => __('No Nile cruises found'),
+            'empty_text' => __('Please change the filters or add Nile cruise packages from the admin panel.'),
+            'breadcrumb_title' => __('Egypt Nile Cruise'),
         ];
 
         $stats = [
             'count' => $packages->total(),
             'featured' => Package::query()
                 ->where('is_active', true)
-                ->where('package_type', 'multi_country')
+                ->where('package_type', 'nile_cruise')
                 ->where('is_featured', true)
                 ->count(),
             'categories' => PackageCategory::query()
                 ->where('is_active', true)
-                ->where('category_type', 'multi_country')
+                ->where('category_type', 'nile_cruise')
                 ->count(),
         ];
 
@@ -154,20 +161,20 @@ class PageController extends BaseWebsiteController
                 : $package->gallery_images[0];
         }
 
-        return $this->imageUrl($package->featured_image ?: $galleryImage, 'images/multi-country-hero.jpg');
+        return $this->imageUrl($package->featured_image ?: $galleryImage, 'website/photos/ship-7.jpg');
     }
 
     private function resolveMultiCountryHeroImage(?string $categoryImage, ?string $packageImage): string
     {
         if ($categoryImage) {
-            return $this->imageUrl($categoryImage, 'images/multi-country-hero.jpg');
+            return $this->imageUrl($categoryImage, 'website/photos/ship-7.jpg');
         }
 
         if ($packageImage) {
             return $packageImage;
         }
 
-        return asset('images/multi-country-hero.jpg');
+        return asset('website/photos/ship-7.jpg');
     }
 
     private function renderStaticPage(Page $page): View

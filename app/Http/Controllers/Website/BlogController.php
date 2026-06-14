@@ -67,14 +67,28 @@ class BlogController extends Controller
         ));
     }
 
-    public function show(string $slug)
+    public function show(string $categorySlugOrSlug, ?string $slug = null)
     {
+        $articleSlug = $slug ?? $categorySlugOrSlug;
+        $requestedCategorySlug = $slug ? $categorySlugOrSlug : null;
+
         $article = Article::query()
             ->with(['category', 'author', 'tags'])
             ->active()
             ->published()
-            ->where('slug', $slug)
+            ->where('slug', $articleSlug)
             ->firstOrFail();
+
+        if (
+            $requestedCategorySlug !== null &&
+            $article->category?->slug &&
+            $requestedCategorySlug !== $article->category->slug
+        ) {
+            return redirect()->route('website.blogs.show.legacy', [
+                'categorySlug' => $article->category->slug,
+                'slug' => $article->slug,
+            ], 301);
+        }
 
         $article->increment('views_count');
 

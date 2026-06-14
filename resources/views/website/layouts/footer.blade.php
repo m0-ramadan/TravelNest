@@ -26,18 +26,18 @@
                 </ul>
             </div>
 
-	            <div class="footer-section">
-	                <h4>{{ __('Destinations') }}</h4>
-	                <ul>
-	                    @forelse ($navigationDestinations as $destination)
-	                        <li><a href="{{ $destination['url'] }}"><i
-	                                    class="las la-chevron-right mr-1"></i>{{ $destination['title'] }}</a></li>
-	                    @empty
-	                        <li><a href="{{ route('website.destinations.index') }}"><i
-	                                    class="las la-chevron-right mr-1"></i>{{ __('View Destinations') }}</a></li>
-	                    @endforelse
-	                </ul>
-	            </div>
+            <div class="footer-section">
+                <h4>{{ __('Destinations') }}</h4>
+                <ul>
+                    @forelse ($navigationDestinations as $destination)
+                        <li><a href="{{ $destination['url'] }}"><i
+                                    class="las la-chevron-right mr-1"></i>{{ $destination['title'] }}</a></li>
+                    @empty
+                        <li><a href="{{ route('website.destinations.index') }}"><i
+                                    class="las la-chevron-right mr-1"></i>{{ __('View Destinations') }}</a></li>
+                    @endforelse
+                </ul>
+            </div>
 
             <div class="footer-section">
                 <h4>{{ __('General') }}</h4>
@@ -67,14 +67,14 @@
                         <span class="award-badge">2026</span>
                     </div>
                     <div class="award-image-container">
-                        <img loading="lazy" src="{{ request()->root() }}/website/photos/tripadvisor/TC_L_2026.svg"
+
+                        <img loading="lazy" src="{{ request()->root() }}/website/photos/tripadvisor/TA2026.png"
                             alt="{{ __('Tripadvisor 2026 Travelers\' Choice Award') }}" class="award-image">
                         <div class="award-glow"></div>
                     </div>
                     <div class="award-content">
                         <h3 class="award-title">
-                            <a href="https://www.tripadvisor.com/"
-                                target="_blank">
+                            <a href="https://www.tripadvisor.com/" target="_blank">
                                 {{ __('Travelers\' Choice Award') }}
                             </a>
                         </h3>
@@ -118,15 +118,15 @@
                             style="display: flex; list-style: none; padding: 0; margin: 0; gap: 15px; justify-content: flex-end;">
                             <li><a href="https://www.facebook.com/share/1CwkGsZJXe/?mibextid=wwXIfr" target="_blank"
                                     aria-label="{{ __('Facebook') }}"
-                                    style="color: var(--rich-gold); font-size: 1.5rem; transition: all 0.3s ease;"><i
+                                    style="color: #fff; font-size: 1.5rem; transition: all 0.3s ease;"><i
                                         class="lab la-facebook-f"></i></a></li>
-                            <li><a href="https://www.instagram.com/etro_tours?igsh=MTl5cXpqeXlpMWtvZg%3D%3D&utm_source=qr" target="_blank"
-                                    aria-label="{{ __('Instagram') }}"
-                                    style="color: var(--rich-gold); font-size: 1.5rem; transition: all 0.3s ease;"><i
+                            <li><a href="https://www.instagram.com/etro_tours?igsh=MTl5cXpqeXlpMWtvZg%3D%3D&utm_source=qr"
+                                    target="_blank" aria-label="{{ __('Instagram') }}"
+                                    style="color: #fff; font-size: 1.5rem; transition: all 0.3s ease;"><i
                                         class="lab la-instagram"></i></a></li>
-                            <li><a href="https://www.tripadvisor.com/"
-                                    target="_blank" aria-label="{{ __('TripAdvisor') }}"
-                                    style="color: var(--rich-gold); font-size: 1.5rem; transition: all 0.3s ease;"><i
+                            <li><a href="https://www.tripadvisor.com/" target="_blank"
+                                    aria-label="{{ __('TripAdvisor') }}"
+                                    style="color: #fff; font-size: 1.5rem; transition: all 0.3s ease;"><i
                                         class="la la-tripadvisor"></i></a></li>
                         </ul>
                     </div>

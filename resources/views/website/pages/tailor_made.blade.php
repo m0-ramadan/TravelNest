@@ -1,8 +1,10 @@
 @extends('website.layouts.master')
 
 @section('title', __('Tailor-Made Travel Experiences') . ' - Etro Tours')
-@section('description', __('Plan a tailor-made journey with Etro Tours and get a custom itinerary designed around your budget, interests, travel style, and dream destinations.'))
-@section('keywords', 'tailor made Egypt tours, custom travel itinerary, private Egypt holidays, luxury bespoke travel, Etro Tours')
+@section('description', __('Plan a tailor-made journey with Etro Tours and get a custom itinerary designed around your
+    budget, interests, travel style, and dream destinations.'))
+@section('keywords', 'tailor made Egypt tours, custom travel itinerary, private Egypt holidays, luxury bespoke travel,
+    Etro Tours')
 @section('image', asset('website/photos/home2.webp'))
 
 @section('css')
@@ -778,7 +780,8 @@
                                 <input type="hidden" name="url" value="{{ old('url') }}">
                                 <input type="hidden" name="company_name" value="{{ old('company_name') }}">
                                 <input type="hidden" name="subject_line" value="{{ old('subject_line') }}">
-                                <input type="hidden" name="form_start_time" id="formStartTime" value="{{ old('form_start_time') }}">
+                                <input type="hidden" name="form_start_time" id="formStartTime"
+                                    value="{{ old('form_start_time') }}">
 
                                 <div class="form-step">
                                     <div class="step-header">
@@ -821,8 +824,7 @@
 
                                         <div class="form-group">
                                             <label class="form-label">{{ __('Country of Residence *') }}</label>
-                                            <input type="text"
-                                                class="form-control @error('nationality') error @enderror"
+                                            <input type="text" class="form-control @error('nationality') error @enderror"
                                                 name="nationality" value="{{ old('nationality') }}"
                                                 placeholder="{{ __('Enter your country of residence') }}" required>
                                             @error('nationality')
@@ -972,13 +974,13 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="form-label">{{ __('Interests & Activities (Select all that apply)') }}</label>
+                                        <label
+                                            class="form-label">{{ __('Interests & Activities (Select all that apply)') }}</label>
                                         <div class="checkbox-group">
                                             @foreach ($interestOptions as $value => $label)
                                                 <div class="custom-checkbox">
                                                     <input type="checkbox" id="{{ $value }}" name="interests[]"
-                                                        value="{{ $value }}"
-                                                        @checked(in_array($value, old('interests', []), true))>
+                                                        value="{{ $value }}" @checked(in_array($value, old('interests', []), true))>
                                                     <label for="{{ $value }}">{{ __($label) }}</label>
                                                 </div>
                                             @endforeach
@@ -1007,7 +1009,8 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="form-label">{{ __('Additional Comments & Special Requests *') }}</label>
+                                        <label
+                                            class="form-label">{{ __('Additional Comments & Special Requests *') }}</label>
                                         <textarea class="form-control form-textarea @error('comment') error @enderror" name="comment" rows="5"
                                             placeholder="{{ __('Tell us anything else that would help us create your perfect trip...') }}" required>{{ old('comment') }}</textarea>
                                         @error('comment')
@@ -1060,7 +1063,7 @@
                                     <div class="contact-info">
                                         <p>{{ __('Speak with our travel experts') }}</p>
                                         <p><a href="tel:+19172678628">+10000000</a></p>
-                                        <p><a href="mailto:tailormade@etrotours.com">tailormade@etrotours.com</a></p>
+                                        <p><a href="mailto:reservations@etrotours.com">reservations@etrotours.com</a></p>
                                     </div>
 
                                     <p style="font-size: 0.9rem; opacity: 0.9; margin: 0;">

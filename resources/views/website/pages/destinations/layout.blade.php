@@ -1,10 +1,10 @@
 <!-- Mobile WhatsApp Button -->
-<div class="fixed-mobile-btn d-lg-none">
+{{-- <div class="fixed-mobile-btn d-lg-none">
     <a href="https://wa.me/201553383000" target="_blank" class="mobile-enquiry-btn">
         <i class="lab la-whatsapp"></i>
         {{ __('WhatsApp Us') }}
     </a>
-</div>
+</div> --}}
 
 <!-- Why Travel With Us Section -->
 <section class="why-choose-section" style="background: var(--pearl-luxury); padding: 80px 0;">
@@ -160,7 +160,8 @@
             <div class="cta-content-wrapper">
                 <div class="cta-text-content">
                     <h2 class="cta-title">{{ __('Ready to Plan Your Dream Cruise?') }}</h2>
-                    <p class="cta-subtitle">{{ __('Speak with our Egypt specialists for your perfect luxury journey.') }}</p>
+                    <p class="cta-subtitle">
+                        {{ __('Speak with our Egypt specialists for your perfect luxury journey.') }}</p>
 
                     <div class="trust-features">
                         <div class="trust-feature">

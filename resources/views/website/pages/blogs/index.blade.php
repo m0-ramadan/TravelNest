@@ -5,7 +5,9 @@
     use Illuminate\Support\Facades\Route;
 
     $pageTitle = isset($category)
-        ? ($category->display_title ?? ($category->title ?? ($category->name ?? __('Blog Category')))) . ' - ' . __('Etro Tours')
+        ? ($category->display_title ?? ($category->title ?? ($category->name ?? __('Blog Category')))) .
+            ' - ' .
+            __('Etro Tours')
         : __('Blogs') . ' - ' . __('Etro Tours');
 
     $heroTitle = isset($category)
@@ -16,14 +18,20 @@
         ? __('Discover useful travel articles, destination guides, and expert insights about :category.', [
             'category' => $category->display_title ?? ($category->title ?? ($category->name ?? __('Category'))),
         ])
-        : __('Discover the wonders of Egypt through our expert travel insights, destination guides, and cultural explorations.');
+        : __(
+            'Discover the wonders of Egypt through our expert travel insights, destination guides, and cultural explorations.',
+        );
 
     $blogsRoute = Route::has('website.blogs') ? route('website.blogs') : url('/blogs');
 @endphp
 
 @section('title', $pageTitle)
 @section('description', $heroSubtitle)
-@section('keywords', trim(collect([$heroTitle, 'Etro Tours blog', 'Egypt travel blog', 'destination guides'])->filter()->implode(', '), ', '))
+@section('keywords',
+    trim(
+    collect([$heroTitle, 'Etro Tours blog', 'Egypt travel blog', 'destination guides'])->filter()->implode(', '),
+    ', ',
+    ))
 @section('image', asset('website/photos/home2.webp'))
 
 @section('css')
@@ -1108,10 +1116,9 @@
                             @php
                                 $articleTitle = $article->display_title ?: __('Article');
 
-                                $articleImage =
-                                    $article->featured_image
-                                        ? asset('storage/' . ltrim($article->featured_image, '/'))
-                                        : asset('website/photos/home2.webp');
+                                $articleImage = $article->featured_image
+                                    ? asset('storage/' . ltrim($article->featured_image, '/'))
+                                    : asset('website/photos/home2.webp');
 
                                 $articleDate = $article->published_at ?? ($article->created_at ?? now());
 
@@ -1242,10 +1249,9 @@
                                 @php
                                     $popularTitle = $popular->display_title ?: __('Article');
 
-                                    $popularImage =
-                                        $popular->featured_image
-                                            ? asset('storage/' . ltrim($popular->featured_image, '/'))
-                                            : asset('website/photos/home2.webp');
+                                    $popularImage = $popular->featured_image
+                                        ? asset('storage/' . ltrim($popular->featured_image, '/'))
+                                        : asset('website/photos/home2.webp');
 
                                     $popularDate = $popular->published_at ?? ($popular->created_at ?? now());
 
@@ -1317,12 +1323,12 @@
         </div>
     </section>
 
-    <div class="fixed-mobile-btn d-lg-none">
+    {{-- <div class="fixed-mobile-btn d-lg-none">
         <a href="https://api.whatsapp.com/send?phone=201553383000" target="_blank" class="mobile-enquiry-btn">
             <i class="lab la-whatsapp"></i>
             {{ __('WhatsApp Us') }}
         </a>
-    </div>
+    </div> --}}
 
     <section class="why-choose-section">
         <div class="container">

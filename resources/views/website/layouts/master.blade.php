@@ -43,7 +43,7 @@
             'logo' => $logoUrl,
             'image' => $logoUrl,
             'telephone' => '+1-917-267-8628',
-            'email' => 'hello@etrotours.com',
+            'email' => 'info@etrotours.com',
             'address' => [
                 '@type' => 'PostalAddress',
                 'addressLocality' => 'Luxor',

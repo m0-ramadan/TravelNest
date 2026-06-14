@@ -63,8 +63,8 @@ class ContactController extends BaseWebsiteController
                     'icon' => 'la la-map-marker',
                     'title' => __('Address'),
                     'lines' => [
-                        __('El Fardous Tower, El Fayrouz District'),
-                        __('Luxor, Egypt'),
+                        __('Al Qarnah, Al Qarna, Luxor Governorate 1341805, Egypt'),
+
                     ],
                 ],
                 [
@@ -79,8 +79,8 @@ class ContactController extends BaseWebsiteController
                     'icon' => 'la la-envelope',
                     'title' => __('Email'),
                     'lines' => [
-                        'hello@etrotours.com',
-                        'tailormade@etrotours.com',
+                        'info@etrotours.com',
+                        'reservations@etrotours.com',
                     ],
                     'type' => 'email',
                 ],
@@ -89,7 +89,7 @@ class ContactController extends BaseWebsiteController
                     'title' => __('Phone Numbers'),
                     'lines' => [
                         __('International: -'),
-                        __('Local: +20 100 488 0015'),
+                        __('Local: +20 15 53383000'),
                     ],
                 ],
             ],
