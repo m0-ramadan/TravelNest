@@ -74,7 +74,8 @@
                     </div>
                     <div class="award-content">
                         <h3 class="award-title">
-                            <a href="https://www.tripadvisor.com/" target="_blank">
+                            <a href="https://www.tripadvisor.com/Attraction_Review-g294205-d19981172-Reviews-Etro_tours-Luxor_Nile_River_Valley.html"
+                                target="_blank">
                                 {{ __('Travelers\' Choice Award') }}
                             </a>
                         </h3>

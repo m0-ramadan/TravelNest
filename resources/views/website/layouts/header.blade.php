@@ -31,10 +31,10 @@
              <a href="{{ route('website.search.index') }}" aria-label="{{ __('Search') }}" class="mobile-action-btn">
                  <i class="la la-search"></i>
              </a>
-            <a href="tel:+19172678628" aria-label="{{ __('Call Us') }}" class="mobile-action-btn call-btn">
+            <a href="tel:+201553383000" aria-label="{{ __('Call Us') }}" class="mobile-action-btn call-btn">
                 <i class="la la-phone"></i>
             </a>
-             <a href="viber://chat?number=201004880015" target="_blank" aria-label="{{ __('Viber') }}"
+             <a href="viber://chat?number=201553383000" target="_blank" aria-label="{{ __('Viber') }}"
                  class="mobile-action-btn viber communication-btn">
                  <i class="lab la-viber"></i>
              </a>
@@ -310,7 +310,7 @@
                  {{ __('Toggle Theme') }}
              </button>
 
-             <a href="tel:+19172678628" class="mobile-action-card">
+             <a href="tel:+201553383000" class="mobile-action-card">
                  <i class="la la-phone"></i>
                  {{ __('Call Us') }}
              </a>

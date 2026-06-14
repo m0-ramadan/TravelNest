@@ -27,7 +27,7 @@ class ContactController extends BaseWebsiteController
                     'title' => __('Call Our Experts'),
                     'description' => __('Speak directly with our travel specialists for immediate assistance and personalized recommendations.'),
                     'highlight' => __('Available 24/7'),
-                    'url' => 'tel:+19172678628',
+                    'url' => 'tel:+201553383000',
                     'label' => '-',
                 ],
                 [
@@ -44,7 +44,7 @@ class ContactController extends BaseWebsiteController
                     'title' => __('Viber Messages'),
                     'description' => __('Connect with us through Viber for smooth communication and trip planning support.'),
                     'highlight' => __('Quick and convenient'),
-                    'url' => 'viber://chat?number=201004880015',
+                    'url' => 'viber://chat?number=201553383000',
                     'label' => __('Message on Viber'),
                     'external' => true,
                 ],
