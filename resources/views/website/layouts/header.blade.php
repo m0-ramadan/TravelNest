@@ -1,11 +1,15 @@
  @php
+     $dayToursUrl = route('website.tours.all', ['type' => 'day_tour']);
      $shoreExcursionsUrl = route('website.tours.all', ['type' => 'shore_excursion']);
+     $toursPackagesUrl = route('website.tours.all');
      $tailorMadeUrl = route('website.tailor_made.index');
      $navigationDestinations = collect($navigationDestinations ?? []);
      $isHomePage = request()->routeIs('website.home');
      $isDestinationsPage = request()->routeIs('website.destinations.*');
      $isMultiCountryPage = request()->routeIs('website.multi_country');
+     $isDayToursPage = request()->routeIs('website.tours.all') && request('type') === 'day_tour';
      $isShoreExcursionsPage = request('type') === 'shore_excursion';
+     $isToursPackagesPage = request()->routeIs('website.tours.all') && !$isDayToursPage && !$isShoreExcursionsPage;
      $isOffersPage = request()->routeIs('website.offers');
      $isContactPage = request()->routeIs('website.contact.*');
      $isTailorMadePage = request()->routeIs('website.tailor_made.*');
@@ -250,6 +254,19 @@
              <a href="{{ route('website.multi_country') }}"
                  class="mobile-nav-link{{ $isMultiCountryPage ? ' is-active' : '' }}">
                 <i class="la la-globe-americas"></i> {{ __('Egypt Nile Cruise') }}
+             </a>
+         </div>
+
+         <div class="mobile-nav-item">
+             <a href="{{ $toursPackagesUrl }}"
+                 class="mobile-nav-link{{ $isToursPackagesPage ? ' is-active' : '' }}">
+                 <i class="la la-suitcase"></i> {{ __('Tours Packages') }}
+             </a>
+         </div>
+
+         <div class="mobile-nav-item">
+             <a href="{{ $dayToursUrl }}" class="mobile-nav-link{{ $isDayToursPage ? ' is-active' : '' }}">
+                 <i class="la la-sun"></i> {{ __('Day Tours') }}
              </a>
          </div>
 
