@@ -1318,13 +1318,19 @@
                                         $relatedImage = $related->featured_image
                                             ? asset(ltrim($related->featured_image, '/'))
                                             : asset('website/photos/home2.webp');
+                                        $relatedUrl = in_array($related->package_type, ['day_tour', 'shore_excursion'], true)
+                                            ? route('website.tours.show', $related->slug)
+                                            : route('website.trips.show', $related->slug);
+                                        $relatedButtonText = in_array($related->package_type, ['day_tour', 'shore_excursion'], true)
+                                            ? __('View Tour')
+                                            : __('View Trip');
                                     @endphp
                                     <div class="related-card">
                                         <img src="{{ $relatedImage }}" alt="{{ $relatedTitle }}" loading="lazy">
                                         <div class="related-card-body">
                                             <div class="related-card-title">{{ $relatedTitle }}</div>
                                             <a class="gold-btn mt-3"
-                                                href="{{ route('website.packages.show.simple', $related->slug) }}">{{ __('View Trip') }}</a>
+                                                href="{{ $relatedUrl }}">{{ $relatedButtonText }}</a>
                                         </div>
                                     </div>
                                 @endforeach

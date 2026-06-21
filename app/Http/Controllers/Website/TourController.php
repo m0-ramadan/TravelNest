@@ -33,32 +33,7 @@ class TourController extends BaseWebsiteController
 
     public function show(string $slug)
     {
-        $tour = Package::query()
-            ->with([
-                'currency',
-                'category',
-                'primaryCountry',
-                'highlights',
-                'itineraries',
-                'inclusions',
-                'prices.currency',
-                'packageAttractions',
-                'reviews',
-                'testimonials',
-            ])
-            ->where('slug', $slug)
-            ->where('is_active', true)
-            ->firstOrFail();
-
-        $relatedTours = Package::query()
-            ->with(['currency'])
-            ->where('is_active', true)
-            ->where('id', '!=', $tour->id)
-            ->whereIn('package_type', ['day_tour', 'shore_excursion'])
-            ->limit(3)
-            ->get();
-
-        return view('website.pages.tours.show', compact('tour', 'relatedTours'));
+        return app(TripController::class)->show($slug);
     }
 
     public function legacyShow(string $country, string $slug)
