@@ -1,6 +1,7 @@
+@include('admin.i18n.locale')
 @extends('admin.layout.master')
 
-@section('title', 'إضافة صفحة بالذكاء الاصطناعي')
+@section('title', admin_t('إضافة صفحة بالذكاء الاصطناعي'))
 
 @section('css')
     <style>

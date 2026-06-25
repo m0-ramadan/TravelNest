@@ -51,6 +51,73 @@ abstract class BaseWebsiteController extends Controller
         return Str::limit(strip_tags($this->translated($value)), $limit);
     }
 
+    protected function localizedUiText(mixed $value, ?string $fallback = ''): string
+    {
+        $text = trim($this->translated($value));
+
+        if ($text === '') {
+            $text = trim((string) ($fallback ?? ''));
+        }
+
+        return $text !== '' ? __($text) : '';
+    }
+
+    protected function localizedModelText(?Model $model, string $attribute): string
+    {
+        if (!$model) {
+            return '';
+        }
+
+        return $this->localizedUiText($model->getRawOriginal($attribute) ?? $model->{$attribute});
+    }
+
+    protected function packageTourTypeLabel(Package $package): string
+    {
+        $tourType = trim((string) $package->tour_type);
+
+        if ($tourType === '') {
+            return $this->typeLabel((string) $package->package_type);
+        }
+
+        return match (Str::lower(str_replace(['-', ' '], '_', $tourType))) {
+            'private' => __('Private'),
+            'group', 'small_group', 'small_group_tour' => __('Small Group Tour'),
+            'shared' => __('Shared'),
+            'custom' => __('Custom'),
+            default => $this->localizedUiText($tourType),
+        };
+    }
+
+    protected function packageScheduleLabel(Package $package): string
+    {
+        $schedule = $package->relationLoaded('cruise') && $package->cruise?->sailing_days
+            ? $package->cruise->sailing_days
+            : ($package->getRawOriginal('schedule_text') ?? $package->schedule_text);
+
+        return $this->localizedUiText($schedule);
+    }
+
+    protected function localizedTagNames(iterable $items, int $limit = 0): array
+    {
+        $collection = collect($items);
+
+        if ($limit > 0) {
+            $collection = $collection->take($limit);
+        }
+
+        return $collection
+            ->map(function ($item) {
+                if ($item instanceof Model) {
+                    return $this->localizedUiText($item->getRawOriginal('title') ?? $item->getRawOriginal('name') ?? $item->title ?? $item->name);
+                }
+
+                return $this->localizedUiText($item);
+            })
+            ->filter()
+            ->values()
+            ->all();
+    }
+
 
     protected function packagePrice(Package $package): string
     {
@@ -74,7 +141,7 @@ abstract class BaseWebsiteController extends Controller
     protected function packageDuration(Package $package): string
     {
         if (!empty($package->duration_text)) {
-            return (string) $package->duration_text;
+            return $this->localizedUiText($package->getRawOriginal('duration_text') ?? $package->duration_text);
         }
 
         if (!empty($package->duration_days)) {
@@ -99,11 +166,11 @@ abstract class BaseWebsiteController extends Controller
     protected function packageCard(Package $package): array
     {
         $highlights = $package->relationLoaded('highlights')
-            ? $package->highlights->take(4)->map(fn($item) => $this->translated($item->getRawOriginal('title') ?? $item->title))->filter()->values()->all()
+            ? $this->localizedTagNames($package->highlights, 4)
             : [];
 
         if (empty($highlights) && $package->relationLoaded('tags')) {
-            $highlights = $package->tags->take(4)->pluck('name')->filter()->values()->all();
+            $highlights = $this->localizedTagNames($package->tags, 4);
         }
 
         return [
@@ -115,7 +182,7 @@ abstract class BaseWebsiteController extends Controller
             'image' => $this->imageUrl($package->featured_image, 'website/photos/home2.webp'),
             'price' => $this->packagePrice($package),
             'duration' => $this->packageDuration($package),
-            'tour_type' => ucfirst((string) ($package->tour_type ?: 'Private')),
+            'tour_type' => $this->packageTourTypeLabel($package),
             'route_text' => $package->route_text ?: $this->translated($package->getRawOriginal('destinations_text') ?? null),
             'is_ultra_luxury' => (bool) $package->is_ultra_luxury,
             'is_best_seller' => (bool) $package->is_best_seller,
@@ -127,24 +194,12 @@ abstract class BaseWebsiteController extends Controller
     protected function packageListingCard(Package $package, ?string $buttonText = null): array
     {
         $highlights = $package->relationLoaded('highlights')
-            ? $package->highlights
-                ->take(2)
-                ->map(fn($item) => $this->translated($item->getRawOriginal('title') ?? $item->title))
-                ->filter()
-                ->values()
-                ->all()
+            ? $this->localizedTagNames($package->highlights, 2)
             : [];
 
         if (empty($highlights) && $package->relationLoaded('tags')) {
-            $highlights = $package->tags->take(2)->pluck('name')->filter()->values()->all();
+            $highlights = $this->localizedTagNames($package->tags, 2);
         }
-
-        $tourType = trim((string) ($package->tour_type ?: Str::headline(str_replace('_', ' ', (string) $package->package_type))));
-        $schedule = trim((string) (
-            $package->relationLoaded('cruise') && $package->cruise?->sailing_days
-                ? $package->cruise->sailing_days
-                : $this->translated($package->getRawOriginal('schedule_text') ?? $package->schedule_text)
-        ));
 
         return [
             'title' => $this->translated($package->getRawOriginal('title') ?? $package->title),
@@ -155,9 +210,9 @@ abstract class BaseWebsiteController extends Controller
                 ? __('Ultra Luxury')
                 : ($package->is_best_seller ? __('Best Seller') : null),
             'duration' => $this->packageDuration($package),
-            'tour_type' => __($tourType !== '' ? $tourType : $this->typeLabel((string) $package->package_type)),
-            'schedule' => $schedule,
-            'country' => $this->translated($package->primaryCountry?->getRawOriginal('name') ?? $package->primaryCountry?->name),
+            'tour_type' => $this->packageTourTypeLabel($package),
+            'schedule' => $this->packageScheduleLabel($package),
+            'country' => $this->localizedModelText($package->primaryCountry, 'name'),
             'description' => $this->shortText(
                 $package->getRawOriginal('short_description') ?: $package->getRawOriginal('description'),
                 170

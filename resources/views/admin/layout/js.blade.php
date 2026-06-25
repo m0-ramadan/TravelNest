@@ -1,3 +1,4 @@
+@include('admin.i18n.locale')
 <!-- build:js dashboard/assets/vendor/js/core.js -->
 
 <script src="{{ asset('dashboard/assets/vendor/libs/jquery/jquery.js') }}"></script>
@@ -36,8 +37,8 @@
             <div class="modal-content">
                 <img class="img_modal">
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-                        الغاء
+                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                        {{ admin_t('إلغاء') }}
                     </button>
                 </div>
             </div>

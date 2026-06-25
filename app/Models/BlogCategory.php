@@ -34,4 +34,14 @@ class BlogCategory extends Model
     {
         return $this->translatedValue('name');
     }
+
+    public function getDisplayTitleAttribute(): string
+    {
+        return $this->display_name;
+    }
+
+    public function getDisplayDescriptionAttribute(): string
+    {
+        return $this->translatedValue('description');
+    }
 }

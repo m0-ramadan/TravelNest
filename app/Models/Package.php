@@ -232,6 +232,71 @@ class Package extends Model
         return $this->translatedValue('title');
     }
 
+    public function getDisplaySubtitleAttribute(): string
+    {
+        return $this->translatedValue('subtitle');
+    }
+
+    public function getDisplayShortDescriptionAttribute(): string
+    {
+        return $this->translatedValue('short_description');
+    }
+
+    public function getDisplayDescriptionAttribute(): string
+    {
+        return $this->translatedValue('description');
+    }
+
+    public function getDisplayScheduleTextAttribute(): string
+    {
+        return $this->translatedValue('schedule_text');
+    }
+
+    public function getDisplayPickupLocationAttribute(): string
+    {
+        return $this->translatedValue('pickup_location');
+    }
+
+    public function getDisplayDropoffLocationAttribute(): string
+    {
+        return $this->translatedValue('dropoff_location');
+    }
+
+    public function getDisplayDestinationsTextAttribute(): string
+    {
+        return $this->translatedValue('destinations_text');
+    }
+
+    public function getDisplayLocationSummaryAttribute(): string
+    {
+        return $this->translatedValue('location_summary');
+    }
+
+    public function getDisplayCancellationPolicyAttribute(): string
+    {
+        return $this->translatedValue('cancellation_policy');
+    }
+
+    public function getDisplayTermsConditionsAttribute(): string
+    {
+        return $this->translatedValue('terms_conditions');
+    }
+
+    public function getDisplaySeoTitleAttribute(): string
+    {
+        return $this->translatedValue('seo_title');
+    }
+
+    public function getDisplaySeoDescriptionAttribute(): string
+    {
+        return $this->translatedValue('seo_description');
+    }
+
+    public function getDisplayBreadcrumbTitleAttribute(): string
+    {
+        return $this->translatedValue('breadcrumb_title');
+    }
+
     public function getFormattedPriceAttribute(): ?string
     {
         if ($this->start_from_price === null) {

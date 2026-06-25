@@ -1,6 +1,7 @@
+@include('admin.i18n.locale')
 @extends('admin.layout.master')
 
-@section('title', 'إرسال إشعار للمندوبين')
+@section('title', admin_t('إرسال إشعار للمندوبين'))
 
 @section('css')
     <link rel="stylesheet" href="{{ asset('admin/assets/css/toastr.min.css') }}">

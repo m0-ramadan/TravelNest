@@ -84,4 +84,19 @@ class PackageCategory extends Model
     {
         return $this->translatedValue('name');
     }
+
+    public function getDisplayDescriptionAttribute(): string
+    {
+        return $this->translatedValue('description');
+    }
+
+    public function getDisplaySeoTitleAttribute(): string
+    {
+        return $this->translatedValue('seo_title');
+    }
+
+    public function getDisplaySeoDescriptionAttribute(): string
+    {
+        return $this->translatedValue('seo_description');
+    }
 }

@@ -1,5 +1,6 @@
+@include('admin.i18n.locale')
 @extends('admin.layout.master')
-@section('title', 'اسعار شحن الفروع')
+@section('title', admin_t('اسعار شحن الفروع'))
 @section('css')
 
 @endsection

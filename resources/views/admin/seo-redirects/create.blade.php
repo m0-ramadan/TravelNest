@@ -1,6 +1,7 @@
+@include('admin.i18n.locale')
 @extends('admin.layout.master')
 
-@section('title', 'إضافة Redirect')
+@section('title', admin_t('إضافة Redirect'))
 
 @section('css')
     <style>

@@ -1,3 +1,4 @@
+@include('admin.i18n.locale')
 <!-- Favicon -->
 <link rel="icon" type="image/png" sizes="48x48" href="{{ asset('favicon-48x48.png') }}" />
 <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />

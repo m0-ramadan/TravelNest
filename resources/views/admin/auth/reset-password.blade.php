@@ -1,4 +1,8 @@
+@include('admin.i18n.locale')
 @extends('admin.auth.layouts.master')
+
+@section('title', admin_t('إعادة تعيين كلمة المرور'))
+
 @section('content')
     <form class="theme-form login-form" action="{{ route('admin.password.update') }}" method="post">
         @csrf

@@ -1,6 +1,7 @@
+@include('admin.i18n.locale')
 @extends('admin.layout.master')
 
-@section('title', 'إضافة رابط تواصل')
+@section('title', admin_t('إضافة رابط تواصل'))
 
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">

@@ -1,6 +1,7 @@
+@include('admin.i18n.locale')
 @extends('admin.layout.master')
 
-@section('title', 'سجل تواصل الحجز')
+@section('title', admin_t('سجل تواصل الحجز'))
 
 @section('css')
     <style>

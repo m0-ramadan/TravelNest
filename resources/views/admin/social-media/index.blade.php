@@ -1,6 +1,7 @@
+@include('admin.i18n.locale')
 @extends('admin.layout.master')
 
-@section('title', 'وسائل التواصل الاجتماعي')
+@section('title', admin_t('وسائل التواصل الاجتماعي'))
 
 @section('css')
 

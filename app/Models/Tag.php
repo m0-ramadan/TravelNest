@@ -49,4 +49,9 @@ class Tag extends Model
     {
         return $this->translatedValue('name');
     }
+
+    public function getDisplayTitleAttribute(): string
+    {
+        return $this->display_name;
+    }
 }

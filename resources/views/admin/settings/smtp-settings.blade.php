@@ -1,6 +1,7 @@
+@include('admin.i18n.locale')
 @extends('admin.layout.master')
 
-@section('title', 'إعدادات SMTP المتقدمة المتقدمة')
+@section('title', admin_t('إعدادات SMTP المتقدمة المتقدمة'))
 
 @section('css')
 

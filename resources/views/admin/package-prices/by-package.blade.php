@@ -1,6 +1,7 @@
+@include('admin.i18n.locale')
 @extends('admin.layout.master')
 
-@section('title', 'أسعار الباقة')
+@section('title', admin_t('أسعار الباقة'))
 
 @section('css')
     <style>

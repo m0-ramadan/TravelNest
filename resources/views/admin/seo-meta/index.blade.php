@@ -1,6 +1,7 @@
+@include('admin.i18n.locale')
 @extends('admin.layout.master')
 
-@section('title', 'SEO Meta')
+@section('title', admin_t('SEO Meta'))
 
 @section('css')
 

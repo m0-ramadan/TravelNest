@@ -67,4 +67,24 @@ class ArticleCategory extends Model
     {
         return $this->translatedValue('name');
     }
+
+    public function getDisplayTitleAttribute(): string
+    {
+        return $this->display_name;
+    }
+
+    public function getDisplayDescriptionAttribute(): string
+    {
+        return $this->translatedValue('description');
+    }
+
+    public function getDisplayMetaTitleAttribute(): string
+    {
+        return $this->translatedValue('meta_title') ?: $this->display_name;
+    }
+
+    public function getDisplayMetaDescriptionAttribute(): string
+    {
+        return $this->translatedValue('meta_description') ?: $this->display_description;
+    }
 }

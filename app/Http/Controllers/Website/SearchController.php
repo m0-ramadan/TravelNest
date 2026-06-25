@@ -155,7 +155,7 @@ class SearchController extends BaseWebsiteController
     private function resultMeta(Package $package): array
     {
         if ($package->package_type === 'nile_cruise') {
-            $sailing = trim((string) ($package->cruise?->sailing_days ?: $this->translated($package->getRawOriginal('schedule_text') ?? $package->schedule_text)));
+            $sailing = $this->packageScheduleLabel($package);
             $route = trim(collect([$package->cruise?->route_from, $package->cruise?->route_to])->filter()->implode(' - '));
 
             return array_values(array_filter([
@@ -167,7 +167,7 @@ class SearchController extends BaseWebsiteController
         return array_values(array_filter([
             ['icon' => 'las la-clock', 'text' => $this->packageDuration($package)],
             trim((string) $package->tour_type) !== ''
-                ? ['icon' => 'las la-users', 'text' => trim((string) $package->tour_type)]
+                ? ['icon' => 'las la-users', 'text' => $this->packageTourTypeLabel($package)]
                 : ['icon' => 'las la-tag', 'text' => $this->resultTypeLabel($package)],
         ]));
     }

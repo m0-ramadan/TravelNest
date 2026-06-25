@@ -1,5 +1,11 @@
+@include('admin.i18n.locale')
 <!doctype html>
-<html lang="ar" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" dir="rtl"
+@php
+    $locale = app()->getLocale();
+    $isRtl = $locale === 'ar';
+@endphp
+<html lang="{{ $locale }}" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact"
+    dir="{{ $isRtl ? 'rtl' : 'ltr' }}"
     data-theme="theme-default" data-assets-path="{{ asset('dashboard/assets') }}/"
     data-template="vertical-menu-template-no-customizer">
 
@@ -39,7 +45,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            font-family: "Cairo", sans-serif !important;
+            font-family: {{ $isRtl ? '"Cairo", "Noto Kufi Arabic", sans-serif' : '"Public Sans", sans-serif' }} !important;
             background: #1e1e2d;
         }
     </style>
@@ -97,16 +103,18 @@
     </form>
     <!-- Core JS -->
     @include('admin.layout.js')
+    @include('admin.i18n.runtime')
     @yield('js')
+
     <script>
         // ✅ حل إسعافي: لو أي Swal اتعملت بدون نصوص للأزرار، نركّب نصوص افتراضية
         if (window.Swal && typeof Swal.fire === 'function') {
             const __fire = Swal.fire.bind(Swal);
             Swal.fire = function(opts, ...rest) {
                 if (opts && typeof opts === 'object') {
-                    if (!opts.confirmButtonText) opts.confirmButtonText = 'موافق';
-                    if (opts.showCancelButton && !opts.cancelButtonText) opts.cancelButtonText = 'إلغاء';
-                    if (opts.showDenyButton && !opts.denyButtonText) opts.denyButtonText = 'لا';
+                    if (!opts.confirmButtonText) opts.confirmButtonText = @json(admin_t('موافق'));
+                    if (opts.showCancelButton && !opts.cancelButtonText) opts.cancelButtonText = @json(admin_t('إلغاء'));
+                    if (opts.showDenyButton && !opts.denyButtonText) opts.denyButtonText = @json(admin_t('لا'));
                 }
                 return __fire(opts, ...rest);
             };

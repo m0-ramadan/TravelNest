@@ -77,6 +77,7 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'api.key' => \App\Http\Middleware\ApiKeyMiddleware::class,
+        'translate.admin' => \App\Http\Middleware\TranslateAdminHtml::class,
         // 'api.cors' => \App\Http\Middleware\Cors::class,
         //  'permission' => \App\Http\Middleware\CheckPermission::class,
         'permission' => PermissionMiddleware::class,

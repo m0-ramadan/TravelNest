@@ -1,6 +1,7 @@
+@include('admin.i18n.locale')
 @extends('admin.layout.master')
 
-@section('title', 'تقييمات المستخدم: ' . $user->name)
+@section('title', admin_t('تقييمات المستخدم') . ': ' . $user->name)
 
 @section('css')
 

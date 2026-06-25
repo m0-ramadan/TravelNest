@@ -1,3 +1,4 @@
+@include('admin.i18n.locale')
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 

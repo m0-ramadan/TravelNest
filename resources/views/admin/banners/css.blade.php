@@ -1,3 +1,4 @@
+@include('admin.i18n.locale')
 <style>
     /*
     ملف الأنماط الموحد للبانرات

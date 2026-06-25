@@ -2,7 +2,7 @@
 
 @section('title', $package->getTranslation('seo_title') ?: $title . ' - Etro Tours')
 @section('description', $package->getTranslation('seo_description') ?: $shortDescription)
-@section('keywords', trim(collect([$title, $package->tour_type ?? null, $package->primaryCountry?->display_name ?? null, 'Etro Tours'])->filter()->implode(', '), ', '))
+@section('keywords', trim(collect([$title, $tourTypeText ?? null, $package->primaryCountry?->display_name ?? null, 'Etro Tours'])->filter()->implode(', '), ', '))
 @section('image', $heroImage)
 
 @section('css')
@@ -838,7 +838,7 @@
                 'name' => 'Etro Tours',
                 'url' => url('/'),
             ],
-            'touristType' => $package->tour_type ?: 'Private',
+            'touristType' => $tourTypeText ?? __('Private'),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
     </script>
 @endsection
@@ -850,16 +850,6 @@
                 ? ($package->currency_symbol ?? '$') .
                     rtrim(rtrim(number_format((float) $package->start_from_price, 2), '0'), '.')
                 : null;
-        $durationText =
-            $package->duration_text ?:
-            ($package->duration_days
-                ? $package->duration_days . ' ' . __('Days')
-                : ($package->duration_hours
-                    ? $package->duration_hours . ' ' . __('Hours')
-                    : ''));
-        $tourTypeText = $package->tour_type
-            ? __(ucfirst(str_replace('_', ' ', $package->tour_type)))
-            : __('Private');
     @endphp
 
     <section class="breadcrumb-top-bar">
@@ -1313,24 +1303,12 @@
                             <h2 class="section-header">{{ __('Related Tours') }}</h2>
                             <div class="related-grid">
                                 @foreach ($relatedPackages as $related)
-                                    @php
-                                        $relatedTitle = $related->getTranslation('title');
-                                        $relatedImage = $related->featured_image
-                                            ? asset(ltrim($related->featured_image, '/'))
-                                            : asset('website/photos/home2.webp');
-                                        $relatedUrl = in_array($related->package_type, ['day_tour', 'shore_excursion'], true)
-                                            ? route('website.tours.show', $related->slug)
-                                            : route('website.trips.show', $related->slug);
-                                        $relatedButtonText = in_array($related->package_type, ['day_tour', 'shore_excursion'], true)
-                                            ? __('View Tour')
-                                            : __('View Trip');
-                                    @endphp
                                     <div class="related-card">
-                                        <img src="{{ $relatedImage }}" alt="{{ $relatedTitle }}" loading="lazy">
+                                        <img src="{{ $related['image'] }}" alt="{{ $related['title'] }}" loading="lazy">
                                         <div class="related-card-body">
-                                            <div class="related-card-title">{{ $relatedTitle }}</div>
+                                            <div class="related-card-title">{{ $related['title'] }}</div>
                                             <a class="gold-btn mt-3"
-                                                href="{{ $relatedUrl }}">{{ $relatedButtonText }}</a>
+                                                href="{{ $related['url'] }}">{{ $related['button_text'] }}</a>
                                         </div>
                                     </div>
                                 @endforeach

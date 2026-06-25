@@ -1,3 +1,4 @@
+@include('admin.i18n.locale')
 @php
 use App\Models\Transfer;
 use App\Models\Branchs;

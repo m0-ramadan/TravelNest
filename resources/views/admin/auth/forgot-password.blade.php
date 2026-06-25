@@ -1,11 +1,17 @@
+@include('admin.i18n.locale')
 @extends('admin.auth.layouts.master')
 
+@section('title', admin_t('نسيت كلمة المرور؟'))
+
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('dashboard/assets/css/bootstrap-rtl.min.css') }}">
+    @if (app()->getLocale() === 'ar')
+        <link rel="stylesheet" href="{{ asset('dashboard/assets/css/bootstrap-rtl.min.css') }}">
+    @endif
 @endsection
 
 @section('content')
-    <div class="authentication-wrapper authentication-cover authentication-bg" dir="rtl">
+    <div class="authentication-wrapper authentication-cover authentication-bg"
+        dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
         <div class="authentication-inner row">
 
             <!-- الجانب الأيسر (الصورة التوضيحية) - يظهر فقط على الشاشات الكبيرة -->

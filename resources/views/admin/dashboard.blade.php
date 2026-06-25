@@ -1,13 +1,14 @@
+@include('admin.i18n.locale')
 @extends('admin.layout.master')
 
-@section('title', 'الرئيسية')
+@section('title', admin_t('الرئيسية'))
 
 @section('css')
     <link rel="stylesheet" href="{{ asset('dashboard/assets/vendor/css/pages/app-logistics-dashboard.css') }}" />
 
     <style>
         body {
-            font-family: "Cairo", sans-serif !important;
+            font-family: {{ app()->getLocale() === 'ar' ? '"Cairo", sans-serif' : '"Public Sans", sans-serif' }} !important;
         }
 
         .layout-navbar-fixed body:not(.modal-open) .layout-content-navbar .layout-navbar,
@@ -91,16 +92,18 @@
         $topClients = \App\Models\Client::withCount('bookings')->orderByDesc('bookings_count')->take(5)->get();
     @endphp
 
+    @php($isRtl = app()->getLocale() === 'ar')
+
     <div class="container-xxl flex-grow-1 container-p-y">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item active">الرئيسية</li>
+                <li class="breadcrumb-item active">{{ admin_t('الرئيسية') }}</li>
             </ol>
         </nav>
 
         <div class="row">
             <div class="col-xl-12 mb-4 col-lg-5 col-12">
-                {{ greeting() }} يا {{ auth()->guard('admin')->user()->name }} 😍
+                {{ greeting() }} {{ $isRtl ? admin_t('يا') . ' ' : '' }}{{ auth()->guard('admin')->user()->name }} 😍
             </div>
 
             <div class="row mb-4 g-4">
@@ -119,7 +122,7 @@
                                         </div>
                                         <h4 class="ms-1 mb-0">{{ $bookingsThisMonth }}</h4>
                                     </div>
-                                    <p class="mb-1">الحجوزات في الشهر</p>
+                                    <p class="mb-1">{{ admin_t('الحجوزات في الشهر') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -136,7 +139,7 @@
                                         </div>
                                         <h4 class="ms-1 mb-0">{{ $totalBookings }}</h4>
                                     </div>
-                                    <p class="mb-1">إجمالي الحجوزات</p>
+                                    <p class="mb-1">{{ admin_t('إجمالي الحجوزات') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -153,7 +156,7 @@
                                         </div>
                                         <h4 class="ms-1 mb-0">{{ $cancelledBookings }}</h4>
                                     </div>
-                                    <p class="mb-1">الحجوزات الملغية</p>
+                                    <p class="mb-1">{{ admin_t('الحجوزات الملغية') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -170,7 +173,7 @@
                                         </div>
                                         <h4 class="ms-1 mb-0">{{ $totalClients }}</h4>
                                     </div>
-                                    <p class="mb-1">عدد العملاء</p>
+                                    <p class="mb-1">{{ admin_t('عدد العملاء') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -187,7 +190,7 @@
                                         </div>
                                         <h4 class="ms-1 mb-0">{{ $clientsThisMonth }}</h4>
                                     </div>
-                                    <p class="mb-1">العملاء في الشهر</p>
+                                    <p class="mb-1">{{ admin_t('العملاء في الشهر') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -204,7 +207,7 @@
                                         </div>
                                         <h4 class="ms-1 mb-0">{{ $totalAdmins }}</h4>
                                     </div>
-                                    <p class="mb-1">عدد الموظفين</p>
+                                    <p class="mb-1">{{ admin_t('عدد الموظفين') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -221,7 +224,7 @@
                                         </div>
                                         <h4 class="ms-1 mb-0">{{ $totalVisitors }}</h4>
                                     </div>
-                                    <p class="mb-1">عدد الزيارات</p>
+                                    <p class="mb-1">{{ admin_t('عدد الزيارات') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -238,7 +241,7 @@
                                         </div>
                                         <h4 class="ms-1 mb-0">{{ $visitorsThisMonth }}</h4>
                                     </div>
-                                    <p class="mb-1">الزيارات في الشهر</p>
+                                    <p class="mb-1">{{ admin_t('الزيارات في الشهر') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -255,7 +258,7 @@
                                         </div>
                                         <h4 class="ms-1 mb-0">{{ $totalPackages }}</h4>
                                     </div>
-                                    <p class="mb-1">عدد الباقات</p>
+                                    <p class="mb-1">{{ admin_t('عدد الباقات') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -272,7 +275,7 @@
                                         </div>
                                         <h4 class="ms-1 mb-0">{{ $packagesThisMonth }}</h4>
                                     </div>
-                                    <p class="mb-1">الباقات المضافة هذا الشهر</p>
+                                    <p class="mb-1">{{ admin_t('الباقات المضافة هذا الشهر') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -306,7 +309,7 @@
                                         </div>
                                         <h4 class="ms-1 mb-0">{{ number_format($totalRevenue, 2) }}</h4>
                                     </div>
-                                    <p class="mb-1">إجمالي الإيرادات</p>
+                                    <p class="mb-1">{{ admin_t('إجمالي الإيرادات') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -323,7 +326,7 @@
                                         </div>
                                         <h4 class="ms-1 mb-0">{{ $totalInquiries }}</h4>
                                     </div>
-                                    <p class="mb-1">إجمالي الاستفسارات</p>
+                                    <p class="mb-1">{{ admin_t('إجمالي الاستفسارات') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -335,12 +338,12 @@
                     <div class="card mb-4">
                         <div class="card-header pb-0">
                             <h5 class="card-title mb-0">{{ number_format($platformProfit, 2) }}</h5>
-                            <small class="text-muted">أرباح المنصة آخر شهر</small>
+                            <small class="text-muted">{{ admin_t('أرباح المنصة آخر شهر') }}</small>
                         </div>
                         <div class="card-body">
                             <div id="expensesChart"></div>
                             <div class="mt-md-2 text-center mt-lg-3 mt-3">
-                                <small class="text-muted mt-3">ملخص أرباح المنصة من المدفوعات المؤكدة</small>
+                                <small class="text-muted mt-3">{{ admin_t('ملخص أرباح المنصة من المدفوعات المؤكدة') }}</small>
                             </div>
                         </div>
                     </div>
@@ -348,16 +351,17 @@
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title mb-0">
-                                <h5 class="m-0">طرق الدفع</h5>
+                                <h5 class="m-0">{{ admin_t('طرق الدفع') }}</h5>
                             </div>
                         </div>
                         <div class="card-body">
                             <div class="d-none d-lg-flex vehicles-progress-labels mb-4">
-                                <div class="vehicles-progress-label on-the-way-text" style="width: 100%">المحفظة</div>
+                                <div class="vehicles-progress-label on-the-way-text" style="width: 100%">
+                                    {{ admin_t('المحفظة') }}</div>
                                 <div class="vehicles-progress-label unloading-text" style="width: 100%">
-                                    كاش</div>
+                                    {{ admin_t('كاش') }}</div>
                                 <div class="vehicles-progress-label loading-text" style="width: 100%">
-                                    بطاقة بنكية</div>
+                                    {{ admin_t('بطاقة بنكية') }}</div>
                             </div>
 
                             <div class="vehicles-overview-progress progress rounded-2 my-4" style="height: 46px">
@@ -387,7 +391,7 @@
                                                     <div class="me-2">
                                                         <i class="ti ti-wallet mt-n1"></i>
                                                     </div>
-                                                    <h6 class="mb-0 fw-normal">المحفظة</h6>
+                                                    <h6 class="mb-0 fw-normal">{{ admin_t('المحفظة') }}</h6>
                                                 </div>
                                             </td>
                                             <td class="text-end pe-0">
@@ -401,7 +405,7 @@
                                                     <div class="me-2">
                                                         <i class="ti ti-cash mt-n1"></i>
                                                     </div>
-                                                    <h6 class="mb-0 fw-normal">كاش</h6>
+                                                    <h6 class="mb-0 fw-normal">{{ admin_t('كاش') }}</h6>
                                                 </div>
                                             </td>
                                             <td class="text-end pe-0">
@@ -415,7 +419,7 @@
                                                     <div class="me-2">
                                                         <i class="ti ti-credit-card mt-n1"></i>
                                                     </div>
-                                                    <h6 class="mb-0 fw-normal">بطاقة بنكية</h6>
+                                                    <h6 class="mb-0 fw-normal">{{ admin_t('بطاقة بنكية') }}</h6>
                                                 </div>
                                             </td>
                                             <td class="text-end pe-0">
@@ -434,11 +438,11 @@
                 <div class="col-12 col-xl-6 col-md-6 mb-4">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between">
-                            <h4 id="visitors_data">إحصائيات الزيارات حسب الدولة</h4>
+                            <h4 id="visitors_data">{{ admin_t('إحصائيات الزيارات حسب الدولة') }}</h4>
 
                             <div class="col-md-4 mb-4">
                                 <select name="visitors_year" id="visitors_year" class="form-control select2">
-                                    <option value="">اختر السنة</option>
+                                    <option value="">{{ admin_t('اختر السنة') }}</option>
                                     <option value="2026">2026</option>
                                     <option value="2025">2025</option>
                                     <option value="2024">2024</option>
@@ -458,7 +462,7 @@
                     <div class="card h-100">
                         <div class="card-header d-flex align-items-center justify-content-between">
                             <div class="card-title mb-0">
-                                <h5 class="m-0 me-2">أكثر العملاء حجوزات</h5>
+                                <h5 class="m-0 me-2">{{ admin_t('أكثر العملاء حجوزات') }}</h5>
                             </div>
                         </div>
 
@@ -466,8 +470,8 @@
                             <table class="table table-borderless border-top">
                                 <thead class="border-bottom">
                                     <tr>
-                                        <th>العميل</th>
-                                        <th class="text-end">عدد الحجوزات</th>
+                                        <th>{{ admin_t('العميل') }}</th>
+                                        <th class="text-end">{{ admin_t('عدد الحجوزات') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -481,7 +485,7 @@
                                                     </div>
 
                                                     <span class="mb-0">
-                                                        {{ trim(($client->first_name ?? '') . ' ' . ($client->last_name ?? '')) ?: $client->email ?? 'بدون اسم' }}
+                                                        {{ trim(($client->first_name ?? '') . ' ' . ($client->last_name ?? '')) ?: $client->email ?? admin_t('بدون اسم') }}
                                                     </span>
                                                 </div>
                                             </td>
@@ -496,7 +500,7 @@
 
                                     @if ($topClients->isEmpty())
                                         <tr>
-                                            <td colspan="2" class="text-center py-4">لا توجد بيانات حالياً</td>
+                                            <td colspan="2" class="text-center py-4">{{ admin_t('لا توجد بيانات حالياً') }}</td>
                                         </tr>
                                     @endif
                                 </tbody>
@@ -510,11 +514,11 @@
                 <div class="col-6 col-md-6 mb-4">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between">
-                            <h4 id="sales_data">إحصائيات الحجوزات 2026</h4>
+                            <h4 id="sales_data">{{ admin_t('إحصائيات الحجوزات') }} 2026</h4>
 
                             <div class="col-md-4 mb-4">
                                 <select name="sales_year" id="year" class="form-control select2 year">
-                                    <option value="">اختر السنة</option>
+                                    <option value="">{{ admin_t('اختر السنة') }}</option>
                                     <option value="2026">2026</option>
                                     <option value="2025">2025</option>
                                     <option value="2024">2024</option>
@@ -533,11 +537,11 @@
                 <div class="col-6 col-md-6 mb-4">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between">
-                            <h4 id="all_data">إحصائيات الأداء لسنة 2026</h4>
+                            <h4 id="all_data">{{ admin_t('إحصائيات الأداء لسنة') }} 2026</h4>
 
                             <div class="col-md-4 mb-4">
                                 <select name="data_year" id="data_year" class="form-control select2 year">
-                                    <option value="">اختر السنة</option>
+                                    <option value="">{{ admin_t('اختر السنة') }}</option>
                                     <option value="2026">2026</option>
                                     <option value="2025">2025</option>
                                     <option value="2024">2024</option>
@@ -575,7 +579,7 @@
 
                     var chartOptions = {
                         series: [{
-                            name: "عدد الزيارات",
+                            name: @json(admin_t('عدد الزيارات')),
                             data: response.count ?? response.values ?? []
                         }],
                         chart: {
@@ -633,7 +637,7 @@
                                 type: 'area'
                             },
                             series: [{
-                                name: 'عدد الحجوزات',
+                                name: @json(admin_t('عدد الحجوزات')),
                                 data: totals
                             }],
                             xaxis: {
@@ -661,7 +665,7 @@
                                 type: 'line'
                             },
                             series: [{
-                                name: 'الأداء العام',
+                                name: @json(admin_t('الأداء العام')),
                                 data: totals
                             }],
                             xaxis: {
@@ -677,12 +681,12 @@
             }
 
             document.querySelector('#year').addEventListener('change', function() {
-                document.getElementById("sales_data").innerHTML = `إحصائيات الحجوزات ${this.value}`;
+                document.getElementById("sales_data").innerHTML = `${@json(admin_t('إحصائيات الحجوزات'))} ${this.value}`;
                 loadBookingsChart(this.value);
             });
 
             document.querySelector('#data_year').addEventListener('change', function() {
-                document.getElementById("all_data").innerHTML = `إحصائيات الأداء لسنة ${this.value}`;
+                document.getElementById("all_data").innerHTML = `${@json(admin_t('إحصائيات الأداء لسنة'))} ${this.value}`;
                 loadGeneralStatsChart(this.value);
             });
 
@@ -700,7 +704,7 @@
                         {{ round($platformProfit, 2) }},
                         {{ max(round($totalRevenue - $platformProfit, 2), 0) }}
                     ],
-                    labels: ['أرباح المنصة', 'باقي الإيرادات'],
+                    labels: [@json(admin_t('أرباح المنصة')), @json(admin_t('باقي الإيرادات'))],
                     dataLabels: {
                         enabled: true
                     },

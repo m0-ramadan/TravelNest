@@ -296,13 +296,13 @@ if (!function_exists('greeting')) {
         $hour = (int) now()->format('H');
 
         if ($hour >= 5 && $hour < 12) {
-            return 'صباح الخير 🌅';
+            return __('صباح الخير') . ' 🌅';
         } elseif ($hour >= 12 && $hour < 17) {
-            return 'مساء الخير ☀️';
+            return __('مساء الخير') . ' ☀️';
         } elseif ($hour >= 17 && $hour < 21) {
-            return 'مساء الخير 🌆';
+            return __('مساء الخير') . ' 🌆';
         } else {
-            return 'تصبح على خير 🌙';
+            return __('تصبح على خير') . ' 🌙';
         }
     }
     if (!function_exists('adminTrans')) {

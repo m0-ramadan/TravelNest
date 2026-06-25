@@ -88,14 +88,18 @@ TemplateCustomizer.LANGUAGES.fr = { ... };
  */
 
 if (typeof TemplateCustomizer !== 'undefined') {
+  const htmlEl = document.documentElement;
+  const currentLang = htmlEl.getAttribute('lang') || 'en';
+  const currentDir = htmlEl.getAttribute('dir') === 'rtl' ? 'rtl' : 'ltr';
+
   window.templateCustomizer = new TemplateCustomizer({
     cssPath: assetsPath + 'vendor/css' + (rtlSupport ? '/rtl' : '') + '/',
     themesPath: assetsPath + 'vendor/css' + (rtlSupport ? '/rtl' : '') + '/',
     displayCustomizer: true,
-    lang: localStorage.getItem('templateCustomizer-' + templateName + '--Lang') || 'en', // Set default language here
+    lang: localStorage.getItem('templateCustomizer-' + templateName + '--Lang') || currentLang, // Set default language here
     // defaultTheme: 2,
     defaultStyle: 'dark',
-    // defaultTextDir: 'rtl',
+    defaultTextDir: currentDir,
     // defaultContentLayout: 'wide',
     // defaultHeaderType: 'static',
     // defaultMenuCollapsed: true,

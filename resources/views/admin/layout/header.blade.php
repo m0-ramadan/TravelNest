@@ -1,3 +1,4 @@
+@include('admin.i18n.locale')
 <div class="page-main-header">
     <div class="main-header-right row m-0">
         <div class="main-header-left">

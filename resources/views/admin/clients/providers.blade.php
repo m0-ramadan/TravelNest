@@ -1,6 +1,7 @@
+@include('admin.i18n.locale')
 @extends('admin.layout.master')
 
-@section('title', 'المتاجر')
+@section('title', admin_t('المتاجر'))
 
 @section('css')
     <!-- Plugins css start-->

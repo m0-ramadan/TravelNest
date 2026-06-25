@@ -1,6 +1,7 @@
+@include('admin.i18n.locale')
 @extends('admin.layout.master')
 
-@section('title', 'إدارة الأدوار')
+@section('title', admin_t('إدارة الأدوار'))
 
 @section('css')
 

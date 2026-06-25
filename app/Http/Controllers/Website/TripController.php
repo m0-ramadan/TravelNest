@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Website;
 
+use App\Models\Country;
 use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -56,12 +57,14 @@ class TripController extends BaseWebsiteController
         $subtitle = $this->translated($package->getRawOriginal('subtitle') ?? $package->subtitle);
         $shortDescription = $this->translated($package->getRawOriginal('short_description') ?? $package->short_description);
         $description = $this->translated($package->getRawOriginal('description') ?? $package->description) ?: $shortDescription;
-        $schedule = $this->translated($package->getRawOriginal('schedule_text') ?? $package->schedule_text);
+        $schedule = $this->packageScheduleLabel($package);
         $pickup = $this->translated($package->getRawOriginal('pickup_location') ?? $package->pickup_location);
         $dropoff = $this->translated($package->getRawOriginal('dropoff_location') ?? $package->dropoff_location);
         $destinations = $this->translated($package->getRawOriginal('destinations_text') ?? $package->destinations_text) ?: (string) ($package->route_text ?? '');
         $locationSummary = $this->translated($package->getRawOriginal('location_summary') ?? $package->location_summary);
         $heroImage = $this->imageUrl($package->featured_image, asset('website/photos/home2.webp'));
+        $durationText = $this->packageDuration($package);
+        $tourTypeText = $this->packageTourTypeLabel($package);
 
         $gallery = [];
         $galleryImages = $package->getRawOriginal('gallery_images') ?? $package->gallery_images;
@@ -154,10 +157,10 @@ class TripController extends BaseWebsiteController
             ->take(6)
             ->values();
 
-        $countries = DB::table('countries')
-            ->orderBy('name')
-            ->pluck('name')
-            ->map(fn($name) => $this->transValue($name, $name))
+        $countries = Country::query()
+            ->orderBy('id')
+            ->get()
+            ->map(fn($country) => $country->display_name)
             ->filter()
             ->values();
 
@@ -189,7 +192,17 @@ class TripController extends BaseWebsiteController
             ->where('id', '!=', $package->id)
             ->when($package->category_id, fn($query) => $query->where('category_id', $package->category_id))
             ->limit(3)
-            ->get();
+            ->get()
+            ->map(function (Package $related) {
+                return [
+                    'title' => $this->translated($related->getRawOriginal('title') ?? $related->title),
+                    'image' => $this->imageUrl($related->featured_image, asset('website/photos/home2.webp')),
+                    'url' => $this->packageRoute($related),
+                    'button_text' => in_array($related->package_type, ['day_tour', 'shore_excursion'], true)
+                        ? __('View Tour')
+                        : __('View Trip'),
+                ];
+            });
 
         return view('website.pages.packages.show', compact(
             'package',
@@ -198,6 +211,8 @@ class TripController extends BaseWebsiteController
             'subtitle',
             'shortDescription',
             'description',
+            'durationText',
+            'tourTypeText',
             'schedule',
             'pickup',
             'dropoff',

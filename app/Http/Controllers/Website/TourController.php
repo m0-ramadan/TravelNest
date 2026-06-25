@@ -65,16 +65,11 @@ class TourController extends BaseWebsiteController
             $symbol = $package->currency?->symbol ?: '$';
 
             $highlights = $package->relationLoaded('highlights')
-                ? $package->highlights
-                    ->take(2)
-                    ->map(fn ($item) => $this->translated($item->getRawOriginal('title') ?? $item->title))
-                    ->filter()
-                    ->values()
-                    ->all()
+                ? $this->localizedTagNames($package->highlights, 2)
                 : [];
 
             if (empty($highlights) && $package->relationLoaded('tags')) {
-                $highlights = $package->tags->take(2)->pluck('name')->filter()->values()->all();
+                $highlights = $this->localizedTagNames($package->tags, 2);
             }
 
             return [
@@ -85,9 +80,9 @@ class TourController extends BaseWebsiteController
                 ),
                 'image' => $this->imageUrl($package->featured_image, 'website/photos/home2.webp'),
                 'url' => $this->packageRoute($package),
-                'country' => $this->translated($package->primaryCountry?->getRawOriginal('name') ?? $package->primaryCountry?->name) ?: __('Offer'),
+                'country' => $this->localizedModelText($package->primaryCountry, 'name') ?: __('Offer'),
                 'duration' => $this->packageDuration($package),
-                'tour_type' => trim((string) ($package->tour_type ?: Str::headline(str_replace('_', ' ', (string) $package->package_type)))),
+                'tour_type' => $this->packageTourTypeLabel($package),
                 'offer_price' => $symbol . number_format((float) $offerPrice, 0),
                 'regular_price' => $basePrice && (float) $basePrice > (float) $offerPrice
                     ? $symbol . number_format((float) $basePrice, 0)

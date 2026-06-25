@@ -1,6 +1,7 @@
+@include('admin.i18n.locale')
 @extends('admin.layout.master')
 
-@section('title', 'أخطاء PHP')
+@section('title', admin_t('أخطاء PHP'))
 
 @section('css')
     <style>

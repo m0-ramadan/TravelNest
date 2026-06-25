@@ -121,18 +121,11 @@ class PageController extends BaseWebsiteController
 
     private function mapMultiCountryCard(Package $package): array
     {
-        $highlights = $package->highlights
-            ->take(3)
-            ->map(fn ($item) => $this->translated($item->getRawOriginal('title') ?? $item->title))
-            ->filter()
-            ->values()
-            ->all();
+        $highlights = $this->localizedTagNames($package->highlights, 3);
 
         if (empty($highlights)) {
-            $highlights = $package->tags->take(3)->pluck('name')->filter()->values()->all();
+            $highlights = $this->localizedTagNames($package->tags, 3);
         }
-
-        $tourType = trim((string) ($package->tour_type ?: 'Private'));
 
         return [
             'title' => $this->translated($package->getRawOriginal('title') ?? $package->title),
@@ -140,13 +133,13 @@ class PageController extends BaseWebsiteController
             'image' => $this->resolvePackageImage($package),
             'price' => $this->packagePrice($package),
             'duration' => $this->packageDuration($package),
-            'tour_type' => __($tourType !== '' ? $tourType : 'Private'),
+            'tour_type' => $this->packageTourTypeLabel($package),
             'description' => $this->shortText(
                 $package->getRawOriginal('short_description') ?: $package->getRawOriginal('description'),
                 220
             ),
             'tags' => $highlights,
-            'country' => $this->translated($package->primaryCountry?->getRawOriginal('name') ?? $package->primaryCountry?->name),
+            'country' => $this->localizedModelText($package->primaryCountry, 'name'),
             'badge' => $package->is_featured ? __('Featured') : null,
         ];
     }
