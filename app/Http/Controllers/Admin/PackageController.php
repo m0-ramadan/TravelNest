@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Attraction;
+use App\Models\City;
 use App\Models\Currency;
 use App\Models\Package;
 use App\Models\PackageCategory;
@@ -41,7 +41,7 @@ class PackageController extends Controller
     public function index(Request $request): View
     {
         $packages = Package::query()
-            ->with(['category', 'primaryCountry', 'currency'])
+            ->with(['category', 'primaryCountry', 'currency', 'destination.city'])
             ->when($request->filled('q'), function ($query) use ($request) {
                 $this->applyTranslatedSearch(
                     $query,
@@ -55,15 +55,15 @@ class PackageController extends Controller
 
         return view('admin.packages.index', compact('packages'));
     }
-    private function perPage(Request $request): int
+    protected function perPage(Request $request, int $default = 15): int
     {
-        return max(5, min((int) $request->input('per_page', 15), 100));
+        return max(5, min((int) $request->input('per_page', $default), 100));
     }
     public function create(): View
     {
         return view('admin.packages.create', [
             'categories' => PackageCategory::all(),
-            'destinations' => Attraction::all(),
+            'destinations' => $this->packageCities(),
             'currencies' => Currency::all(),
         ]);
     }
@@ -90,7 +90,7 @@ class PackageController extends Controller
     {
         $package->load([
             'category',
-            'destination',
+            'destination.city',
             'currency',
             'facilities',
             'itineraries',
@@ -113,7 +113,7 @@ class PackageController extends Controller
         return view('admin.packages.edit', [
             'package' => $package,
             'categories' => PackageCategory::all(),
-            'destinations' => Attraction::all(),
+            'destinations' => $this->packageCities(),
             'currencies' => Currency::all(),
         ]);
     }
@@ -146,7 +146,7 @@ class PackageController extends Controller
     public function createWithAI(): View
     {
         return view('admin.packages.create-with-ai', [
-            'destinations' => Attraction::all(),
+            'destinations' => $this->packageCities(),
             'categories' => PackageCategory::all(),
             'currencies' => Currency::all(),
         ]);
@@ -174,8 +174,11 @@ class PackageController extends Controller
             'extra_instructions' => ['nullable', 'string'],
         ]);
 
-        $destination = !empty($data['destination_id'])
-            ? Attraction::find($data['destination_id'])
+        $selectedCity = !empty($data['destination_id'])
+            ? City::find($data['destination_id'])
+            : null;
+        $destination = $selectedCity
+            ? $this->resolveDestinationAttractionFromCityId((int) $selectedCity->id)
             : null;
 
         $category = !empty($data['category_id'])
@@ -192,7 +195,7 @@ class PackageController extends Controller
             'luxury_level' => $data['luxury_level'] ?? null,
             'content_language' => $data['content_language'] ?? 'en',
             'extra_instructions' => $data['extra_instructions'] ?? null,
-            'destination_name' => $this->adminTrans($destination?->name),
+            'destination_name' => $this->adminTrans($selectedCity?->name),
             'category_name' => $this->adminTrans($category?->name),
         ]);
 
@@ -200,7 +203,7 @@ class PackageController extends Controller
             return back()->withInput()->with('error', 'فشل توليد بيانات الرحلة بالذكاء الاصطناعي.');
         }
 
-        DB::transaction(function () use ($request, $data, $aiData, $destination) {
+        DB::transaction(function () use ($request, $data, $aiData, $destination, $selectedCity) {
             $finalData = array_merge($aiData, $data);
 
             unset(
@@ -210,8 +213,10 @@ class PackageController extends Controller
                 $finalData['extra_instructions']
             );
 
-            if (!empty($destination?->country_id)) {
-                $finalData['primary_country_id'] = $destination->country_id;
+            $finalData['destination_id'] = $destination?->id;
+
+            if (!empty($selectedCity?->country_id)) {
+                $finalData['primary_country_id'] = $selectedCity->country_id;
             }
 
             $finalData['is_active'] = true;
@@ -462,6 +467,19 @@ class PackageController extends Controller
             'prices',
         ])->toArray();
 
+        $selectedCity = !empty($data['destination_id'])
+            ? City::find($data['destination_id'])
+            : null;
+        $selectedAttraction = $selectedCity
+            ? $this->resolveDestinationAttractionFromCityId((int) $selectedCity->id)
+            : null;
+
+        $data['destination_id'] = $selectedAttraction?->id;
+
+        if (empty($data['primary_country_id']) && !empty($selectedCity?->country_id)) {
+            $data['primary_country_id'] = $selectedCity->country_id;
+        }
+
         $data = $this->translateModelFields($data, $this->translatedFields);
 
         $data['slug'] = !empty($data['slug'])
@@ -509,6 +527,24 @@ class PackageController extends Controller
             );
 
         return $packageData;
+    }
+
+    private function packageCities()
+    {
+        return City::query()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+    }
+
+    private function resolveDestinationAttractionFromCityId(int $cityId): ?Attraction
+    {
+        return Attraction::query()
+            ->where('city_id', $cityId)
+            ->orderByDesc('is_featured')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->first();
     }
 
     private function normalizeTranslatedFields(array $data): array

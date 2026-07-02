@@ -14,9 +14,22 @@ class PackagePriceController extends Controller
 {
     use HandlesTranslatedFields;
 
+    public function byPackage(Package $package): View
+    {
+        $packagePrices = PackagePrice::query()
+            ->with('currency')
+            ->where('package_id', $package->id)
+            ->latest()
+            ->paginate($this->perPage(request()))
+            ->withQueryString();
+
+        return $this->view('admin.package-prices.by-package', compact('package', 'packagePrices'));
+    }
+
     public function index(Request $request): View
     {
         $packagePrices = PackagePrice::query()
+            ->with(['package', 'currency'])
             ->when($request->filled('q'), function ($query) use ($request) {
                 $this->applyTranslatedSearch($query, ['label', 'season_name', 'notes'], $request->string('q'));
             })
@@ -96,5 +109,10 @@ class PackagePriceController extends Controller
         $packagePrice->delete();
 
         return $this->success('admin.package-prices.index', 'PackagePrice deleted.');
+    }
+
+    protected function perPage(Request $request, int $default = 15): int
+    {
+        return max(5, min((int) $request->input('per_page', $default), 100));
     }
 }

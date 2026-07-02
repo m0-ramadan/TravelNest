@@ -19,10 +19,9 @@
                     <li><i class="lab la-whatsapp" style="color: var(--rich-gold); margin-right: 8px;"></i><a
                             href="https://wa.me/201553383000" target="_blank">+20 15 53383000</a></li>
                     <li><i class="la la-envelope" style="color: var(--rich-gold); margin-right: 8px;"></i><a
-                            href="https://etrotours.com/cdn-cgi/l/email-protection#c2abaca4ad82aeb7baadb0a3aca6a3b1b5a3aceca1adaf"><span
-                                class="__cf_email__"
-                                data-cfemail="b5dcdbd3daf5d9c0cddac7d4dbd1d4c6c2d4db9bd6dad8">{{ __('[email protected]') }}</span></a>
-                    </li>
+                            href="mailto:info@etrotours.com">info@etrotours.com</a></li>
+                    <li><i class="la la-envelope" style="color: var(--rich-gold); margin-right: 8px;"></i><a
+                            href="mailto:reservations@etrotours.com">reservations@etrotours.com</a></li>
                 </ul>
             </div>
 

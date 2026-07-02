@@ -116,6 +116,14 @@
             $decoded = json_decode($galleryImages, true);
             $galleryImages = is_array($decoded) ? $decoded : [];
         }
+
+        $resolveImagePath = function ($image) {
+            if (is_array($image)) {
+                return $image['path'] ?? $image['url'] ?? null;
+            }
+
+            return $image;
+        };
     @endphp
 
     <div class="container-xxl flex-grow-1 container-p-y">
@@ -170,7 +178,10 @@
                             @if (is_array($galleryImages) && count($galleryImages))
                                 <div class="d-flex flex-wrap gap-2">
                                     @foreach ($galleryImages as $image)
-                                        <img src="{{ asset($image) }}" class="image-preview" alt="gallery">
+                                        @php($imagePath = $resolveImagePath($image))
+                                        @if (!empty($imagePath))
+                                            <img src="{{ asset($imagePath) }}" class="image-preview" alt="gallery">
+                                        @endif
                                     @endforeach
                                 </div>
                             @else
@@ -193,8 +204,8 @@
 
                     <div class="col-md-4">
                         <div class="info-box">
-                            <div class="info-label">الوجهة</div>
-                            <div class="info-value">{{ adminTrans(optional($package->destination)->name) ?: '-' }}</div>
+                            <div class="info-label">المدينة</div>
+                            <div class="info-value">{{ adminTrans(optional(optional($package->destination)->city)->name) ?: (adminTrans(optional($package->destination)->name) ?: '-') }}</div>
                         </div>
                     </div>
 
@@ -302,7 +313,7 @@
                     <div class="col-md-6">
                         <div class="info-box">
                             <div class="info-label">الجدول</div>
-                            <div class="info-value">{{ $package->schedule_text ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans($package->schedule_text ?? '') ?: '-' }}</div>
                         </div>
                     </div>
 
@@ -316,28 +327,28 @@
                     <div class="col-md-6">
                         <div class="info-box">
                             <div class="info-label">مكان الاستلام</div>
-                            <div class="info-value">{{ $package->pickup_location ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans($package->pickup_location ?? '') ?: '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="info-box">
                             <div class="info-label">مكان الانتهاء</div>
-                            <div class="info-value">{{ $package->dropoff_location ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans($package->dropoff_location ?? '') ?: '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="info-box">
                             <div class="info-label">الوجهات</div>
-                            <div class="info-value">{{ $package->destinations_text ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans($package->destinations_text ?? '') ?: '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="info-box">
                             <div class="info-label">ملخص الموقع</div>
-                            <div class="info-value">{{ $package->location_summary ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans($package->location_summary ?? '') ?: '-' }}</div>
                         </div>
                     </div>
                 </div>
@@ -363,12 +374,12 @@
                         <div class="timeline-item">
                             <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
                                 <h6 class="mb-0">
-                                    Day {{ $day->day_number ?? '-' }} - {{ $day->title ?? '-' }}
+                                    Day {{ $day->day_number ?? '-' }} - {{ adminTrans($day->title ?? '') ?: '-' }}
                                 </h6>
                                 <span class="badge-soft">{{ $day->duration ?? '-' }}</span>
                             </div>
 
-                            <div class="info-value mb-2">{{ $day->description ?? '-' }}</div>
+                            <div class="info-value mb-2">{{ adminTrans($day->description ?? '') ?: '-' }}</div>
 
                             <div>
                                 @if ($day->meals_breakfast)
@@ -469,8 +480,8 @@
                             <tbody>
                                 @foreach ($package->prices as $price)
                                     <tr>
-                                        <td>{{ $price->label ?? '-' }}</td>
-                                        <td>{{ $price->season_name ?? '-' }}</td>
+                                        <td>{{ adminTrans($price->label ?? '') ?: '-' }}</td>
+                                        <td>{{ adminTrans($price->season_name ?? '') ?: '-' }}</td>
                                         <td>{{ $price->price_type ?? '-' }}</td>
                                         <td>{{ $price->room_type ?? '-' }}</td>
                                         <td>{{ number_format($price->amount ?? 0, 2) }}</td>
@@ -478,7 +489,7 @@
                                         </td>
                                         <td>{{ $price->valid_from ?? '-' }}</td>
                                         <td>{{ $price->valid_to ?? '-' }}</td>
-                                        <td>{{ $price->notes ?? '-' }}</td>
+                                        <td>{{ adminTrans($price->notes ?? '') ?: '-' }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -492,7 +503,7 @@
 
                 <div class="info-box mt-3">
                     <div class="info-label">ملاحظات الأسعار</div>
-                    <div class="info-value">{{ $package->pricing_information ?? '-' }}</div>
+                    <div class="info-value">{{ adminTrans($package->pricing_information ?? '') ?: '-' }}</div>
                 </div>
 
                 {{-- السياسات --}}
@@ -502,28 +513,28 @@
                     <div class="col-md-6">
                         <div class="info-box">
                             <div class="info-label">سياسة الأطفال</div>
-                            <div class="info-value">{{ $package->children_policy ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans($package->children_policy ?? '') ?: '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="info-box">
                             <div class="info-label">سياسة الاستلام والتوصيل</div>
-                            <div class="info-value">{{ $package->pickup_policy ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans($package->pickup_policy ?? '') ?: '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="info-box">
                             <div class="info-label">سياسة الإلغاء</div>
-                            <div class="info-value">{{ $package->cancellation_policy ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans($package->cancellation_policy ?? '') ?: '-' }}</div>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="info-box">
                             <div class="info-label">الشروط والأحكام</div>
-                            <div class="info-value">{{ $package->terms_conditions ?? '-' }}</div>
+                            <div class="info-value">{{ adminTrans($package->terms_conditions ?? '') ?: '-' }}</div>
                         </div>
                     </div>
                 </div>

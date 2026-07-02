@@ -40,6 +40,7 @@ class TripController extends BaseWebsiteController
                 'currency',
                 'category',
                 'primaryCountry',
+                'destination.city',
                 'highlights',
                 'itineraries',
                 'inclusions',
@@ -60,8 +61,16 @@ class TripController extends BaseWebsiteController
         $schedule = $this->packageScheduleLabel($package);
         $pickup = $this->translated($package->getRawOriginal('pickup_location') ?? $package->pickup_location);
         $dropoff = $this->translated($package->getRawOriginal('dropoff_location') ?? $package->dropoff_location);
-        $destinations = $this->translated($package->getRawOriginal('destinations_text') ?? $package->destinations_text) ?: (string) ($package->route_text ?? '');
+        $selectedDestination = $this->localizedModelText($package->destination?->city, 'name')
+            ?: $this->localizedModelText($package->destination, 'name');
+        $destinationsText = $this->translated($package->getRawOriginal('destinations_text') ?? $package->destinations_text);
+        $routeText = trim((string) ($package->route_text ?? ''));
         $locationSummary = $this->translated($package->getRawOriginal('location_summary') ?? $package->location_summary);
+        $destinations = collect([$selectedDestination, $destinationsText, $routeText, $locationSummary])
+            ->map(fn($value) => trim((string) $value))
+            ->filter()
+            ->unique()
+            ->implode(' - ');
         $heroImage = $this->imageUrl($package->featured_image, asset('website/photos/home2.webp'));
         $durationText = $this->packageDuration($package);
         $tourTypeText = $this->packageTourTypeLabel($package);

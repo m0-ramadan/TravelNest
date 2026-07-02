@@ -3,6 +3,7 @@
      $dayToursUrl = route('website.tours.all', ['type' => 'day_tour']);
      $shoreExcursionsUrl = route('website.tours.all', ['type' => 'shore_excursion']);
      $tailorMadeUrl = route('website.tailor_made.index');
+     $contactEmail = 'info@etrotours.com';
      $navigationDestinations = collect($navigationDestinations ?? []);
      $isHomePage = request()->routeIs('website.home');
      $isDestinationsPage = request()->routeIs('website.destinations.*');
@@ -34,6 +35,9 @@
              </button>
              <a href="{{ route('website.search.index') }}" aria-label="{{ __('Search') }}" class="mobile-action-btn">
                  <i class="la la-search"></i>
+             </a>
+             <a href="mailto:{{ $contactEmail }}" aria-label="{{ __('Email Us') }}" class="mobile-action-btn">
+                 <i class="la la-envelope"></i>
              </a>
             <a href="tel:+201553383000" aria-label="{{ __('Call Us') }}" class="mobile-action-btn call-btn">
                 <i class="la la-phone"></i>

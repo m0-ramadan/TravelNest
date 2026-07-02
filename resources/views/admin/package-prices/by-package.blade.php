@@ -70,7 +70,7 @@
             <div class="main-header d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="mb-0">أسعار الباقة</h5>
-                    <small class="opacity-75">{{ $package->name ?? '-' }}</small>
+                    <small class="opacity-75">{{ adminTrans($package->title ?? ($package->name ?? '')) ?: '-' }}</small>
                 </div>
                 <div class="d-flex gap-2">
                     <a href="{{ route('admin.package-prices.create', ['package_id' => $package->id]) }}"
@@ -84,8 +84,8 @@
                     <div class="item-card">
                         <div class="d-flex justify-content-between align-items-start flex-wrap mb-3">
                             <div>
-                                <h6 class="mb-1">{{ $price->label ?? '-' }}</h6>
-                                <small class="text-light opacity-75">{{ $price->season_name ?? '-' }}</small>
+                                <h6 class="mb-1">{{ adminTrans($price->label ?? '') ?: '-' }}</h6>
+                                <small class="text-light opacity-75">{{ adminTrans($price->season_name ?? '') ?: '-' }}</small>
                             </div>
 
                             <span class="badge-status">
@@ -110,7 +110,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <strong>Notes:</strong> {{ $price->notes ?: '-' }}
+                            <strong>Notes:</strong> {{ adminTrans($price->notes ?? '') ?: '-' }}
                         </div>
 
                         <div class="d-flex gap-2 flex-wrap">

@@ -349,8 +349,8 @@
                             </div>
 
                             <div>
-                                <span class="detail-label">الوجهة:</span>
-                                <span>{{ adminTrans(optional($package->destination)->name) ?: '-' }}</span>
+                                <span class="detail-label">المدينة:</span>
+                                <span>{{ adminTrans(optional(optional($package->destination)->city)->name) ?: (adminTrans(optional($package->destination)->name) ?: '-') }}</span>
                             </div>
 
                             <div>

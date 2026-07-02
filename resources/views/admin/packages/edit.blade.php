@@ -297,13 +297,13 @@
                         </div>
 
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">الوجهة</label>
+                            <label class="form-label">المدينة</label>
                             <select id="destination_selector" name="destination_id" class="form-select">
-                                <option value="">اختر الوجهة</option>
+                                <option value="">اختر المدينة</option>
                                 @foreach ($destinations ?? collect() as $destination)
                                     <option value="{{ $destination->id }}"
                                         data-country-id="{{ $destination->country_id }}"
-                                        {{ old('destination_id', $package->destination_id ?? null) == $destination->id ? 'selected' : '' }}>
+                                        {{ old('destination_id', optional(optional($package->destination)->city)->id) == $destination->id ? 'selected' : '' }}>
                                         {{ adminTrans($destination->name) }}
                                     </option>
                                 @endforeach
