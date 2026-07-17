@@ -45,7 +45,7 @@ class TripController extends BaseWebsiteController
                 'itineraries',
                 'inclusions',
                 'prices.currency',
-                'packageAttractions',
+                'packageAttractions.attraction',
                 'cruise',
                 'reviews',
                 'testimonials',
@@ -108,11 +108,13 @@ class TripController extends BaseWebsiteController
             $gallery[] = $heroImage;
         }
 
+        $itineraryUnit = $package->duration_type === 'hours' ? __('Step') : __('Day');
+
         $itineraries = $package->itineraries
-            ->map(function ($item) {
+            ->map(function ($item) use ($itineraryUnit) {
                 $item->display_title = $this->transValue(
                     $item->getRawOriginal('title') ?? $item->title,
-                    __('Day') . ' ' . $item->day_number
+                    ''
                 );
                 $item->display_description = $this->transValue($item->getRawOriginal('description') ?? $item->description, '');
                 $item->display_overnight = $this->transValue($item->getRawOriginal('overnight_location') ?? ($item->overnight_location ?? ''), '');
@@ -235,7 +237,8 @@ class TripController extends BaseWebsiteController
             'prices',
             'testimonials',
             'reviews',
-            'countries'
+            'countries',
+            'itineraryUnit'
         ));
     }
 

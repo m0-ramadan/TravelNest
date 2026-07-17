@@ -353,11 +353,16 @@
                     </div>
                 </div>
 
-                {{-- المرافق --}}
-                <div class="section-title">مرافق الرحلة</div>
+                <div class="section-title">Trip Facilities</div>
 
                 <div class="info-box">
-                    @if (isset($package->facilities) && $package->facilities->count())
+                    @if (isset($package->packageAttractions) && $package->packageAttractions->count())
+                        @foreach ($package->packageAttractions as $packageAttraction)
+                            <span class="badge-soft">
+                                {{ $packageAttraction->display_title ?: $packageAttraction->attraction?->display_name }}
+                            </span>
+                        @endforeach
+                    @elseif (isset($package->facilities) && $package->facilities->count())
                         @foreach ($package->facilities as $facility)
                             <span class="badge-soft">{{ $facility->title }}</span>
                         @endforeach

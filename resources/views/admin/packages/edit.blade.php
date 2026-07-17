@@ -117,26 +117,93 @@
         .remove-btn {
             height: 46px;
         }
+
+        .attractions-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 12px;
+            max-height: 430px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .attraction-choice {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            border: 1px solid var(--dark-border);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, .035);
+            cursor: pointer;
+        }
+
+        .attraction-choice:has(input:checked) {
+            border-color: var(--primary-color);
+            background: rgba(105, 108, 255, .16);
+        }
+
+        .attraction-choice input {
+            width: 18px;
+            height: 18px;
+            flex: 0 0 18px;
+            accent-color: var(--primary-color);
+        }
+
+        .attraction-choice-copy {
+            min-width: 0;
+        }
+
+        .attraction-choice-copy strong,
+        .attraction-choice-copy small {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .attraction-choice-copy small {
+            margin-top: 4px;
+            color: rgba(255, 255, 255, .6);
+        }
+
+        .attraction-choice.is-filtered-out {
+            display: none;
+        }
+
+        .itinerary-sequence {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            margin-bottom: 14px;
+            border-radius: 999px;
+            background: rgba(105, 108, 255, .18);
+            color: #dddfff;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .d-none-force {
+            display: none !important;
+        }
     </style>
 @endsection
 
 @section('content')
     @php
         $packageTitle = adminTrans($package->title ?? ($package->name ?? ''));
-
-        $facilities = old(
-            'facilities',
-            isset($package->facilities)
-                ? $package->facilities
-                    ->map(
-                        fn($item) => [
-                            'title' => $item->title,
-                            'sort_order' => $item->sort_order ?? 0,
-                        ],
-                    )
-                    ->toArray()
-                : [],
+        $durationType = old(
+            'duration_type',
+            $package->duration_type ?? (!empty($package->duration_hours) ? 'hours' : 'days'),
         );
+
+        $selectedAttractionIds = collect(
+            old(
+                'attraction_ids',
+                $package->packageAttractions?->pluck('attraction_id')->all() ?? [],
+            ),
+        )->map(fn($id) => (int) $id)->all();
 
         $itinerary = old(
             'itinerary',
@@ -147,8 +214,8 @@
                             'id' => $item->id,
                             'duration' => $item->duration ?? '',
                             'day_number' => $item->day_number,
-                            'title' => $item->title,
-                            'description' => $item->description,
+                            'title' => adminTrans($item->title),
+                            'description' => adminTrans($item->description),
                             'meals_breakfast' => $item->meals_breakfast ?? false,
                             'meals_lunch' => $item->meals_lunch ?? false,
                             'meals_dinner' => $item->meals_dinner ?? false,
@@ -157,6 +224,10 @@
                     ->toArray()
                 : [],
         );
+
+        if (!is_array($itinerary) || $itinerary === []) {
+            $itinerary = [['day_number' => 1]];
+        }
 
         $included = old(
             'included',
@@ -442,16 +513,38 @@
                     <div class="section-title">المدة والمسار</div>
 
                     <div class="row">
-                        <div class="col-md-3 mb-3">
+                        <div class="col-12 mb-3">
+                            <label class="form-label d-block">Type Duration</label>
+                            <div class="d-flex flex-wrap gap-4">
+                                <label class="d-flex align-items-center gap-2">
+                                    <input type="radio" name="duration_type" value="days"
+                                        {{ $durationType === 'days' ? 'checked' : '' }}>
+                                    <span>Days / Nights</span>
+                                </label>
+                                <label class="d-flex align-items-center gap-2">
+                                    <input type="radio" name="duration_type" value="hours"
+                                        {{ $durationType === 'hours' ? 'checked' : '' }}>
+                                    <span>Hours</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3" id="daysFieldWrapper">
                             <label class="form-label">عدد الأيام</label>
                             <input type="number" name="duration_days" class="form-control"
                                 value="{{ old('duration_days', $package->duration_days) }}">
                         </div>
 
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-3 mb-3" id="nightsFieldWrapper">
                             <label class="form-label">عدد الليالي</label>
                             <input type="number" name="duration_nights" class="form-control"
                                 value="{{ old('duration_nights', $package->duration_nights) }}">
+                        </div>
+
+                        <div class="col-md-3 mb-3" id="hoursFieldWrapper">
+                            <label class="form-label">عدد الساعات</label>
+                            <input type="number" name="duration_hours" class="form-control"
+                                value="{{ old('duration_hours', $package->duration_hours) }}">
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -497,59 +590,69 @@
                         </div>
                     </div>
 
-                    {{-- المرافق --}}
-                    <div class="section-title">مرافق الرحلة / Cruise Facilities</div>
+                    <div class="section-title">Trip Facilities</div>
+                    <p class="text-white-50 mb-3">Select the attractions associated with this trip.</p>
 
-                    <div id="facilities-wrapper">
-                        @foreach ($facilities as $i => $facility)
-                            <div class="repeat-box">
-                                <div class="row">
-                                    <div class="col-md-9 mb-2">
-                                        <input type="text" name="facilities[{{ $i }}][title]"
-                                            class="form-control" value="{{ $facility['title'] ?? '' }}"
-                                            placeholder="Facility">
-                                    </div>
-
-                                    <div class="col-md-2 mb-2">
-                                        <input type="number" name="facilities[{{ $i }}][sort_order]"
-                                            class="form-control" value="{{ $facility['sort_order'] ?? $i }}">
-                                    </div>
-
-                                    <div class="col-md-1 mb-2">
-                                        <button type="button"
-                                            class="btn btn-danger w-100 remove-btn js-remove">X</button>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
+                    <div class="mb-3">
+                        <input type="search" class="form-control" id="attractionSearch"
+                            placeholder="Search attractions by name or city..." autocomplete="off">
                     </div>
 
-                    <button type="button" class="btn btn-light" id="add-facility-btn">+ إضافة مرفق</button>
+                    <div class="attractions-picker-grid" id="attractionsPicker">
+                        @forelse ($attractions ?? collect() as $attraction)
+                            @php
+                                $attractionName = adminTrans($attraction->name) ?: 'Attraction #' . $attraction->id;
+                                $cityName = adminTrans($attraction->city?->name) ?: 'No city';
+                                $searchText = mb_strtolower($attractionName . ' ' . $cityName);
+                            @endphp
+                            <label class="attraction-choice" data-attraction-choice
+                                data-attraction-search="{{ $searchText }}">
+                                <input type="checkbox" name="attraction_ids[]" value="{{ $attraction->id }}"
+                                    {{ in_array((int) $attraction->id, $selectedAttractionIds, true) ? 'checked' : '' }}>
+                                <span class="attraction-choice-copy">
+                                    <strong>{{ $attractionName }}</strong>
+                                    <small>{{ $cityName }}</small>
+                                </span>
+                            </label>
+                        @empty
+                            <div class="text-white-50">No active attractions are available.</div>
+                        @endforelse
+                    </div>
+
+                    @error('attraction_ids')
+                        <div class="text-danger small mt-2">{{ $message }}</div>
+                    @enderror
+                    @error('attraction_ids.*')
+                        <div class="text-danger small mt-2">{{ $message }}</div>
+                    @enderror
 
                     {{-- البرنامج --}}
-                    <div class="section-title">برنامج الرحلة / Itinerary</div>
+                    <div class="section-title" id="itinerary-section-title">Daily Itinerary</div>
+                    <p class="text-white-50" id="itinerary-section-copy">Add the content for each day in order.</p>
 
                     <div id="itinerary-wrapper">
                         @foreach ($itinerary as $i => $day)
-                            <div class="repeat-box">
+                            <div class="repeat-box" data-itinerary-item>
                                 <input type="hidden" name="itinerary[{{ $i }}][id]"
                                     value="{{ $day['id'] ?? '' }}">
+                                <input type="hidden" name="itinerary[{{ $i }}][day_number]"
+                                    value="{{ $i + 1 }}" data-itinerary-number-input>
+
+                                <span class="itinerary-sequence">
+                                    <span data-itinerary-unit>{{ $durationType === 'hours' ? 'Step' : 'Day' }}</span>
+                                    <span data-itinerary-number>{{ $i + 1 }}</span>
+                                </span>
 
                                 <div class="row">
                                     <div class="col-md-4 mb-2">
-                                        <label class="form-label">نوع البرنامج</label>
+                                        <label class="form-label" data-itinerary-duration-label>Date / Day label</label>
                                         <input type="text" name="itinerary[{{ $i }}][duration]"
-                                            class="form-control" value="{{ $day['duration'] ?? '' }}">
+                                            class="form-control" value="{{ $day['duration'] ?? '' }}"
+                                            data-itinerary-duration-input>
                                     </div>
 
-                                    <div class="col-md-2 mb-2">
-                                        <label class="form-label">رقم اليوم</label>
-                                        <input type="number" name="itinerary[{{ $i }}][day_number]"
-                                            class="form-control" value="{{ $day['day_number'] ?? '' }}">
-                                    </div>
-
-                                    <div class="col-md-4 mb-2">
-                                        <label class="form-label">عنوان اليوم</label>
+                                    <div class="col-md-6 mb-2">
+                                        <label class="form-label" data-itinerary-title-label>Day title / Place</label>
                                         <input type="text" name="itinerary[{{ $i }}][title]"
                                             class="form-control" value="{{ $day['title'] ?? '' }}">
                                     </div>
@@ -561,7 +664,7 @@
                                     </div>
 
                                     <div class="col-md-8 mb-2">
-                                        <label class="form-label">تفاصيل اليوم</label>
+                                        <label class="form-label" data-itinerary-details-label>Day details and activities</label>
                                         <textarea name="itinerary[{{ $i }}][description]" rows="4" class="form-control">{{ $day['description'] ?? '' }}</textarea>
                                     </div>
 
@@ -594,7 +697,7 @@
                         @endforeach
                     </div>
 
-                    <button type="button" class="btn btn-light" id="add-itinerary-btn">+ إضافة يوم</button>
+                    <button type="button" class="btn btn-light" id="add-itinerary-btn">+ Add New Day</button>
 
                     {{-- شامل وغير شامل --}}
                     <div class="section-title">المشمول وغير المشمول</div>
@@ -1058,6 +1161,18 @@
                 }
             }
 
+            const attractionSearch = document.getElementById('attractionSearch');
+            const attractionsPicker = document.getElementById('attractionsPicker');
+
+            attractionSearch?.addEventListener('input', function() {
+                const query = this.value.trim().toLocaleLowerCase();
+
+                attractionsPicker?.querySelectorAll('[data-attraction-choice]').forEach(choice => {
+                    const searchText = (choice.dataset.attractionSearch || '').toLocaleLowerCase();
+                    choice.classList.toggle('is-filtered-out', query !== '' && !searchText.includes(query));
+                });
+            });
+
             document.addEventListener('click', function(e) {
                 const removeButton = e.target.closest('.js-remove');
                 if (!removeButton) return;
@@ -1066,20 +1181,24 @@
                 if (box) {
                     box.remove();
                     syncFaqEmptyState();
+                    renumberItineraryItems();
                 }
             });
 
-            document.getElementById('add-facility-btn')?.addEventListener('click', addFacility);
             document.getElementById('add-itinerary-btn')?.addEventListener('click', addItinerary);
             document.getElementById('add-included-btn')?.addEventListener('click', addIncluded);
             document.getElementById('add-excluded-btn')?.addEventListener('click', addExcluded);
             document.getElementById('add-price-btn')?.addEventListener('click', addPrice);
             document.getElementById('add-faq-btn')?.addEventListener('click', addFaq);
 
+            document.querySelectorAll('input[name="duration_type"]').forEach(input => {
+                input.addEventListener('change', updateItineraryMode);
+            });
+
             syncFaqEmptyState();
+            updateItineraryMode();
         });
 
-        let facilityIndex = {{ count($facilities ?? []) }};
         let itineraryIndex = {{ count($itinerary ?? []) }};
         let includedIndex = {{ count($included ?? []) }};
         let excludedIndex = {{ count($excluded ?? []) }};
@@ -1116,45 +1235,75 @@
             }
         }
 
-        function addFacility() {
-            document.getElementById('facilities-wrapper').insertAdjacentHTML('beforeend', `
-                <div class="repeat-box">
-                    <div class="row">
-                        <div class="col-md-9 mb-2">
-                            <input type="text" name="facilities[${facilityIndex}][title]" class="form-control" placeholder="Facility">
-                        </div>
+        function renumberItineraryItems() {
+            document.querySelectorAll('[data-itinerary-item]').forEach((item, index) => {
+                const number = index + 1;
+                const numberLabel = item.querySelector('[data-itinerary-number]');
+                const numberInput = item.querySelector('[data-itinerary-number-input]');
 
-                        <div class="col-md-2 mb-2">
-                            <input type="number" name="facilities[${facilityIndex}][sort_order]" class="form-control" value="${facilityIndex}">
-                        </div>
+                if (numberLabel) numberLabel.textContent = number;
+                if (numberInput) numberInput.value = number;
+            });
+        }
 
-                        <div class="col-md-1 mb-2">
-                            <button type="button" class="btn btn-danger w-100 remove-btn js-remove">X</button>
-                        </div>
-                    </div>
-                </div>
-            `);
+        function updateItineraryMode() {
+            const type = document.querySelector('input[name="duration_type"]:checked')?.value || 'days';
+            const isHourly = type === 'hours';
 
-            facilityIndex++;
-            focusLastField('facilities-wrapper');
+            document.getElementById('daysFieldWrapper')?.classList.toggle('d-none-force', isHourly);
+            document.getElementById('nightsFieldWrapper')?.classList.toggle('d-none-force', isHourly);
+            document.getElementById('hoursFieldWrapper')?.classList.toggle('d-none-force', !isHourly);
+
+            const title = document.getElementById('itinerary-section-title');
+            const copy = document.getElementById('itinerary-section-copy');
+            const addButton = document.getElementById('add-itinerary-btn');
+
+            if (title) title.textContent = isHourly ? 'Trip Steps' : 'Daily Itinerary';
+            if (copy) {
+                copy.textContent = isHourly
+                    ? 'Add every trip step in order with its time and full details.'
+                    : 'Add the content for each day in order.';
+            }
+            if (addButton) addButton.textContent = isHourly ? '+ Add New Step' : '+ Add New Day';
+
+            document.querySelectorAll('[data-itinerary-item]').forEach(item => {
+                item.querySelector('[data-itinerary-unit]').textContent = isHourly ? 'Step' : 'Day';
+                item.querySelector('[data-itinerary-duration-label]').textContent = isHourly
+                    ? 'Time / Duration'
+                    : 'Date / Day label';
+                item.querySelector('[data-itinerary-title-label]').textContent = isHourly
+                    ? 'Step title / Place'
+                    : 'Day title / Place';
+                item.querySelector('[data-itinerary-details-label]').textContent = isHourly
+                    ? 'Step details and activities'
+                    : 'Day details and activities';
+
+                const durationInput = item.querySelector('[data-itinerary-duration-input]');
+                durationInput.placeholder = isHourly
+                    ? 'Example: 09:00 AM - 10:30 AM'
+                    : 'Optional date or day label';
+            });
+
+            renumberItineraryItems();
         }
 
         function addItinerary() {
+            const isHourly = document.querySelector('input[name="duration_type"]:checked')?.value === 'hours';
             document.getElementById('itinerary-wrapper').insertAdjacentHTML('beforeend', `
-                <div class="repeat-box">
+                <div class="repeat-box" data-itinerary-item>
+                    <input type="hidden" name="itinerary[${itineraryIndex}][day_number]" value="${itineraryIndex + 1}" data-itinerary-number-input>
+                    <span class="itinerary-sequence">
+                        <span data-itinerary-unit>${isHourly ? 'Step' : 'Day'}</span>
+                        <span data-itinerary-number>${itineraryIndex + 1}</span>
+                    </span>
                     <div class="row">
                         <div class="col-md-4 mb-2">
-                            <label class="form-label">نوع البرنامج</label>
-                            <input type="text" name="itinerary[${itineraryIndex}][duration]" class="form-control" placeholder="4 Days - Aswan / Luxor">
+                            <label class="form-label" data-itinerary-duration-label>${isHourly ? 'Time / Duration' : 'Date / Day label'}</label>
+                            <input type="text" name="itinerary[${itineraryIndex}][duration]" class="form-control" data-itinerary-duration-input placeholder="${isHourly ? 'Example: 09:00 AM - 10:30 AM' : 'Optional date or day label'}">
                         </div>
 
-                        <div class="col-md-2 mb-2">
-                            <label class="form-label">رقم اليوم</label>
-                            <input type="number" name="itinerary[${itineraryIndex}][day_number]" class="form-control">
-                        </div>
-
-                        <div class="col-md-4 mb-2">
-                            <label class="form-label">عنوان اليوم</label>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label" data-itinerary-title-label>${isHourly ? 'Step title / Place' : 'Day title / Place'}</label>
                             <input type="text" name="itinerary[${itineraryIndex}][title]" class="form-control">
                         </div>
 
@@ -1164,7 +1313,7 @@
                         </div>
 
                         <div class="col-md-8 mb-2">
-                            <label class="form-label">تفاصيل اليوم</label>
+                            <label class="form-label" data-itinerary-details-label>${isHourly ? 'Step details and activities' : 'Day details and activities'}</label>
                             <textarea name="itinerary[${itineraryIndex}][description]" rows="4" class="form-control"></textarea>
                         </div>
 
@@ -1188,6 +1337,7 @@
             `);
 
             itineraryIndex++;
+            updateItineraryMode();
             focusLastField('itinerary-wrapper');
         }
 

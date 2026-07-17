@@ -37,6 +37,6 @@ class PackageAttraction extends Model
 
     public function getDisplayTitleAttribute(): string
     {
-        return $this->translatedValue('title');
+        return $this->translatedValue('title') ?: ($this->attraction?->display_name ?? '');
     }
 }

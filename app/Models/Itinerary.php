@@ -13,6 +13,7 @@ class Itinerary extends Model
 
     protected $fillable = [
         'package_id',
+        'duration',
         'day_number',
         'title',
         'description',
@@ -22,6 +23,7 @@ class Itinerary extends Model
         'overnight_location',
         'start_time',
         'end_time',
+        'sort_order',
     ];
 
     protected $casts = [
@@ -32,6 +34,7 @@ class Itinerary extends Model
         'meals_lunch' => 'boolean',
         'meals_dinner' => 'boolean',
         'day_number' => 'integer',
+        'sort_order' => 'integer',
     ];
 
     public function package(): BelongsTo

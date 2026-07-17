@@ -8,8 +8,14 @@
     $isRtl = $locale === 'ar';
     $viewErrors = $errors ?? new \Illuminate\Support\ViewErrorBag();
 
-    $facilities = old('facilities', []);
-    $itinerary = old('itinerary', []);
+    $selectedAttractionIds = collect(old('attraction_ids', []))
+        ->map(fn($id) => (int) $id)
+        ->all();
+    $durationType = old('duration_type', 'days');
+    $itinerary = old('itinerary');
+    if (!is_array($itinerary) || $itinerary === []) {
+        $itinerary = [['day_number' => 1]];
+    }
     $included = old('included', []);
     $excluded = old('excluded', []);
     $prices = old('prices', []);
@@ -70,7 +76,7 @@
         'destinations_text' => 3,
         'location_summary' => 3,
         'itinerary' => 3,
-        'facilities' => 4,
+        'attraction_ids' => 4,
         'included' => 4,
         'excluded' => 4,
         'adult_price' => 4,
@@ -706,10 +712,11 @@
         }
 
         .item-order-badge {
-            width: 54px;
-            height: 54px;
+            width: 60px;
+            min-height: 58px;
             border-radius: 16px;
-            display: inline-flex;
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             background: linear-gradient(180deg, rgba(124, 92, 255, 0.45), rgba(124, 92, 255, 0.24));
@@ -718,6 +725,21 @@
             font-weight: 800;
             letter-spacing: .04em;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .item-order-label {
+            display: block;
+            font-size: 9px;
+            line-height: 1;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, .72);
+            margin-bottom: 5px;
+        }
+
+        .item-order-number {
+            line-height: 1;
         }
 
         .field-block {
@@ -917,6 +939,123 @@
         .facility-chip:hover {
             transform: translateY(-1px);
             background: rgba(124, 58, 237, 0.18);
+        }
+
+        .attractions-picker-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .attractions-search {
+            position: relative;
+            flex: 1 1 420px;
+        }
+
+        .attractions-search i {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: var(--wizard-muted);
+            pointer-events: none;
+        }
+
+        .attractions-search .form-control {
+            padding-left: 44px;
+        }
+
+        .attractions-selected-count {
+            flex: 0 0 auto;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(124, 92, 255, 0.35);
+            background: rgba(124, 92, 255, 0.10);
+            color: #d8ccff;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .attractions-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 12px;
+            max-height: 430px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .attraction-choice {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+            padding: 14px;
+            border: 1px solid var(--wizard-border);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.025);
+            cursor: pointer;
+            transition: border-color .2s ease, background .2s ease, transform .2s ease;
+        }
+
+        .attraction-choice:hover {
+            transform: translateY(-1px);
+            border-color: rgba(167, 139, 250, 0.48);
+        }
+
+        .attraction-choice:has(input:checked) {
+            border-color: rgba(124, 92, 255, 0.85);
+            background: rgba(124, 92, 255, 0.14);
+            box-shadow: inset 0 0 0 1px rgba(124, 92, 255, 0.18);
+        }
+
+        .attraction-choice input {
+            width: 18px;
+            height: 18px;
+            flex: 0 0 18px;
+            accent-color: var(--wizard-primary);
+        }
+
+        .attraction-choice-icon {
+            width: 42px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 42px;
+            border-radius: 13px;
+            background: var(--wizard-primary-soft);
+            color: #e9dcff;
+            font-size: 19px;
+        }
+
+        .attraction-choice-copy {
+            min-width: 0;
+        }
+
+        .attraction-choice-copy strong,
+        .attraction-choice-copy small {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .attraction-choice-copy strong {
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .attraction-choice-copy small {
+            margin-top: 4px;
+            color: var(--wizard-muted);
+        }
+
+        .attraction-choice.is-filtered-out {
+            display: none;
         }
 
         .upload-zone {
@@ -1712,12 +1851,12 @@
                                         <div class="choice-row">
                                             <label class="choice-pill">
                                                 <input type="radio" name="duration_type" value="days"
-                                                    {{ old('duration_type', 'days') === 'days' ? 'checked' : '' }}>
+                                                    {{ $durationType === 'days' ? 'checked' : '' }}>
                                                 <span>{{ admin_t('أيام / ليالي') }}</span>
                                             </label>
                                             <label class="choice-pill">
                                                 <input type="radio" name="duration_type" value="hours"
-                                                    {{ old('duration_type') === 'hours' ? 'checked' : '' }}>
+                                                    {{ $durationType === 'hours' ? 'checked' : '' }}>
                                                 <span>{{ admin_t('ساعات') }}</span>
                                             </label>
                                         </div>
@@ -1827,8 +1966,8 @@
                                         <div class="dynamic-section-head">
                                             <span class="dynamic-section-icon"><i class="ti ti-calendar-event"></i></span>
                                             <div>
-                                                <h4>Daily Itinerary</h4>
-                                                <p>Split the trip into days or stops with meal and activity details.</p>
+                                                <h4 id="itinerarySectionTitle">Daily Itinerary</h4>
+                                                <p id="itinerarySectionCopy">Split the trip into days with meal and activity details.</p>
                                             </div>
                                         </div>
 
@@ -1837,15 +1976,18 @@
                                                 <div class="repeat-box itinerary-item itinerary-item-card">
                                                     <div class="itinerary-item-grid">
                                                         <div class="dynamic-order-column">
-                                                            <span class="item-order-badge">{{ str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) }}</span>
+                                                            <span class="item-order-badge">
+                                                                <small class="item-order-label">{{ $durationType === 'hours' ? 'Step' : 'Day' }}</small>
+                                                                <span class="item-order-number">{{ str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) }}</span>
+                                                            </span>
                                                         </div>
 
                                                         <div class="field-block itinerary-date-field">
-                                                            <label class="field-block-label">Date</label>
+                                                            <label class="field-block-label" data-itinerary-duration-label>Date / Day label</label>
                                                             <div class="field-shell">
-                                                                <span class="field-shell-icon"><i class="ti ti-calendar"></i></span>
-                                                                <input type="date"
-                                                                    placeholder="Select date" name="itinerary[{{ $i }}][duration]"
+                                                                <span class="field-shell-icon"><i class="ti ti-clock"></i></span>
+                                                                <input type="text" data-itinerary-duration-input
+                                                                    placeholder="Optional date or day label" name="itinerary[{{ $i }}][duration]"
                                                                     value="{{ $day['duration'] ?? '' }}">
                                                             </div>
                                                             <input type="hidden" name="itinerary[{{ $i }}][day_number]"
@@ -1921,7 +2063,7 @@
                                         <button type="button" class="btn dynamic-add-btn" id="addItineraryBtn">
                                             <span class="btn-icon-text">
                                                 <i class="ti ti-plus"></i>
-                                                Add New Day
+                                                <span id="addItineraryText">Add New Day</span>
                                             </span>
                                         </button>
                                     </div>
@@ -2167,50 +2309,54 @@
 
                             <div class="form-section-card">
                                 <div class="section-header">
-                                    <div class="section-icon"><i class="ti ti-stars"></i></div>
+                                    <div class="section-icon"><i class="ti ti-map-pin-star"></i></div>
                                     <div>
-                                        <h3>{{ admin_t('مرافق الرحلة') }}</h3>
-                                        <p>{{ admin_t('أضف أبرز المرافق والخدمات المرتبطة بهذه الرحلة.') }}</p>
+                                        <h3>Trip Facilities</h3>
+                                        <p>Select the attractions associated with this trip from the existing list.</p>
                                     </div>
                                 </div>
 
                                 <div class="section-body">
-                                    <div id="facilities-wrapper">
-                                        @forelse ($facilities as $i => $facility)
-                                            <div class="repeat-box facility-item">
-                                                <div class="fields-grid">
-                                                    <div class="field-span-2">
-                                                        <label class="form-label">{{ admin_t('المرفق') }}</label>
-                                                        <input type="text"
-                                                            name="facilities[{{ $i }}][title]"
-                                                            class="form-control" value="{{ $facility['title'] ?? '' }}"
-                                                            placeholder="{{ admin_t('مثال: مرشد سياحي خاص') }}">
-                                                    </div>
-                                                    <div>
-                                                        <label class="form-label">{{ admin_t('الترتيب') }}</label>
-                                                        <div class="d-flex gap-2">
-                                                            <input type="number"
-                                                                name="facilities[{{ $i }}][sort_order]"
-                                                                class="form-control"
-                                                                value="{{ $facility['sort_order'] ?? $i }}">
-                                                            <button type="button"
-                                                                class="btn btn-outline-danger js-remove">{{ admin_t('حذف') }}</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                    <div class="attractions-picker-toolbar">
+                                        <div class="attractions-search">
+                                            <i class="ti ti-search"></i>
+                                            <input type="search" class="form-control" id="attractionSearch"
+                                                placeholder="Search attractions by name or city..." autocomplete="off">
+                                        </div>
+                                        <span class="attractions-selected-count" id="attractionsSelectedCount">0 selected</span>
+                                    </div>
+
+                                    <div class="attractions-picker-grid" id="attractionsPicker">
+                                        @forelse ($attractions ?? collect() as $attraction)
+                                            @php
+                                                $attractionName = adminTrans($attraction->name) ?: 'Attraction #' . $attraction->id;
+                                                $cityName = adminTrans($attraction->city?->name) ?: 'No city';
+                                                $searchText = mb_strtolower($attractionName . ' ' . $cityName);
+                                            @endphp
+                                            <label class="attraction-choice" data-attraction-choice
+                                                data-attraction-search="{{ $searchText }}">
+                                                <input type="checkbox" name="attraction_ids[]"
+                                                    value="{{ $attraction->id }}"
+                                                    {{ in_array((int) $attraction->id, $selectedAttractionIds, true) ? 'checked' : '' }}>
+                                                <span class="attraction-choice-icon"><i class="ti ti-map-pin"></i></span>
+                                                <span class="attraction-choice-copy">
+                                                    <strong>{{ $attractionName }}</strong>
+                                                    <small>{{ $cityName }}</small>
+                                                </span>
+                                            </label>
                                         @empty
-                                            <div class="empty-state" id="facilitiesEmptyState">
-                                                {{ admin_t('لا توجد مرافق مضافة حتى الآن.') }}</div>
+                                            <div class="empty-state field-span-3">
+                                                No active attractions are available. Add attractions first, then return to this page.
+                                            </div>
                                         @endforelse
                                     </div>
 
-                                    <button type="button" class="btn btn-wizard-outline mt-2" id="addFacilityBtn">
-                                        <span class="btn-icon-text">
-                                            <i class="ti ti-plus"></i>
-                                            {{ admin_t('+ إضافة مرفق') }}
-                                        </span>
-                                    </button>
+                                    @error('attraction_ids')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    @error('attraction_ids.*')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
 
@@ -2695,6 +2841,9 @@
             const featuredPreview = document.getElementById('featuredPreview');
             const destinationSelector = document.getElementById('destination_selector');
             const primaryCountryInput = document.getElementById('primary_country_id');
+            const attractionSearch = document.getElementById('attractionSearch');
+            const attractionsPicker = document.getElementById('attractionsPicker');
+            const attractionsSelectedCount = document.getElementById('attractionsSelectedCount');
             const totalSteps = {{ count($steps) }};
             const initialStep = {{ $initialStep }};
             const draftKey = 'travelnest-package-create-draft';
@@ -2722,7 +2871,6 @@
                 galleryPreview: @json(admin_t('معاينة المعرض')),
                 noGallery: @json(admin_t('لا توجد صور في المعرض حتى الآن.')),
                 noItinerary: @json(admin_t('لا يوجد برنامج يومي حتى الآن.')),
-                noFacilities: @json(admin_t('لا توجد مرافق مضافة حتى الآن.')),
                 noIncluded: @json(admin_t('لا يوجد عناصر مشمولة حتى الآن.')),
                 noExcluded: @json(admin_t('لا يوجد عناصر غير مشمولة حتى الآن.')),
                 noPrices: @json(admin_t('لا توجد أسعار مضافة حتى الآن.')),
@@ -2872,6 +3020,14 @@
                     }
 
                     if (element.type === 'checkbox') {
+                        if (element.name.endsWith('[]')) {
+                            data[element.name] = data[element.name] || [];
+                            if (element.checked) {
+                                data[element.name].push(element.value);
+                            }
+                            return;
+                        }
+
                         data[element.name] = element.checked;
                         return;
                     }
@@ -2897,6 +3053,14 @@
                     }
 
                     if (field.type === 'checkbox') {
+                        if (name.endsWith('[]') && Array.isArray(value)) {
+                            const selectedValues = value.map(String);
+                            form.querySelectorAll(`[name="${CSS.escape(name)}"]`).forEach(checkbox => {
+                                checkbox.checked = selectedValues.includes(checkbox.value);
+                            });
+                            return;
+                        }
+
                         field.checked = Boolean(value);
                         return;
                     }
@@ -2961,6 +3125,37 @@
                 document.getElementById('daysFieldWrapper').classList.toggle('d-none-force', type !== 'days');
                 document.getElementById('nightsFieldWrapper').classList.toggle('d-none-force', type !== 'days');
                 document.getElementById('hoursFieldWrapper').classList.toggle('d-none-force', type !== 'hours');
+                updateItineraryMode();
+            }
+
+            function updateItineraryMode() {
+                const type = form.querySelector('input[name="duration_type"]:checked')?.value || 'days';
+                const isHourly = type === 'hours';
+
+                document.getElementById('itinerarySectionTitle').textContent = isHourly ? 'Trip Steps' : 'Daily Itinerary';
+                document.getElementById('itinerarySectionCopy').textContent = isHourly
+                    ? 'Split the trip into ordered steps and add the timing and details for each step.'
+                    : 'Split the trip into days with meal and activity details.';
+                document.getElementById('addItineraryText').textContent = isHourly ? 'Add New Step' : 'Add New Day';
+
+                document.querySelectorAll('.itinerary-item').forEach(item => {
+                    const label = item.querySelector('.item-order-label');
+                    const durationLabel = item.querySelector('[data-itinerary-duration-label]');
+                    const durationInput = item.querySelector('[data-itinerary-duration-input]');
+
+                    if (label) label.textContent = isHourly ? 'Step' : 'Day';
+                    if (durationLabel) durationLabel.textContent = isHourly ? 'Time / Duration' : 'Date / Day label';
+                    if (durationInput) {
+                        durationInput.placeholder = isHourly
+                            ? 'Example: 09:00 AM - 10:30 AM'
+                            : 'Optional date or day label';
+                    }
+                });
+
+                const emptyMessage = document.querySelector('#itineraryEmptyState span');
+                if (emptyMessage) {
+                    emptyMessage.textContent = isHourly ? 'No trip steps added yet.' : 'No itinerary days added yet.';
+                }
             }
 
             function updateCounter(input) {
@@ -3110,7 +3305,12 @@
                 Array.from(wrapper.querySelectorAll(itemSelector)).forEach((item, index) => {
                     const badge = item.querySelector('.item-order-badge');
                     if (badge) {
-                        badge.textContent = String(index + 1).padStart(2, '0');
+                        const number = badge.querySelector('.item-order-number');
+                        if (number) {
+                            number.textContent = String(index + 1).padStart(2, '0');
+                        } else {
+                            badge.textContent = String(index + 1).padStart(2, '0');
+                        }
                     }
 
                     if (syncDayNumbers) {
@@ -3156,48 +3356,47 @@
                 if (dinner) dinner.value = state.dinner;
             }
 
-            let facilityIndex = {{ count($facilities) }};
+            function updateAttractionsPicker() {
+                if (!attractionsPicker) {
+                    return;
+                }
+
+                const query = (attractionSearch?.value || '').trim().toLocaleLowerCase();
+                const choices = Array.from(attractionsPicker.querySelectorAll('[data-attraction-choice]'));
+
+                choices.forEach(choice => {
+                    const searchText = (choice.dataset.attractionSearch || '').toLocaleLowerCase();
+                    choice.classList.toggle('is-filtered-out', query !== '' && !searchText.includes(query));
+                });
+
+                const selectedCount = choices.filter(choice => choice.querySelector('input:checked')).length;
+                if (attractionsSelectedCount) {
+                    attractionsSelectedCount.textContent = `${selectedCount} selected`;
+                }
+            }
+
             let itineraryIndex = {{ count($itinerary) }};
             let includedIndex = {{ count($included) }};
             let excludedIndex = {{ count($excluded) }};
             let priceIndex = {{ count($prices) }};
             let faqIndex = {{ count($faqItems) }};
 
-            function addFacility(title = '') {
-                document.getElementById('facilities-wrapper').insertAdjacentHTML('beforeend', `
-                    <div class="repeat-box facility-item">
-                        <div class="fields-grid">
-                            <div class="field-span-2">
-                                <label class="form-label">${@json(admin_t('المرفق'))}</label>
-                                <input type="text" name="facilities[${facilityIndex}][title]" class="form-control" value="${title}" placeholder="${@json(admin_t('مثال: مرشد سياحي خاص'))}">
-                            </div>
-                            <div>
-                                <label class="form-label">${@json(admin_t('الترتيب'))}</label>
-                                <div class="d-flex gap-2">
-                                    <input type="number" name="facilities[${facilityIndex}][sort_order]" class="form-control" value="${facilityIndex}">
-                                    ${createRemoveButton()}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `);
-                facilityIndex++;
-                ensureEmptyState('#facilities-wrapper', '.facility-item', 'facilitiesEmptyState', texts
-                    .noFacilities);
-            }
-
             function addItinerary() {
+                const isHourly = form.querySelector('input[name="duration_type"]:checked')?.value === 'hours';
                 appendAnimatedItem('itinerary-wrapper', `
                     <div class="repeat-box itinerary-item itinerary-item-card">
                         <div class="itinerary-item-grid">
                             <div class="dynamic-order-column">
-                                <span class="item-order-badge">${String(itineraryIndex + 1).padStart(2, '0')}</span>
+                                <span class="item-order-badge">
+                                    <small class="item-order-label">${isHourly ? 'Step' : 'Day'}</small>
+                                    <span class="item-order-number">${String(itineraryIndex + 1).padStart(2, '0')}</span>
+                                </span>
                             </div>
                             <div class="field-block itinerary-date-field">
-                                <label class="field-block-label">Date</label>
+                                <label class="field-block-label" data-itinerary-duration-label>${isHourly ? 'Time / Duration' : 'Date / Day label'}</label>
                                 <div class="field-shell">
-                                    <span class="field-shell-icon"><i class="ti ti-calendar"></i></span>
-                                    <input type="date" name="itinerary[${itineraryIndex}][duration]">
+                                    <span class="field-shell-icon"><i class="ti ti-clock"></i></span>
+                                    <input type="text" data-itinerary-duration-input name="itinerary[${itineraryIndex}][duration]" placeholder="${isHourly ? 'Example: 09:00 AM - 10:30 AM' : 'Optional date or day label'}">
                                 </div>
                                 <input type="hidden" name="itinerary[${itineraryIndex}][day_number]" value="${itineraryIndex + 1}">
                             </div>
@@ -3238,6 +3437,7 @@
                 itineraryIndex++;
                 renumberDynamicItems('itinerary-wrapper', '.itinerary-item', true);
                 ensureEmptyState('#itinerary-wrapper', '.itinerary-item', 'itineraryEmptyState', texts.noItinerary);
+                updateItineraryMode();
             }
 
             function addInclusion(type) {
@@ -3392,13 +3592,13 @@
             maybeRestoreDraft();
             syncCountryFromDestination();
             updateDurationFields();
+            updateAttractionsPicker();
             renderGalleryPreview();
             renderFeaturedPreview();
             form.querySelectorAll('[data-meal-select]').forEach(syncMealInputs);
             document.querySelectorAll('[data-counter-max]').forEach(updateCounter);
             showStep(currentStep);
             ensureEmptyState('#itinerary-wrapper', '.itinerary-item', 'itineraryEmptyState', texts.noItinerary);
-            ensureEmptyState('#facilities-wrapper', '.facility-item', 'facilitiesEmptyState', texts.noFacilities);
             ensureEmptyState('#included-wrapper', '.included-item', 'includedEmptyState', texts.noIncluded);
             ensureEmptyState('#excluded-wrapper', '.excluded-item', 'excludedEmptyState', texts.noExcluded);
             ensureEmptyState('#prices-wrapper', '.price-item', 'pricesEmptyState', texts.noPrices);
@@ -3409,6 +3609,8 @@
             document.querySelectorAll('[data-counter-max]').forEach(input => {
                 input.addEventListener('input', () => updateCounter(input));
             });
+
+            attractionSearch?.addEventListener('input', updateAttractionsPicker);
 
             stepButtons.forEach(button => {
                 button.addEventListener('click', () => {
@@ -3461,6 +3663,9 @@
                 if (event.target.matches('[data-meal-select]')) {
                     syncMealInputs(event.target);
                 }
+                if (event.target.matches('input[name="attraction_ids[]"]')) {
+                    updateAttractionsPicker();
+                }
                 updateSummary();
             });
 
@@ -3499,7 +3704,6 @@
                 updateSummary();
             });
 
-            document.getElementById('addFacilityBtn').addEventListener('click', () => addFacility());
             document.getElementById('addItineraryBtn').addEventListener('click', addItinerary);
             document.getElementById('addIncludedBtn').addEventListener('click', () => addInclusion('included'));
             document.getElementById('addExcludedBtn').addEventListener('click', () => addInclusion('excluded'));
@@ -3529,14 +3733,13 @@
 
                         ensureEmptyState('#itinerary-wrapper', '.itinerary-item', 'itineraryEmptyState', texts
                             .noItinerary);
-                        ensureEmptyState('#facilities-wrapper', '.facility-item', 'facilitiesEmptyState', texts
-                            .noFacilities);
                         ensureEmptyState('#included-wrapper', '.included-item', 'includedEmptyState', texts
                             .noIncluded);
                         ensureEmptyState('#excluded-wrapper', '.excluded-item', 'excludedEmptyState', texts
                             .noExcluded);
                         ensureEmptyState('#prices-wrapper', '.price-item', 'pricesEmptyState', texts.noPrices);
                         ensureEmptyState('#faq-wrapper', '.faq-item', 'faqEmptyState', @json(admin_t('لا توجد أسئلة شائعة مضافة حتى الآن.')));
+                        updateItineraryMode();
                         updateSummary();
                     }, 260);
 

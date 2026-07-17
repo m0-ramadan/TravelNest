@@ -24,6 +24,7 @@ class Package extends Model
         'subtitle',
         'short_description',
         'description',
+        'duration_type',
         'duration_days',
         'duration_hours',
         'duration_nights',

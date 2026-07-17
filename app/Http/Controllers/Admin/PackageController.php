@@ -76,6 +76,7 @@ class PackageController extends Controller
             'categories' => PackageCategory::all(),
             'destinations' => $this->packageCities(),
             'currencies' => Currency::all(),
+            'attractions' => $this->packageAttractionOptions(),
         ]);
     }
 
@@ -88,7 +89,7 @@ class PackageController extends Controller
 
             $package = Package::create($packageData);
 
-            $this->syncFacilities($package, $request);
+            $this->syncPackageAttractions($package, $request);
             $this->syncItineraries($package, $request);
             $this->syncInclusions($package, $request);
             $this->syncPrices($package, $request);
@@ -104,6 +105,7 @@ class PackageController extends Controller
             'destination.city',
             'currency',
             'facilities',
+            'packageAttractions.attraction',
             'itineraries',
             'inclusions',
             'prices.currency',
@@ -116,6 +118,7 @@ class PackageController extends Controller
     {
         $package->load([
             'facilities',
+            'packageAttractions.attraction',
             'itineraries',
             'inclusions',
             'prices',
@@ -126,6 +129,9 @@ class PackageController extends Controller
             'categories' => PackageCategory::all(),
             'destinations' => $this->packageCities(),
             'currencies' => Currency::all(),
+            'attractions' => $this->packageAttractionOptions(
+                $package->packageAttractions->pluck('attraction_id')->all()
+            ),
         ]);
     }
 
@@ -138,7 +144,7 @@ class PackageController extends Controller
 
             $package->update($packageData);
 
-            $this->syncFacilities($package, $request);
+            $this->syncPackageAttractions($package, $request);
             $this->syncItineraries($package, $request);
             $this->syncInclusions($package, $request);
             $this->syncPrices($package, $request);
@@ -175,6 +181,7 @@ class PackageController extends Controller
             'tour_type' => ['nullable', 'string'],
             'difficulty_level' => ['nullable', 'string'],
             'booking_mode' => ['nullable', 'string'],
+            'duration_type' => ['nullable', 'string', 'in:days,hours'],
             'duration_days' => ['nullable', 'integer'],
             'duration_nights' => ['nullable', 'integer'],
             'duration_hours' => ['nullable', 'integer'],
@@ -237,6 +244,15 @@ class PackageController extends Controller
             $finalData['rating_avg'] = $finalData['rating_avg'] ?? 0;
             $finalData['reviews_count'] = $finalData['reviews_count'] ?? 0;
             $finalData['sort_order'] = $finalData['sort_order'] ?? 0;
+            $finalData['duration_type'] = $finalData['duration_type']
+                ?? (!empty($finalData['duration_hours']) ? 'hours' : 'days');
+
+            if ($finalData['duration_type'] === 'hours') {
+                $finalData['duration_days'] = null;
+                $finalData['duration_nights'] = null;
+            } else {
+                $finalData['duration_hours'] = null;
+            }
 
             $packageData = $this->prepareAiPackageData($finalData);
 
@@ -271,7 +287,7 @@ class PackageController extends Controller
     public function duplicate(Package $package): RedirectResponse
     {
         DB::transaction(function () use ($package) {
-            $package->load(['facilities', 'itineraries', 'inclusions', 'prices']);
+            $package->load(['facilities', 'packageAttractions', 'itineraries', 'inclusions', 'prices']);
 
             $copy = $package->replicate();
             $copy->slug = $package->slug . '-' . now()->timestamp;
@@ -287,6 +303,16 @@ class PackageController extends Controller
                     'description' => $facility->description ?? '',
                     'sort_order' => $facility->sort_order,
                 ]);
+            }
+
+            foreach ($package->packageAttractions as $packageAttraction) {
+                $copy->packageAttractions()->create($packageAttraction->only([
+                    'attraction_id',
+                    'title',
+                    'teaser',
+                    'image',
+                    'sort_order',
+                ]));
             }
 
             foreach ($package->itineraries as $day) {
@@ -389,6 +415,7 @@ class PackageController extends Controller
             'short_description' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
 
+            'duration_type' => ['required', 'string', 'in:days,hours'],
             'duration_days' => ['nullable', 'integer'],
             'duration_nights' => ['nullable', 'integer'],
             'duration_hours' => ['nullable', 'integer'],
@@ -450,6 +477,9 @@ class PackageController extends Controller
             'facilities.*.title' => ['nullable', 'string'],
             'facilities.*.sort_order' => ['nullable', 'integer'],
 
+            'attraction_ids' => ['nullable', 'array'],
+            'attraction_ids.*' => ['integer', 'distinct', 'exists:attractions,id'],
+
             'itinerary' => ['nullable', 'array'],
             'itinerary.*.duration' => ['nullable', 'string'],
             'itinerary.*.day_number' => ['nullable', 'integer'],
@@ -510,6 +540,7 @@ class PackageController extends Controller
             'featured_image',
             'gallery_images',
             'facilities',
+            'attraction_ids',
             'itinerary',
             'included',
             'excluded',
@@ -526,6 +557,14 @@ class PackageController extends Controller
 
         $data['destination_id'] = $selectedAttraction?->id;
         $data['package_type'] = $this->normalizePackageType($data['package_type'] ?? null);
+        $data['duration_type'] = $data['duration_type'] ?? 'days';
+
+        if ($data['duration_type'] === 'hours') {
+            $data['duration_days'] = null;
+            $data['duration_nights'] = null;
+        } else {
+            $data['duration_hours'] = null;
+        }
 
         if (empty($data['primary_country_id']) && !empty($selectedCity?->country_id)) {
             $data['primary_country_id'] = $selectedCity->country_id;
@@ -652,6 +691,23 @@ class PackageController extends Controller
             ->get();
     }
 
+    private function packageAttractionOptions(array $includeIds = [])
+    {
+        return Attraction::query()
+            ->with('city')
+            ->where(function ($query) use ($includeIds) {
+                $query->where('is_active', true);
+
+                if (!empty($includeIds)) {
+                    $query->orWhereIn('id', $includeIds);
+                }
+            })
+            ->orderBy('city_id')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+    }
+
     private function resolveDestinationAttractionFromCityId(int $cityId): ?Attraction
     {
         return Attraction::query()
@@ -705,9 +761,39 @@ class PackageController extends Controller
         }
     }
 
+    private function syncPackageAttractions(Package $package, Request $request): void
+    {
+        $selectedIds = collect((array) $request->input('attraction_ids', []))
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values();
+
+        $attractions = Attraction::query()
+            ->whereIn('id', $selectedIds)
+            ->get()
+            ->keyBy('id');
+
+        $package->packageAttractions()->delete();
+
+        foreach ($selectedIds as $sortOrder => $attractionId) {
+            $attraction = $attractions->get($attractionId);
+
+            if (!$attraction) {
+                continue;
+            }
+
+            $package->packageAttractions()->create([
+                'attraction_id' => $attraction->id,
+                'sort_order' => $sortOrder,
+            ]);
+        }
+    }
+
     private function syncItineraries(Package $package, Request $request): void
     {
         $package->itineraries()->delete();
+        $position = 0;
 
         foreach ((array) $request->input('itinerary', []) as $day) {
             if (empty($day['title']) && empty($day['description'])) {
@@ -716,13 +802,16 @@ class PackageController extends Controller
 
             $package->itineraries()->create([
                 'duration' => $day['duration'] ?? null,
-                'day_number' => $day['day_number'] ?? null,
+                'day_number' => $position + 1,
                 'title' => $day['title'] ?? null,
                 'description' => $day['description'] ?? null,
                 'meals_breakfast' => !empty($day['meals_breakfast']),
                 'meals_lunch' => !empty($day['meals_lunch']),
                 'meals_dinner' => !empty($day['meals_dinner']),
+                'sort_order' => $position,
             ]);
+
+            $position++;
         }
     }
 
@@ -797,6 +886,8 @@ class PackageController extends Controller
 
     private function createItinerariesFromArray(Package $package, array $itinerary): void
     {
+        $position = 0;
+
         foreach ($itinerary as $day) {
             if (!is_array($day)) {
                 continue;
@@ -804,13 +895,16 @@ class PackageController extends Controller
 
             $package->itineraries()->create([
                 'duration' => $day['duration'] ?? null,
-                'day_number' => $day['day_number'] ?? null,
+                'day_number' => $position + 1,
                 'title' => $day['title'] ?? null,
                 'description' => $day['description'] ?? null,
                 'meals_breakfast' => !empty($day['meals_breakfast']),
                 'meals_lunch' => !empty($day['meals_lunch']),
                 'meals_dinner' => !empty($day['meals_dinner']),
+                'sort_order' => $position,
             ]);
+
+            $position++;
         }
     }
 

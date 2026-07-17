@@ -849,6 +849,10 @@
         $priceFrom = (float) ($package->price_from ?? $package->start_from_price ?? 0);
         $priceTo = (float) ($package->price_to ?? 0);
         $priceText = null;
+        $hasCategoryPricing = $package->adult_price !== null
+            || $package->child_price !== null
+            || $package->infant_price !== null;
+        $pricingInformation = $package->getTranslation('pricing_information');
 
         if ($priceFrom > 0 || $priceTo > 0) {
             if ($priceTo > $priceFrom && $priceFrom > 0) {
@@ -1034,19 +1038,25 @@
                             <h2 class="section-header">{{ __('Places You\'ll Visit') }}</h2>
                             <div class="row g-4 mt-2">
                                 @foreach ($package->packageAttractions as $attraction)
+                                    @php
+                                        $attractionTitle = $attraction->display_title
+                                            ?: $attraction->attraction?->display_name;
+                                        $attractionTeaser = $attraction->getTranslation('teaser')
+                                            ?: $attraction->attraction?->display_short_description;
+                                    @endphp
                                     <div class="col-md-6 col-lg-4">
                                         <div class="related-card h-100">
                                             @if($attraction->image)
-                                                <img src="{{ asset(ltrim($attraction->image, '/')) }}" alt="{{ $attraction->display_title }}" loading="lazy">
+                                                <img src="{{ asset(ltrim($attraction->image, '/')) }}" alt="{{ $attractionTitle }}" loading="lazy">
                                             @elseif($attraction->attraction && $attraction->attraction->image)
-                                                <img src="{{ asset(ltrim($attraction->attraction->image, '/')) }}" alt="{{ $attraction->display_title }}" loading="lazy">
+                                                <img src="{{ asset(ltrim($attraction->attraction->image, '/')) }}" alt="{{ $attractionTitle }}" loading="lazy">
                                             @else
-                                                <img src="{{ asset('website/photos/home2.webp') }}" alt="{{ $attraction->display_title }}" loading="lazy">
+                                                <img src="{{ asset('website/photos/home2.webp') }}" alt="{{ $attractionTitle }}" loading="lazy">
                                             @endif
                                             <div class="related-card-body">
-                                                <h5 class="related-card-title mb-2">{{ $attraction->display_title }}</h5>
-                                                @if($teaser = $attraction->getTranslation('teaser'))
-                                                    <p class="mb-0 text-muted" style="font-size: 0.9rem;">{{ \Illuminate\Support\Str::limit($teaser, 100) }}</p>
+                                                <h5 class="related-card-title mb-2">{{ $attractionTitle }}</h5>
+                                                @if($attractionTeaser)
+                                                    <p class="mb-0 text-muted" style="font-size: 0.9rem;">{{ \Illuminate\Support\Str::limit($attractionTeaser, 100) }}</p>
                                                 @endif
                                             </div>
                                         </div>
@@ -1082,10 +1092,14 @@
                                         <div class="day-header" onclick="toggleDay('day-{{ $day->id }}')">
                                             <div class="day-number">{{ $day->day_number }}</div>
                                             <div>
-                                                <h3 class="day-title">{{ __('Day') }} {{ $day->day_number }}:
-                                                    {{ $day->display_title }}</h3>
+                                                <h3 class="day-title">
+                                                    {{ $itineraryUnit }} {{ $day->day_number }}@if ($day->display_title): {{ $day->display_title }}@endif
+                                                </h3>
                                                 @if ($day->duration)
-                                                    <small>{{ $day->duration }}</small>
+                                                    <small>
+                                                        <i class="la la-clock"></i>
+                                                        {{ $day->duration }}
+                                                    </small>
                                                 @endif
                                             </div>
                                             <i class="la la-chevron-down collapse-icon" style="margin-left:auto"></i>
@@ -1165,9 +1179,48 @@
                         </div>
                     </section>
 
-                    @if ($prices->count())
+                    @if ($prices->count() || $hasCategoryPricing || $pricingInformation)
                         <section class="content-section">
                             <h2 class="section-header">{{ __('Pricing & Packages') }}</h2>
+
+                            @if ($hasCategoryPricing)
+                                <div class="price-box mb-4">
+                                    <table class="price-table">
+                                        <thead>
+                                            <tr>
+                                                <th>{{ __('Guest Category') }}</th>
+                                                <th>{{ __('Age') }}</th>
+                                                <th>{{ __('Price') }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if ($package->adult_price !== null)
+                                                <tr>
+                                                    <td>{{ __('Adult') }}</td>
+                                                    <td>{{ $package->adult_min_age }}+ {{ __('years') }}</td>
+                                                    <td>{{ $currencySymbol }}{{ number_format((float) $package->adult_price, 2) }}</td>
+                                                </tr>
+                                            @endif
+                                            @if ($package->child_price !== null)
+                                                <tr>
+                                                    <td>{{ __('Child') }}</td>
+                                                    <td>{{ $package->child_min_age }} - {{ $package->child_max_age }} {{ __('years') }}</td>
+                                                    <td>{{ $currencySymbol }}{{ number_format((float) $package->child_price, 2) }}</td>
+                                                </tr>
+                                            @endif
+                                            @if ($package->infant_price !== null)
+                                                <tr>
+                                                    <td>{{ __('Infant') }}</td>
+                                                    <td>{{ $package->infant_min_age }} - {{ $package->infant_max_age }} {{ __('years') }}</td>
+                                                    <td>{{ $currencySymbol }}{{ number_format((float) $package->infant_price, 2) }}</td>
+                                                </tr>
+                                            @endif
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
+
+                            @if ($prices->count())
                             <div class="price-box">
                                 <table class="price-table">
                                     <thead>
@@ -1199,6 +1252,14 @@
                                     </tbody>
                                 </table>
                             </div>
+                            @endif
+
+                            @if ($pricingInformation)
+                                <div class="about-content mt-4">
+                                    <h4>{{ __('Pricing Information') }}</h4>
+                                    {!! $pricingInformation !!}
+                                </div>
+                            @endif
                         </section>
                     @endif
 
@@ -1216,11 +1277,31 @@
                         </section>
                     @endif
 
-                    @if ($package->getTranslation('cancellation_policy') || $package->getTranslation('terms_conditions'))
+                    @php
+                        $cancellationPolicy = $package->getTranslation('cancellation_policy');
+                        $termsConditions = $package->getTranslation('terms_conditions');
+                        $childrenPolicy = $package->getTranslation('children_policy');
+                        $pickupPolicy = $package->getTranslation('pickup_policy');
+                    @endphp
+                    @if ($cancellationPolicy || $termsConditions || $childrenPolicy || $pickupPolicy)
                         <section class="content-section">
                             <h2 class="section-header">{{ __('Important Information') }}</h2>
-                            
-                            @if ($cancellationPolicy = $package->getTranslation('cancellation_policy'))
+
+                            @if ($childrenPolicy)
+                                <div class="mb-4">
+                                    <h4 class="mb-3" style="color: var(--primary-navy, #1c325c); font-family: 'Playfair Display', serif;"><i class="la la-child" style="color: var(--rich-gold, #c5955b);"></i> {{ __('Children Policy') }}</h4>
+                                    <div class="about-content">{!! $childrenPolicy !!}</div>
+                                </div>
+                            @endif
+
+                            @if ($pickupPolicy)
+                                <div class="mb-4">
+                                    <h4 class="mb-3" style="color: var(--primary-navy, #1c325c); font-family: 'Playfair Display', serif;"><i class="la la-shuttle-van" style="color: var(--rich-gold, #c5955b);"></i> {{ __('Pickup & Drop-off Policy') }}</h4>
+                                    <div class="about-content">{!! $pickupPolicy !!}</div>
+                                </div>
+                            @endif
+
+                            @if ($cancellationPolicy)
                                 <div class="mb-4">
                                     <h4 class="mb-3" style="color: var(--primary-navy, #1c325c); font-family: 'Playfair Display', serif;"><i class="la la-info-circle" style="color: var(--rich-gold, #c5955b);"></i> {{ __('Cancellation Policy') }}</h4>
                                     <div class="about-content">
@@ -1229,7 +1310,7 @@
                                 </div>
                             @endif
 
-                            @if ($termsConditions = $package->getTranslation('terms_conditions'))
+                            @if ($termsConditions)
                                 <div>
                                     <h4 class="mb-3" style="color: var(--primary-navy, #1c325c); font-family: 'Playfair Display', serif;"><i class="la la-file-alt" style="color: var(--rich-gold, #c5955b);"></i> {{ __('Terms & Conditions') }}</h4>
                                     <div class="about-content">
