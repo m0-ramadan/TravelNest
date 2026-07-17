@@ -46,13 +46,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(function () {
     Route::get('lang/{locale}', function (Request $request, string $locale) {
-        $locale = strtolower(trim($locale));
-
-        if (in_array($locale, ['ar', 'en'], true)) {
-            app(\App\Services\JsonTranslationFileService::class)->ensureLocaleFile($locale);
-            $request->session()->put('admin_locale', $locale);
-            $request->session()->put('locale', $locale);
-        }
+        app(\App\Services\JsonTranslationFileService::class)->ensureLocaleFile('en');
+        $request->session()->put('admin_locale', 'en');
 
         return redirect()->back();
     })->name('lang.switch');

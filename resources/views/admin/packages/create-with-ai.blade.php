@@ -254,7 +254,7 @@
                                 <option value="shore_excursion"
                                     {{ old('package_type') == 'shore_excursion' ? 'selected' : '' }}>Shore Excursion
                                 </option>
-                                <option value="tailor_made" {{ old('package_type') == 'tailor_made' ? 'selected' : '' }}>
+                                <option value="custom" {{ old('package_type') == 'custom' ? 'selected' : '' }}>
                                     Tailor Made</option>
                             </select>
                         </div>

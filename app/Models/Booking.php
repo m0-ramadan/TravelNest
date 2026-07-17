@@ -21,6 +21,7 @@ class Booking extends Model
         'travel_date',
         'adults',
         'children',
+        'infants',
         'special_requests',
         'confirmed_at',
         'cancelled_at',

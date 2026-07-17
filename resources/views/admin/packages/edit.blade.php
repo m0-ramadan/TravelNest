@@ -214,6 +214,14 @@
                 : [],
         );
 
+        $faqItems = old('faq_json', $package->faq_json ?? []);
+
+        $adultMinAge = old('adult_min_age', $package->adult_min_age ?? 12);
+        $childMinAge = old('child_min_age', $package->child_min_age ?? 2);
+        $childMaxAge = old('child_max_age', $package->child_max_age ?? 11);
+        $infantMinAge = old('infant_min_age', $package->infant_min_age ?? 0);
+        $infantMaxAge = old('infant_max_age', $package->infant_max_age ?? 1);
+
         $galleryImages = old('gallery_images', $package->gallery_images ?? []);
     @endphp
 
@@ -328,8 +336,8 @@
                                 <option value="shore_excursion"
                                     {{ old('package_type', $package->package_type) == 'shore_excursion' ? 'selected' : '' }}>
                                     Shore Excursion</option>
-                                <option value="tailor_made"
-                                    {{ old('package_type', $package->package_type) == 'tailor_made' ? 'selected' : '' }}>
+                                <option value="custom"
+                                    {{ old('package_type', $package->package_type) == 'custom' ? 'selected' : '' }}>
                                     Tailor Made</option>
                             </select>
                             @error('package_type')
@@ -516,7 +524,7 @@
                         @endforeach
                     </div>
 
-                    <button type="button" class="btn btn-light" onclick="addFacility()">+ إضافة مرفق</button>
+                    <button type="button" class="btn btn-light" id="add-facility-btn">+ إضافة مرفق</button>
 
                     {{-- البرنامج --}}
                     <div class="section-title">برنامج الرحلة / Itinerary</div>
@@ -586,7 +594,7 @@
                         @endforeach
                     </div>
 
-                    <button type="button" class="btn btn-light" onclick="addItinerary()">+ إضافة يوم</button>
+                    <button type="button" class="btn btn-light" id="add-itinerary-btn">+ إضافة يوم</button>
 
                     {{-- شامل وغير شامل --}}
                     <div class="section-title">المشمول وغير المشمول</div>
@@ -616,7 +624,7 @@
                                 @endforeach
                             </div>
 
-                            <button type="button" class="btn btn-light mb-3" onclick="addIncluded()">+ إضافة
+                            <button type="button" class="btn btn-light mb-3" id="add-included-btn">+ إضافة
                                 بند</button>
                         </div>
 
@@ -644,7 +652,7 @@
                                 @endforeach
                             </div>
 
-                            <button type="button" class="btn btn-light mb-3" onclick="addExcluded()">+ إضافة
+                            <button type="button" class="btn btn-light mb-3" id="add-excluded-btn">+ إضافة
                                 بند</button>
                         </div>
                     </div>
@@ -654,9 +662,30 @@
 
                     <div class="row">
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">السعر يبدأ من</label>
-                            <input type="number" step="0.01" name="start_from_price" class="form-control"
-                                value="{{ old('start_from_price', $package->start_from_price ?? ($package->base_price ?? '')) }}">
+                            <label class="form-label">سعر البالغ</label>
+                            <input id="adult_price" type="number" step="0.01" min="0" name="adult_price"
+                                class="form-control" value="{{ old('adult_price', $package->adult_price ?? '') }}">
+                            @error('adult_price')
+                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">سعر الطفل</label>
+                            <input id="child_price" type="number" step="0.01" min="0" name="child_price"
+                                class="form-control" value="{{ old('child_price', $package->child_price ?? '') }}">
+                            @error('child_price')
+                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">سعر الرضيع</label>
+                            <input id="infant_price" type="number" step="0.01" min="0" name="infant_price"
+                                class="form-control" value="{{ old('infant_price', $package->infant_price ?? '') }}">
+                            @error('infant_price')
+                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                            @enderror
                         </div>
 
                         <div class="col-md-3 mb-3">
@@ -666,9 +695,54 @@
                         </div>
                     </div>
 
-                    <div id="prices-wrapper">
+                    <div class="section-title">{{ __('trips.age_policy') }}</div>
+
+                    <div class="row">
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">سن البالغ يبدأ من</label>
+                            <input type="number" min="0" name="adult_min_age" class="form-control"
+                                value="{{ $adultMinAge }}">
+                            @error('adult_min_age')
+                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                            @enderror
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">سن الطفل من</label>
+                            <input type="number" min="0" name="child_min_age" class="form-control"
+                                value="{{ $childMinAge }}">
+                            @error('child_min_age')
+                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                            @enderror
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">سن الطفل إلى</label>
+                            <input type="number" min="0" name="child_max_age" class="form-control"
+                                value="{{ $childMaxAge }}">
+                            @error('child_max_age')
+                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                            @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">سن الرضيع من</label>
+                            <input type="number" min="0" name="infant_min_age" class="form-control"
+                                value="{{ $infantMinAge }}">
+                            @error('infant_min_age')
+                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                            @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">سن الرضيع إلى</label>
+                            <input type="number" min="0" name="infant_max_age" class="form-control"
+                                value="{{ $infantMaxAge }}">
+                            @error('infant_max_age')
+                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div id="prices-wrapper" class="mt-3">
                         @foreach ($prices as $i => $price)
-                            <div class="repeat-box">
+                            <div class="repeat-box price-item">
                                 <input type="hidden" name="prices[{{ $i }}][id]"
                                     value="{{ $price['id'] ?? '' }}">
 
@@ -759,7 +833,7 @@
                         @endforeach
                     </div>
 
-                    <button type="button" class="btn btn-light" onclick="addPrice()">+ إضافة سعر</button>
+                    <button type="button" class="btn btn-light" id="add-price-btn">+ إضافة سعر</button>
 
                     <div class="mt-3">
                         <label class="form-label">ملاحظات الأسعار</label>
@@ -790,6 +864,35 @@
                             <textarea name="terms_conditions" rows="4" class="form-control">{{ old('terms_conditions', adminTrans($package->terms_conditions) ?? '') }}</textarea>
                         </div>
                     </div>
+
+                    <div class="section-title">FAQs</div>
+
+                    <p class="text-white-50 mb-3">Add questions and answers for this trip to appear on the website.</p>
+
+                    <div id="faq-wrapper">
+                        @forelse ($faqItems as $i => $faq)
+                            <div class="repeat-box faq-item">
+                                <div class="row">
+                                    <div class="col-md-5 mb-2">
+                                        <label class="form-label">Question</label>
+                                        <input type="text" name="faq_json[{{ $i }}][question]" class="form-control"
+                                            value="{{ is_array($faq['question'] ?? null) ? ($faq['question'][app()->getLocale()] ?? $faq['question']['en'] ?? '') : ($faq['question'] ?? '') }}">
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label class="form-label">Answer</label>
+                                        <textarea name="faq_json[{{ $i }}][answer]" rows="3" class="form-control">{{ is_array($faq['answer'] ?? null) ? ($faq['answer'][app()->getLocale()] ?? $faq['answer']['en'] ?? '') : ($faq['answer'] ?? '') }}</textarea>
+                                    </div>
+                                    <div class="col-md-1 mb-2 d-flex align-items-end">
+                                        <button type="button" class="btn btn-danger w-100 remove-btn js-remove">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="text-white-50 mb-3" id="faq-empty-state">No FAQs added yet.</div>
+                        @endforelse
+                    </div>
+
+                    <button type="button" class="btn btn-light mb-3" id="add-faq-btn">+ Add FAQ</button>
 
                     {{-- المشاركون والتقييم --}}
                     <div class="section-title">المشاركون والتقييم</div>
@@ -930,6 +1033,7 @@
             </div>
         </div>
     </div>
+
 @endsection
 
 @section('js')
@@ -955,11 +1059,24 @@
             }
 
             document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('js-remove')) {
-                    const box = e.target.closest('.repeat-box');
-                    if (box) box.remove();
+                const removeButton = e.target.closest('.js-remove');
+                if (!removeButton) return;
+
+                const box = removeButton.closest('.repeat-box');
+                if (box) {
+                    box.remove();
+                    syncFaqEmptyState();
                 }
             });
+
+            document.getElementById('add-facility-btn')?.addEventListener('click', addFacility);
+            document.getElementById('add-itinerary-btn')?.addEventListener('click', addItinerary);
+            document.getElementById('add-included-btn')?.addEventListener('click', addIncluded);
+            document.getElementById('add-excluded-btn')?.addEventListener('click', addExcluded);
+            document.getElementById('add-price-btn')?.addEventListener('click', addPrice);
+            document.getElementById('add-faq-btn')?.addEventListener('click', addFaq);
+
+            syncFaqEmptyState();
         });
 
         let facilityIndex = {{ count($facilities ?? []) }};
@@ -967,190 +1084,241 @@
         let includedIndex = {{ count($included ?? []) }};
         let excludedIndex = {{ count($excluded ?? []) }};
         let priceIndex = {{ count($prices ?? []) }};
+        let faqIndex = {{ count($faqItems ?? []) }};
+
+        function syncFaqEmptyState() {
+            const wrapper = document.getElementById('faq-wrapper');
+            if (!wrapper) return;
+
+            const hasItems = wrapper.querySelector('.faq-item');
+            let emptyState = document.getElementById('faq-empty-state');
+
+            if (hasItems && emptyState) {
+                emptyState.remove();
+            }
+
+            if (!hasItems && !emptyState) {
+                wrapper.insertAdjacentHTML('beforeend',
+                    '<div class="text-white-50 mb-3" id="faq-empty-state">No FAQs added yet.</div>');
+            }
+        }
+
+        function focusLastField(wrapperId) {
+            const wrapper = document.getElementById(wrapperId);
+            if (!wrapper) return;
+
+            const lastField = wrapper.querySelector(
+                '.repeat-box:last-child input, .repeat-box:last-child textarea, .repeat-box:last-child select'
+            );
+
+            if (lastField) {
+                lastField.focus();
+            }
+        }
 
         function addFacility() {
             document.getElementById('facilities-wrapper').insertAdjacentHTML('beforeend', `
-            <div class="repeat-box">
-                <div class="row">
-                    <div class="col-md-9 mb-2">
-                        <input type="text" name="facilities[${facilityIndex}][title]" class="form-control" placeholder="Facility">
-                    </div>
+                <div class="repeat-box">
+                    <div class="row">
+                        <div class="col-md-9 mb-2">
+                            <input type="text" name="facilities[${facilityIndex}][title]" class="form-control" placeholder="Facility">
+                        </div>
 
-                    <div class="col-md-2 mb-2">
-                        <input type="number" name="facilities[${facilityIndex}][sort_order]" class="form-control" value="${facilityIndex}">
-                    </div>
+                        <div class="col-md-2 mb-2">
+                            <input type="number" name="facilities[${facilityIndex}][sort_order]" class="form-control" value="${facilityIndex}">
+                        </div>
 
-                    <div class="col-md-1 mb-2">
-                        <button type="button" class="btn btn-danger w-100 remove-btn js-remove">X</button>
+                        <div class="col-md-1 mb-2">
+                            <button type="button" class="btn btn-danger w-100 remove-btn js-remove">X</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `);
+            `);
 
             facilityIndex++;
+            focusLastField('facilities-wrapper');
         }
 
         function addItinerary() {
             document.getElementById('itinerary-wrapper').insertAdjacentHTML('beforeend', `
-            <div class="repeat-box">
-                <div class="row">
-                    <div class="col-md-4 mb-2">
-                        <label class="form-label">نوع البرنامج</label>
-                        <input type="text" name="itinerary[${itineraryIndex}][duration]" class="form-control" placeholder="4 Days - Aswan / Luxor">
-                    </div>
-
-                    <div class="col-md-2 mb-2">
-                        <label class="form-label">رقم اليوم</label>
-                        <input type="number" name="itinerary[${itineraryIndex}][day_number]" class="form-control">
-                    </div>
-
-                    <div class="col-md-4 mb-2">
-                        <label class="form-label">عنوان اليوم</label>
-                        <input type="text" name="itinerary[${itineraryIndex}][title]" class="form-control">
-                    </div>
-
-                    <div class="col-md-2 mb-2">
-                        <label class="form-label">حذف</label>
-                        <button type="button" class="btn btn-danger w-100 remove-btn js-remove">حذف</button>
-                    </div>
-
-                    <div class="col-md-8 mb-2">
-                        <label class="form-label">تفاصيل اليوم</label>
-                        <textarea name="itinerary[${itineraryIndex}][description]" rows="4" class="form-control"></textarea>
-                    </div>
-
-                    <div class="col-md-4 mb-2">
-                        <label class="form-label d-block">الوجبات</label>
-
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="itinerary[${itineraryIndex}][meals_breakfast]" value="1">
-                            <label class="form-check-label">Breakfast</label>
+                <div class="repeat-box">
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label">نوع البرنامج</label>
+                            <input type="text" name="itinerary[${itineraryIndex}][duration]" class="form-control" placeholder="4 Days - Aswan / Luxor">
                         </div>
 
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="itinerary[${itineraryIndex}][meals_lunch]" value="1">
-                            <label class="form-check-label">Lunch</label>
+                        <div class="col-md-2 mb-2">
+                            <label class="form-label">رقم اليوم</label>
+                            <input type="number" name="itinerary[${itineraryIndex}][day_number]" class="form-control">
                         </div>
 
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="itinerary[${itineraryIndex}][meals_dinner]" value="1">
-                            <label class="form-check-label">Dinner</label>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label">عنوان اليوم</label>
+                            <input type="text" name="itinerary[${itineraryIndex}][title]" class="form-control">
+                        </div>
+
+                        <div class="col-md-2 mb-2">
+                            <label class="form-label">حذف</label>
+                            <button type="button" class="btn btn-danger w-100 remove-btn js-remove">حذف</button>
+                        </div>
+
+                        <div class="col-md-8 mb-2">
+                            <label class="form-label">تفاصيل اليوم</label>
+                            <textarea name="itinerary[${itineraryIndex}][description]" rows="4" class="form-control"></textarea>
+                        </div>
+
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label d-block">الوجبات</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="itinerary[${itineraryIndex}][meals_breakfast]" value="1">
+                                <label class="form-check-label">Breakfast</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="itinerary[${itineraryIndex}][meals_lunch]" value="1">
+                                <label class="form-check-label">Lunch</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="itinerary[${itineraryIndex}][meals_dinner]" value="1">
+                                <label class="form-check-label">Dinner</label>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        `);
+            `);
 
             itineraryIndex++;
+            focusLastField('itinerary-wrapper');
         }
 
         function addIncluded() {
             document.getElementById('included-wrapper').insertAdjacentHTML('beforeend', `
-            <div class="repeat-box">
-                <div class="row">
-                    <div class="col-md-10 mb-2">
-                        <input type="text" name="included[${includedIndex}][title]" class="form-control" placeholder="Included item">
-                    </div>
+                <div class="repeat-box">
+                    <div class="row">
+                        <div class="col-md-10 mb-2">
+                            <input type="text" name="included[${includedIndex}][title]" class="form-control" placeholder="Included item">
+                        </div>
 
-                    <div class="col-md-2 mb-2">
-                        <button type="button" class="btn btn-danger w-100 remove-btn js-remove">حذف</button>
+                        <div class="col-md-2 mb-2">
+                            <button type="button" class="btn btn-danger w-100 remove-btn js-remove">حذف</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `);
+            `);
 
             includedIndex++;
+            focusLastField('included-wrapper');
         }
 
         function addExcluded() {
             document.getElementById('excluded-wrapper').insertAdjacentHTML('beforeend', `
-            <div class="repeat-box">
-                <div class="row">
-                    <div class="col-md-10 mb-2">
-                        <input type="text" name="excluded[${excludedIndex}][title]" class="form-control" placeholder="Excluded item">
-                    </div>
+                <div class="repeat-box">
+                    <div class="row">
+                        <div class="col-md-10 mb-2">
+                            <input type="text" name="excluded[${excludedIndex}][title]" class="form-control" placeholder="Excluded item">
+                        </div>
 
-                    <div class="col-md-2 mb-2">
-                        <button type="button" class="btn btn-danger w-100 remove-btn js-remove">حذف</button>
+                        <div class="col-md-2 mb-2">
+                            <button type="button" class="btn btn-danger w-100 remove-btn js-remove">حذف</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `);
+            `);
 
             excludedIndex++;
+            focusLastField('excluded-wrapper');
         }
 
         function addPrice() {
             document.getElementById('prices-wrapper').insertAdjacentHTML('beforeend', `
-            <div class="repeat-box">
-                <div class="row">
-                    <div class="col-md-3 mb-2">
-                        <label class="form-label">المدة / Label</label>
-                        <input type="text" name="prices[${priceIndex}][label]" class="form-control" placeholder="3 Nights 4 Days">
-                    </div>
+                <div class="repeat-box price-item">
+                    <div class="row">
+                        <div class="col-md-10 mb-2">
+                            <input type="text" name="prices[${priceIndex}][label]" class="form-control" placeholder="Price title">
+                        </div>
 
-                    <div class="col-md-3 mb-2">
-                        <label class="form-label">الموسم</label>
-                        <input type="text" name="prices[${priceIndex}][season_name]" class="form-control" placeholder="May to August">
-                    </div>
+                        <div class="col-md-2 mb-2">
+                            <button type="button" class="btn btn-danger w-100 remove-btn js-remove">حذف</button>
+                        </div>
 
-                    <div class="col-md-2 mb-2">
-                        <label class="form-label">نوع السعر</label>
-                        <select name="prices[${priceIndex}][price_type]" class="form-select">
-                            <option value="from">From</option>
-                            <option value="fixed">Fixed</option>
-                        </select>
-                    </div>
+                        <div class="col-md-4 mb-2">
+                            <input type="text" name="prices[${priceIndex}][season_name]" class="form-control" placeholder="Season">
+                        </div>
 
-                    <div class="col-md-2 mb-2">
-                        <label class="form-label">الغرفة</label>
-                        <select name="prices[${priceIndex}][room_type]" class="form-select">
-                            <option value="">N/A</option>
-                            <option value="double">Double</option>
-                            <option value="single">Single</option>
-                            <option value="triple">Triple</option>
-                        </select>
-                    </div>
+                        <div class="col-md-4 mb-2">
+                            <input type="number" step="0.01" name="prices[${priceIndex}][amount]" class="form-control" placeholder="Amount">
+                        </div>
 
-                    <div class="col-md-2 mb-2">
-                        <label class="form-label">السعر</label>
-                        <input type="number" step="0.01" name="prices[${priceIndex}][amount]" class="form-control">
-                    </div>
+                        <div class="col-md-4 mb-2">
+                            <select name="prices[${priceIndex}][currency_id]" class="form-select">
+                                <option value="">Currency</option>
+                                @foreach ($currencies ?? collect() as $currency)
+                                    <option value="{{ $currency->id }}">{{ $currency->code }}</option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                    <div class="col-md-3 mb-2">
-                        <label class="form-label">العملة</label>
-                        <select name="prices[${priceIndex}][currency_id]" class="form-select">
-                            <option value="">اختر العملة</option>
-                            @foreach ($currencies ?? collect() as $currency)
-                                <option value="{{ $currency->id }}">{{ $currency->code }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                        <div class="col-md-4 mb-2">
+                            <select name="prices[${priceIndex}][price_type]" class="form-select">
+                                <option value="from">From</option>
+                                <option value="fixed">Fixed</option>
+                            </select>
+                        </div>
 
-                    <div class="col-md-3 mb-2">
-                        <label class="form-label">من تاريخ</label>
-                        <input type="date" name="prices[${priceIndex}][valid_from]" class="form-control">
-                    </div>
+                        <div class="col-md-4 mb-2">
+                            <select name="prices[${priceIndex}][room_type]" class="form-select">
+                                <option value="">Room Type</option>
+                                <option value="double">Double</option>
+                                <option value="single">Single</option>
+                                <option value="triple">Triple</option>
+                            </select>
+                        </div>
 
-                    <div class="col-md-3 mb-2">
-                        <label class="form-label">إلى تاريخ</label>
-                        <input type="date" name="prices[${priceIndex}][valid_to]" class="form-control">
-                    </div>
+                        <div class="col-md-4 mb-2">
+                            <input type="date" name="prices[${priceIndex}][valid_from]" class="form-control">
+                        </div>
 
-                    <div class="col-md-2 mb-2">
-                        <label class="form-label">حذف</label>
-                        <button type="button" class="btn btn-danger w-100 remove-btn js-remove">حذف</button>
-                    </div>
+                        <div class="col-md-6 mb-2">
+                            <input type="date" name="prices[${priceIndex}][valid_to]" class="form-control">
+                        </div>
 
-                    <div class="col-md-12 mb-2">
-                        <label class="form-label">ملاحظات</label>
-                        <textarea name="prices[${priceIndex}][notes]" rows="2" class="form-control"></textarea>
+                        <div class="col-md-6 mb-2">
+                            <textarea name="prices[${priceIndex}][notes]" rows="2" class="form-control" placeholder="Notes"></textarea>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `);
+            `);
 
             priceIndex++;
+            focusLastField('prices-wrapper');
+        }
+
+        function addFaq() {
+            const emptyState = document.getElementById('faq-empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            document.getElementById('faq-wrapper').insertAdjacentHTML('beforeend', `
+                <div class="repeat-box faq-item">
+                    <div class="row">
+                        <div class="col-md-10 mb-2">
+                            <input type="text" name="faq_json[${faqIndex}][question]" class="form-control" placeholder="Question">
+                        </div>
+
+                        <div class="col-md-2 mb-2">
+                            <button type="button" class="btn btn-danger w-100 remove-btn js-remove">Remove</button>
+                        </div>
+
+                        <div class="col-md-12 mb-2">
+                            <textarea name="faq_json[${faqIndex}][answer]" rows="3" class="form-control" placeholder="Answer"></textarea>
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            faqIndex++;
+            focusLastField('faq-wrapper');
         }
     </script>
 @endsection

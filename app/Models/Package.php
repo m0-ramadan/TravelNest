@@ -31,6 +31,16 @@ class Package extends Model
         'route_text',
         'start_from_price',
         'compare_price',
+        'adult_price',
+        'child_price',
+        'infant_price',
+        'adult_min_age',
+        'child_min_age',
+        'child_max_age',
+        'infant_min_age',
+        'infant_max_age',
+        'price_from',
+        'price_to',
         'currency_id',
         'schedule_text',
         'pickup_location',
@@ -86,9 +96,19 @@ class Package extends Model
         'breadcrumb_title' => 'array',
         'start_from_price' => 'decimal:2',
         'compare_price' => 'decimal:2',
+        'adult_price' => 'decimal:2',
+        'child_price' => 'decimal:2',
+        'infant_price' => 'decimal:2',
+        'price_from' => 'decimal:2',
+        'price_to' => 'decimal:2',
         'rating_avg' => 'decimal:2',
         'duration_days' => 'integer',
         'duration_nights' => 'integer',
+        'adult_min_age' => 'integer',
+        'child_min_age' => 'integer',
+        'child_max_age' => 'integer',
+        'infant_min_age' => 'integer',
+        'infant_max_age' => 'integer',
         'reviews_count' => 'integer',
         'min_participants' => 'integer',
         'max_participants' => 'integer',
@@ -306,12 +326,35 @@ class Package extends Model
 
     public function getFormattedPriceAttribute(): ?string
     {
-        if ($this->start_from_price === null) {
+        $priceFrom = $this->price_from;
+
+        if ($priceFrom === null) {
+            $priceFrom = $this->start_from_price;
+        }
+
+        if ($priceFrom === null) {
             return null;
         }
 
         $symbol = $this->currency?->symbol ?? '$';
 
-        return $symbol . number_format((float) $this->start_from_price, 2);
+        return $symbol . number_format((float) $priceFrom, 2);
+    }
+
+    public function getPriceRangeTextAttribute(): ?string
+    {
+        $symbol = $this->currency?->symbol ?? '$';
+        $priceFrom = (float) ($this->price_from ?? $this->start_from_price ?? 0);
+        $priceTo = (float) ($this->price_to ?? 0);
+
+        if ($priceFrom <= 0 && $priceTo <= 0) {
+            return null;
+        }
+
+        if ($priceTo > $priceFrom && $priceFrom > 0) {
+            return $symbol . number_format($priceFrom, 2) . ' to ' . $symbol . number_format($priceTo, 2);
+        }
+
+        return $symbol . number_format(max($priceFrom, $priceTo), 2);
     }
 }

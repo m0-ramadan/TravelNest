@@ -101,11 +101,13 @@ class TranslateAdminHtml
 
     protected function translateHtml(string $html, array $translations): string
     {
+        [$protectedHtml, $rawTextBlocks] = $this->protectRawTextElements($html);
+
         libxml_use_internal_errors(true);
 
         $document = new \DOMDocument('1.0', 'UTF-8');
         $encodedHtml = mb_encode_numericentity(
-            $html,
+            $protectedHtml,
             [0x80, 0x10FFFF, 0, ~0],
             'UTF-8'
         );
@@ -167,8 +169,35 @@ class TranslateAdminHtml
         libxml_clear_errors();
 
         $renderedHtml = (string) $document->saveHTML();
+        $decodedHtml = html_entity_decode($renderedHtml, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-        return html_entity_decode($renderedHtml, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        return strtr($decodedHtml, $rawTextBlocks);
+    }
+
+    /**
+     * DOMDocument rewrites closing tags found inside JavaScript template literals.
+     * Keep raw-text element contents byte-for-byte intact while translating the page.
+     *
+     * @return array{0: string, 1: array<string, string>}
+     */
+    protected function protectRawTextElements(string $html): array
+    {
+        $rawTextBlocks = [];
+        $index = 0;
+
+        $protectedHtml = preg_replace_callback(
+            '~(<(script|style|textarea)\b[^>]*>)(.*?)(</\2\s*>)~is',
+            function (array $matches) use (&$rawTextBlocks, &$index): string {
+                $token = '__ADMIN_RAW_TEXT_' . hash('sha256', $index . ':' . $matches[3]) . '__';
+                $rawTextBlocks[$token] = $matches[3];
+                $index++;
+
+                return $matches[1] . $token . $matches[4];
+            },
+            $html
+        );
+
+        return [$protectedHtml ?? $html, $rawTextBlocks];
     }
 
     protected function translatedValue(string $value, array $translations): string

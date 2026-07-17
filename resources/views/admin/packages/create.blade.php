@@ -13,6 +13,12 @@
     $included = old('included', []);
     $excluded = old('excluded', []);
     $prices = old('prices', []);
+    $faqItems = old('faq_json', []);
+    $adultMinAge = old('adult_min_age', 12);
+    $childMinAge = old('child_min_age', 2);
+    $childMaxAge = old('child_max_age', 11);
+    $infantMinAge = old('infant_min_age', 0);
+    $infantMaxAge = old('infant_max_age', 1);
 
     $steps = [
         1 => [
@@ -67,7 +73,14 @@
         'facilities' => 4,
         'included' => 4,
         'excluded' => 4,
-        'start_from_price' => 4,
+        'adult_price' => 4,
+        'child_price' => 4,
+        'infant_price' => 4,
+        'adult_min_age' => 4,
+        'child_min_age' => 4,
+        'child_max_age' => 4,
+        'infant_min_age' => 4,
+        'infant_max_age' => 4,
         'compare_price' => 4,
         'pricing_information' => 4,
         'children_policy' => 4,
@@ -75,6 +88,7 @@
         'cancellation_policy' => 4,
         'terms_conditions' => 4,
         'prices' => 4,
+        'faq_json' => 4,
         'min_participants' => 5,
         'max_participants' => 5,
         'booking_lead_days' => 5,
@@ -488,6 +502,378 @@
             margin-bottom: 14px;
         }
 
+        .stack-list {
+            display: grid;
+            gap: 14px;
+        }
+
+        .editor-card {
+            margin-bottom: 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.025));
+        }
+
+        .editor-card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .editor-card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .editor-card-title strong {
+            font-size: 15px;
+            color: #fff;
+        }
+
+        .editor-card-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 36px;
+            background: rgba(124, 58, 237, 0.16);
+            color: #f4ecff;
+        }
+
+        .editor-card-body {
+            display: grid;
+            gap: 16px;
+        }
+
+        .editor-inline-input {
+            flex: 1 1 auto;
+        }
+
+        .editor-textarea {
+            min-height: 120px !important;
+        }
+
+        .repeat-box {
+            transition: opacity .25s ease, transform .25s ease, height .25s ease, margin .25s ease, padding .25s ease;
+            will-change: opacity, transform, height;
+        }
+
+        .repeat-box.is-entering {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .repeat-box.is-removing {
+            opacity: 0;
+            transform: translateY(-6px);
+            margin-bottom: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            overflow: hidden;
+        }
+
+        .dynamic-section-shell {
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 20px;
+            background:
+                radial-gradient(circle at top, rgba(124, 92, 255, 0.08), transparent 36%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.015));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        }
+
+        .dynamic-section-shell.is-ltr {
+            direction: ltr !important;
+            text-align: left !important;
+            unicode-bidi: isolate;
+        }
+
+        .dynamic-section-shell.is-ltr input,
+        .dynamic-section-shell.is-ltr select,
+        .dynamic-section-shell.is-ltr textarea,
+        .dynamic-section-shell.is-ltr button,
+        .dynamic-section-shell.is-ltr label {
+            direction: ltr !important;
+            text-align: left !important;
+        }
+
+        .dynamic-section-shell.is-ltr .btn-icon-text {
+            flex-direction: row !important;
+        }
+
+        .dynamic-section-head {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .dynamic-section-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 64px;
+            background: linear-gradient(180deg, rgba(124, 92, 255, 0.36), rgba(124, 92, 255, 0.22));
+            color: #fff;
+            box-shadow: 0 18px 30px rgba(124, 92, 255, 0.18);
+        }
+
+        .dynamic-section-head h4 {
+            margin: 0 0 6px;
+            font-size: 15px;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .dynamic-section-head p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.62);
+            font-size: 13px;
+        }
+
+        .faq-list,
+        .itinerary-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .faq-item-card,
+        .itinerary-item-card {
+            direction: ltr;
+            min-width: 0;
+            margin-bottom: 0;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.02));
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+        }
+
+        .faq-item-grid {
+            display: grid;
+            grid-template-columns: 64px minmax(0, .9fr) minmax(0, 1.1fr) 48px;
+            grid-template-areas: "order question answer remove";
+            gap: 16px;
+            align-items: start;
+        }
+
+        .itinerary-item-grid {
+            display: grid;
+            grid-template-columns: 64px minmax(0, .85fr) minmax(0, 1.15fr) 48px;
+            grid-template-areas:
+                "order date place remove"
+                "order meals activities .";
+            gap: 16px;
+            align-items: start;
+        }
+
+        .dynamic-order-column {
+            grid-area: order;
+        }
+
+        .faq-question-field {
+            grid-area: question;
+        }
+
+        .faq-answer-field {
+            grid-area: answer;
+        }
+
+        .itinerary-date-field {
+            grid-area: date;
+        }
+
+        .itinerary-place-field {
+            grid-area: place;
+        }
+
+        .itinerary-meals-field {
+            grid-area: meals;
+        }
+
+        .itinerary-activities-field {
+            grid-area: activities;
+        }
+
+        .dynamic-remove-control {
+            grid-area: remove;
+        }
+
+        .item-order-badge {
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, rgba(124, 92, 255, 0.45), rgba(124, 92, 255, 0.24));
+            color: #fff;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: .04em;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .field-block {
+            display: grid;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .field-block-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #f4f1ff;
+        }
+
+        .field-shell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 48px;
+            width: 100%;
+            padding: 0 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: #2e3055;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+
+        .dynamic-section-shell.is-ltr .field-shell {
+            direction: ltr !important;
+            flex-direction: row;
+        }
+
+        .field-shell:focus-within {
+            border-color: rgba(124, 92, 255, 0.95);
+            box-shadow: 0 0 0 2px rgba(124, 92, 255, 0.2), 0 10px 24px rgba(124, 92, 255, 0.14);
+        }
+
+        .field-shell-icon {
+            color: rgba(196, 172, 255, 0.95);
+            font-size: 18px;
+            flex: 0 0 auto;
+        }
+
+        .field-shell input,
+        .field-shell select,
+        .field-shell textarea {
+            direction: ltr !important;
+            text-align: left !important;
+            width: 100%;
+            min-height: 46px;
+            padding: 0 !important;
+            border: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            color: #fff !important;
+        }
+
+        .field-shell input[type="date"] {
+            min-width: 0;
+            color-scheme: dark;
+        }
+
+        .field-shell textarea {
+            min-height: 120px;
+            padding-top: 14px !important;
+            padding-bottom: 14px !important;
+            resize: vertical;
+        }
+
+        .field-shell select option {
+            color: #111827;
+        }
+
+        .field-shell input::placeholder,
+        .field-shell textarea::placeholder {
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        .field-shell-textarea {
+            align-items: flex-start;
+        }
+
+        .field-shell-textarea .field-shell-icon {
+            margin-top: 16px;
+        }
+
+        .hover-delete-btn {
+            min-height: 48px;
+            border-radius: 14px;
+            border: 1px solid rgba(248, 113, 113, 0.14);
+            background: rgba(239, 68, 68, 0.09);
+            color: #fb7185;
+            opacity: .28;
+            transition: opacity .2s ease, background .2s ease, border-color .2s ease, transform .2s ease;
+        }
+
+        .faq-item-card:hover .hover-delete-btn,
+        .itinerary-item-card:hover .hover-delete-btn {
+            opacity: 1;
+        }
+
+        .hover-delete-btn:hover {
+            color: #fecaca;
+            background: rgba(239, 68, 68, 0.16);
+            border-color: rgba(248, 113, 113, 0.26);
+            transform: translateY(-1px);
+        }
+
+        .dynamic-add-btn {
+            width: fit-content;
+            min-height: 56px;
+            margin-top: 20px;
+            padding-inline: 22px;
+            border-radius: 14px;
+            border: 1px solid rgba(124, 92, 255, 0.55);
+            background: rgba(124, 92, 255, 0.08);
+            color: #b79bff;
+            box-shadow: 0 14px 28px rgba(124, 92, 255, 0.08);
+        }
+
+        .dynamic-add-btn:hover {
+            color: #d5c6ff;
+            background: rgba(124, 92, 255, 0.14);
+            transform: translateY(-1px);
+        }
+
+        .dynamic-section-shell.is-ltr .dynamic-add-btn {
+            margin-right: auto;
+            margin-left: 0;
+        }
+
+        .empty-dynamic-state {
+            display: grid;
+            place-items: center;
+            gap: 10px;
+            min-height: 180px;
+            text-align: center;
+        }
+
+        .empty-dynamic-state strong {
+            font-size: 34px;
+            line-height: 1;
+        }
+
+        .icon-remove-btn {
+            width: 42px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex: 0 0 42px;
+        }
+
         .repeat-box-title {
             display: flex;
             justify-content: space-between;
@@ -772,6 +1158,22 @@
                 background: linear-gradient(90deg, #8b5cf6, #7c3aed);
                 transition: width .25s ease;
             }
+
+            .faq-item-grid {
+                grid-template-columns: 56px minmax(0, 1fr) 48px;
+                grid-template-areas:
+                    "order question remove"
+                    ". answer .";
+            }
+
+            .itinerary-item-grid {
+                grid-template-columns: 56px minmax(0, 1fr) 48px;
+                grid-template-areas:
+                    "order date remove"
+                    ". place ."
+                    ". meals ."
+                    ". activities .";
+            }
         }
 
         @media (max-width: 767px) {
@@ -808,6 +1210,55 @@
 
             .wizard-actions-group .btn {
                 flex: 1 1 auto;
+            }
+
+            .editor-card-head {
+                align-items: stretch;
+            }
+
+            .editor-card-title {
+                flex: 1 1 auto;
+            }
+
+            .editor-inline-input {
+                width: 100%;
+            }
+
+            .faq-item-grid,
+            .itinerary-item-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .faq-item-grid {
+                grid-template-areas:
+                    "order"
+                    "question"
+                    "answer"
+                    "remove";
+            }
+
+            .itinerary-item-grid {
+                grid-template-areas:
+                    "order"
+                    "date"
+                    "place"
+                    "meals"
+                    "activities"
+                    "remove";
+            }
+
+            .item-order-badge {
+                width: 48px;
+                height: 48px;
+            }
+
+            .hover-delete-btn {
+                opacity: 1;
+                width: 100%;
+            }
+
+            .dynamic-section-shell {
+                padding: 16px;
             }
         }
     </style>
@@ -1020,8 +1471,8 @@
                                                     {{ old('package_type') == 'shore_excursion' ? 'selected' : '' }}>
                                                     {{ admin_t('رحلة شاطئية') }}
                                                 </option>
-                                                <option value="tailor_made"
-                                                    {{ old('package_type') == 'tailor_made' ? 'selected' : '' }}>
+                                                <option value="custom"
+                                                    {{ old('package_type') == 'custom' ? 'selected' : '' }}>
                                                     {{ admin_t('رحلة مخصصة') }}
                                                 </option>
                                             </select>
@@ -1372,83 +1823,108 @@
                                 </div>
 
                                 <div class="section-body">
-                                    <div id="itinerary-wrapper">
-                                        @forelse ($itinerary as $i => $day)
-                                            <div class="repeat-box itinerary-item">
-                                                <div class="repeat-box-title">
-                                                    <strong>{{ admin_t('يوم رقم :number', ['number' => $day['day_number'] ?? $i + 1]) }}</strong>
-                                                    <button type="button"
-                                                        class="btn btn-sm btn-outline-danger js-remove">
-                                                        {{ admin_t('حذف') }}
-                                                    </button>
-                                                </div>
-                                                <div class="fields-grid">
-                                                    <div>
-                                                        <label class="form-label">{{ admin_t('نوع البرنامج') }}</label>
-                                                        <input type="text"
-                                                            name="itinerary[{{ $i }}][duration]"
-                                                            class="form-control" value="{{ $day['duration'] ?? '' }}">
-                                                    </div>
-
-                                                    <div>
-                                                        <label class="form-label">{{ admin_t('رقم اليوم') }}</label>
-                                                        <input type="number"
-                                                            name="itinerary[{{ $i }}][day_number]"
-                                                            class="form-control" value="{{ $day['day_number'] ?? '' }}">
-                                                    </div>
-
-                                                    <div>
-                                                        <label class="form-label">{{ admin_t('عنوان اليوم') }}</label>
-                                                        <input type="text"
-                                                            name="itinerary[{{ $i }}][title]"
-                                                            class="form-control" value="{{ $day['title'] ?? '' }}">
-                                                    </div>
-
-                                                    <div class="field-span-2">
-                                                        <label class="form-label">{{ admin_t('تفاصيل اليوم') }}</label>
-                                                        <textarea name="itinerary[{{ $i }}][description]" rows="4" class="form-control">{{ $day['description'] ?? '' }}</textarea>
-                                                    </div>
-
-                                                    <div>
-                                                        <label class="form-label">{{ admin_t('الوجبات') }}</label>
-                                                        <div class="choice-row">
-                                                            <label class="choice-pill">
-                                                                <input type="checkbox"
-                                                                    name="itinerary[{{ $i }}][meals_breakfast]"
-                                                                    value="1"
-                                                                    {{ !empty($day['meals_breakfast']) ? 'checked' : '' }}>
-                                                                <span>{{ admin_t('فطار') }}</span>
-                                                            </label>
-                                                            <label class="choice-pill">
-                                                                <input type="checkbox"
-                                                                    name="itinerary[{{ $i }}][meals_lunch]"
-                                                                    value="1"
-                                                                    {{ !empty($day['meals_lunch']) ? 'checked' : '' }}>
-                                                                <span>{{ admin_t('غداء') }}</span>
-                                                            </label>
-                                                            <label class="choice-pill">
-                                                                <input type="checkbox"
-                                                                    name="itinerary[{{ $i }}][meals_dinner]"
-                                                                    value="1"
-                                                                    {{ !empty($day['meals_dinner']) ? 'checked' : '' }}>
-                                                                <span>{{ admin_t('عشاء') }}</span>
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                    <div class="dynamic-section-shell is-ltr" dir="ltr" lang="en">
+                                        <div class="dynamic-section-head">
+                                            <span class="dynamic-section-icon"><i class="ti ti-calendar-event"></i></span>
+                                            <div>
+                                                <h4>Daily Itinerary</h4>
+                                                <p>Split the trip into days or stops with meal and activity details.</p>
                                             </div>
-                                        @empty
-                                            <div class="empty-state" id="itineraryEmptyState">
-                                                {{ admin_t('لا يوجد برنامج يومي حتى الآن.') }}</div>
-                                        @endforelse
-                                    </div>
+                                        </div>
 
-                                    <button type="button" class="btn btn-wizard-outline mt-2" id="addItineraryBtn">
-                                        <span class="btn-icon-text">
-                                            <i class="ti ti-plus"></i>
-                                            {{ admin_t('إضافة يوم جديد') }}
-                                        </span>
-                                    </button>
+                                        <div id="itinerary-wrapper" class="itinerary-list">
+                                            @forelse ($itinerary as $i => $day)
+                                                <div class="repeat-box itinerary-item itinerary-item-card">
+                                                    <div class="itinerary-item-grid">
+                                                        <div class="dynamic-order-column">
+                                                            <span class="item-order-badge">{{ str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) }}</span>
+                                                        </div>
+
+                                                        <div class="field-block itinerary-date-field">
+                                                            <label class="field-block-label">Date</label>
+                                                            <div class="field-shell">
+                                                                <span class="field-shell-icon"><i class="ti ti-calendar"></i></span>
+                                                                <input type="date"
+                                                                    placeholder="Select date" name="itinerary[{{ $i }}][duration]"
+                                                                    value="{{ $day['duration'] ?? '' }}">
+                                                            </div>
+                                                            <input type="hidden" name="itinerary[{{ $i }}][day_number]"
+                                                                value="{{ $day['day_number'] ?? $i + 1 }}">
+                                                        </div>
+
+                                                        <div class="field-block itinerary-place-field">
+                                                            <label class="field-block-label">Place / Stop</label>
+                                                            <div class="field-shell">
+                                                                <span class="field-shell-icon"><i class="ti ti-map-pin"></i></span>
+                                                                <input type="text" name="itinerary[{{ $i }}][title]"
+                                                                    value="{{ $day['title'] ?? '' }}"
+                                                                    placeholder="Enter place or stop">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="field-block itinerary-meals-field">
+                                                            <label class="field-block-label">Meals</label>
+                                                            <div class="field-shell">
+                                                                <span class="field-shell-icon"><i class="ti ti-tools-kitchen-2"></i></span>
+                                                                @php
+                                                                    $mealValue = 'none';
+                                                                    if (!empty($day['meals_breakfast']) && !empty($day['meals_lunch']) && !empty($day['meals_dinner'])) {
+                                                                        $mealValue = 'full_board';
+                                                                    } elseif (!empty($day['meals_breakfast'])) {
+                                                                        $mealValue = 'breakfast';
+                                                                    } elseif (!empty($day['meals_lunch'])) {
+                                                                        $mealValue = 'lunch';
+                                                                    } elseif (!empty($day['meals_dinner'])) {
+                                                                        $mealValue = 'dinner';
+                                                                    }
+                                                                @endphp
+                                                                <select data-meal-select>
+                                                                    <option value="none" {{ $mealValue === 'none' ? 'selected' : '' }}>No meals</option>
+                                                                    <option value="breakfast" {{ $mealValue === 'breakfast' ? 'selected' : '' }}>Breakfast</option>
+                                                                    <option value="lunch" {{ $mealValue === 'lunch' ? 'selected' : '' }}>Lunch</option>
+                                                                    <option value="dinner" {{ $mealValue === 'dinner' ? 'selected' : '' }}>Dinner</option>
+                                                                    <option value="full_board" {{ $mealValue === 'full_board' ? 'selected' : '' }}>Full board</option>
+                                                                </select>
+                                                            </div>
+                                                            <input type="hidden" name="itinerary[{{ $i }}][meals_breakfast]"
+                                                                value="{{ !empty($day['meals_breakfast']) ? '1' : '0' }}">
+                                                            <input type="hidden" name="itinerary[{{ $i }}][meals_lunch]"
+                                                                value="{{ !empty($day['meals_lunch']) ? '1' : '0' }}">
+                                                            <input type="hidden" name="itinerary[{{ $i }}][meals_dinner]"
+                                                                value="{{ !empty($day['meals_dinner']) ? '1' : '0' }}">
+                                                        </div>
+
+                                                        <div class="field-block itinerary-activities-field">
+                                                            <label class="field-block-label">Activities</label>
+                                                            <div class="field-shell field-shell-textarea">
+                                                                <span class="field-shell-icon"><i class="ti ti-route"></i></span>
+                                                                <textarea name="itinerary[{{ $i }}][description]" rows="4"
+                                                                    placeholder="Enter activities">{{ $day['description'] ?? '' }}</textarea>
+                                                            </div>
+                                                        </div>
+
+                                                        <button type="button"
+                                                            class="btn js-remove hover-delete-btn icon-remove-btn dynamic-remove-control"
+                                                            aria-label="{{ admin_t('حذف') }}">
+                                                            <i class="ti ti-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            @empty
+                                                <div class="empty-state empty-dynamic-state" id="itineraryEmptyState">
+                                                    <strong>🗓️</strong>
+                                                    <span>No itinerary added yet.</span>
+                                                </div>
+                                            @endforelse
+                                        </div>
+
+                                        <button type="button" class="btn dynamic-add-btn" id="addItineraryBtn">
+                                            <span class="btn-icon-text">
+                                                <i class="ti ti-plus"></i>
+                                                Add New Day
+                                            </span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1480,11 +1956,33 @@
                                 <div class="section-body">
                                     <div class="fields-grid">
                                         <div>
-                                            <label class="form-label"
-                                                for="start_from_price">{{ admin_t('السعر يبدأ من') }}</label>
-                                            <input id="start_from_price" type="number" step="0.01"
-                                                name="start_from_price" class="form-control"
-                                                value="{{ old('start_from_price') }}">
+                                            <label class="form-label" for="adult_price">{{ admin_t('سعر البالغ') }}</label>
+                                            <input id="adult_price" type="number" step="0.01" min="0"
+                                                name="adult_price" class="form-control"
+                                                value="{{ old('adult_price', '') }}">
+                                            @error('adult_price')
+                                                <div class="text-danger small mt-1">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div>
+                                            <label class="form-label" for="child_price">{{ admin_t('سعر الطفل') }}</label>
+                                            <input id="child_price" type="number" step="0.01" min="0"
+                                                name="child_price" class="form-control"
+                                                value="{{ old('child_price', '') }}">
+                                            @error('child_price')
+                                                <div class="text-danger small mt-1">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div>
+                                            <label class="form-label" for="infant_price">{{ admin_t('سعر الرضيع') }}</label>
+                                            <input id="infant_price" type="number" step="0.01" min="0"
+                                                name="infant_price" class="form-control"
+                                                value="{{ old('infant_price', '') }}">
+                                            @error('infant_price')
+                                                <div class="text-danger small mt-1">{{ $message }}</div>
+                                            @enderror
                                         </div>
 
                                         <div>
@@ -1495,94 +1993,154 @@
                                         </div>
                                     </div>
 
-                                    <div id="prices-wrapper" class="mt-3">
+                                    <div class="repeat-box mt-3">
+                                        <div class="repeat-box-title">
+                                            <strong>{{ __('trips.age_policy') }}</strong>
+                                        </div>
+                                        <div class="fields-grid">
+                                            <div>
+                                                <label class="form-label" for="adult_min_age">{{ admin_t('سن البالغ يبدأ من') }}</label>
+                                                <input id="adult_min_age" type="number" min="0" name="adult_min_age"
+                                                    class="form-control" value="{{ $adultMinAge }}">
+                                                @error('adult_min_age')
+                                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div>
+                                                <label class="form-label" for="child_min_age">{{ admin_t('سن الطفل من') }}</label>
+                                                <input id="child_min_age" type="number" min="0" name="child_min_age"
+                                                    class="form-control" value="{{ $childMinAge }}">
+                                                @error('child_min_age')
+                                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div>
+                                                <label class="form-label" for="child_max_age">{{ admin_t('سن الطفل إلى') }}</label>
+                                                <input id="child_max_age" type="number" min="0" name="child_max_age"
+                                                    class="form-control" value="{{ $childMaxAge }}">
+                                                @error('child_max_age')
+                                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div>
+                                                <label class="form-label" for="infant_min_age">{{ admin_t('سن الرضيع من') }}</label>
+                                                <input id="infant_min_age" type="number" min="0" name="infant_min_age"
+                                                    class="form-control" value="{{ $infantMinAge }}">
+                                                @error('infant_min_age')
+                                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div>
+                                                <label class="form-label" for="infant_max_age">{{ admin_t('سن الرضيع إلى') }}</label>
+                                                <input id="infant_max_age" type="number" min="0" name="infant_max_age"
+                                                    class="form-control" value="{{ $infantMaxAge }}">
+                                                @error('infant_max_age')
+                                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="prices-wrapper" class="stack-list mt-3">
                                         @forelse ($prices as $i => $price)
-                                            <div class="repeat-box price-item">
-                                                <div class="repeat-box-title">
-                                                    <strong>{{ admin_t('سعر رقم :number', ['number' => $i + 1]) }}</strong>
+                                            <div class="repeat-box editor-card price-item">
+                                                <div class="editor-card-head">
+                                                    <div class="editor-card-title editor-inline-input">
+                                                        <span class="editor-card-badge">
+                                                            <i class="ti ti-cash-banknote"></i>
+                                                        </span>
+                                                        <input type="text" name="prices[{{ $i }}][label]"
+                                                            class="form-control" value="{{ $price['label'] ?? '' }}"
+                                                            placeholder="{{ admin_t('عنوان السعر أو الباقة') }}">
+                                                    </div>
                                                     <button type="button"
-                                                        class="btn btn-sm btn-outline-danger js-remove">
-                                                        {{ admin_t('حذف') }}
+                                                        class="btn btn-outline-danger js-remove icon-remove-btn"
+                                                        aria-label="{{ admin_t('حذف') }}">
+                                                        <i class="ti ti-trash"></i>
                                                     </button>
                                                 </div>
-                                                <div class="fields-grid">
-                                                    <div>
-                                                        <label class="form-label">{{ admin_t('العنوان') }}</label>
-                                                        <input type="text" name="prices[{{ $i }}][label]"
-                                                            class="form-control" value="{{ $price['label'] ?? '' }}">
+                                                <div class="editor-card-body">
+                                                    <div class="fields-grid">
+                                                        <div>
+                                                            <label class="form-label">{{ admin_t('الموسم') }}</label>
+                                                            <input type="text" name="prices[{{ $i }}][season_name]"
+                                                                class="form-control"
+                                                                value="{{ $price['season_name'] ?? '' }}"
+                                                                placeholder="{{ admin_t('مثال: موسم الصيف') }}">
+                                                        </div>
+
+                                                        <div>
+                                                            <label class="form-label">{{ admin_t('المبلغ') }}</label>
+                                                            <input type="number" step="0.01"
+                                                                name="prices[{{ $i }}][amount]"
+                                                                class="form-control" value="{{ $price['amount'] ?? '' }}"
+                                                                placeholder="{{ admin_t('المبلغ') }}">
+                                                        </div>
+
+                                                        <div>
+                                                            <label class="form-label">{{ admin_t('العملة') }}</label>
+                                                            <select name="prices[{{ $i }}][currency_id]"
+                                                                class="form-select">
+                                                                <option value="">{{ admin_t('العملة') }}</option>
+                                                                @foreach ($currencies ?? collect() as $currency)
+                                                                    <option value="{{ $currency->id }}"
+                                                                        {{ ($price['currency_id'] ?? old('currency_id')) == $currency->id ? 'selected' : '' }}>
+                                                                        {{ $currency->code }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
                                                     </div>
 
-                                                    <div>
-                                                        <label class="form-label">{{ admin_t('الموسم') }}</label>
-                                                        <input type="text"
-                                                            name="prices[{{ $i }}][season_name]"
-                                                            class="form-control"
-                                                            value="{{ $price['season_name'] ?? '' }}">
+                                                    <div class="fields-grid">
+                                                        <div>
+                                                            <label class="form-label">{{ admin_t('نوع السعر') }}</label>
+                                                            <select name="prices[{{ $i }}][price_type]"
+                                                                class="form-select">
+                                                                <option value="from"
+                                                                    {{ ($price['price_type'] ?? '') === 'from' ? 'selected' : '' }}>
+                                                                    {{ admin_t('يبدأ من') }}</option>
+                                                                <option value="fixed"
+                                                                    {{ ($price['price_type'] ?? '') === 'fixed' ? 'selected' : '' }}>
+                                                                    {{ admin_t('ثابت') }}</option>
+                                                                <option value="seasonal"
+                                                                    {{ ($price['price_type'] ?? '') === 'seasonal' ? 'selected' : '' }}>
+                                                                    {{ admin_t('موسمي') }}</option>
+                                                            </select>
+                                                        </div>
+
+                                                        <div>
+                                                            <label class="form-label">{{ admin_t('نوع الغرفة') }}</label>
+                                                            <input type="text"
+                                                                name="prices[{{ $i }}][room_type]"
+                                                                class="form-control"
+                                                                value="{{ $price['room_type'] ?? '' }}"
+                                                                placeholder="{{ admin_t('مثال: غرفة مزدوجة') }}">
+                                                        </div>
+
+                                                        <div>
+                                                            <label class="form-label">{{ admin_t('من تاريخ') }}</label>
+                                                            <input type="date"
+                                                                name="prices[{{ $i }}][valid_from]"
+                                                                class="form-control"
+                                                                value="{{ $price['valid_from'] ?? '' }}">
+                                                        </div>
                                                     </div>
 
-                                                    <div>
-                                                        <label class="form-label">{{ admin_t('نوع السعر') }}</label>
-                                                        <select name="prices[{{ $i }}][price_type]"
-                                                            class="form-select">
-                                                            <option value="from"
-                                                                {{ ($price['price_type'] ?? '') === 'from' ? 'selected' : '' }}>
-                                                                {{ admin_t('يبدأ من') }}</option>
-                                                            <option value="fixed"
-                                                                {{ ($price['price_type'] ?? '') === 'fixed' ? 'selected' : '' }}>
-                                                                {{ admin_t('ثابت') }}</option>
-                                                            <option value="seasonal"
-                                                                {{ ($price['price_type'] ?? '') === 'seasonal' ? 'selected' : '' }}>
-                                                                {{ admin_t('موسمي') }}</option>
-                                                        </select>
-                                                    </div>
+                                                    <div class="fields-grid two-up">
+                                                        <div>
+                                                            <label class="form-label">{{ admin_t('إلى تاريخ') }}</label>
+                                                            <input type="date"
+                                                                name="prices[{{ $i }}][valid_to]"
+                                                                class="form-control"
+                                                                value="{{ $price['valid_to'] ?? '' }}">
+                                                        </div>
 
-                                                    <div>
-                                                        <label class="form-label">{{ admin_t('نوع الغرفة') }}</label>
-                                                        <input type="text"
-                                                            name="prices[{{ $i }}][room_type]"
-                                                            class="form-control"
-                                                            value="{{ $price['room_type'] ?? '' }}">
-                                                    </div>
-
-                                                    <div>
-                                                        <label class="form-label">{{ admin_t('المبلغ') }}</label>
-                                                        <input type="number" step="0.01"
-                                                            name="prices[{{ $i }}][amount]"
-                                                            class="form-control" value="{{ $price['amount'] ?? '' }}">
-                                                    </div>
-
-                                                    <div>
-                                                        <label class="form-label">{{ admin_t('العملة') }}</label>
-                                                        <select name="prices[{{ $i }}][currency_id]"
-                                                            class="form-select">
-                                                            <option value="">{{ admin_t('اختر العملة') }}</option>
-                                                            @foreach ($currencies ?? collect() as $currency)
-                                                                <option value="{{ $currency->id }}"
-                                                                    {{ ($price['currency_id'] ?? old('currency_id')) == $currency->id ? 'selected' : '' }}>
-                                                                    {{ $currency->code }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-
-                                                    <div>
-                                                        <label class="form-label">{{ admin_t('من تاريخ') }}</label>
-                                                        <input type="date"
-                                                            name="prices[{{ $i }}][valid_from]"
-                                                            class="form-control"
-                                                            value="{{ $price['valid_from'] ?? '' }}">
-                                                    </div>
-
-                                                    <div>
-                                                        <label class="form-label">{{ admin_t('إلى تاريخ') }}</label>
-                                                        <input type="date"
-                                                            name="prices[{{ $i }}][valid_to]"
-                                                            class="form-control" value="{{ $price['valid_to'] ?? '' }}">
-                                                    </div>
-
-                                                    <div class="field-span-3">
-                                                        <label class="form-label">{{ admin_t('ملاحظات') }}</label>
-                                                        <textarea name="prices[{{ $i }}][notes]" rows="3" class="form-control">{{ $price['notes'] ?? '' }}</textarea>
+                                                        <div>
+                                                            <label class="form-label">{{ admin_t('ملاحظات') }}</label>
+                                                            <textarea name="prices[{{ $i }}][notes]" rows="3" class="form-control"
+                                                                placeholder="{{ admin_t('أضف أي توضيح متعلق بهذا السعر') }}">{{ $price['notes'] ?? '' }}</textarea>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1612,19 +2170,11 @@
                                     <div class="section-icon"><i class="ti ti-stars"></i></div>
                                     <div>
                                         <h3>{{ admin_t('مرافق الرحلة') }}</h3>
-                                        <p>{{ admin_t('أضف أبرز المرافق أو استخدم الاقتراحات السريعة.') }}</p>
+                                        <p>{{ admin_t('أضف أبرز المرافق والخدمات المرتبطة بهذه الرحلة.') }}</p>
                                     </div>
                                 </div>
 
                                 <div class="section-body">
-                                    <strong class="d-block mb-3">{{ admin_t('اقتراحات سريعة') }}</strong>
-                                    <div class="facility-suggestions" id="facilitySuggestions">
-                                        @foreach ([admin_t('فندق'), admin_t('وجبات'), admin_t('مواصلات'), admin_t('مرشد سياحي'), admin_t('تذاكر دخول'), admin_t('استقبال وتوديع'), admin_t('تأمين سفر')] as $suggestion)
-                                            <button type="button" class="facility-chip"
-                                                data-facility-suggestion="{{ $suggestion }}">{{ $suggestion }}</button>
-                                        @endforeach
-                                    </div>
-
                                     <div id="facilities-wrapper">
                                         @forelse ($facilities as $i => $facility)
                                             <div class="repeat-box facility-item">
@@ -1764,6 +2314,77 @@
                                                 for="terms_conditions">{{ admin_t('الشروط والأحكام') }}</label>
                                             <textarea id="terms_conditions" name="terms_conditions" rows="5" class="form-control">{{ old('terms_conditions') }}</textarea>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section-card">
+                                <div class="section-header">
+                                    <div class="section-icon"><i class="ti ti-help-hexagon"></i></div>
+                                    <div>
+                                        <h3>{{ admin_t('الأسئلة الشائعة') }}</h3>
+                                        <p>{{ admin_t('أضف أسئلة وإجابات خاصة بهذه الرحلة لتظهر في الموقع.') }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="section-body">
+                                    <div class="dynamic-section-shell is-ltr" dir="ltr" lang="en">
+                                        <div class="dynamic-section-head">
+                                            <span class="dynamic-section-icon"><i class="ti ti-help-hexagon"></i></span>
+                                            <div>
+                                                <h4>FAQs</h4>
+                                                <p>Add questions and answers specific to this trip.</p>
+                                            </div>
+                                        </div>
+
+                                        <div id="faq-wrapper" class="faq-list">
+                                            @forelse ($faqItems as $i => $faq)
+                                                <div class="repeat-box faq-item faq-item-card">
+                                                    <div class="faq-item-grid">
+                                                        <div class="dynamic-order-column">
+                                                            <span class="item-order-badge">{{ str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) }}</span>
+                                                        </div>
+
+                                                        <div class="field-block faq-question-field">
+                                                            <label class="field-block-label">Question</label>
+                                                            <div class="field-shell">
+                                                                <span class="field-shell-icon"><i class="ti ti-help-circle"></i></span>
+                                                                <input type="text" name="faq_json[{{ $i }}][question]"
+                                                                    value="{{ is_array($faq['question'] ?? null) ? ($faq['question'][app()->getLocale()] ?? $faq['question']['en'] ?? '') : ($faq['question'] ?? '') }}"
+                                                                    placeholder="Enter question...">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="field-block faq-answer-field">
+                                                            <label class="field-block-label">Answer</label>
+                                                            <div class="field-shell field-shell-textarea">
+                                                                <span class="field-shell-icon"><i class="ti ti-edit"></i></span>
+                                                                <textarea name="faq_json[{{ $i }}][answer]" rows="4"
+                                                                    placeholder="Enter answer...">{{ is_array($faq['answer'] ?? null) ? ($faq['answer'][app()->getLocale()] ?? $faq['answer']['en'] ?? '') : ($faq['answer'] ?? '') }}</textarea>
+                                                            </div>
+                                                        </div>
+
+                                                        <button type="button"
+                                                            class="btn js-remove hover-delete-btn icon-remove-btn dynamic-remove-control"
+                                                            aria-label="{{ admin_t('حذف') }}">
+                                                            <i class="ti ti-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            @empty
+                                                <div class="empty-state empty-dynamic-state" id="faqEmptyState">
+                                                    <strong>💬</strong>
+                                                    <span>No FAQs added yet.</span>
+                                                </div>
+                                            @endforelse
+                                        </div>
+
+                                        <button type="button" class="btn dynamic-add-btn" id="addFaqBtn">
+                                            <span class="btn-icon-text">
+                                                <i class="ti ti-plus"></i>
+                                                Add New FAQ
+                                            </span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -2118,8 +2739,6 @@
                 5: []
             };
 
-            const facilitySuggestions = document.getElementById('facilitySuggestions');
-
             function notify(message, type = 'success') {
                 if (window.Swal) {
                     Swal.fire({
@@ -2430,7 +3049,29 @@
                     const div = document.createElement('div');
                     div.className = 'empty-state';
                     div.id = emptyId;
-                    div.textContent = emptyText;
+
+                    const dynamicState = {
+                        itineraryEmptyState: {
+                            icon: '🗓️',
+                            text: 'No itinerary added yet.'
+                        },
+                        faqEmptyState: {
+                            icon: '💬',
+                            text: 'No FAQs added yet.'
+                        }
+                    }[emptyId];
+
+                    if (dynamicState) {
+                        const icon = document.createElement('strong');
+                        const message = document.createElement('span');
+                        div.classList.add('empty-dynamic-state');
+                        icon.textContent = dynamicState.icon;
+                        message.textContent = dynamicState.text;
+                        div.append(icon, message);
+                    } else {
+                        div.textContent = emptyText;
+                    }
+
                     wrapper.appendChild(div);
                 }
 
@@ -2440,7 +3081,79 @@
             }
 
             function createRemoveButton() {
-                return `<button type="button" class="btn btn-outline-danger js-remove">${@json(admin_t('حذف'))}</button>`;
+                return `<button type="button" class="btn js-remove hover-delete-btn icon-remove-btn dynamic-remove-control" aria-label="${@json(admin_t('حذف'))}"><i class="ti ti-trash"></i></button>`;
+            }
+
+            function appendAnimatedItem(wrapperId, markup) {
+                const wrapper = document.getElementById(wrapperId);
+                wrapper.querySelector('.empty-state')?.remove();
+                wrapper.insertAdjacentHTML('beforeend', markup);
+                const item = wrapper.lastElementChild;
+                isDirty = true;
+                item.classList.add('is-entering');
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => item.classList.remove('is-entering'));
+                });
+
+                item.querySelector('input, select, textarea')?.focus({
+                    preventScroll: true
+                });
+                return item;
+            }
+
+            function renumberDynamicItems(wrapperId, itemSelector, syncDayNumbers = false) {
+                const wrapper = document.getElementById(wrapperId);
+                if (!wrapper) {
+                    return;
+                }
+
+                Array.from(wrapper.querySelectorAll(itemSelector)).forEach((item, index) => {
+                    const badge = item.querySelector('.item-order-badge');
+                    if (badge) {
+                        badge.textContent = String(index + 1).padStart(2, '0');
+                    }
+
+                    if (syncDayNumbers) {
+                        const dayNumber = item.querySelector('input[name*="[day_number]"]');
+                        if (dayNumber) {
+                            dayNumber.value = index + 1;
+                        }
+                    }
+                });
+            }
+
+            function syncMealInputs(selectElement) {
+                const card = selectElement.closest('.itinerary-item');
+                if (!card) {
+                    return;
+                }
+
+                const breakfast = card.querySelector('input[name*="[meals_breakfast]"]');
+                const lunch = card.querySelector('input[name*="[meals_lunch]"]');
+                const dinner = card.querySelector('input[name*="[meals_dinner]"]');
+                const selected = selectElement.value;
+
+                const state = {
+                    breakfast: '0',
+                    lunch: '0',
+                    dinner: '0',
+                };
+
+                if (selected === 'breakfast') {
+                    state.breakfast = '1';
+                } else if (selected === 'lunch') {
+                    state.lunch = '1';
+                } else if (selected === 'dinner') {
+                    state.dinner = '1';
+                } else if (selected === 'full_board') {
+                    state.breakfast = '1';
+                    state.lunch = '1';
+                    state.dinner = '1';
+                }
+
+                if (breakfast) breakfast.value = state.breakfast;
+                if (lunch) lunch.value = state.lunch;
+                if (dinner) dinner.value = state.dinner;
             }
 
             let facilityIndex = {{ count($facilities) }};
@@ -2448,6 +3161,7 @@
             let includedIndex = {{ count($included) }};
             let excludedIndex = {{ count($excluded) }};
             let priceIndex = {{ count($prices) }};
+            let faqIndex = {{ count($faqItems) }};
 
             function addFacility(title = '') {
                 document.getElementById('facilities-wrapper').insertAdjacentHTML('beforeend', `
@@ -2473,50 +3187,56 @@
             }
 
             function addItinerary() {
-                document.getElementById('itinerary-wrapper').insertAdjacentHTML('beforeend', `
-                    <div class="repeat-box itinerary-item">
-                        <div class="repeat-box-title">
-                            <strong>${replacePlaceholders(texts.dayTitle, { number: itineraryIndex + 1 })}</strong>
-                            ${createRemoveButton()}
-                        </div>
-                        <div class="fields-grid">
-                            <div>
-                                <label class="form-label">${@json(admin_t('نوع البرنامج'))}</label>
-                                <input type="text" name="itinerary[${itineraryIndex}][duration]" class="form-control">
+                appendAnimatedItem('itinerary-wrapper', `
+                    <div class="repeat-box itinerary-item itinerary-item-card">
+                        <div class="itinerary-item-grid">
+                            <div class="dynamic-order-column">
+                                <span class="item-order-badge">${String(itineraryIndex + 1).padStart(2, '0')}</span>
                             </div>
-                            <div>
-                                <label class="form-label">${@json(admin_t('رقم اليوم'))}</label>
-                                <input type="number" name="itinerary[${itineraryIndex}][day_number]" class="form-control" value="${itineraryIndex + 1}">
+                            <div class="field-block itinerary-date-field">
+                                <label class="field-block-label">Date</label>
+                                <div class="field-shell">
+                                    <span class="field-shell-icon"><i class="ti ti-calendar"></i></span>
+                                    <input type="date" name="itinerary[${itineraryIndex}][duration]">
+                                </div>
+                                <input type="hidden" name="itinerary[${itineraryIndex}][day_number]" value="${itineraryIndex + 1}">
                             </div>
-                            <div>
-                                <label class="form-label">${@json(admin_t('عنوان اليوم'))}</label>
-                                <input type="text" name="itinerary[${itineraryIndex}][title]" class="form-control">
-                            </div>
-                            <div class="field-span-2">
-                                <label class="form-label">${@json(admin_t('تفاصيل اليوم'))}</label>
-                                <textarea name="itinerary[${itineraryIndex}][description]" rows="4" class="form-control"></textarea>
-                            </div>
-                            <div>
-                                <label class="form-label">${@json(admin_t('الوجبات'))}</label>
-                                <div class="choice-row">
-                                    <label class="choice-pill">
-                                        <input type="checkbox" name="itinerary[${itineraryIndex}][meals_breakfast]" value="1">
-                                        <span>${@json(admin_t('فطار'))}</span>
-                                    </label>
-                                    <label class="choice-pill">
-                                        <input type="checkbox" name="itinerary[${itineraryIndex}][meals_lunch]" value="1">
-                                        <span>${@json(admin_t('غداء'))}</span>
-                                    </label>
-                                    <label class="choice-pill">
-                                        <input type="checkbox" name="itinerary[${itineraryIndex}][meals_dinner]" value="1">
-                                        <span>${@json(admin_t('عشاء'))}</span>
-                                    </label>
+                            <div class="field-block itinerary-place-field">
+                                <label class="field-block-label">Place / Stop</label>
+                                <div class="field-shell">
+                                    <span class="field-shell-icon"><i class="ti ti-map-pin"></i></span>
+                                    <input type="text" name="itinerary[${itineraryIndex}][title]" placeholder="Enter place or stop">
                                 </div>
                             </div>
+                            <div class="field-block itinerary-meals-field">
+                                <label class="field-block-label">Meals</label>
+                                <div class="field-shell">
+                                    <span class="field-shell-icon"><i class="ti ti-tools-kitchen-2"></i></span>
+                                    <select data-meal-select>
+                                        <option value="none">No meals</option>
+                                        <option value="breakfast">Breakfast</option>
+                                        <option value="lunch">Lunch</option>
+                                        <option value="dinner">Dinner</option>
+                                        <option value="full_board">Full board</option>
+                                    </select>
+                                </div>
+                                <input type="hidden" name="itinerary[${itineraryIndex}][meals_breakfast]" value="0">
+                                <input type="hidden" name="itinerary[${itineraryIndex}][meals_lunch]" value="0">
+                                <input type="hidden" name="itinerary[${itineraryIndex}][meals_dinner]" value="0">
+                            </div>
+                            <div class="field-block itinerary-activities-field">
+                                <label class="field-block-label">Activities</label>
+                                <div class="field-shell field-shell-textarea">
+                                    <span class="field-shell-icon"><i class="ti ti-route"></i></span>
+                                    <textarea name="itinerary[${itineraryIndex}][description]" rows="4" placeholder="Enter activities"></textarea>
+                                </div>
+                            </div>
+                            ${createRemoveButton()}
                         </div>
                     </div>
                 `);
                 itineraryIndex++;
+                renumberDynamicItems('itinerary-wrapper', '.itinerary-item', true);
                 ensureEmptyState('#itinerary-wrapper', '.itinerary-item', 'itineraryEmptyState', texts.noItinerary);
             }
 
@@ -2537,62 +3257,99 @@
 
             function addPrice() {
                 document.getElementById('prices-wrapper').insertAdjacentHTML('beforeend', `
-                    <div class="repeat-box price-item">
-                        <div class="repeat-box-title">
-                            <strong>${@json(admin_t('سعر جديد'))}</strong>
+                    <div class="repeat-box editor-card price-item">
+                        <div class="editor-card-head">
+                            <div class="editor-card-title editor-inline-input">
+                                <span class="editor-card-badge">
+                                    <i class="ti ti-cash-banknote"></i>
+                                </span>
+                                <input type="text" name="prices[${priceIndex}][label]" class="form-control" placeholder="${@json(admin_t('عنوان السعر أو الباقة'))}">
+                            </div>
                             ${createRemoveButton()}
                         </div>
-                        <div class="fields-grid">
-                            <div>
-                                <label class="form-label">${@json(admin_t('العنوان'))}</label>
-                                <input type="text" name="prices[${priceIndex}][label]" class="form-control">
+                        <div class="editor-card-body">
+                            <div class="fields-grid">
+                                <div>
+                                    <label class="form-label">${@json(admin_t('الموسم'))}</label>
+                                    <input type="text" name="prices[${priceIndex}][season_name]" class="form-control" placeholder="${@json(admin_t('مثال: موسم الصيف'))}">
+                                </div>
+                                <div>
+                                    <label class="form-label">${@json(admin_t('المبلغ'))}</label>
+                                    <input type="number" step="0.01" name="prices[${priceIndex}][amount]" class="form-control" placeholder="${@json(admin_t('المبلغ'))}">
+                                </div>
+                                <div>
+                                    <label class="form-label">${@json(admin_t('العملة'))}</label>
+                                    <select name="prices[${priceIndex}][currency_id]" class="form-select">
+                                        <option value="">${@json(admin_t('العملة'))}</option>
+                                        @foreach ($currencies ?? collect() as $currency)
+                                            <option value="{{ $currency->id }}">{{ $currency->code }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
-                            <div>
-                                <label class="form-label">${@json(admin_t('الموسم'))}</label>
-                                <input type="text" name="prices[${priceIndex}][season_name]" class="form-control">
+                            <div class="fields-grid">
+                                <div>
+                                    <label class="form-label">${@json(admin_t('نوع السعر'))}</label>
+                                    <select name="prices[${priceIndex}][price_type]" class="form-select">
+                                        <option value="from">${@json(admin_t('يبدأ من'))}</option>
+                                        <option value="fixed">${@json(admin_t('ثابت'))}</option>
+                                        <option value="seasonal">${@json(admin_t('موسمي'))}</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label">${@json(admin_t('نوع الغرفة'))}</label>
+                                    <input type="text" name="prices[${priceIndex}][room_type]" class="form-control" placeholder="${@json(admin_t('مثال: غرفة مزدوجة'))}">
+                                </div>
+                                <div>
+                                    <label class="form-label">${@json(admin_t('من تاريخ'))}</label>
+                                    <input type="date" name="prices[${priceIndex}][valid_from]" class="form-control">
+                                </div>
                             </div>
-                            <div>
-                                <label class="form-label">${@json(admin_t('نوع السعر'))}</label>
-                                <select name="prices[${priceIndex}][price_type]" class="form-select">
-                                    <option value="from">${@json(admin_t('يبدأ من'))}</option>
-                                    <option value="fixed">${@json(admin_t('ثابت'))}</option>
-                                    <option value="seasonal">${@json(admin_t('موسمي'))}</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="form-label">${@json(admin_t('نوع الغرفة'))}</label>
-                                <input type="text" name="prices[${priceIndex}][room_type]" class="form-control">
-                            </div>
-                            <div>
-                                <label class="form-label">${@json(admin_t('المبلغ'))}</label>
-                                <input type="number" step="0.01" name="prices[${priceIndex}][amount]" class="form-control">
-                            </div>
-                            <div>
-                                <label class="form-label">${@json(admin_t('العملة'))}</label>
-                                <select name="prices[${priceIndex}][currency_id]" class="form-select">
-                                    <option value="">${@json(admin_t('اختر العملة'))}</option>
-                                    @foreach ($currencies ?? collect() as $currency)
-                                        <option value="{{ $currency->id }}">{{ $currency->code }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <label class="form-label">${@json(admin_t('من تاريخ'))}</label>
-                                <input type="date" name="prices[${priceIndex}][valid_from]" class="form-control">
-                            </div>
-                            <div>
-                                <label class="form-label">${@json(admin_t('إلى تاريخ'))}</label>
-                                <input type="date" name="prices[${priceIndex}][valid_to]" class="form-control">
-                            </div>
-                            <div class="field-span-3">
-                                <label class="form-label">${@json(admin_t('ملاحظات'))}</label>
-                                <textarea name="prices[${priceIndex}][notes]" rows="3" class="form-control"></textarea>
+                            <div class="fields-grid two-up">
+                                <div>
+                                    <label class="form-label">${@json(admin_t('إلى تاريخ'))}</label>
+                                    <input type="date" name="prices[${priceIndex}][valid_to]" class="form-control">
+                                </div>
+                                <div>
+                                    <label class="form-label">${@json(admin_t('ملاحظات'))}</label>
+                                    <textarea name="prices[${priceIndex}][notes]" rows="3" class="form-control" placeholder="${@json(admin_t('أضف أي توضيح متعلق بهذا السعر'))}"></textarea>
+                                </div>
                             </div>
                         </div>
                     </div>
                 `);
                 priceIndex++;
                 ensureEmptyState('#prices-wrapper', '.price-item', 'pricesEmptyState', texts.noPrices);
+            }
+
+            function addFaq() {
+                appendAnimatedItem('faq-wrapper', `
+                    <div class="repeat-box faq-item faq-item-card">
+                        <div class="faq-item-grid">
+                            <div class="dynamic-order-column">
+                                <span class="item-order-badge">${String(faqIndex + 1).padStart(2, '0')}</span>
+                            </div>
+                            <div class="field-block faq-question-field">
+                                <label class="field-block-label">Question</label>
+                                <div class="field-shell">
+                                    <span class="field-shell-icon"><i class="ti ti-help-circle"></i></span>
+                                    <input type="text" name="faq_json[${faqIndex}][question]" placeholder="Enter question...">
+                                </div>
+                            </div>
+                            <div class="field-block faq-answer-field">
+                                <label class="field-block-label">Answer</label>
+                                <div class="field-shell field-shell-textarea">
+                                    <span class="field-shell-icon"><i class="ti ti-edit"></i></span>
+                                    <textarea name="faq_json[${faqIndex}][answer]" rows="4" placeholder="Enter answer..."></textarea>
+                                </div>
+                            </div>
+                            ${createRemoveButton()}
+                        </div>
+                    </div>
+                `);
+                faqIndex++;
+                renumberDynamicItems('faq-wrapper', '.faq-item');
+                ensureEmptyState('#faq-wrapper', '.faq-item', 'faqEmptyState', @json(admin_t('لا توجد أسئلة شائعة مضافة حتى الآن.')));
             }
 
             function updateSummary() {
@@ -2615,7 +3372,7 @@
                     destination: destinationOption && destinationOption.value ? destinationOption.textContent
                         .trim() : texts.noData,
                     duration: durationText || texts.noData,
-                    price: document.getElementById('start_from_price').value || texts.noData,
+                    price: document.getElementById('adult_price').value || texts.noData,
                     category: categoryOption && categoryOption.value ? categoryOption.textContent.trim() : texts
                         .noData,
                     status: form.querySelector('input[name="is_active"]').checked ? texts.active : texts
@@ -2637,6 +3394,7 @@
             updateDurationFields();
             renderGalleryPreview();
             renderFeaturedPreview();
+            form.querySelectorAll('[data-meal-select]').forEach(syncMealInputs);
             document.querySelectorAll('[data-counter-max]').forEach(updateCounter);
             showStep(currentStep);
             ensureEmptyState('#itinerary-wrapper', '.itinerary-item', 'itineraryEmptyState', texts.noItinerary);
@@ -2644,6 +3402,9 @@
             ensureEmptyState('#included-wrapper', '.included-item', 'includedEmptyState', texts.noIncluded);
             ensureEmptyState('#excluded-wrapper', '.excluded-item', 'excludedEmptyState', texts.noExcluded);
             ensureEmptyState('#prices-wrapper', '.price-item', 'pricesEmptyState', texts.noPrices);
+            ensureEmptyState('#faq-wrapper', '.faq-item', 'faqEmptyState', @json(admin_t('لا توجد أسئلة شائعة مضافة حتى الآن.')));
+            renumberDynamicItems('itinerary-wrapper', '.itinerary-item', true);
+            renumberDynamicItems('faq-wrapper', '.faq-item');
 
             document.querySelectorAll('[data-counter-max]').forEach(input => {
                 input.addEventListener('input', () => updateCounter(input));
@@ -2695,8 +3456,11 @@
                 updateSummary();
             });
 
-            form.addEventListener('change', function() {
+            form.addEventListener('change', function(event) {
                 isDirty = true;
+                if (event.target.matches('[data-meal-select]')) {
+                    syncMealInputs(event.target);
+                }
                 updateSummary();
             });
 
@@ -2740,14 +3504,7 @@
             document.getElementById('addIncludedBtn').addEventListener('click', () => addInclusion('included'));
             document.getElementById('addExcludedBtn').addEventListener('click', () => addInclusion('excluded'));
             document.getElementById('addPriceBtn').addEventListener('click', addPrice);
-
-            facilitySuggestions?.addEventListener('click', function(event) {
-                const chip = event.target.closest('[data-facility-suggestion]');
-                if (!chip) {
-                    return;
-                }
-                addFacility(chip.dataset.facilitySuggestion || '');
-            });
+            document.getElementById('addFaqBtn').addEventListener('click', addFaq);
 
             document.addEventListener('click', function(event) {
                 const removeButton = event.target.closest('.js-remove');
@@ -2757,19 +3514,34 @@
 
                 const box = removeButton.closest('.repeat-box');
                 if (box) {
-                    box.remove();
-                }
+                    isDirty = true;
+                    box.style.height = `${box.offsetHeight}px`;
+                    requestAnimationFrame(() => {
+                        box.classList.add('is-removing');
+                        box.style.height = '0px';
+                    });
 
-                ensureEmptyState('#itinerary-wrapper', '.itinerary-item', 'itineraryEmptyState', texts
-                    .noItinerary);
-                ensureEmptyState('#facilities-wrapper', '.facility-item', 'facilitiesEmptyState', texts
-                    .noFacilities);
-                ensureEmptyState('#included-wrapper', '.included-item', 'includedEmptyState', texts
-                    .noIncluded);
-                ensureEmptyState('#excluded-wrapper', '.excluded-item', 'excludedEmptyState', texts
-                    .noExcluded);
-                ensureEmptyState('#prices-wrapper', '.price-item', 'pricesEmptyState', texts.noPrices);
-                updateSummary();
+                    setTimeout(() => {
+                        box.remove();
+
+                        renumberDynamicItems('itinerary-wrapper', '.itinerary-item', true);
+                        renumberDynamicItems('faq-wrapper', '.faq-item');
+
+                        ensureEmptyState('#itinerary-wrapper', '.itinerary-item', 'itineraryEmptyState', texts
+                            .noItinerary);
+                        ensureEmptyState('#facilities-wrapper', '.facility-item', 'facilitiesEmptyState', texts
+                            .noFacilities);
+                        ensureEmptyState('#included-wrapper', '.included-item', 'includedEmptyState', texts
+                            .noIncluded);
+                        ensureEmptyState('#excluded-wrapper', '.excluded-item', 'excludedEmptyState', texts
+                            .noExcluded);
+                        ensureEmptyState('#prices-wrapper', '.price-item', 'pricesEmptyState', texts.noPrices);
+                        ensureEmptyState('#faq-wrapper', '.faq-item', 'faqEmptyState', @json(admin_t('لا توجد أسئلة شائعة مضافة حتى الآن.')));
+                        updateSummary();
+                    }, 260);
+
+                    return;
+                }
             });
 
             document.querySelectorAll('[data-jump-step]').forEach(button => {

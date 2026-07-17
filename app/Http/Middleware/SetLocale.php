@@ -17,18 +17,19 @@ class SetLocale
     {
         $defaultLocale = config('app.locale', 'en');
         $isAdminRequest = $request->is('admin') || $request->is('admin/*');
-        $requestedLocale = strtolower(trim((string) $request->query('lang', '')));
 
-        if ($isAdminRequest && in_array($requestedLocale, ['ar', 'en'], true)) {
-            $locale = $requestedLocale;
-            $request->session()->put('admin_locale', $locale);
-            $request->session()->put('locale', $locale);
-        } elseif ($isAdminRequest && $request->session()->has('admin_locale')) {
-            $locale = (string) $request->session()->get('admin_locale');
-        } elseif ($request->session()->has('locale')) {
+        if ($isAdminRequest) {
+            $request->session()->put('admin_locale', 'en');
+            app()->setLocale('en');
+            $this->jsonTranslationFileService->ensureLocaleFile('en');
+
+            return $next($request);
+        }
+
+        if ($request->session()->has('locale')) {
             $locale = (string) $request->session()->get('locale');
         } else {
-            $locale = $isAdminRequest ? 'ar' : $defaultLocale;
+            $locale = $defaultLocale;
         }
 
         $locale = strtolower(trim($locale));
@@ -42,19 +43,7 @@ class SetLocale
             $supportedLocales
         )));
 
-        if ($isAdminRequest) {
-            $supportedLocales = array_values(array_intersect($supportedLocales, ['ar', 'en']));
-
-            if (empty($supportedLocales)) {
-                $supportedLocales = ['ar', 'en'];
-            }
-
-            if (!in_array($locale, $supportedLocales, true)) {
-                $locale = 'ar';
-            }
-
-            $request->session()->put('admin_locale', $locale);
-        } elseif (!in_array($locale, $supportedLocales, true)) {
+        if (!in_array($locale, $supportedLocales, true)) {
             $locale = strtolower((string) config('app.fallback_locale', 'en'));
         }
 

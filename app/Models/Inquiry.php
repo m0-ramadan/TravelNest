@@ -24,6 +24,7 @@ class Inquiry extends Model
         'budget',
         'adults',
         'children',
+        'infants',
         'source',
         'message',
         'status',
@@ -98,7 +99,9 @@ class Inquiry extends Model
 
     protected function travellersCount(): Attribute
     {
-        return Attribute::get(fn () => (int) ($this->adults ?? 0) + (int) ($this->children ?? 0));
+        return Attribute::get(
+            fn () => (int) ($this->adults ?? 0) + (int) ($this->children ?? 0) + (int) ($this->infants ?? 0)
+        );
     }
 
     protected function subject(): Attribute

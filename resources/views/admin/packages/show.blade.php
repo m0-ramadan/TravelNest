@@ -443,9 +443,29 @@
                 <div class="row">
                     <div class="col-md-3">
                         <div class="info-box">
-                            <div class="info-label">السعر يبدأ من</div>
+                            <div class="info-label">سعر البالغ</div>
                             <div class="info-value">
-                                {{ number_format($package->start_from_price ?? ($package->base_price ?? 0), 2) }}
+                                {{ number_format((float) ($package->adult_price ?? 0), 2) }}
+                                {{ optional($package->currency)->code }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <div class="info-label">سعر الطفل</div>
+                            <div class="info-value">
+                                {{ number_format((float) ($package->child_price ?? 0), 2) }}
+                                {{ optional($package->currency)->code }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <div class="info-label">سعر الرضيع</div>
+                            <div class="info-value">
+                                {{ number_format((float) ($package->infant_price ?? 0), 2) }}
                                 {{ optional($package->currency)->code }}
                             </div>
                         </div>
@@ -456,6 +476,20 @@
                             <div class="info-label">سعر المقارنة</div>
                             <div class="info-value">
                                 {{ $package->compare_price ? number_format($package->compare_price, 2) : '-' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <div class="info-label">النطاق السعري المعروض</div>
+                            <div class="info-value">
+                                {{ number_format((float) ($package->price_from ?? 0), 2) }}
+                                {{ optional($package->currency)->code }} -
+                                {{ number_format((float) ($package->price_to ?? 0), 2) }}
+                                {{ optional($package->currency)->code }}
                             </div>
                         </div>
                     </div>
@@ -508,6 +542,34 @@
 
                 {{-- السياسات --}}
                 <div class="section-title">السياسات والشروط</div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="info-box">
+                            <div class="info-label">{{ __('trips.age_policy') }}</div>
+                            <div class="info-value">
+                                البالغون: {{ (int) ($package->adult_min_age ?? 12) }}+<br>
+                                الأطفال: {{ (int) ($package->child_min_age ?? 2) }} - {{ (int) ($package->child_max_age ?? 11) }}<br>
+                                الرضع: {{ (int) ($package->infant_min_age ?? 0) }} - {{ (int) ($package->infant_max_age ?? 1) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (!empty($package->faq_json) && is_array($package->faq_json))
+                    <div class="section-title">الأسئلة الشائعة</div>
+
+                    @foreach ($package->faq_json as $faq)
+                        <div class="info-box">
+                            <div class="info-label">
+                                {{ is_array($faq['question'] ?? null) ? ($faq['question'][app()->getLocale()] ?? $faq['question']['en'] ?? '-') : ($faq['question'] ?? '-') }}
+                            </div>
+                            <div class="info-value">
+                                {{ is_array($faq['answer'] ?? null) ? ($faq['answer'][app()->getLocale()] ?? $faq['answer']['en'] ?? '-') : ($faq['answer'] ?? '-') }}
+                            </div>
+                        </div>
+                    @endforeach
+                @endif
 
                 <div class="row">
                     <div class="col-md-6">

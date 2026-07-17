@@ -121,21 +121,30 @@ abstract class BaseWebsiteController extends Controller
 
     protected function packagePrice(Package $package): string
     {
-        $amount = $package->start_from_price ?? $package->base_price ?? null;
+        $priceFrom = $package->price_from ?? $package->start_from_price ?? $package->base_price ?? null;
+        $priceTo = $package->price_to ?? null;
 
-        if ($amount === null) {
+        if ($priceFrom === null) {
             $firstPrice = $package->relationLoaded('prices') ? $package->prices->first() : null;
-            $amount = $firstPrice?->amount;
+            $priceFrom = $firstPrice?->amount;
+            $priceTo = $firstPrice?->amount;
         }
 
-        if ($amount === null) {
+        if ($priceFrom === null) {
             return __('Ask for price');
         }
 
         $currency = $package->relationLoaded('currency') ? $package->currency : null;
         $symbol = $currency?->symbol ?: Currency::query()->where('is_default', true)->value('symbol') ?: '$';
 
-        return __('From') . ' ' . $symbol . number_format((float) $amount, 0);
+        $priceFrom = (float) $priceFrom;
+        $priceTo = (float) ($priceTo ?? $priceFrom);
+
+        if ($priceTo > $priceFrom && $priceFrom > 0) {
+            return __('From') . ' ' . $symbol . number_format($priceFrom, 0) . ' ' . __('to') . ' ' . $symbol . number_format($priceTo, 0);
+        }
+
+        return __('From') . ' ' . $symbol . number_format(max($priceFrom, $priceTo), 0);
     }
 
     protected function packageDuration(Package $package): string

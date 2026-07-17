@@ -845,11 +845,25 @@
 
 @section('content')
     @php
-        $priceText =
-            $package->start_from_price !== null
-                ? ($package->currency_symbol ?? '$') .
-                    rtrim(rtrim(number_format((float) $package->start_from_price, 2), '0'), '.')
-                : null;
+        $currencySymbol = $package->currency?->symbol ?? '$';
+        $priceFrom = (float) ($package->price_from ?? $package->start_from_price ?? 0);
+        $priceTo = (float) ($package->price_to ?? 0);
+        $priceText = null;
+
+        if ($priceFrom > 0 || $priceTo > 0) {
+            if ($priceTo > $priceFrom && $priceFrom > 0) {
+                $priceText = __('trips.from_to_price', [
+                    'currency' => $currencySymbol,
+                    'from' => number_format($priceFrom, 2),
+                    'to' => number_format($priceTo, 2),
+                ]);
+            } else {
+                $priceText = __('trips.from_price', [
+                    'currency' => $currencySymbol,
+                    'amount' => number_format(max($priceFrom, $priceTo), 2),
+                ]);
+            }
+        }
     @endphp
 
     <section class="breadcrumb-top-bar">
@@ -1322,9 +1336,7 @@
                         <div class="sidebar-header">
                             <h3 class="sidebar-title">{{ __('Reserve Your Journey') }}</h3>
                             @if ($priceText)
-                                <div class="sidebar-price"><span
-                                        style="font-size:15px">{{ __('From') }}</span><br><span
-                                        class="item">{{ $priceText }}</span></div>
+                                <div class="sidebar-price"><span class="item">{{ $priceText }}</span></div>
                             @else
                                 <div class="sidebar-price"><span class="item">{{ __('Ask for Price') }}</span></div>
                             @endif

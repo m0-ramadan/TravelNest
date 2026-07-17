@@ -24,28 +24,6 @@
          <!-- /Search -->
 
          <ul class="navbar-nav flex-row align-items-center ms-auto">
-             <li class="nav-item dropdown-language dropdown me-3 me-xl-2">
-                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown"
-                     aria-label="{{ admin_t('اللغة') }}">
-                     <i class="ti ti-language ti-md"></i>
-                 </a>
-                 <ul class="dropdown-menu dropdown-menu-end">
-                     <li>
-                         <a class="dropdown-item {{ app()->getLocale() === 'en' ? 'active' : '' }}"
-                             href="{{ url()->current() }}?{{ http_build_query(array_merge(request()->query(), ['lang' => 'en'])) }}">
-                             <span class="align-middle">English</span>
-                         </a>
-                     </li>
-                     <li>
-                         <a class="dropdown-item {{ app()->getLocale() === 'ar' ? 'active' : '' }}"
-                             href="{{ url()->current() }}?{{ http_build_query(array_merge(request()->query(), ['lang' => 'ar'])) }}">
-                             <span class="align-middle">العربية</span>
-                         </a>
-                     </li>
-                 </ul>
-             </li>
-
-
              <!-- Quick links  -->
 
              <!-- Quick links -->

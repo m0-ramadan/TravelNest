@@ -1,13 +1,6 @@
 @php
-    $requestedAdminLocale = request()->query('lang');
-    if (in_array($requestedAdminLocale, ['ar', 'en'], true)) {
-        session(['admin_locale' => $requestedAdminLocale]);
-    }
-
-    $resolvedAdminLocale = session('admin_locale', app()->getLocale());
-    if (!in_array($resolvedAdminLocale, ['ar', 'en'], true)) {
-        $resolvedAdminLocale = 'ar';
-    }
+    $resolvedAdminLocale = 'en';
+    session(['admin_locale' => $resolvedAdminLocale]);
     app()->setLocale($resolvedAdminLocale);
 
     if (!function_exists('admin_translation_maps')) {

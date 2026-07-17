@@ -14,12 +14,23 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class PackageController extends Controller
 {
     use HandlesTranslatedFields;
+
+    private const PACKAGE_TYPES = [
+        'travel_package',
+        'nile_cruise',
+        'day_tour',
+        'shore_excursion',
+        'deal',
+        'multi_country',
+        'custom',
+    ];
 
     protected array $translatedFields = [
         'title',
@@ -160,7 +171,7 @@ class PackageController extends Controller
             'destination_id' => ['nullable', 'integer'],
             'primary_country_id' => ['nullable', 'integer'],
             'currency_id' => ['nullable', 'integer'],
-            'package_type' => ['nullable', 'string'],
+            'package_type' => ['nullable', 'string', 'in:' . implode(',', self::PACKAGE_TYPES)],
             'tour_type' => ['nullable', 'string'],
             'difficulty_level' => ['nullable', 'string'],
             'booking_mode' => ['nullable', 'string'],
@@ -271,7 +282,11 @@ class PackageController extends Controller
             $copy->save();
 
             foreach ($package->facilities as $facility) {
-                $copy->facilities()->create($facility->only(['title', 'sort_order']));
+                $copy->facilities()->create([
+                    'title' => $facility->title,
+                    'description' => $facility->description ?? '',
+                    'sort_order' => $facility->sort_order,
+                ]);
             }
 
             foreach ($package->itineraries as $day) {
@@ -363,11 +378,11 @@ class PackageController extends Controller
 
     private function validatePackage(Request $request): array
     {
-        return $request->validate([
+        $validator = Validator::make($request->all(), [
             'category_id' => ['nullable', 'integer'],
             'destination_id' => ['nullable', 'integer'],
             'primary_country_id' => ['nullable', 'integer'],
-            'package_type' => ['nullable', 'string'],
+            'package_type' => ['nullable', 'string', 'in:' . implode(',', self::PACKAGE_TYPES)],
             'slug' => ['nullable', 'string'],
             'title' => ['nullable', 'string'],
             'subtitle' => ['nullable', 'string'],
@@ -382,6 +397,14 @@ class PackageController extends Controller
 
             'start_from_price' => ['nullable', 'numeric'],
             'compare_price' => ['nullable', 'numeric'],
+            'adult_price' => ['required', 'numeric', 'min:0'],
+            'child_price' => ['nullable', 'numeric', 'min:0'],
+            'infant_price' => ['nullable', 'numeric', 'min:0'],
+            'adult_min_age' => ['required', 'integer', 'min:0'],
+            'child_min_age' => ['required', 'integer', 'min:0'],
+            'child_max_age' => ['required', 'integer', 'gte:child_min_age'],
+            'infant_min_age' => ['required', 'integer', 'min:0'],
+            'infant_max_age' => ['required', 'integer', 'gte:infant_min_age'],
             'currency_id' => ['nullable', 'integer'],
 
             'schedule_text' => ['nullable', 'string'],
@@ -452,7 +475,33 @@ class PackageController extends Controller
             'prices.*.valid_from' => ['nullable', 'date'],
             'prices.*.valid_to' => ['nullable', 'date'],
             'prices.*.notes' => ['nullable', 'string'],
+
+            'faq_json' => ['nullable', 'array'],
+            'faq_json.*.question' => ['nullable', 'string'],
+            'faq_json.*.answer' => ['nullable', 'string'],
         ]);
+
+        $validator->after(function ($validator) use ($request) {
+            $adultMinAge = (int) $request->input('adult_min_age', 12);
+            $childMinAge = (int) $request->input('child_min_age', 2);
+            $childMaxAge = (int) $request->input('child_max_age', 11);
+            $infantMinAge = (int) $request->input('infant_min_age', 0);
+            $infantMaxAge = (int) $request->input('infant_max_age', 1);
+
+            if ($infantMaxAge >= $childMinAge) {
+                $validator->errors()->add('infant_max_age', 'يجب أن تنتهي فئة الرضع قبل بداية فئة الأطفال.');
+            }
+
+            if ($childMaxAge >= $adultMinAge) {
+                $validator->errors()->add('child_max_age', 'يجب أن تنتهي فئة الأطفال قبل بداية فئة البالغين.');
+            }
+
+            if ($adultMinAge <= $infantMaxAge) {
+                $validator->errors()->add('adult_min_age', 'حد البالغين يجب أن يكون أكبر من الحد الأعلى للرضع.');
+            }
+        });
+
+        return $validator->validate();
     }
 
     private function preparePackageData(Request $request, array $validated, ?Package $package = null): array
@@ -465,6 +514,7 @@ class PackageController extends Controller
             'included',
             'excluded',
             'prices',
+            'faq_json',
         ])->toArray();
 
         $selectedCity = !empty($data['destination_id'])
@@ -475,12 +525,14 @@ class PackageController extends Controller
             : null;
 
         $data['destination_id'] = $selectedAttraction?->id;
+        $data['package_type'] = $this->normalizePackageType($data['package_type'] ?? null);
 
         if (empty($data['primary_country_id']) && !empty($selectedCity?->country_id)) {
             $data['primary_country_id'] = $selectedCity->country_id;
         }
 
         $data = $this->translateModelFields($data, $this->translatedFields);
+        $data['faq_json'] = $this->normalizeFaqItems((array) $request->input('faq_json', []));
 
         $data['slug'] = !empty($data['slug'])
             ? Str::slug($data['slug'])
@@ -490,6 +542,11 @@ class PackageController extends Controller
         $data['is_featured'] = $request->boolean('is_featured');
         $data['is_best_seller'] = $request->boolean('is_best_seller');
         $data['is_ultra_luxury'] = $request->boolean('is_ultra_luxury');
+
+        [$priceFrom, $priceTo] = $this->resolveCategoryPriceBounds($data);
+        $data['price_from'] = $priceFrom;
+        $data['price_to'] = $priceTo;
+        $data['start_from_price'] = $priceFrom;
 
         if ($request->hasFile('featured_image')) {
             $data['featured_image'] = $this->uploadFile($request->file('featured_image'), 'packages');
@@ -504,6 +561,64 @@ class PackageController extends Controller
         }
 
         return $data;
+    }
+
+    private function normalizePackageType(?string $packageType): string
+    {
+        $packageType = strtolower(trim((string) $packageType));
+
+        return match ($packageType) {
+            'tailor_made' => 'custom',
+            'travel-package' => 'travel_package',
+            'nile-cruise' => 'nile_cruise',
+            'day-tour' => 'day_tour',
+            'shore-excursion' => 'shore_excursion',
+            'multi-country' => 'multi_country',
+            '' => 'travel_package',
+            default => in_array($packageType, self::PACKAGE_TYPES, true) ? $packageType : 'travel_package',
+        };
+    }
+
+    private function normalizeFaqItems(array $items): array
+    {
+        $normalized = [];
+
+        foreach ($items as $item) {
+            $question = trim((string) ($item['question'] ?? ''));
+            $answer = trim((string) ($item['answer'] ?? ''));
+
+            if ($question === '' && $answer === '') {
+                continue;
+            }
+
+            $translated = $this->translateModelFields([
+                'question' => $question,
+                'answer' => $answer,
+            ], ['question', 'answer']);
+
+            $normalized[] = [
+                'question' => $translated['question'] ?? ['en' => $question, 'ar' => $question],
+                'answer' => $translated['answer'] ?? ['en' => $answer, 'ar' => $answer],
+            ];
+        }
+
+        return $normalized;
+    }
+
+    private function resolveCategoryPriceBounds(array $data): array
+    {
+        $prices = collect([
+            $data['adult_price'] ?? null,
+            $data['child_price'] ?? null,
+            $data['infant_price'] ?? null,
+        ])->filter(fn ($price) => $price !== null && $price !== '');
+
+        $paidPrices = $prices->filter(fn ($price) => (float) $price > 0);
+
+        $priceFrom = (float) ($paidPrices->min() ?? 0);
+        $priceTo = (float) ($prices->max() ?? 0);
+
+        return [$priceFrom, $priceTo];
     }
 
     private function prepareAiPackageData(array $data): array
@@ -584,6 +699,7 @@ class PackageController extends Controller
 
             $package->facilities()->create([
                 'title' => $facility['title'],
+                'description' => '',
                 'sort_order' => $facility['sort_order'] ?? $index,
             ]);
         }
@@ -673,6 +789,7 @@ class PackageController extends Controller
 
             $package->facilities()->create([
                 'title' => $title,
+                'description' => '',
                 'sort_order' => $index,
             ]);
         }
