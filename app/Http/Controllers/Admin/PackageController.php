@@ -89,6 +89,9 @@ class PackageController extends Controller
 
             $package = Package::create($packageData);
 
+            if ($request->has('facilities')) {
+                $this->syncFacilities($package, $request);
+            }
             $this->syncPackageAttractions($package, $request);
             $this->syncItineraries($package, $request);
             $this->syncInclusions($package, $request);
@@ -144,6 +147,9 @@ class PackageController extends Controller
 
             $package->update($packageData);
 
+            if ($request->has('facilities')) {
+                $this->syncFacilities($package, $request);
+            }
             $this->syncPackageAttractions($package, $request);
             $this->syncItineraries($package, $request);
             $this->syncInclusions($package, $request);
@@ -328,7 +334,14 @@ class PackageController extends Controller
             }
 
             foreach ($package->inclusions as $item) {
-                $copy->inclusions()->create($item->only(['title', 'type', 'sort_order']));
+                $copy->inclusions()->create($item->only([
+                    'title',
+                    'content',
+                    'description',
+                    'type',
+                    'item_type',
+                    'sort_order',
+                ]));
             }
 
             foreach ($package->prices as $price) {
@@ -820,25 +833,33 @@ class PackageController extends Controller
         $package->inclusions()->delete();
 
         foreach ((array) $request->input('included', []) as $index => $item) {
-            if (empty($item['title'])) {
+            $title = trim((string) ($item['title'] ?? ''));
+
+            if ($title === '') {
                 continue;
             }
 
             $package->inclusions()->create([
-                'title' => $item['title'],
+                'title' => $title,
+                'content' => $title,
                 'type' => 'included',
+                'item_type' => 'included',
                 'sort_order' => $index,
             ]);
         }
 
         foreach ((array) $request->input('excluded', []) as $index => $item) {
-            if (empty($item['title'])) {
+            $title = trim((string) ($item['title'] ?? ''));
+
+            if ($title === '') {
                 continue;
             }
 
             $package->inclusions()->create([
-                'title' => $item['title'],
+                'title' => $title,
+                'content' => $title,
                 'type' => 'excluded',
+                'item_type' => 'excluded',
                 'sort_order' => $index,
             ]);
         }
@@ -919,7 +940,9 @@ class PackageController extends Controller
 
             $package->inclusions()->create([
                 'title' => $title,
+                'content' => $title,
                 'type' => $type,
+                'item_type' => $type,
                 'sort_order' => $index,
             ]);
         }

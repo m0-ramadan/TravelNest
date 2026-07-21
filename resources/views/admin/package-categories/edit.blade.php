@@ -61,6 +61,18 @@
             border-color: var(--primary-color);
             box-shadow: 0 0 0 .25rem rgba(105, 108, 255, .25);
         }
+
+        .form-select option {
+            color: #212529;
+        }
+
+        .current-image {
+            width: 130px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, .15);
+        }
     </style>
 @endsection
 
@@ -78,12 +90,23 @@
             <div class="main-header d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="mb-0">تعديل التصنيف</h5>
-                    <small class="opacity-75">{{ $category->name ?? '' }}</small>
+                    <small class="opacity-75">{{ adminTrans($category->name) }}</small>
                 </div>
                 <a href="{{ route('admin.package-categories.index') }}" class="btn btn-light">رجوع</a>
             </div>
 
             <div class="form-body">
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <strong>يرجى مراجعة البيانات:</strong>
+                        <ul class="mb-0 mt-2">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <form action="{{ route('admin.package-categories.update', $category) }}" method="POST"
                     enctype="multipart/form-data">
                     @csrf
@@ -93,44 +116,132 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">اسم التصنيف</label>
-                            <input type="text" name="name" class="form-control"
-                                value="{{ old('name', $category->name) }}">
+                            <label class="form-label">اسم التصنيف <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
+                                value="{{ old('name', adminTrans($category->name)) }}" required>
+                            @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Slug</label>
-                            <input type="text" name="slug" class="form-control"
-                                value="{{ old('slug', $category->slug) }}">
+                            <label class="form-label">Slug <span class="text-danger">*</span></label>
+                            <input type="text" name="slug" class="form-control @error('slug') is-invalid @enderror"
+                                value="{{ old('slug', $category->slug) }}" dir="ltr" required>
+                            @error('slug') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">نوع التصنيف <span class="text-danger">*</span></label>
+                            <select name="category_type" class="form-select @error('category_type') is-invalid @enderror" required>
+                                @foreach (\App\Models\PackageCategory::TYPES as $value => $label)
+                                    <option value="{{ $value }}" @selected(old('category_type', $category->category_type) === $value)>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('category_type') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">التصنيف الأب</label>
+                            <select name="parent_id" class="form-select @error('parent_id') is-invalid @enderror">
+                                <option value="">تصنيف رئيسي</option>
+                                @foreach ($parents as $parent)
+                                    <option value="{{ $parent->id }}" @selected((string) old('parent_id', $category->parent_id) === (string) $parent->id)>
+                                        {{ adminTrans($parent->name) }}{{ $parent->is_active ? '' : ' (غير مفعل)' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('parent_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">الدولة</label>
+                            <select name="country_id" class="form-select @error('country_id') is-invalid @enderror">
+                                <option value="">كل الدول</option>
+                                @foreach ($countries as $country)
+                                    <option value="{{ $country->id }}" @selected((string) old('country_id', $category->country_id) === (string) $country->id)>
+                                        {{ adminTrans($country->name) }}{{ $country->is_active ? '' : ' (غير مفعلة)' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('country_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">الترتيب</label>
-                            <input type="number" name="sort_order" class="form-control"
+                            <input type="number" min="0" name="sort_order" class="form-control @error('sort_order') is-invalid @enderror"
                                 value="{{ old('sort_order', $category->sort_order ?? 0) }}">
+                            @error('sort_order') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">الصورة</label>
-                            <input type="file" name="image" class="form-control">
+                            @if ($category->image)
+                                <div class="d-flex align-items-center gap-3 mb-2">
+                                    <img src="{{ asset('storage/' . $category->image) }}" alt="{{ adminTrans($category->name) }}"
+                                        class="current-image">
+                                    <div class="form-check">
+                                        <input type="hidden" name="remove_image" value="0">
+                                        <input class="form-check-input" type="checkbox" name="remove_image" value="1"
+                                            id="remove_image" @checked((bool) old('remove_image', false))>
+                                        <label class="form-check-label" for="remove_image">حذف الصورة الحالية</label>
+                                    </div>
+                                </div>
+                            @endif
+                            <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp"
+                                class="form-control @error('image') is-invalid @enderror">
+                            <div class="form-text text-light opacity-75">اتركها فارغة للاحتفاظ بالصورة الحالية.</div>
+                            @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">الأيقونة</label>
+                            <input type="text" name="icon" class="form-control @error('icon') is-invalid @enderror"
+                                value="{{ old('icon', $category->icon) }}" placeholder="fas fa-map-marked-alt" dir="ltr">
+                            @error('icon') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="col-md-12 mb-3">
                             <label class="form-label">الوصف</label>
-                            <textarea name="description" class="form-control" rows="5">{{ old('description', $category->description) }}</textarea>
+                            <textarea name="description" class="form-control @error('description') is-invalid @enderror" rows="5">{{ old('description', adminTrans($category->description)) }}</textarea>
+                            @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">الحد الأدنى للأيام</label>
+                            <input type="number" min="0" name="min_days" class="form-control @error('min_days') is-invalid @enderror"
+                                value="{{ old('min_days', $category->min_days) }}">
+                            @error('min_days') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">الحد الأقصى للأيام</label>
+                            <input type="number" min="0" name="max_days" class="form-control @error('max_days') is-invalid @enderror"
+                                value="{{ old('max_days', $category->max_days) }}">
+                            @error('max_days') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">السعر يبدأ من</label>
+                            <input type="number" min="0" step="0.01" name="price_from"
+                                class="form-control @error('price_from') is-invalid @enderror"
+                                value="{{ old('price_from', $category->price_from) }}">
+                            @error('price_from') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="col-md-12 mb-3 d-flex gap-4">
                             <div class="form-check form-switch">
+                                <input type="hidden" name="is_active" value="0">
                                 <input class="form-check-input" type="checkbox" value="1" name="is_active"
-                                    id="is_active" {{ old('is_active', $category->is_active ?? true) ? 'checked' : '' }}>
+                                    id="is_active" @checked((bool) old('is_active', $category->is_active))>
                                 <label class="form-check-label" for="is_active">مفعل</label>
                             </div>
 
                             <div class="form-check form-switch">
+                                <input type="hidden" name="is_featured" value="0">
                                 <input class="form-check-input" type="checkbox" value="1" name="is_featured"
                                     id="is_featured"
-                                    {{ old('is_featured', $category->is_featured ?? false) ? 'checked' : '' }}>
+                                    @checked((bool) old('is_featured', $category->is_featured))>
                                 <label class="form-check-label" for="is_featured">مميز</label>
                             </div>
                         </div>
@@ -141,13 +252,15 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Meta Title</label>
-                            <input type="text" name="seo_title" class="form-control"
-                                value="{{ old('seo_title', $category->seo_title) }}">
+                            <input type="text" name="seo_title" class="form-control @error('seo_title') is-invalid @enderror"
+                                value="{{ old('seo_title', adminTrans($category->seo_title)) }}">
+                            @error('seo_title') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Meta Description</label>
-                            <textarea name="seo_description" class="form-control" rows="3">{{ old('seo_description', $category->seo_description) }}</textarea>
+                            <textarea name="seo_description" class="form-control @error('seo_description') is-invalid @enderror" rows="3">{{ old('seo_description', adminTrans($category->seo_description)) }}</textarea>
+                            @error('seo_description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                     </div>
 

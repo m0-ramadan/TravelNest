@@ -6,6 +6,7 @@ use App\Models\Country;
 use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class TripController extends BaseWebsiteController
 {
@@ -58,15 +59,25 @@ class TripController extends BaseWebsiteController
         $subtitle = $this->translated($package->getRawOriginal('subtitle') ?? $package->subtitle);
         $shortDescription = $this->translated($package->getRawOriginal('short_description') ?? $package->short_description);
         $description = $this->translated($package->getRawOriginal('description') ?? $package->description) ?: $shortDescription;
+        $breadcrumbTitle = $this->translated(
+            $package->getRawOriginal('breadcrumb_title') ?? $package->breadcrumb_title
+        ) ?: $title;
+        $packageTypeText = $this->typeLabel((string) $package->package_type);
+        $bookingModeText = match ($package->booking_mode) {
+            'instant' => __('Instant Confirmation'),
+            'request' => __('On Request'),
+            default => $this->localizedUiText($package->booking_mode),
+        };
+        $countryText = $this->localizedModelText($package->primaryCountry, 'name');
         $schedule = $this->packageScheduleLabel($package);
         $pickup = $this->translated($package->getRawOriginal('pickup_location') ?? $package->pickup_location);
         $dropoff = $this->translated($package->getRawOriginal('dropoff_location') ?? $package->dropoff_location);
         $selectedDestination = $this->localizedModelText($package->destination?->city, 'name')
             ?: $this->localizedModelText($package->destination, 'name');
         $destinationsText = $this->translated($package->getRawOriginal('destinations_text') ?? $package->destinations_text);
-        $routeText = trim((string) ($package->route_text ?? ''));
+        $routeText = $this->translated($package->getRawOriginal('route_text') ?? $package->route_text);
         $locationSummary = $this->translated($package->getRawOriginal('location_summary') ?? $package->location_summary);
-        $destinations = collect([$selectedDestination, $destinationsText, $routeText, $locationSummary])
+        $destinations = collect([$selectedDestination, $destinationsText])
             ->map(fn($value) => trim((string) $value))
             ->filter()
             ->unique()
@@ -74,6 +85,22 @@ class TripController extends BaseWebsiteController
         $heroImage = $this->imageUrl($package->featured_image, asset('website/photos/home2.webp'));
         $durationText = $this->packageDuration($package);
         $tourTypeText = $this->packageTourTypeLabel($package);
+        $videoEmbedUrl = $this->videoEmbedUrl($package->video_url);
+        $listingUrl = in_array($package->package_type, ['day_tour', 'shore_excursion'], true)
+            ? route('website.tours.all')
+            : route('website.trips');
+        $listingLabel = in_array($package->package_type, ['day_tour', 'shore_excursion'], true)
+            ? __('Tours')
+            : __('Trips');
+        $rawCanonicalUrl = trim((string) ($package->canonical_url ?? ''));
+
+        if ($rawCanonicalUrl === '' || trim($rawCanonicalUrl, '/') === trim((string) $package->slug, '/')) {
+            $canonicalUrl = $this->packageRoute($package);
+        } elseif (Str::startsWith($rawCanonicalUrl, ['http://', 'https://'])) {
+            $canonicalUrl = $rawCanonicalUrl;
+        } else {
+            $canonicalUrl = url('/' . ltrim($rawCanonicalUrl, '/'));
+        }
 
         $gallery = [];
         $galleryImages = $package->getRawOriginal('gallery_images') ?? $package->gallery_images;
@@ -122,6 +149,22 @@ class TripController extends BaseWebsiteController
             })
             ->values();
 
+        $highlights = $package->highlights
+            ->map(function ($highlight) {
+                $highlight->display_title = $this->transValue(
+                    $highlight->getRawOriginal('title') ?? $highlight->title,
+                    ''
+                );
+                $highlight->display_description = $this->transValue(
+                    $highlight->getRawOriginal('description') ?? $highlight->description,
+                    ''
+                );
+
+                return $highlight;
+            })
+            ->filter(fn($highlight) => $highlight->display_title !== '' || $highlight->display_description !== '')
+            ->values();
+
         $inclusions = $package->inclusions
             ->map(function ($item) {
                 $rawContent = method_exists($item, 'getRawOriginal')
@@ -146,14 +189,41 @@ class TripController extends BaseWebsiteController
         $prices = $package->prices
             ->map(function ($price) use ($package) {
                 $rawLabel = method_exists($price, 'getRawOriginal') ? ($price->getRawOriginal('label') ?? $price->label) : $price->label;
+                $rawSeasonName = method_exists($price, 'getRawOriginal') ? ($price->getRawOriginal('season_name') ?? $price->season_name) : $price->season_name;
                 $rawNotes = method_exists($price, 'getRawOriginal') ? ($price->getRawOriginal('notes') ?? $price->notes) : $price->notes;
 
                 $price->display_label = $this->transValue($rawLabel, $price->room_type ?: $price->price_type ?: __('Package Price'));
+                $price->display_season_name = $this->transValue($rawSeasonName, '');
                 $price->display_notes = $this->transValue($rawNotes, '');
+                $price->display_price_type = match ($price->price_type) {
+                    'from' => __('Starts From'),
+                    'fixed' => __('Fixed'),
+                    'seasonal' => __('Seasonal'),
+                    default => Str::headline((string) $price->price_type),
+                };
+                $price->display_room_type = $price->room_type
+                    ? __(Str::headline((string) $price->room_type))
+                    : '';
+                $price->display_valid_from = $price->valid_from?->format('M j, Y');
+                $price->display_valid_to = $price->valid_to?->format('M j, Y');
                 $price->formatted_amount = $this->money($price->amount, $price->currency?->symbol ?: ($package->currency?->symbol ?: '$'));
 
                 return $price;
             })
+            ->values();
+
+        $faqs = collect($package->faq_json ?? [])
+            ->map(function ($faq) {
+                if (!is_array($faq)) {
+                    return null;
+                }
+
+                return [
+                    'question' => trim($this->transValue($faq['question'] ?? '', '')),
+                    'answer' => trim($this->transValue($faq['answer'] ?? '', '')),
+                ];
+            })
+            ->filter(fn($faq) => $faq && ($faq['question'] !== '' || $faq['answer'] !== ''))
             ->values();
 
         $testimonials = $package->testimonials
@@ -222,19 +292,30 @@ class TripController extends BaseWebsiteController
             'subtitle',
             'shortDescription',
             'description',
+            'breadcrumbTitle',
+            'canonicalUrl',
             'durationText',
+            'packageTypeText',
             'tourTypeText',
+            'videoEmbedUrl',
+            'listingUrl',
+            'listingLabel',
+            'bookingModeText',
+            'countryText',
             'schedule',
             'pickup',
             'dropoff',
             'destinations',
+            'routeText',
             'locationSummary',
             'heroImage',
             'gallery',
+            'highlights',
             'itineraries',
             'included',
             'excluded',
             'prices',
+            'faqs',
             'testimonials',
             'reviews',
             'countries',
@@ -245,5 +326,41 @@ class TripController extends BaseWebsiteController
     public function legacyShow(string $country, string $slug)
     {
         return $this->show($slug);
+    }
+
+    private function videoEmbedUrl(?string $url): ?string
+    {
+        $url = trim((string) $url);
+
+        if ($url === '') {
+            return null;
+        }
+
+        $parts = parse_url($url);
+        $host = Str::lower((string) ($parts['host'] ?? ''));
+        $path = trim((string) ($parts['path'] ?? ''), '/');
+        $videoId = null;
+
+        if (Str::contains($host, 'youtu.be')) {
+            $videoId = Str::before($path, '/');
+        } elseif (Str::contains($host, 'youtube.com') || Str::contains($host, 'youtube-nocookie.com')) {
+            parse_str((string) ($parts['query'] ?? ''), $query);
+
+            if ($path === 'watch') {
+                $videoId = $query['v'] ?? null;
+            } elseif (Str::startsWith($path, ['embed/', 'shorts/'])) {
+                $videoId = Str::after($path, '/');
+            }
+        }
+
+        if ($videoId) {
+            return 'https://www.youtube.com/embed/' . rawurlencode(Str::before((string) $videoId, '/'));
+        }
+
+        if (Str::contains($host, 'vimeo.com') && preg_match('/(?:video\/)?(\d+)/', $path, $matches)) {
+            return 'https://player.vimeo.com/video/' . $matches[1];
+        }
+
+        return $url;
     }
 }

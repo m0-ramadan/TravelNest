@@ -12,6 +12,16 @@ class PackageCategory extends Model
 {
     use HasTranslatableAttributes;
 
+    public const TYPES = [
+        'travel_package' => 'باقة سياحية',
+        'nile_cruise' => 'رحلة نيلية',
+        'day_tour' => 'رحلة يوم واحد',
+        'shore_excursion' => 'رحلة شاطئية',
+        'deal' => 'عرض',
+        'multi_country' => 'أكثر من دولة',
+        'custom' => 'مخصصة',
+    ];
+
     protected $fillable = [
         'parent_id',
         'country_id',
@@ -34,7 +44,6 @@ class PackageCategory extends Model
     protected $casts = [
         'name' => 'array',
         'description' => 'array',
-        'category_type' => 'array',
         'seo_title' => 'array',
         'seo_description' => 'array',
         'min_days' => 'integer',

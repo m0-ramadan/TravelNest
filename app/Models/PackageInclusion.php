@@ -12,8 +12,11 @@ class PackageInclusion extends Model
 
     protected $fillable = [
         'package_id',
+        'type',
         'item_type',
+        'title',
         'content',
+        'description',
         'sort_order',
     ];
 
@@ -29,6 +32,8 @@ class PackageInclusion extends Model
 
     public function getDisplayContentAttribute(): string
     {
-        return $this->translatedValue('content');
+        return $this->translatedValue('content')
+            ?: $this->translatedValue('title')
+            ?: $this->translatedValue('description');
     }
 }

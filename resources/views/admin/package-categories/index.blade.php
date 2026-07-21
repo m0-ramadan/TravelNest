@@ -189,10 +189,10 @@
 
 @section('content')
     @php
-        $totalCategories = $categories->total() ?? $categories->count();
-        $activeCategories = \App\Models\PackageCategory::where('is_active', true)->count();
-        $inactiveCategories = \App\Models\PackageCategory::where('is_active', false)->count();
-        $featuredCategories = \App\Models\PackageCategory::where('is_featured', true)->count();
+        $totalCategories = $statistics['total'];
+        $activeCategories = $statistics['active'];
+        $inactiveCategories = $statistics['inactive'];
+        $featuredCategories = $statistics['featured'];
     @endphp
 
     <div class="container-xxl flex-grow-1 container-p-y">
@@ -300,10 +300,10 @@
 
                             <div class="d-flex gap-2 flex-wrap">
                                 <span
-                                    class="badge-status {{ $category->is_active ?? true ? 'status-active' : 'status-inactive' }}">
-                                    {{ $category->is_active ?? true ? 'مفعل' : 'غير مفعل' }}
+                                    class="badge-status {{ $category->is_active ? 'status-active' : 'status-inactive' }}">
+                                    {{ $category->is_active ? 'مفعل' : 'غير مفعل' }}
                                 </span>
-                                @if ($category->is_featured ?? false)
+                                @if ($category->is_featured)
                                     <span class="badge-status status-featured">مميز</span>
                                 @endif
                             </div>
@@ -318,6 +318,16 @@
                             <div>
                                 <span class="detail-label">الترتيب:</span>
                                 <span>{{ $category->sort_order ?? 0 }}</span>
+                            </div>
+
+                            <div>
+                                <span class="detail-label">النوع:</span>
+                                <span>{{ \App\Models\PackageCategory::TYPES[$category->category_type] ?? $category->category_type }}</span>
+                            </div>
+
+                            <div>
+                                <span class="detail-label">التصنيف الأب:</span>
+                                <span>{{ $category->parent ? adminTrans($category->parent->name) : '-' }}</span>
                             </div>
 
                             <div>
@@ -350,7 +360,8 @@
                                 </form>
                             @endif
 
-                            <form action="{{ route('admin.package-categories.destroy', $category) }}" method="POST">
+                            <form action="{{ route('admin.package-categories.destroy', $category) }}" method="POST"
+                                onsubmit="return confirm('هل أنت متأكد من حذف هذا التصنيف؟ لن يتم حذف الباقات المرتبطة به.')">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-danger btn-sm" type="submit">حذف</button>

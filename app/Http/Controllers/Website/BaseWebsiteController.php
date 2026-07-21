@@ -150,15 +150,30 @@ abstract class BaseWebsiteController extends Controller
     protected function packageDuration(Package $package): string
     {
         if (!empty($package->duration_text)) {
-            return $this->localizedUiText($package->getRawOriginal('duration_text') ?? $package->duration_text);
-        }
+            $customDuration = $this->localizedUiText(
+                $package->getRawOriginal('duration_text') ?? $package->duration_text
+            );
 
-        if (!empty($package->duration_days)) {
-            return $package->duration_days . ' ' . __('Days');
+            if (is_numeric($customDuration)) {
+                $unit = $package->duration_type === 'hours' ? __('Hours') : __('Days');
+
+                return $customDuration . ' ' . $unit;
+            }
+
+            return $customDuration;
         }
 
         if (!empty($package->duration_hours)) {
             return $package->duration_hours . ' ' . __('Hours');
+        }
+
+        $parts = collect([
+            !empty($package->duration_days) ? $package->duration_days . ' ' . __('Days') : null,
+            !empty($package->duration_nights) ? $package->duration_nights . ' ' . __('Nights') : null,
+        ])->filter();
+
+        if ($parts->isNotEmpty()) {
+            return $parts->implode(' / ');
         }
 
         return __('Flexible');

@@ -4,12 +4,12 @@
 @section('description', $package->getTranslation('seo_description') ?: $shortDescription)
 @section('keywords', trim(collect([$title, $tourTypeText ?? null, $package->primaryCountry?->display_name ?? null, 'Etro Tours'])->filter()->implode(', '), ', '))
 @section('image', $heroImage)
+@section('canonical', $canonicalUrl)
 
 @section('css')
     <style>
         .package-hero {
-            height: 72vh;
-            min-height: 520px;
+            min-height: clamp(560px, 72vh, 760px);
             background: linear-gradient(rgba(28, 50, 92, .38), rgba(26, 75, 102, .48)), var(--hero-bg);
             background-size: cover;
             background-position: center;
@@ -17,7 +17,9 @@
             display: flex;
             align-items: center;
             position: relative;
-            overflow: hidden
+            overflow: hidden;
+            box-sizing: border-box;
+            padding: clamp(120px, 14vh, 150px) 0 clamp(45px, 7vh, 70px)
         }
 
         .package-hero:after {
@@ -28,37 +30,62 @@
             pointer-events: none
         }
 
-        .hero-content {
+        .package-hero .hero-content {
             position: relative;
             z-index: 2;
             text-align: center;
             color: #fff;
             max-width: 1000px;
             margin: auto;
-            padding: 120px 20px 0
+            padding: 0 20px
         }
 
-        .hero-title {
+        .package-hero .hero-title {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(2.4rem, 6vw, 5rem);
+            font-size: clamp(1.85rem, 4.2vw, 3.6rem);
             font-weight: 700;
-            margin-bottom: 18px;
+            line-height: 1.12;
+            margin-bottom: 14px;
             text-shadow: 2px 2px 5px rgba(0, 0, 0, .35)
         }
 
-        .hero-subtitle {
-            font-size: 1.2rem;
+        .package-hero .hero-subtitle {
+            font-size: clamp(.9rem, 1.35vw, 1.05rem);
             opacity: .95;
             max-width: 780px;
-            margin: 0 auto 25px;
-            line-height: 1.7
+            margin: 0 auto 20px;
+            line-height: 1.55
         }
 
-        .hero-actions {
+        .package-hero .hero-actions {
             display: flex;
             gap: 14px;
             justify-content: center;
-            flex-wrap: wrap
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 3
+        }
+
+        .package-hero .hero-badges {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px
+        }
+
+        .package-hero .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 11px;
+            border: 1px solid rgba(255, 255, 255, .36);
+            border-radius: 999px;
+            background: rgba(11, 18, 32, .36);
+            color: #fff;
+            font-size: .78rem;
+            font-weight: 700;
+            backdrop-filter: blur(7px)
         }
 
         .gold-btn,
@@ -66,9 +93,10 @@
         .submit-btn {
             background: var(--gradient-gold, #c5955b);
             color: var(--primary-navy, #1c325c);
-            padding: 13px 28px;
+            padding: 11px 22px;
             border-radius: 50px;
             text-decoration: none;
+            font-size: .9rem;
             font-weight: 700;
             display: inline-flex;
             align-items: center;
@@ -238,7 +266,17 @@
             gap: 15px;
             padding: 18px;
             cursor: pointer;
-            background: var(--pearl-luxury, #faf8f3)
+            background: var(--pearl-luxury, #faf8f3);
+            border: 0;
+            width: 100%;
+            color: inherit;
+            font: inherit;
+            text-align: start
+        }
+
+        .day-header:focus-visible {
+            outline: 3px solid rgba(197, 149, 91, .45);
+            outline-offset: -3px
         }
 
         .day-number {
@@ -262,11 +300,23 @@
         }
 
         .collapsible-content {
-            display: none
+            display: block;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transition: max-height .4s ease, opacity .25s ease, visibility .25s ease
         }
 
-        .collapsible-content.open {
-            display: block
+        .collapsible-content.open,
+        .collapsible-content.active {
+            max-height: 3200px;
+            opacity: 1;
+            visibility: visible
+        }
+
+        .day-header[aria-expanded='true'] .collapse-icon {
+            transform: rotate(180deg)
         }
 
         .day-content {
@@ -328,6 +378,31 @@
             width: 100%;
             border-collapse: separate;
             border-spacing: 0 10px
+        }
+
+        .price-table-wrap {
+            overflow-x: auto;
+            border-radius: 14px
+        }
+
+        .price-table {
+            min-width: 660px
+        }
+
+        .price-meta {
+            display: block;
+            color: #777;
+            font-size: .82rem;
+            font-weight: 500;
+            margin-top: 4px
+        }
+
+        .compare-price {
+            display: block;
+            margin-top: 6px;
+            color: rgba(255, 255, 255, .72);
+            font-size: .95rem;
+            text-decoration: line-through
         }
 
         .price-table tr {
@@ -751,8 +826,17 @@
 
         @media(max-width:991px) {
             .package-hero {
-                height: 62vh;
+                min-height: auto;
+                padding: 105px 0 46px;
                 background-attachment: scroll
+            }
+
+            .package-hero .hero-title {
+                font-size: clamp(1.75rem, 6vw, 3rem)
+            }
+
+            .package-hero .hero-subtitle {
+                max-width: 680px
             }
 
             .cruise-details,
@@ -792,11 +876,45 @@
 
         @media(max-width:575px) {
             .package-hero {
-                min-height: 430px
+                min-height: auto;
+                padding: 92px 0 38px
             }
 
-            .hero-content {
-                padding-top: 80px
+            .package-hero .hero-content {
+                padding: 0 12px
+            }
+
+            .package-hero .hero-title {
+                font-size: clamp(1.55rem, 7.5vw, 2.15rem);
+                line-height: 1.15;
+                margin-bottom: 12px
+            }
+
+            .package-hero .hero-subtitle {
+                font-size: .88rem;
+                line-height: 1.45;
+                margin-bottom: 18px
+            }
+
+            .package-hero .hero-badges {
+                gap: 6px;
+                margin-bottom: 12px
+            }
+
+            .package-hero .hero-badge {
+                padding: 5px 9px;
+                font-size: .7rem
+            }
+
+            .package-hero .hero-actions {
+                gap: 10px
+            }
+
+            .package-hero .hero-actions .gold-btn,
+            .package-hero .hero-actions .outline-btn {
+                min-height: 42px;
+                padding: 10px 16px;
+                font-size: .82rem
             }
 
             .content-section {
@@ -821,6 +939,40 @@
                 font-size: .9rem
             }
         }
+
+        @media(max-width:420px) {
+            .package-hero .hero-actions {
+                flex-direction: column;
+                align-items: center
+            }
+
+            .package-hero .hero-actions .gold-btn,
+            .package-hero .hero-actions .outline-btn {
+                width: min(100%, 240px)
+            }
+        }
+
+        @media(max-height:650px) {
+            .package-hero {
+                min-height: auto;
+                padding: 52px 0 24px
+            }
+
+            .package-hero .hero-title {
+                font-size: clamp(1.55rem, 4vw, 2.5rem);
+                margin-bottom: 10px
+            }
+
+            .package-hero .hero-subtitle {
+                font-size: .84rem;
+                line-height: 1.4;
+                margin-bottom: 14px
+            }
+
+            .package-hero .hero-badges {
+                margin-bottom: 10px
+            }
+        }
     </style>
 @endsection
 
@@ -832,7 +984,7 @@
             'name' => $title,
             'description' => trim(preg_replace('/\s+/', ' ', strip_tags($shortDescription ?: $title))),
             'image' => $heroImage,
-            'url' => request()->fullUrl(),
+            'url' => $canonicalUrl,
             'provider' => [
                 '@type' => 'TravelAgency',
                 'name' => 'Etro Tours',
@@ -841,6 +993,22 @@
             'touristType' => $tourTypeText ?? __('Private'),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
     </script>
+    @if ($faqs->count())
+        <script type="application/ld+json">
+            {!! json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'FAQPage',
+                'mainEntity' => $faqs->map(fn ($faq, $index) => [
+                    '@type' => 'Question',
+                    'name' => $faq['question'] ?: __('Question') . ' ' . ($index + 1),
+                    'acceptedAnswer' => [
+                        '@type' => 'Answer',
+                        'text' => strip_tags($faq['answer']),
+                    ],
+                ])->all(),
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+        </script>
+    @endif
 @endsection
 
 @section('content')
@@ -848,6 +1016,7 @@
         $currencySymbol = $package->currency?->symbol ?? '$';
         $priceFrom = (float) ($package->price_from ?? $package->start_from_price ?? 0);
         $priceTo = (float) ($package->price_to ?? 0);
+        $comparePrice = (float) ($package->compare_price ?? 0);
         $priceText = null;
         $hasCategoryPricing = $package->adult_price !== null
             || $package->child_price !== null
@@ -875,8 +1044,8 @@
             <div class="breadcrumb-list">
                 <ul>
                     <li><a href="{{ route('website.home') }}">{{ __('Home') }}</a></li>
-                    <li><a href="{{ route('website.multi_country') }}">{{ __('Tours') }}</a></li>
-                    <li>{{ $title }}</li>
+                    <li><a href="{{ $listingUrl }}">{{ $listingLabel }}</a></li>
+                    <li>{{ $breadcrumbTitle }}</li>
                 </ul>
             </div>
         </div>
@@ -885,6 +1054,18 @@
     <section class="package-hero" style="--hero-bg:url('{{ $heroImage }}')">
         <div class="container">
             <div class="hero-content">
+                <div class="hero-badges" aria-label="{{ __('Trip badges') }}">
+                    <span class="hero-badge"><i class="la la-compass"></i> {{ $packageTypeText }}</span>
+                    @if ($package->is_best_seller)
+                        <span class="hero-badge"><i class="la la-fire"></i> {{ __('Best Seller') }}</span>
+                    @endif
+                    @if ($package->is_ultra_luxury)
+                        <span class="hero-badge"><i class="la la-gem"></i> {{ __('Ultra Luxury') }}</span>
+                    @endif
+                    @if ($package->is_featured)
+                        <span class="hero-badge"><i class="la la-star"></i> {{ __('Featured') }}</span>
+                    @endif
+                </div>
                 <h1 class="hero-title">{{ $title }}</h1>
                 @if ($subtitle || $shortDescription)
                     <p class="hero-subtitle">{{ $subtitle ?: $shortDescription }}</p>
@@ -895,7 +1076,13 @@
                             <i class="la la-image"></i> {{ __('View Gallery') }}
                         </a>
                     @endif
-                    <a href="#reserve" class="gold-btn"><i class="la la-envelope"></i> {{ __('Enquire Now') }}</a>
+                    <a href="#reserve" class="gold-btn d-none d-lg-inline-flex">
+                        <i class="la la-envelope"></i> {{ __('Enquire Now') }}
+                    </a>
+                    <a href="#" class="gold-btn d-inline-flex d-lg-none" data-bs-toggle="modal"
+                        data-bs-target="#simpleEnquiryModal">
+                        <i class="la la-envelope"></i> {{ __('Enquire Now') }}
+                    </a>
                 </div>
             </div>
         </div>
@@ -946,11 +1133,43 @@
                                         </div>
                                     </div>
                                 @endif
-                                @if ($destinations || $locationSummary)
+                                @if ($packageTypeText)
+                                    <div class="detail-item"><i class="la la-suitcase"></i>
+                                        <div class="detail-text">
+                                            <strong class="detail-label">{{ __('Package Type:') }}</strong>
+                                            <span class="detail-value">{{ $packageTypeText }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if ($countryText)
+                                    <div class="detail-item"><i class="la la-globe"></i>
+                                        <div class="detail-text">
+                                            <strong class="detail-label">{{ __('Country:') }}</strong>
+                                            <span class="detail-value">{{ $countryText }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if ($destinations)
                                     <div class="detail-item"><i class="la la-map-marker"></i>
                                         <div class="detail-text">
                                             <strong class="detail-label">{{ __('Destinations:') }}</strong>
-                                            <span class="detail-value">{{ $destinations ?: $locationSummary }}</span>
+                                            <span class="detail-value">{{ $destinations }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if ($routeText)
+                                    <div class="detail-item"><i class="la la-route"></i>
+                                        <div class="detail-text">
+                                            <strong class="detail-label">{{ __('Route:') }}</strong>
+                                            <span class="detail-value">{{ $routeText }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if ($locationSummary)
+                                    <div class="detail-item"><i class="la la-map"></i>
+                                        <div class="detail-text">
+                                            <strong class="detail-label">{{ __('Location:') }}</strong>
+                                            <span class="detail-value">{{ $locationSummary }}</span>
                                         </div>
                                     </div>
                                 @endif
@@ -970,12 +1189,14 @@
                                         </div>
                                     </div>
                                 @endif
-                                <div class="detail-item"><i class="la la-users"></i>
-                                    <div class="detail-text">
-                                        <strong class="detail-label">{{ __('Tour Type:') }}</strong>
-                                        <span class="detail-value">{{ $tourTypeText }}</span>
+                                @if ($tourTypeText)
+                                    <div class="detail-item"><i class="la la-users"></i>
+                                        <div class="detail-text">
+                                            <strong class="detail-label">{{ __('Tour Type:') }}</strong>
+                                            <span class="detail-value">{{ $tourTypeText }}</span>
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
                                 @if ($package->category)
                                     <div class="detail-item"><i class="la la-tag"></i>
                                         <div class="detail-text">
@@ -1016,17 +1237,46 @@
                                         </div>
                                     </div>
                                 @endif
+                                @if ($bookingModeText)
+                                    <div class="detail-item"><i class="la la-calendar-check"></i>
+                                        <div class="detail-text">
+                                            <strong class="detail-label">{{ __('Booking Mode:') }}</strong>
+                                            <span class="detail-value">{{ $bookingModeText }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if ((float) $package->rating_avg > 0 || (int) $package->reviews_count > 0)
+                                    <div class="detail-item"><i class="la la-star"></i>
+                                        <div class="detail-text">
+                                            <strong class="detail-label">{{ __('Rating:') }}</strong>
+                                            <span class="detail-value">
+                                                {{ number_format((float) $package->rating_avg, 1) }}/5
+                                                @if ((int) $package->reviews_count > 0)
+                                                    ({{ trans_choice(':count review|:count reviews', (int) $package->reviews_count, ['count' => (int) $package->reviews_count]) }})
+                                                @endif
+                                            </span>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </section>
 
-                    @if ($package->highlights && $package->highlights->count())
+                    @if ($highlights->count())
                         <section class="content-section">
                             <h2 class="section-header">{{ __('Tour Highlights') }}</h2>
                             <div class="styled-list">
                                 <ul style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;">
-                                    @foreach ($package->highlights as $highlight)
-                                        <li style="border: none; padding: 5px 0;"><i class="la la-check-circle" style="color:var(--rich-gold, #c5955b); margin-right:8px; font-size: 1.2rem; vertical-align: middle;"></i> {{ $highlight->display_title }}</li>
+                                    @foreach ($highlights as $highlight)
+                                        <li style="border: none; padding: 5px 0;">
+                                            <i class="la la-check-circle" style="color:var(--rich-gold, #c5955b); margin-right:8px; font-size: 1.2rem; vertical-align: middle;"></i>
+                                            @if ($highlight->display_title)
+                                                <strong>{{ $highlight->display_title }}</strong>
+                                            @endif
+                                            @if ($highlight->display_description)
+                                                <span class="price-meta">{{ $highlight->display_description }}</span>
+                                            @endif
+                                        </li>
                                     @endforeach
                                 </ul>
                             </div>
@@ -1066,30 +1316,28 @@
                         </section>
                     @endif
 
-                    @if ($package->video_url)
+                    @if ($videoEmbedUrl)
                         <section class="content-section">
                             <h2 class="section-header">{{ __('Video Tour') }}</h2>
                             <div style="border-radius:18px; overflow:hidden; position:relative; padding-bottom:56.25%; height:0; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-                                @php
-                                    $videoUrl = $package->video_url;
-                                    if (str_contains($videoUrl, 'youtube.com/watch?v=')) {
-                                        $videoUrl = str_replace('watch?v=', 'embed/', $videoUrl);
-                                    } elseif (str_contains($videoUrl, 'youtu.be/')) {
-                                        $videoUrl = str_replace('youtu.be/', 'youtube.com/embed/', $videoUrl);
-                                    }
-                                @endphp
-                                <iframe src="{{ $videoUrl }}" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe>
+                                <iframe src="{{ $videoEmbedUrl }}" title="{{ __('Video Tour') }}: {{ $title }}"
+                                    style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
+                                    loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    allowfullscreen></iframe>
                             </div>
                         </section>
                     @endif
 
-                    <section id="itinerary" class="content-section">
-                        <h2 class="section-header">{{ $title }} {{ __('Itinerary') }}</h2>
-                        @if ($itineraries->count())
+                    @if ($itineraries->count())
+                        <section id="itinerary" class="content-section">
+                            <h2 class="section-header">{{ $title }} {{ __('Itinerary') }}</h2>
                             <div class="itinerary-section">
                                 @foreach ($itineraries as $day)
                                     <div class="day-card">
-                                        <div class="day-header" onclick="toggleDay('day-{{ $day->id }}')">
+                                        <button type="button" class="day-header" data-collapse-target="day-{{ $day->id }}"
+                                            aria-controls="day-{{ $day->id }}"
+                                            aria-expanded="{{ $loop->first ? 'true' : 'false' }}">
                                             <div class="day-number">{{ $day->day_number }}</div>
                                             <div>
                                                 <h3 class="day-title">
@@ -1103,11 +1351,11 @@
                                                 @endif
                                             </div>
                                             <i class="la la-chevron-down collapse-icon" style="margin-left:auto"></i>
-                                        </div>
-                                        <div class="collapsible-content {{ $loop->first ? 'open' : '' }}"
+                                        </button>
+                                        <div class="collapsible-content {{ $loop->first ? 'open active' : '' }}"
                                             id="day-{{ $day->id }}">
                                             <div class="day-content">
-                                                {!! $day->display_description ?: '<p>' . __('No itinerary description added yet.') . '</p>' !!}
+                                                {!! nl2br(e($day->display_description ?: __('No itinerary description added yet.'))) !!}
                                                 @if ($day->display_overnight)
                                                     <p><strong>{{ __('Overnight:') }}</strong>
                                                         {{ $day->display_overnight }}</p>
@@ -1130,128 +1378,148 @@
                                     </div>
                                 @endforeach
                             </div>
-                        @else
-                            <div class="empty-state">
-                                {{ __('Itinerary is not linked yet because there are no records for this package in the itineraries table.') }}
-                            </div>
-                        @endif
-                    </section>
+                        </section>
+                    @endif
 
-                    <section class="content-section">
-                        <h2 class="section-header">{{ __('What\'s Included') }}</h2>
-                        <div class="row g-4">
-                            <div class="col-md-12">
-                                <div class="included-box">
-                                    <h4 class="box-title">{{ __('Included in Your Journey') }}</h4>
-                                    @if ($included->count())
+                    @if ($included->count() || $excluded->count())
+                        <section class="content-section">
+                            <h2 class="section-header">{{ __('What\'s Included') }}</h2>
+                            <div class="row g-4">
+                                @if ($included->count())
+                                    <div class="{{ $excluded->count() ? 'col-md-6' : 'col-12' }}">
+                                        <div class="included-box">
+                                            <h4 class="box-title">{{ __('Included in Your Journey') }}</h4>
                                         <div class="styled-list">
                                             <ul>
                                                 @foreach ($included as $item)
-                                                    <li>{!! $item->display_content !!}</li>
+                                                    <li>{{ $item->display_content }}</li>
                                                 @endforeach
                                             </ul>
                                         </div>
-                                    @else
-                                        <div class="empty-state">
-                                            {{ __('Included items are not linked yet because there are no valid included records in package_inclusions.') }}
                                         </div>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="col-md-12">
-                                <div class="excluded-box">
-                                    <h4 class="box-title">{{ __('Not Included') }}</h4>
-                                    @if ($excluded->count())
+                                    </div>
+                                @endif
+                                @if ($excluded->count())
+                                    <div class="{{ $included->count() ? 'col-md-6' : 'col-12' }}">
+                                        <div class="excluded-box">
+                                            <h4 class="box-title">{{ __('Not Included') }}</h4>
                                         <div class="styled-list">
                                             <ul>
                                                 @foreach ($excluded as $item)
-                                                    <li>{!! $item->display_content !!}</li>
+                                                    <li>{{ $item->display_content }}</li>
                                                 @endforeach
                                             </ul>
                                         </div>
-                                    @else
-                                        <div class="empty-state">
-                                            {{ __('Not included items are not linked yet because there are no valid excluded records in package_inclusions.') }}
                                         </div>
-                                    @endif
-                                </div>
+                                    </div>
+                                @endif
                             </div>
-                        </div>
-                    </section>
+                        </section>
+                    @endif
 
                     @if ($prices->count() || $hasCategoryPricing || $pricingInformation)
                         <section class="content-section">
                             <h2 class="section-header">{{ __('Pricing & Packages') }}</h2>
+                            @if ($comparePrice > 0)
+                                <p class="section-subtitle">
+                                    {{ __('Compare Price:') }}
+                                    <span style="text-decoration: line-through;">{{ $currencySymbol }}{{ number_format($comparePrice, 2) }}</span>
+                                </p>
+                            @endif
 
                             @if ($hasCategoryPricing)
                                 <div class="price-box mb-4">
-                                    <table class="price-table">
-                                        <thead>
-                                            <tr>
-                                                <th>{{ __('Guest Category') }}</th>
-                                                <th>{{ __('Age') }}</th>
-                                                <th>{{ __('Price') }}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @if ($package->adult_price !== null)
+                                    <div class="price-table-wrap">
+                                        <table class="price-table">
+                                            <thead>
                                                 <tr>
-                                                    <td>{{ __('Adult') }}</td>
-                                                    <td>{{ $package->adult_min_age }}+ {{ __('years') }}</td>
-                                                    <td>{{ $currencySymbol }}{{ number_format((float) $package->adult_price, 2) }}</td>
+                                                    <th>{{ __('Guest Category') }}</th>
+                                                    <th>{{ __('Age') }}</th>
+                                                    <th>{{ __('Price') }}</th>
                                                 </tr>
-                                            @endif
-                                            @if ($package->child_price !== null)
-                                                <tr>
-                                                    <td>{{ __('Child') }}</td>
-                                                    <td>{{ $package->child_min_age }} - {{ $package->child_max_age }} {{ __('years') }}</td>
-                                                    <td>{{ $currencySymbol }}{{ number_format((float) $package->child_price, 2) }}</td>
-                                                </tr>
-                                            @endif
-                                            @if ($package->infant_price !== null)
-                                                <tr>
-                                                    <td>{{ __('Infant') }}</td>
-                                                    <td>{{ $package->infant_min_age }} - {{ $package->infant_max_age }} {{ __('years') }}</td>
-                                                    <td>{{ $currencySymbol }}{{ number_format((float) $package->infant_price, 2) }}</td>
-                                                </tr>
-                                            @endif
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                @if ($package->adult_price !== null)
+                                                    <tr>
+                                                        <td>{{ __('Adult') }}</td>
+                                                        <td>{{ $package->adult_min_age }}+ {{ __('years') }}</td>
+                                                        <td>{{ $currencySymbol }}{{ number_format((float) $package->adult_price, 2) }}</td>
+                                                    </tr>
+                                                @endif
+                                                @if ($package->child_price !== null)
+                                                    <tr>
+                                                        <td>{{ __('Child') }}</td>
+                                                        <td>{{ $package->child_min_age }} - {{ $package->child_max_age }} {{ __('years') }}</td>
+                                                        <td>{{ $currencySymbol }}{{ number_format((float) $package->child_price, 2) }}</td>
+                                                    </tr>
+                                                @endif
+                                                @if ($package->infant_price !== null)
+                                                    <tr>
+                                                        <td>{{ __('Infant') }}</td>
+                                                        <td>{{ $package->infant_min_age }} - {{ $package->infant_max_age }} {{ __('years') }}</td>
+                                                        <td>{{ $currencySymbol }}{{ number_format((float) $package->infant_price, 2) }}</td>
+                                                    </tr>
+                                                @endif
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             @endif
 
                             @if ($prices->count())
-                            <div class="price-box">
-                                <table class="price-table">
-                                    <thead>
-                                        <tr>
-                                            <th>{{ __('Option') }}</th>
-                                            <th>{{ __('Guests') }}</th>
-                                            <th>{{ __('Price') }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($prices as $price)
-                                            <tr>
-                                                <td>
-                                                    {{ $price->display_label }}
-                                                    @if ($price->display_notes)
-                                                        <br><small>{{ $price->display_notes }}</small>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    @if ($price->pax_min || $price->pax_max)
-                                                        {{ $price->pax_min ?? 1 }} - {{ $price->pax_max ?? '+' }} {{ __('Pax') }}
-                                                    @else
-                                                        {{ __('Per Person') }}
-                                                    @endif
-                                                </td>
-                                                <td>{{ $price->formatted_amount }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                                <div class="price-box">
+                                    <div class="price-table-wrap">
+                                        <table class="price-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>{{ __('Option') }}</th>
+                                                    <th>{{ __('Price Details') }}</th>
+                                                    <th>{{ __('Validity') }}</th>
+                                                    <th>{{ __('Price') }}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($prices as $price)
+                                                    <tr>
+                                                        <td>
+                                                            {{ $price->display_label }}
+                                                            @if ($price->display_season_name)
+                                                                <span class="price-meta"><i class="la la-sun"></i> {{ $price->display_season_name }}</span>
+                                                            @endif
+                                                            @if ($price->display_notes)
+                                                                <span class="price-meta">{{ $price->display_notes }}</span>
+                                                            @endif
+                                                        </td>
+                                                        <td>
+                                                            {{ $price->display_price_type }}
+                                                            @if ($price->display_room_type)
+                                                                <span class="price-meta">{{ __('Room:') }} {{ $price->display_room_type }}</span>
+                                                            @endif
+                                                            @if ($price->pax_min || $price->pax_max)
+                                                                <span class="price-meta">
+                                                                    {{ $price->pax_min ?? 1 }} - {{ $price->pax_max ?? '+' }} {{ __('Pax') }}
+                                                                </span>
+                                                            @endif
+                                                        </td>
+                                                        <td>
+                                                            @if ($price->display_valid_from || $price->display_valid_to)
+                                                                @if ($price->display_valid_from)
+                                                                    <span class="price-meta">{{ __('From:') }} {{ $price->display_valid_from }}</span>
+                                                                @endif
+                                                                @if ($price->display_valid_to)
+                                                                    <span class="price-meta">{{ __('To:') }} {{ $price->display_valid_to }}</span>
+                                                                @endif
+                                                            @else
+                                                                {{ __('All Year') }}
+                                                            @endif
+                                                        </td>
+                                                        <td>{{ $price->formatted_amount }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             @endif
 
                             @if ($pricingInformation)
@@ -1321,26 +1589,26 @@
                         </section>
                     @endif
 
-                    @if ($package->faq_json && is_array($package->faq_json) && count($package->faq_json) > 0)
+                    @if ($faqs->count())
                         <section class="content-section">
                             <h2 class="section-header">{{ __('Frequently Asked Questions') }}</h2>
                             <div class="faq-accordion">
-                                @foreach ($package->faq_json as $index => $faq)
+                                @foreach ($faqs as $index => $faq)
                                     <div class="day-card mb-3">
-                                        <div class="day-header" onclick="toggleDay('faq-{{ $index }}')">
+                                        <button type="button" class="day-header"
+                                            data-collapse-target="faq-{{ $package->id }}-{{ $index }}"
+                                            aria-controls="faq-{{ $package->id }}-{{ $index }}" aria-expanded="false">
                                             <div class="day-number" style="width: 36px; height: 36px; min-width: 36px; font-size: 1.2rem;"><i class="la la-question"></i></div>
                                             <div>
                                                 <h3 class="day-title" style="font-size: 1.05rem; font-family: inherit; font-weight: 700;">
-                                                    {{ is_array($faq['question'] ?? '') ? ($faq['question'][app()->getLocale()] ?? $faq['question']['en'] ?? '') : ($faq['question'] ?? '') }}
+                                                    {{ $faq['question'] ?: __('Question') . ' ' . ($index + 1) }}
                                                 </h3>
                                             </div>
                                             <i class="la la-chevron-down collapse-icon" style="margin-left:auto"></i>
-                                        </div>
-                                        <div class="collapsible-content" id="faq-{{ $index }}">
+                                        </button>
+                                        <div class="collapsible-content" id="faq-{{ $package->id }}-{{ $index }}">
                                             <div class="day-content" style="padding: 15px 22px;">
-                                                <p class="mb-0">
-                                                    {!! is_array($faq['answer'] ?? '') ? ($faq['answer'][app()->getLocale()] ?? $faq['answer']['en'] ?? '') : ($faq['answer'] ?? '') !!}
-                                                </p>
+                                                <div class="mb-0 about-content">{!! nl2br(e($faq['answer'] ?: __('Answer will be added soon.'))) !!}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -1349,9 +1617,10 @@
                         </section>
                     @endif
 
-                    <section id="reviews" class="content-section">
-                        <h2 class="section-header">{{ __('Guest Reviews') }}</h2>
-                        @if ($reviews->count())
+                    @if ($reviews->count() || $testimonials->count())
+                        <section id="reviews" class="content-section">
+                            <h2 class="section-header">{{ __('Guest Reviews') }}</h2>
+                            @if ($reviews->count())
                             @foreach ($reviews as $review)
                                 <div class="review-card">
                                     <div class="rating-stars">
@@ -1365,7 +1634,7 @@
                                     <p>{{ $review->content }}</p>
                                 </div>
                             @endforeach
-                        @elseif($testimonials->count())
+                            @else
                             @foreach ($testimonials as $testimonial)
                                 <div class="review-card">
                                     <div class="rating-stars">
@@ -1384,14 +1653,9 @@
                                     @endif
                                 </div>
                             @endforeach
-                        @else
-                            <div class="empty-state">
-                                {{ __('Reviews are not linked yet. No approved reviews or active testimonials found for this package.') }}
-                            </div>
-                        @endif
-
-                        {{-- غير مربوط: TripAdvisor live widget لأنه محتاج كود رسمي/API من TripAdvisor --}}
-                    </section>
+                            @endif
+                        </section>
+                    @endif
 
                     @if ($relatedPackages->count())
                         <section class="content-section">
@@ -1420,6 +1684,11 @@
                                 <div class="sidebar-price"><span class="item">{{ $priceText }}</span></div>
                             @else
                                 <div class="sidebar-price"><span class="item">{{ __('Ask for Price') }}</span></div>
+                            @endif
+                            @if ($comparePrice > max($priceFrom, $priceTo, 0))
+                                <span class="compare-price">
+                                    {{ __('Was') }} {{ $currencySymbol }}{{ number_format($comparePrice, 2) }}
+                                </span>
                             @endif
                         </div>
                         <div class="sidebar-content">
@@ -1482,34 +1751,75 @@
 
 @section('js')
     <script>
-        function toggleDay(id) {
-            const el = document.getElementById(id);
-            if (el) {
-                el.classList.toggle('open');
-            }
-        }
-
-        function changeQty(id, amount) {
+        window.changeQty = function(id, amount) {
             const input = document.getElementById(id);
             if (!input) return;
             const min = parseInt(input.getAttribute('min') || '0');
             const current = parseInt(input.value || min);
             input.value = Math.max(min, current + amount);
-        }
-
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                const target = document.querySelector(this.getAttribute('href'));
-                if (!target) return;
-                e.preventDefault();
-                window.scrollTo({
-                    top: target.offsetTop - 90,
-                    behavior: 'smooth'
-                });
-            });
-        });
+        };
 
         document.addEventListener('DOMContentLoaded', function() {
+            const collapseTriggers = document.querySelectorAll('[data-collapse-target]');
+
+            const setCollapseState = (trigger, content, isOpen) => {
+                content.classList.toggle('open', isOpen);
+                content.classList.toggle('active', isOpen);
+                content.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+                trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                content.style.maxHeight = isOpen ? `${content.scrollHeight}px` : '0px';
+            };
+
+            collapseTriggers.forEach((trigger) => {
+                const content = document.getElementById(trigger.dataset.collapseTarget);
+
+                if (!content) {
+                    return;
+                }
+
+                setCollapseState(
+                    trigger,
+                    content,
+                    content.classList.contains('open') || content.classList.contains('active')
+                );
+
+                trigger.addEventListener('click', function() {
+                    setCollapseState(this, content, this.getAttribute('aria-expanded') !== 'true');
+                });
+            });
+
+            window.addEventListener('resize', function() {
+                document.querySelectorAll('.collapsible-content.open').forEach((content) => {
+                    content.style.maxHeight = `${content.scrollHeight}px`;
+                });
+            });
+
+            document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+                anchor.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+
+                    if (!href || href === '#' || this.hasAttribute('data-bs-toggle')) {
+                        return;
+                    }
+
+                    let target = null;
+
+                    try {
+                        target = document.querySelector(href);
+                    } catch (error) {
+                        return;
+                    }
+
+                    if (!target) return;
+
+                    e.preventDefault();
+                    window.scrollTo({
+                        top: target.offsetTop - 90,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
             const galleryImages = @json(array_values($gallery ?? []));
             const lightbox = document.getElementById('galleryLightbox');
 

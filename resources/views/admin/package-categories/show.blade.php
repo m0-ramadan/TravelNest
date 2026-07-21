@@ -84,14 +84,60 @@
                     <div class="col-md-4">
                         <div class="info-box">
                             <div class="info-label">الحالة</div>
-                            <div class="info-value">{{ $category->is_active ?? true ? 'مفعل' : 'غير مفعل' }}</div>
+                            <div class="info-value">{{ $category->is_active ? 'مفعل' : 'غير مفعل' }}</div>
                         </div>
                     </div>
 
                     <div class="col-md-4">
                         <div class="info-box">
                             <div class="info-label">مميز</div>
-                            <div class="info-value">{{ $category->is_featured ?? false ? 'نعم' : 'لا' }}</div>
+                            <div class="info-value">{{ $category->is_featured ? 'نعم' : 'لا' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-label">نوع التصنيف</div>
+                            <div class="info-value">
+                                {{ \App\Models\PackageCategory::TYPES[$category->category_type] ?? $category->category_type }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-label">التصنيف الأب</div>
+                            <div class="info-value">{{ $category->parent ? adminTrans($category->parent->name) : '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-label">الدولة</div>
+                            <div class="info-value">{{ $category->country ? adminTrans($category->country->name) : '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-label">التصنيفات الفرعية</div>
+                            <div class="info-value">{{ $category->children_count }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-label">مدة الرحلة</div>
+                            <div class="info-value">
+                                {{ $category->min_days ?? '-' }} — {{ $category->max_days ?? '-' }} يوم
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-label">السعر يبدأ من</div>
+                            <div class="info-value">{{ $category->price_from !== null ? number_format((float) $category->price_from, 2) : '-' }}</div>
                         </div>
                     </div>
 
