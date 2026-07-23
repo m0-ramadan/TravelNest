@@ -1297,9 +1297,9 @@
                                     <div class="col-md-6 col-lg-4">
                                         <div class="related-card h-100">
                                             @if($attraction->image)
-                                                <img src="{{ asset(ltrim($attraction->image, '/')) }}" alt="{{ $attractionTitle }}" loading="lazy">
+                                                <img src="{{ asset('storage/' . ltrim($attraction->image, '/')) }}" alt="{{ $attractionTitle }}" loading="lazy">
                                             @elseif($attraction->attraction && $attraction->attraction->image)
-                                                <img src="{{ asset(ltrim($attraction->attraction->image, '/')) }}" alt="{{ $attractionTitle }}" loading="lazy">
+                                                <img src="{{ asset('storage/' . ltrim($attraction->attraction->image, '/')) }}" alt="{{ $attractionTitle }}" loading="lazy">
                                             @else
                                                 <img src="{{ asset('website/photos/home2.webp') }}" alt="{{ $attractionTitle }}" loading="lazy">
                                             @endif
