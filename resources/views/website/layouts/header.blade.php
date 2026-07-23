@@ -160,6 +160,21 @@
      </div>
  </nav>
    <style>
+      @media (min-width: 992px) {
+          /*
+           * Keep the desktop dropdown open while the pointer crosses the visual
+           * gap between its toggle and menu.
+           */
+          body.website-theme-shell .navbar .dropdown-menu::before {
+              content: "";
+              position: absolute;
+              top: -12px;
+              right: 0;
+              left: 0;
+              height: 12px;
+          }
+      }
+
       @media (max-width: 991px) {
           body.website-theme-shell .navbar-brand img {
                  width: 130px !important;

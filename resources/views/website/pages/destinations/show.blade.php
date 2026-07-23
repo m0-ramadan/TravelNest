@@ -6,11 +6,12 @@
         ? route('website.destinations.index', ['country' => $destination->country->slug])
         : route('website.destinations.index');
     $countryName = $destination->country?->display_name ?: __('Destination');
-    $heroSubtitle = $shortDescription !== ''
-        ? $shortDescription
-        : __('Explore curated journeys, private tours, and unforgettable highlights in :destination.', [
-            'destination' => $destination->display_name,
-        ]);
+    $heroSubtitle =
+        $shortDescription !== ''
+            ? $shortDescription
+            : __('Explore curated journeys, private tours, and unforgettable highlights in :destination.', [
+                'destination' => $destination->display_name,
+            ]);
     $activeType = collect($typeOptions)->firstWhere('value', $selectedType);
     $resultsTitle = $activeType
         ? $activeType['label'] . ' ' . __('in') . ' ' . $destination->display_name
@@ -19,7 +20,18 @@
 
 @section('title', $pageTitle . ' - Etro Tours')
 @section('description', $pageDescription)
-@section('keywords', trim(collect([$destination->display_name, $countryName, 'Etro Tours', 'destination travel', 'Egypt trips'])->filter()->implode(', '), ', '))
+@section('keywords',
+    trim(
+    collect([
+    $destination->display_name,
+    $countryName,
+    'Etro Tours',
+    'destination travel',
+    'Egypt
+    trips',
+    ])->filter()->implode(', '),
+    ', ',
+    ))
 @section('image', $heroImage)
 
 @section('css')
@@ -685,7 +697,7 @@
 
         .destination-cta {
             background: linear-gradient(135deg, #0f2749 0%, #123d66 100%);
-            padding: 0 0 92px;
+            padding: 92px 0 92px;
         }
 
         .cta-card {
@@ -1015,7 +1027,9 @@
                         <div class="col-lg-4 col-md-6">
                             <article class="attraction-card">
                                 <div class="attraction-image">
-                                    <img src="{{ $attraction['image'] }}" alt="{{ $attraction['title'] }}" loading="lazy">
+                                    <img src="{{ $attraction['image'] }}" alt="{{ $attraction['title'] }}"
+                                        loading="lazy"
+                                        onerror="this.onerror=null;this.src='{{ asset('website/photos/home2.webp') }}';">
                                 </div>
                                 <div class="attraction-body">
                                     <h3 class="attraction-title">{{ $attraction['title'] }}</h3>
@@ -1108,7 +1122,8 @@
                                     @endif
 
                                     <a href="{{ $package['url'] }}">
-                                        <img src="{{ $package['image'] }}" alt="{{ $package['title'] }}" loading="lazy">
+                                        <img src="{{ $package['image'] }}" alt="{{ $package['title'] }}" loading="lazy"
+                                            onerror="this.onerror=null;this.src='{{ asset('website/photos/home2.webp') }}';">
                                     </a>
 
                                     @if ($package['price'])

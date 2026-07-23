@@ -319,15 +319,27 @@ abstract class BaseWebsiteController extends Controller
 
         $path = ltrim($path, '/');
 
-        if (Str::startsWith($path, ['storage/', 'website/', 'images/'])) {
-            return asset($path);
+        if (Str::startsWith($path, 'storage/')) {
+            $storagePath = Str::after($path, 'storage/');
+
+            return Storage::disk('public')->exists($storagePath) || file_exists(public_path($path))
+                ? asset($path)
+                : $fallback;
+        }
+
+        if (Str::startsWith($path, 'website/')) {
+            return file_exists(public_path($path)) ? asset($path) : $fallback;
         }
 
         if (Storage::disk('public')->exists($path)) {
             return asset('storage/' . $path);
         }
 
-        return asset($path);
+        if (file_exists(public_path($path))) {
+            return asset($path);
+        }
+
+        return $fallback;
     }
 
     protected function money($amount, ?string $symbol = '$'): ?string

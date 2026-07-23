@@ -121,6 +121,16 @@ class DestinationController extends BaseWebsiteController
             ->where('city_id', $destination->id)
             ->pluck('package_id');
 
+        $matchesDestination = function ($query) use ($destination, $packageIds) {
+            $query->whereIn('id', $packageIds)
+                ->orWhereHas('destination', function ($attractionQuery) use ($destination) {
+                    $attractionQuery->where('city_id', $destination->id);
+                })
+                ->orWhereHas('packageAttractions.attraction', function ($attractionQuery) use ($destination) {
+                    $attractionQuery->where('city_id', $destination->id);
+                });
+        };
+
         $allowedTypes = [
             'travel_package',
             'nile_cruise',
@@ -139,12 +149,12 @@ class DestinationController extends BaseWebsiteController
 
         $statsQuery = Package::query()
             ->where('is_active', true)
-            ->whereIn('id', $packageIds);
+            ->where($matchesDestination);
 
         $packages = Package::query()
             ->with(['currency', 'primaryCountry', 'highlights', 'tags', 'cruise', 'category'])
             ->where('is_active', true)
-            ->whereIn('id', $packageIds)
+            ->where($matchesDestination)
             ->when($selectedType, fn ($query) => $query->where('package_type', $selectedType))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {

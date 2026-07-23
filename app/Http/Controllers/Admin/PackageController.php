@@ -350,6 +350,10 @@ class PackageController extends Controller
                     'season_name',
                     'price_type',
                     'room_type',
+                    'pax_min',
+                    'pax_max',
+                    'group_size_min',
+                    'group_size_max',
                     'amount',
                     'currency_id',
                     'valid_from',
@@ -513,6 +517,8 @@ class PackageController extends Controller
             'prices.*.season_name' => ['nullable', 'string'],
             'prices.*.price_type' => ['nullable', 'string'],
             'prices.*.room_type' => ['nullable', 'string'],
+            'prices.*.pax_min' => ['nullable', 'integer', 'min:1'],
+            'prices.*.pax_max' => ['nullable', 'integer', 'min:1'],
             'prices.*.amount' => ['nullable', 'numeric'],
             'prices.*.currency_id' => ['nullable', 'integer'],
             'prices.*.valid_from' => ['nullable', 'date'],
@@ -541,6 +547,19 @@ class PackageController extends Controller
 
             if ($adultMinAge <= $infantMaxAge) {
                 $validator->errors()->add('adult_min_age', 'حد البالغين يجب أن يكون أكبر من الحد الأعلى للرضع.');
+            }
+
+            foreach ((array) $request->input('prices', []) as $index => $price) {
+                $paxMin = $price['pax_min'] ?? null;
+                $paxMax = $price['pax_max'] ?? null;
+
+                if ($paxMin !== null && $paxMin !== '' && $paxMax !== null && $paxMax !== ''
+                    && (int) $paxMax < (int) $paxMin) {
+                    $validator->errors()->add(
+                        "prices.{$index}.pax_max",
+                        'الحد الأقصى لعدد الأفراد يجب أن يساوي أو يزيد عن الحد الأدنى.'
+                    );
+                }
             }
         });
 
@@ -879,6 +898,8 @@ class PackageController extends Controller
                 'season_name' => $price['season_name'] ?? null,
                 'price_type' => $price['price_type'] ?? 'from',
                 'room_type' => $price['room_type'] ?? null,
+                'pax_min' => $price['pax_min'] ?? null,
+                'pax_max' => $price['pax_max'] ?? null,
                 'amount' => $price['amount'],
                 'currency_id' => $price['currency_id'] ?? $package->currency_id,
                 'valid_from' => $price['valid_from'] ?? null,
@@ -960,6 +981,8 @@ class PackageController extends Controller
                 'season_name' => $price['season_name'] ?? $price['season'] ?? null,
                 'price_type' => $price['price_type'] ?? 'from',
                 'room_type' => $price['room_type'] ?? null,
+                'pax_min' => $price['pax_min'] ?? null,
+                'pax_max' => $price['pax_max'] ?? null,
                 'amount' => $price['amount'],
                 'currency_id' => $price['currency_id'] ?? $currencyId,
                 'valid_from' => $price['valid_from'] ?? null,

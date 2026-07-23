@@ -2261,6 +2261,30 @@
                                                         </div>
 
                                                         <div>
+                                                            <label class="form-label">{{ admin_t('عدد الأفراد من') }}</label>
+                                                            <input type="number" min="1"
+                                                                name="prices[{{ $i }}][pax_min]"
+                                                                class="form-control"
+                                                                value="{{ $price['pax_min'] ?? '' }}"
+                                                                placeholder="{{ admin_t('مثال: 1') }}">
+                                                            @error("prices.$i.pax_min")
+                                                                <div class="text-danger small mt-1">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
+
+                                                        <div>
+                                                            <label class="form-label">{{ admin_t('عدد الأفراد إلى') }}</label>
+                                                            <input type="number" min="1"
+                                                                name="prices[{{ $i }}][pax_max]"
+                                                                class="form-control"
+                                                                value="{{ $price['pax_max'] ?? '' }}"
+                                                                placeholder="{{ admin_t('مثال: 4') }}">
+                                                            @error("prices.$i.pax_max")
+                                                                <div class="text-danger small mt-1">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
+
+                                                        <div>
                                                             <label class="form-label">{{ admin_t('من تاريخ') }}</label>
                                                             <input type="date"
                                                                 name="prices[{{ $i }}][valid_from]"
@@ -3499,6 +3523,14 @@
                                 <div>
                                     <label class="form-label">${@json(admin_t('نوع الغرفة'))}</label>
                                     <input type="text" name="prices[${priceIndex}][room_type]" class="form-control" placeholder="${@json(admin_t('مثال: غرفة مزدوجة'))}">
+                                </div>
+                                <div>
+                                    <label class="form-label">${@json(admin_t('عدد الأفراد من'))}</label>
+                                    <input type="number" min="1" name="prices[${priceIndex}][pax_min]" class="form-control" placeholder="${@json(admin_t('مثال: 1'))}">
+                                </div>
+                                <div>
+                                    <label class="form-label">${@json(admin_t('عدد الأفراد إلى'))}</label>
+                                    <input type="number" min="1" name="prices[${priceIndex}][pax_max]" class="form-control" placeholder="${@json(admin_t('مثال: 4'))}">
                                 </div>
                                 <div>
                                     <label class="form-label">${@json(admin_t('من تاريخ'))}</label>

@@ -199,11 +199,10 @@
         );
 
         $selectedAttractionIds = collect(
-            old(
-                'attraction_ids',
-                $package->packageAttractions?->pluck('attraction_id')->all() ?? [],
-            ),
-        )->map(fn($id) => (int) $id)->all();
+            old('attraction_ids', $package->packageAttractions?->pluck('attraction_id')->all() ?? []),
+        )
+            ->map(fn($id) => (int) $id)
+            ->all();
 
         $itinerary = old(
             'itinerary',
@@ -274,6 +273,8 @@
                             'season_name' => $item->season_name,
                             'price_type' => $item->price_type,
                             'room_type' => $item->room_type,
+                            'pax_min' => $item->pax_min,
+                            'pax_max' => $item->pax_max,
                             'amount' => $item->amount,
                             'currency_id' => $item->currency_id,
                             'valid_from' => $item->valid_from,
@@ -664,7 +665,8 @@
                                     </div>
 
                                     <div class="col-md-8 mb-2">
-                                        <label class="form-label" data-itinerary-details-label>Day details and activities</label>
+                                        <label class="form-label" data-itinerary-details-label>Day details and
+                                            activities</label>
                                         <textarea name="itinerary[{{ $i }}][description]" rows="4" class="form-control">{{ $day['description'] ?? '' }}</textarea>
                                     </div>
 
@@ -891,6 +893,26 @@
                                     </div>
 
                                     <div class="col-md-2 mb-2">
+                                        <label class="form-label">عدد الأفراد من</label>
+                                        <input type="number" min="1"
+                                            name="prices[{{ $i }}][pax_min]" class="form-control"
+                                            value="{{ $price['pax_min'] ?? '' }}" placeholder="1">
+                                        @error("prices.$i.pax_min")
+                                            <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-2 mb-2">
+                                        <label class="form-label">عدد الأفراد إلى</label>
+                                        <input type="number" min="1"
+                                            name="prices[{{ $i }}][pax_max]" class="form-control"
+                                            value="{{ $price['pax_max'] ?? '' }}" placeholder="4">
+                                        @error("prices.$i.pax_max")
+                                            <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-2 mb-2">
                                         <label class="form-label">السعر</label>
                                         <input type="number" step="0.01" name="prices[{{ $i }}][amount]"
                                             class="form-control" value="{{ $price['amount'] ?? '' }}">
@@ -978,15 +1000,17 @@
                                 <div class="row">
                                     <div class="col-md-5 mb-2">
                                         <label class="form-label">Question</label>
-                                        <input type="text" name="faq_json[{{ $i }}][question]" class="form-control"
-                                            value="{{ is_array($faq['question'] ?? null) ? ($faq['question'][app()->getLocale()] ?? $faq['question']['en'] ?? '') : ($faq['question'] ?? '') }}">
+                                        <input type="text" name="faq_json[{{ $i }}][question]"
+                                            class="form-control"
+                                            value="{{ is_array($faq['question'] ?? null) ? $faq['question'][app()->getLocale()] ?? ($faq['question']['en'] ?? '') : $faq['question'] ?? '' }}">
                                     </div>
                                     <div class="col-md-6 mb-2">
                                         <label class="form-label">Answer</label>
-                                        <textarea name="faq_json[{{ $i }}][answer]" rows="3" class="form-control">{{ is_array($faq['answer'] ?? null) ? ($faq['answer'][app()->getLocale()] ?? $faq['answer']['en'] ?? '') : ($faq['answer'] ?? '') }}</textarea>
+                                        <textarea name="faq_json[{{ $i }}][answer]" rows="3" class="form-control">{{ is_array($faq['answer'] ?? null) ? $faq['answer'][app()->getLocale()] ?? ($faq['answer']['en'] ?? '') : $faq['answer'] ?? '' }}</textarea>
                                     </div>
                                     <div class="col-md-1 mb-2 d-flex align-items-end">
-                                        <button type="button" class="btn btn-danger w-100 remove-btn js-remove">Remove</button>
+                                        <button type="button"
+                                            class="btn btn-danger w-100 remove-btn js-remove">Remove</button>
                                     </div>
                                 </div>
                             </div>
@@ -1169,7 +1193,8 @@
 
                 attractionsPicker?.querySelectorAll('[data-attraction-choice]').forEach(choice => {
                     const searchText = (choice.dataset.attractionSearch || '').toLocaleLowerCase();
-                    choice.classList.toggle('is-filtered-out', query !== '' && !searchText.includes(query));
+                    choice.classList.toggle('is-filtered-out', query !== '' && !searchText.includes(
+                        query));
                 });
             });
 
@@ -1260,28 +1285,28 @@
 
             if (title) title.textContent = isHourly ? 'Trip Steps' : 'Daily Itinerary';
             if (copy) {
-                copy.textContent = isHourly
-                    ? 'Add every trip step in order with its time and full details.'
-                    : 'Add the content for each day in order.';
+                copy.textContent = isHourly ?
+                    'Add every trip step in order with its time and full details.' :
+                    'Add the content for each day in order.';
             }
             if (addButton) addButton.textContent = isHourly ? '+ Add New Step' : '+ Add New Day';
 
             document.querySelectorAll('[data-itinerary-item]').forEach(item => {
                 item.querySelector('[data-itinerary-unit]').textContent = isHourly ? 'Step' : 'Day';
-                item.querySelector('[data-itinerary-duration-label]').textContent = isHourly
-                    ? 'Time / Duration'
-                    : 'Date / Day label';
-                item.querySelector('[data-itinerary-title-label]').textContent = isHourly
-                    ? 'Step title / Place'
-                    : 'Day title / Place';
-                item.querySelector('[data-itinerary-details-label]').textContent = isHourly
-                    ? 'Step details and activities'
-                    : 'Day details and activities';
+                item.querySelector('[data-itinerary-duration-label]').textContent = isHourly ?
+                    'Time / Duration' :
+                    'Date / Day label';
+                item.querySelector('[data-itinerary-title-label]').textContent = isHourly ?
+                    'Step title / Place' :
+                    'Day title / Place';
+                item.querySelector('[data-itinerary-details-label]').textContent = isHourly ?
+                    'Step details and activities' :
+                    'Day details and activities';
 
                 const durationInput = item.querySelector('[data-itinerary-duration-input]');
-                durationInput.placeholder = isHourly
-                    ? 'Example: 09:00 AM - 10:30 AM'
-                    : 'Optional date or day label';
+                durationInput.placeholder = isHourly ?
+                    'Example: 09:00 AM - 10:30 AM' :
+                    'Optional date or day label';
             });
 
             renumberItineraryItems();
@@ -1422,6 +1447,14 @@
                                 <option value="single">Single</option>
                                 <option value="triple">Triple</option>
                             </select>
+                        </div>
+
+                        <div class="col-md-4 mb-2">
+                            <input type="number" min="1" name="prices[${priceIndex}][pax_min]" class="form-control" placeholder="عدد الأفراد من">
+                        </div>
+
+                        <div class="col-md-4 mb-2">
+                            <input type="number" min="1" name="prices[${priceIndex}][pax_max]" class="form-control" placeholder="عدد الأفراد إلى">
                         </div>
 
                         <div class="col-md-4 mb-2">

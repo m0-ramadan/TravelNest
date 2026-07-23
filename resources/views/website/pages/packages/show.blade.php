@@ -2,7 +2,17 @@
 
 @section('title', $package->getTranslation('seo_title') ?: $title . ' - Etro Tours')
 @section('description', $package->getTranslation('seo_description') ?: $shortDescription)
-@section('keywords', trim(collect([$title, $tourTypeText ?? null, $package->primaryCountry?->display_name ?? null, 'Etro Tours'])->filter()->implode(', '), ', '))
+@section('keywords',
+    trim(
+    collect([
+    $title,
+    $tourTypeText ?? null,
+    $package->primaryCountry?->display_name ?? null,
+    'Etro
+    Tours',
+    ])->filter()->implode(', '),
+    ', ',
+    ))
 @section('image', $heroImage)
 @section('canonical', $canonicalUrl)
 
@@ -1014,13 +1024,12 @@
 @section('content')
     @php
         $currencySymbol = $package->currency?->symbol ?? '$';
-        $priceFrom = (float) ($package->price_from ?? $package->start_from_price ?? 0);
+        $priceFrom = (float) ($package->price_from ?? ($package->start_from_price ?? 0));
         $priceTo = (float) ($package->price_to ?? 0);
         $comparePrice = (float) ($package->compare_price ?? 0);
         $priceText = null;
-        $hasCategoryPricing = $package->adult_price !== null
-            || $package->child_price !== null
-            || $package->infant_price !== null;
+        $hasCategoryPricing =
+            $package->adult_price !== null || $package->child_price !== null || $package->infant_price !== null;
         $pricingInformation = $package->getTranslation('pricing_information');
 
         if ($priceFrom > 0 || $priceTo > 0) {
@@ -1133,22 +1142,22 @@
                                         </div>
                                     </div>
                                 @endif
-                                @if ($packageTypeText)
+                                {{-- @if ($packageTypeText)
                                     <div class="detail-item"><i class="la la-suitcase"></i>
                                         <div class="detail-text">
                                             <strong class="detail-label">{{ __('Package Type:') }}</strong>
                                             <span class="detail-value">{{ $packageTypeText }}</span>
                                         </div>
                                     </div>
-                                @endif
-                                @if ($countryText)
+                                @endif --}}
+                                {{-- @if ($countryText)
                                     <div class="detail-item"><i class="la la-globe"></i>
                                         <div class="detail-text">
                                             <strong class="detail-label">{{ __('Country:') }}</strong>
                                             <span class="detail-value">{{ $countryText }}</span>
                                         </div>
                                     </div>
-                                @endif
+                                @endif --}}
                                 @if ($destinations)
                                     <div class="detail-item"><i class="la la-map-marker"></i>
                                         <div class="detail-text">
@@ -1165,14 +1174,14 @@
                                         </div>
                                     </div>
                                 @endif
-                                @if ($locationSummary)
+                                {{-- @if ($locationSummary)
                                     <div class="detail-item"><i class="la la-map"></i>
                                         <div class="detail-text">
                                             <strong class="detail-label">{{ __('Location:') }}</strong>
                                             <span class="detail-value">{{ $locationSummary }}</span>
                                         </div>
                                     </div>
-                                @endif
+                                @endif --}}
                                 @if ($pickup)
                                     <div class="detail-item"><i class="la la-map-pin"></i>
                                         <div class="detail-text">
@@ -1181,14 +1190,14 @@
                                         </div>
                                     </div>
                                 @endif
-                                @if ($dropoff)
+                                {{-- @if ($dropoff)
                                     <div class="detail-item"><i class="la la-location-arrow"></i>
                                         <div class="detail-text">
                                             <strong class="detail-label">{{ __('Dropoff Location:') }}</strong>
                                             <span class="detail-value">{{ $dropoff }}</span>
                                         </div>
                                     </div>
-                                @endif
+                                @endif --}}
                                 @if ($tourTypeText)
                                     <div class="detail-item"><i class="la la-users"></i>
                                         <div class="detail-text">
@@ -1197,43 +1206,47 @@
                                         </div>
                                     </div>
                                 @endif
-                                @if ($package->category)
+                                {{-- @if ($package->category)
                                     <div class="detail-item"><i class="la la-tag"></i>
                                         <div class="detail-text">
                                             <strong class="detail-label">{{ __('Category:') }}</strong>
                                             <span class="detail-value">{{ $package->category->display_name }}</span>
                                         </div>
                                     </div>
-                                @endif
-                                @if ($package->difficulty_level)
+                                @endif --}}
+                                {{-- @if ($package->difficulty_level)
                                     <div class="detail-item"><i class="la la-hiking"></i>
                                         <div class="detail-text">
                                             <strong class="detail-label">{{ __('Difficulty:') }}</strong>
                                             <span class="detail-value">{{ __(ucfirst($package->difficulty_level)) }}</span>
                                         </div>
                                     </div>
-                                @endif
-                                @if ($package->min_participants || $package->max_participants)
+                                @endif --}}
+                                {{-- @if ($package->min_participants || $package->max_participants)
                                     <div class="detail-item"><i class="la la-user-friends"></i>
                                         <div class="detail-text">
                                             <strong class="detail-label">{{ __('Group Size:') }}</strong>
                                             <span class="detail-value">
-                                                @if($package->min_participants && $package->max_participants)
-                                                    {{ $package->min_participants }} - {{ $package->max_participants }} {{ __('Pax') }}
+                                                @if ($package->min_participants && $package->max_participants)
+                                                    {{ $package->min_participants }} - {{ $package->max_participants }}
+                                                    {{ __('Pax') }}
                                                 @elseif($package->max_participants)
-                                                    {{ __('Up to') }} {{ $package->max_participants }} {{ __('Pax') }}
+                                                    {{ __('Up to') }} {{ $package->max_participants }}
+                                                    {{ __('Pax') }}
                                                 @else
-                                                    {{ __('Min') }} {{ $package->min_participants }} {{ __('Pax') }}
+                                                    {{ __('Min') }} {{ $package->min_participants }}
+                                                    {{ __('Pax') }}
                                                 @endif
                                             </span>
                                         </div>
                                     </div>
-                                @endif
-                                @if ($package->booking_lead_days)
+                                @endif --}}
+                                {{-- @if ($package->booking_lead_days)
                                     <div class="detail-item"><i class="la la-hourglass-half"></i>
                                         <div class="detail-text">
                                             <strong class="detail-label">{{ __('Booking Window:') }}</strong>
-                                            <span class="detail-value">{{ __('Min. :days days before', ['days' => $package->booking_lead_days]) }}</span>
+                                            <span
+                                                class="detail-value">{{ __('Min. :days days before', ['days' => $package->booking_lead_days]) }}</span>
                                         </div>
                                     </div>
                                 @endif
@@ -1244,8 +1257,8 @@
                                             <span class="detail-value">{{ $bookingModeText }}</span>
                                         </div>
                                     </div>
-                                @endif
-                                @if ((float) $package->rating_avg > 0 || (int) $package->reviews_count > 0)
+                                @endif --}}
+                                {{-- @if ((float) $package->rating_avg > 0 || (int) $package->reviews_count > 0)
                                     <div class="detail-item"><i class="la la-star"></i>
                                         <div class="detail-text">
                                             <strong class="detail-label">{{ __('Rating:') }}</strong>
@@ -1257,7 +1270,7 @@
                                             </span>
                                         </div>
                                     </div>
-                                @endif
+                                @endif --}}
                             </div>
                         </div>
                     </section>
@@ -1266,10 +1279,12 @@
                         <section class="content-section">
                             <h2 class="section-header">{{ __('Tour Highlights') }}</h2>
                             <div class="styled-list">
-                                <ul style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;">
+                                <ul
+                                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;">
                                     @foreach ($highlights as $highlight)
                                         <li style="border: none; padding: 5px 0;">
-                                            <i class="la la-check-circle" style="color:var(--rich-gold, #c5955b); margin-right:8px; font-size: 1.2rem; vertical-align: middle;"></i>
+                                            <i class="la la-check-circle"
+                                                style="color:var(--rich-gold, #c5955b); margin-right:8px; font-size: 1.2rem; vertical-align: middle;"></i>
                                             @if ($highlight->display_title)
                                                 <strong>{{ $highlight->display_title }}</strong>
                                             @endif
@@ -1289,24 +1304,29 @@
                             <div class="row g-4 mt-2">
                                 @foreach ($package->packageAttractions as $attraction)
                                     @php
-                                        $attractionTitle = $attraction->display_title
-                                            ?: $attraction->attraction?->display_name;
-                                        $attractionTeaser = $attraction->getTranslation('teaser')
-                                            ?: $attraction->attraction?->display_short_description;
+                                        $attractionTitle =
+                                            $attraction->display_title ?: $attraction->attraction?->display_name;
+                                        $attractionTeaser =
+                                            $attraction->getTranslation('teaser') ?:
+                                            $attraction->attraction?->display_short_description;
                                     @endphp
                                     <div class="col-md-6 col-lg-4">
                                         <div class="related-card h-100">
-                                            @if($attraction->image)
-                                                <img src="{{ asset('storage/' . ltrim($attraction->image, '/')) }}" alt="{{ $attractionTitle }}" loading="lazy">
+                                            @if ($attraction->image)
+                                                <img src="{{ asset('storage/' . ltrim($attraction->image, '/')) }}"
+                                                    alt="{{ $attractionTitle }}" loading="lazy">
                                             @elseif($attraction->attraction && $attraction->attraction->image)
-                                                <img src="{{ asset('storage/' . ltrim($attraction->attraction->image, '/')) }}" alt="{{ $attractionTitle }}" loading="lazy">
+                                                <img src="{{ asset('storage/' . ltrim($attraction->attraction->image, '/')) }}"
+                                                    alt="{{ $attractionTitle }}" loading="lazy">
                                             @else
-                                                <img src="{{ asset('website/photos/home2.webp') }}" alt="{{ $attractionTitle }}" loading="lazy">
+                                                <img src="{{ asset('website/photos/home2.webp') }}"
+                                                    alt="{{ $attractionTitle }}" loading="lazy">
                                             @endif
                                             <div class="related-card-body">
                                                 <h5 class="related-card-title mb-2">{{ $attractionTitle }}</h5>
-                                                @if($attractionTeaser)
-                                                    <p class="mb-0 text-muted" style="font-size: 0.9rem;">{{ \Illuminate\Support\Str::limit($attractionTeaser, 100) }}</p>
+                                                @if ($attractionTeaser)
+                                                    <p class="mb-0 text-muted" style="font-size: 0.9rem;">
+                                                        {{ \Illuminate\Support\Str::limit($attractionTeaser, 100) }}</p>
                                                 @endif
                                             </div>
                                         </div>
@@ -1319,7 +1339,8 @@
                     @if ($videoEmbedUrl)
                         <section class="content-section">
                             <h2 class="section-header">{{ __('Video Tour') }}</h2>
-                            <div style="border-radius:18px; overflow:hidden; position:relative; padding-bottom:56.25%; height:0; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                            <div
+                                style="border-radius:18px; overflow:hidden; position:relative; padding-bottom:56.25%; height:0; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
                                 <iframe src="{{ $videoEmbedUrl }}" title="{{ __('Video Tour') }}: {{ $title }}"
                                     style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
                                     loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
@@ -1335,13 +1356,17 @@
                             <div class="itinerary-section">
                                 @foreach ($itineraries as $day)
                                     <div class="day-card">
-                                        <button type="button" class="day-header" data-collapse-target="day-{{ $day->id }}"
+                                        <button type="button" class="day-header"
+                                            data-collapse-target="day-{{ $day->id }}"
                                             aria-controls="day-{{ $day->id }}"
                                             aria-expanded="{{ $loop->first ? 'true' : 'false' }}">
-                                            <div class="day-number">{{ $day->day_number }}</div>
+                                            <div class="day-number" style="color: white !important;">
+                                                {{ $day->day_number }}</div>
                                             <div>
                                                 <h3 class="day-title">
-                                                    {{ $itineraryUnit }} {{ $day->day_number }}@if ($day->display_title): {{ $day->display_title }}@endif
+                                                    {{ $itineraryUnit }} {{ $day->day_number }}@if ($day->display_title)
+                                                        : {{ $day->display_title }}
+                                                    @endif
                                                 </h3>
                                                 @if ($day->duration)
                                                     <small>
@@ -1389,13 +1414,13 @@
                                     <div class="{{ $excluded->count() ? 'col-md-6' : 'col-12' }}">
                                         <div class="included-box">
                                             <h4 class="box-title">{{ __('Included in Your Journey') }}</h4>
-                                        <div class="styled-list">
-                                            <ul>
-                                                @foreach ($included as $item)
-                                                    <li>{{ $item->display_content }}</li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
+                                            <div class="styled-list">
+                                                <ul>
+                                                    @foreach ($included as $item)
+                                                        <li>{{ $item->display_content }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
                                         </div>
                                     </div>
                                 @endif
@@ -1403,13 +1428,13 @@
                                     <div class="{{ $included->count() ? 'col-md-6' : 'col-12' }}">
                                         <div class="excluded-box">
                                             <h4 class="box-title">{{ __('Not Included') }}</h4>
-                                        <div class="styled-list">
-                                            <ul>
-                                                @foreach ($excluded as $item)
-                                                    <li>{{ $item->display_content }}</li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
+                                            <div class="styled-list">
+                                                <ul>
+                                                    @foreach ($excluded as $item)
+                                                        <li>{{ $item->display_content }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
                                         </div>
                                     </div>
                                 @endif
@@ -1423,7 +1448,8 @@
                             @if ($comparePrice > 0)
                                 <p class="section-subtitle">
                                     {{ __('Compare Price:') }}
-                                    <span style="text-decoration: line-through;">{{ $currencySymbol }}{{ number_format($comparePrice, 2) }}</span>
+                                    <span
+                                        style="text-decoration: line-through;">{{ $currencySymbol }}{{ number_format($comparePrice, 2) }}</span>
                                 </p>
                             @endif
 
@@ -1443,21 +1469,26 @@
                                                     <tr>
                                                         <td>{{ __('Adult') }}</td>
                                                         <td>{{ $package->adult_min_age }}+ {{ __('years') }}</td>
-                                                        <td>{{ $currencySymbol }}{{ number_format((float) $package->adult_price, 2) }}</td>
+                                                        <td>{{ $currencySymbol }}{{ number_format((float) $package->adult_price, 2) }}
+                                                        </td>
                                                     </tr>
                                                 @endif
                                                 @if ($package->child_price !== null)
                                                     <tr>
                                                         <td>{{ __('Child') }}</td>
-                                                        <td>{{ $package->child_min_age }} - {{ $package->child_max_age }} {{ __('years') }}</td>
-                                                        <td>{{ $currencySymbol }}{{ number_format((float) $package->child_price, 2) }}</td>
+                                                        <td>{{ $package->child_min_age }} -
+                                                            {{ $package->child_max_age }} {{ __('years') }}</td>
+                                                        <td>{{ $currencySymbol }}{{ number_format((float) $package->child_price, 2) }}
+                                                        </td>
                                                     </tr>
                                                 @endif
                                                 @if ($package->infant_price !== null)
                                                     <tr>
                                                         <td>{{ __('Infant') }}</td>
-                                                        <td>{{ $package->infant_min_age }} - {{ $package->infant_max_age }} {{ __('years') }}</td>
-                                                        <td>{{ $currencySymbol }}{{ number_format((float) $package->infant_price, 2) }}</td>
+                                                        <td>{{ $package->infant_min_age }} -
+                                                            {{ $package->infant_max_age }} {{ __('years') }}</td>
+                                                        <td>{{ $currencySymbol }}{{ number_format((float) $package->infant_price, 2) }}
+                                                        </td>
                                                     </tr>
                                                 @endif
                                             </tbody>
@@ -1473,6 +1504,7 @@
                                             <thead>
                                                 <tr>
                                                     <th>{{ __('Option') }}</th>
+                                                    <th>{{ __('Pax') }}</th>
                                                     <th>{{ __('Price Details') }}</th>
                                                     <th>{{ __('Validity') }}</th>
                                                     <th>{{ __('Price') }}</th>
@@ -1484,30 +1516,43 @@
                                                         <td>
                                                             {{ $price->display_label }}
                                                             @if ($price->display_season_name)
-                                                                <span class="price-meta"><i class="la la-sun"></i> {{ $price->display_season_name }}</span>
+                                                                <span class="price-meta"><i class="la la-sun"></i>
+                                                                    {{ $price->display_season_name }}</span>
                                                             @endif
                                                             @if ($price->display_notes)
-                                                                <span class="price-meta">{{ $price->display_notes }}</span>
+                                                                <span
+                                                                    class="price-meta">{{ $price->display_notes }}</span>
+                                                            @endif
+                                                        </td>
+                                                        <td>
+                                                            @if ($price->pax_min && $price->pax_max && $price->pax_min === $price->pax_max)
+                                                                {{ $price->pax_min }} {{ __('Pax') }}
+                                                            @elseif ($price->pax_min && $price->pax_max)
+                                                                {{ $price->pax_min }} - {{ $price->pax_max }} {{ __('Pax') }}
+                                                            @elseif ($price->pax_min)
+                                                                {{ $price->pax_min }}+ {{ __('Pax') }}
+                                                            @elseif ($price->pax_max)
+                                                                1 - {{ $price->pax_max }} {{ __('Pax') }}
+                                                            @else
+                                                                -
                                                             @endif
                                                         </td>
                                                         <td>
                                                             {{ $price->display_price_type }}
                                                             @if ($price->display_room_type)
-                                                                <span class="price-meta">{{ __('Room:') }} {{ $price->display_room_type }}</span>
-                                                            @endif
-                                                            @if ($price->pax_min || $price->pax_max)
-                                                                <span class="price-meta">
-                                                                    {{ $price->pax_min ?? 1 }} - {{ $price->pax_max ?? '+' }} {{ __('Pax') }}
-                                                                </span>
+                                                                <span class="price-meta">{{ __('Room:') }}
+                                                                    {{ $price->display_room_type }}</span>
                                                             @endif
                                                         </td>
                                                         <td>
                                                             @if ($price->display_valid_from || $price->display_valid_to)
                                                                 @if ($price->display_valid_from)
-                                                                    <span class="price-meta">{{ __('From:') }} {{ $price->display_valid_from }}</span>
+                                                                    <span class="price-meta">{{ __('From:') }}
+                                                                        {{ $price->display_valid_from }}</span>
                                                                 @endif
                                                                 @if ($price->display_valid_to)
-                                                                    <span class="price-meta">{{ __('To:') }} {{ $price->display_valid_to }}</span>
+                                                                    <span class="price-meta">{{ __('To:') }}
+                                                                        {{ $price->display_valid_to }}</span>
                                                                 @endif
                                                             @else
                                                                 {{ __('All Year') }}
@@ -1531,7 +1576,7 @@
                         </section>
                     @endif
 
-                    @if (count($gallery) > 1)
+                    {{-- @if (count($gallery) > 1)
                         <section class="content-section">
                             <h2 class="section-header">{{ __('Gallery') }}</h2>
                             <div class="gallery-grid">
@@ -1543,7 +1588,7 @@
                                 @endforeach
                             </div>
                         </section>
-                    @endif
+                    @endif --}}
 
                     @php
                         $cancellationPolicy = $package->getTranslation('cancellation_policy');
@@ -1557,21 +1602,33 @@
 
                             @if ($childrenPolicy)
                                 <div class="mb-4">
-                                    <h4 class="mb-3" style="color: var(--primary-navy, #1c325c); font-family: 'Playfair Display', serif;"><i class="la la-child" style="color: var(--rich-gold, #c5955b);"></i> {{ __('Children Policy') }}</h4>
+                                    <h4 class="mb-3"
+                                        style="color: var(--primary-navy, #1c325c); font-family: 'Playfair Display', serif;">
+                                        <i class="la la-child" style="color: var(--rich-gold, #c5955b);"></i>
+                                        {{ __('Children Policy') }}
+                                    </h4>
                                     <div class="about-content">{!! $childrenPolicy !!}</div>
                                 </div>
                             @endif
 
                             @if ($pickupPolicy)
                                 <div class="mb-4">
-                                    <h4 class="mb-3" style="color: var(--primary-navy, #1c325c); font-family: 'Playfair Display', serif;"><i class="la la-shuttle-van" style="color: var(--rich-gold, #c5955b);"></i> {{ __('Pickup & Drop-off Policy') }}</h4>
+                                    <h4 class="mb-3"
+                                        style="color: var(--primary-navy, #1c325c); font-family: 'Playfair Display', serif;">
+                                        <i class="la la-shuttle-van" style="color: var(--rich-gold, #c5955b);"></i>
+                                        {{ __('Pickup & Drop-off Policy') }}
+                                    </h4>
                                     <div class="about-content">{!! $pickupPolicy !!}</div>
                                 </div>
                             @endif
 
                             @if ($cancellationPolicy)
                                 <div class="mb-4">
-                                    <h4 class="mb-3" style="color: var(--primary-navy, #1c325c); font-family: 'Playfair Display', serif;"><i class="la la-info-circle" style="color: var(--rich-gold, #c5955b);"></i> {{ __('Cancellation Policy') }}</h4>
+                                    <h4 class="mb-3"
+                                        style="color: var(--primary-navy, #1c325c); font-family: 'Playfair Display', serif;">
+                                        <i class="la la-info-circle" style="color: var(--rich-gold, #c5955b);"></i>
+                                        {{ __('Cancellation Policy') }}
+                                    </h4>
                                     <div class="about-content">
                                         {!! $cancellationPolicy !!}
                                     </div>
@@ -1580,7 +1637,11 @@
 
                             @if ($termsConditions)
                                 <div>
-                                    <h4 class="mb-3" style="color: var(--primary-navy, #1c325c); font-family: 'Playfair Display', serif;"><i class="la la-file-alt" style="color: var(--rich-gold, #c5955b);"></i> {{ __('Terms & Conditions') }}</h4>
+                                    <h4 class="mb-3"
+                                        style="color: var(--primary-navy, #1c325c); font-family: 'Playfair Display', serif;">
+                                        <i class="la la-file-alt" style="color: var(--rich-gold, #c5955b);"></i>
+                                        {{ __('Terms & Conditions') }}
+                                    </h4>
                                     <div class="about-content">
                                         {!! $termsConditions !!}
                                     </div>
@@ -1597,16 +1658,22 @@
                                     <div class="day-card mb-3">
                                         <button type="button" class="day-header"
                                             data-collapse-target="faq-{{ $package->id }}-{{ $index }}"
-                                            aria-controls="faq-{{ $package->id }}-{{ $index }}" aria-expanded="false">
-                                            <div class="day-number" style="width: 36px; height: 36px; min-width: 36px; font-size: 1.2rem;"><i class="la la-question"></i></div>
+                                            aria-controls="faq-{{ $package->id }}-{{ $index }}"
+                                            aria-expanded="false">
+                                            <div class="day-number"
+                                                style="width: 36px; height: 36px; min-width: 36px; font-size: 1.2rem;"><i
+                                                    class="las la-question-circle" style="color: #fff !important;"
+                                                    aria-hidden="true"></i></div>
                                             <div>
-                                                <h3 class="day-title" style="font-size: 1.05rem; font-family: inherit; font-weight: 700;">
+                                                <h3 class="day-title"
+                                                    style="font-size: 1.05rem; font-family: inherit; font-weight: 700;">
                                                     {{ $faq['question'] ?: __('Question') . ' ' . ($index + 1) }}
                                                 </h3>
                                             </div>
                                             <i class="la la-chevron-down collapse-icon" style="margin-left:auto"></i>
                                         </button>
-                                        <div class="collapsible-content" id="faq-{{ $package->id }}-{{ $index }}">
+                                        <div class="collapsible-content"
+                                            id="faq-{{ $package->id }}-{{ $index }}">
                                             <div class="day-content" style="padding: 15px 22px;">
                                                 <div class="mb-0 about-content">{!! nl2br(e($faq['answer'] ?: __('Answer will be added soon.'))) !!}</div>
                                             </div>
@@ -1621,38 +1688,39 @@
                         <section id="reviews" class="content-section">
                             <h2 class="section-header">{{ __('Guest Reviews') }}</h2>
                             @if ($reviews->count())
-                            @foreach ($reviews as $review)
-                                <div class="review-card">
-                                    <div class="rating-stars">
-                                        @for ($i = 1; $i <= 5; $i++)
-                                            <i class="la {{ $i <= round($review->rating) ? 'la-star' : 'la-star-o' }}"></i>
-                                        @endfor
+                                @foreach ($reviews as $review)
+                                    <div class="review-card">
+                                        <div class="rating-stars">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                <i
+                                                    class="la {{ $i <= round($review->rating) ? 'la-star' : 'la-star-o' }}"></i>
+                                            @endfor
+                                        </div>
+                                        @if ($review->title)
+                                            <h5>{{ $review->title }}</h5>
+                                        @endif
+                                        <p>{{ $review->content }}</p>
                                     </div>
-                                    @if ($review->title)
-                                        <h5>{{ $review->title }}</h5>
-                                    @endif
-                                    <p>{{ $review->content }}</p>
-                                </div>
-                            @endforeach
+                                @endforeach
                             @else
-                            @foreach ($testimonials as $testimonial)
-                                <div class="review-card">
-                                    <div class="rating-stars">
-                                        @for ($i = 1; $i <= 5; $i++)
-                                            <i
-                                                class="la {{ $i <= (int) $testimonial->rating ? 'la-star' : 'la-star-o' }}"></i>
-                                        @endfor
-                                        @if ($testimonial->is_verified)
-                                            <span class="verified-badge">{{ __('Verified') }}</span>
+                                @foreach ($testimonials as $testimonial)
+                                    <div class="review-card">
+                                        <div class="rating-stars">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                <i
+                                                    class="la {{ $i <= (int) $testimonial->rating ? 'la-star' : 'la-star-o' }}"></i>
+                                            @endfor
+                                            @if ($testimonial->is_verified)
+                                                <span class="verified-badge">{{ __('Verified') }}</span>
+                                            @endif
+                                        </div>
+                                        <p>"{{ $testimonial->content }}"</p>
+                                        <strong>{{ $testimonial->customer_name }}</strong>
+                                        @if ($testimonial->source)
+                                            <small> - {{ $testimonial->source }}</small>
                                         @endif
                                     </div>
-                                    <p>"{{ $testimonial->content }}"</p>
-                                    <strong>{{ $testimonial->customer_name }}</strong>
-                                    @if ($testimonial->source)
-                                        <small> - {{ $testimonial->source }}</small>
-                                    @endif
-                                </div>
-                            @endforeach
+                                @endforeach
                             @endif
                         </section>
                     @endif
@@ -1663,7 +1731,8 @@
                             <div class="related-grid">
                                 @foreach ($relatedPackages as $related)
                                     <div class="related-card">
-                                        <img src="{{ $related['image'] }}" alt="{{ $related['title'] }}" loading="lazy">
+                                        <img src="{{ $related['image'] }}" alt="{{ $related['title'] }}"
+                                            loading="lazy">
                                         <div class="related-card-body">
                                             <div class="related-card-title">{{ $related['title'] }}</div>
                                             <a class="gold-btn mt-3"

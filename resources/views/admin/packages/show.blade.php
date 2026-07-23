@@ -509,6 +509,7 @@
                                     <th>Season</th>
                                     <th>Price Type</th>
                                     <th>Room</th>
+                                    <th>عدد الأفراد</th>
                                     <th>Amount</th>
                                     <th>Currency</th>
                                     <th>Valid From</th>
@@ -523,6 +524,19 @@
                                         <td>{{ adminTrans($price->season_name ?? '') ?: '-' }}</td>
                                         <td>{{ $price->price_type ?? '-' }}</td>
                                         <td>{{ $price->room_type ?? '-' }}</td>
+                                        <td>
+                                            @if ($price->pax_min && $price->pax_max && $price->pax_min === $price->pax_max)
+                                                {{ $price->pax_min }}
+                                            @elseif ($price->pax_min && $price->pax_max)
+                                                {{ $price->pax_min }} - {{ $price->pax_max }}
+                                            @elseif ($price->pax_min)
+                                                {{ $price->pax_min }}+
+                                            @elseif ($price->pax_max)
+                                                1 - {{ $price->pax_max }}
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
                                         <td>{{ number_format($price->amount ?? 0, 2) }}</td>
                                         <td>{{ optional($price->currency)->code ?? (optional($package->currency)->code ?? '-') }}
                                         </td>
