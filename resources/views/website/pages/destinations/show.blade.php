@@ -219,12 +219,12 @@
 
         .destination-overview {
             background: linear-gradient(180deg, #ffffff 0%, #f7fafc 100%);
-            padding: 58px 0 28px;
+            padding: 72px 0 92px;
         }
 
         .overview-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.6fr) minmax(300px, 0.9fr);
+            grid-template-columns: minmax(0, 1fr);
             gap: 28px;
             align-items: start;
         }
@@ -347,8 +347,8 @@
         }
 
         .attractions-section {
-            background: linear-gradient(180deg, #f7fafc 0%, #eef4fb 100%);
-            padding: 28px 0 28px;
+            background: linear-gradient(180deg, #f7fafc 0%, #ffffff 100%);
+            padding: 92px 0 72px;
         }
 
         .section-heading {
@@ -431,8 +431,8 @@
         }
 
         .destination-results {
-            background: linear-gradient(180deg, #eef4fb 0%, #f8fbff 100%);
-            padding: 28px 0 92px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            padding: 58px 0 92px;
         }
 
         .filters-card {
@@ -950,116 +950,6 @@
         </div>
     </section>
 
-    <section class="destination-overview">
-        <div class="container">
-            <div class="overview-grid">
-                <div class="overview-panel">
-                    <div class="section-kicker">
-                        <i class="la la-compass"></i>
-                        {{ __('About this destination') }}
-                    </div>
-                    <h2>{{ __('Discover') }} {{ $destination->display_name }}</h2>
-
-                    @if ($descriptionHtml)
-                        <div class="overview-body">{!! $descriptionHtml !!}</div>
-                    @else
-                        <p class="overview-summary">
-                            {{ $overviewText ?: $heroSubtitle }}
-                        </p>
-                    @endif
-                </div>
-
-                <div class="overview-sidebar">
-                    <div class="sidebar-card">
-                        <h3>{{ __('Quick Facts') }}</h3>
-                        <div class="fact-list">
-                            <div class="fact-item">
-                                <span>{{ __('Country') }}</span>
-                                <strong>{{ $countryName }}</strong>
-                            </div>
-                            <div class="fact-item">
-                                <span>{{ __('Trips Available') }}</span>
-                                <strong>{{ number_format($stats['count']) }}</strong>
-                            </div>
-                            <div class="fact-item">
-                                <span>{{ __('Featured Experiences') }}</span>
-                                <strong>{{ number_format($stats['featured']) }}</strong>
-                            </div>
-                            <div class="fact-item">
-                                <span>{{ __('Attractions') }}</span>
-                                <strong>{{ number_format($stats['attractions']) }}</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    @if ($attractions->count())
-                        <div class="sidebar-card">
-                            <h3>{{ __('Must-See Highlights') }}</h3>
-                            <div class="destination-tags">
-                                @foreach ($attractions->take(6) as $attraction)
-                                    <span>{{ $attraction['title'] }}</span>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </section>
-
-    @if ($attractions->count())
-        <section class="attractions-section">
-            <div class="container">
-                <div class="section-heading">
-                    <div class="section-kicker">
-                        <i class="la la-landmark"></i>
-                        {{ __('Explore Highlights') }}
-                    </div>
-                    <h2>{{ __('Top places to experience in :destination', ['destination' => $destination->display_name]) }}
-                    </h2>
-                    <p>
-                        {{ __('Blend iconic landmarks, local culture, and unforgettable moments while planning your stay in :destination.', ['destination' => $destination->display_name]) }}
-                    </p>
-                </div>
-
-                <div class="row g-4">
-                    @foreach ($attractions as $attraction)
-                        <div class="col-lg-4 col-md-6">
-                            <article class="attraction-card">
-                                <div class="attraction-image">
-                                    <img src="{{ $attraction['image'] }}" alt="{{ $attraction['title'] }}"
-                                        loading="lazy"
-                                        onerror="this.onerror=null;this.src='{{ asset('website/photos/home2.webp') }}';">
-                                </div>
-                                <div class="attraction-body">
-                                    <h3 class="attraction-title">{{ $attraction['title'] }}</h3>
-                                    <p class="attraction-description">{{ $attraction['description'] }}</p>
-
-                                    @if ($attraction['opening_hours'])
-                                        <div class="attraction-meta">
-                                            <span>
-                                                <i class="la la-clock"></i>
-                                                {{ $attraction['opening_hours'] }}
-                                            </span>
-                                        </div>
-                                    @endif
-
-                                    @if ($attraction['map_url'])
-                                        <a href="{{ $attraction['map_url'] }}" target="_blank" rel="noopener"
-                                            class="attraction-link">
-                                            <i class="la la-map"></i>
-                                            {{ __('Open Map') }}
-                                        </a>
-                                    @endif
-                                </div>
-                            </article>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-    @endif
-
     <section class="destination-results" id="destination-journeys">
         <div class="container">
             <div class="filters-card">
@@ -1222,6 +1112,81 @@
                         <i class="la la-envelope"></i>
                         {{ __('Talk to an Expert') }}
                     </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @if ($attractions->count())
+        <section class="attractions-section">
+            <div class="container">
+                <div class="section-heading">
+                    <div class="section-kicker">
+                        <i class="la la-landmark"></i>
+                        {{ __('Explore Highlights') }}
+                    </div>
+                    <h2>{{ __('Top places to experience in :destination', ['destination' => $destination->display_name]) }}
+                    </h2>
+                    <p>
+                        {{ __('Blend iconic landmarks, local culture, and unforgettable moments while planning your stay in :destination.', ['destination' => $destination->display_name]) }}
+                    </p>
+                </div>
+
+                <div class="row g-4">
+                    @foreach ($attractions as $attraction)
+                        <div class="col-lg-4 col-md-6">
+                            <article class="attraction-card">
+                                <div class="attraction-image">
+                                    <img src="{{ $attraction['image'] }}" alt="{{ $attraction['title'] }}"
+                                        loading="lazy"
+                                        onerror="this.onerror=null;this.src='{{ asset('website/photos/home2.webp') }}';">
+                                </div>
+                                <div class="attraction-body">
+                                    <h3 class="attraction-title">{{ $attraction['title'] }}</h3>
+                                    <p class="attraction-description">{{ $attraction['description'] }}</p>
+
+                                    @if ($attraction['opening_hours'])
+                                        <div class="attraction-meta">
+                                            <span>
+                                                <i class="la la-clock"></i>
+                                                {{ $attraction['opening_hours'] }}
+                                            </span>
+                                        </div>
+                                    @endif
+
+                                    @if ($attraction['map_url'])
+                                        <a href="{{ $attraction['map_url'] }}" target="_blank" rel="noopener"
+                                            class="attraction-link">
+                                            <i class="la la-map"></i>
+                                            {{ __('Open Map') }}
+                                        </a>
+                                    @endif
+                                </div>
+                            </article>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    <section class="destination-overview">
+        <div class="container">
+            <div class="overview-grid">
+                <div class="overview-panel">
+                    <div class="section-kicker">
+                        <i class="la la-compass"></i>
+                        {{ __('About this destination') }}
+                    </div>
+                    <h2>{{ __('Discover') }} {{ $destination->display_name }}</h2>
+
+                    @if ($descriptionHtml)
+                        <div class="overview-body">{!! $descriptionHtml !!}</div>
+                    @else
+                        <p class="overview-summary">
+                            {{ $overviewText ?: $heroSubtitle }}
+                        </p>
+                    @endif
                 </div>
             </div>
         </div>

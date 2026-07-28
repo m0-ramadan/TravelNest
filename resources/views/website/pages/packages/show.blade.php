@@ -441,6 +441,185 @@
             color: var(--rich-gold, #c5955b)
         }
 
+        .pricing-showcase {
+            padding: clamp(32px, 4vw, 48px);
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 50% 0, rgba(255, 255, 255, .98), rgba(255, 253, 248, .94) 74%),
+                #fffdf9;
+            border: 1px solid rgba(28, 50, 92, .11);
+            border-radius: 28px;
+            box-shadow: 0 12px 38px rgba(28, 50, 92, .08)
+        }
+
+        .pricing-showcase .section-header {
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: clamp(2rem, 4.2vw, 3.25rem);
+            line-height: 1.15
+        }
+
+        .pricing-showcase .section-header:after {
+            width: 90px;
+            height: 4px;
+            margin: 16px auto 0;
+            background: #2897ee
+        }
+
+        .pricing-showcase .section-subtitle {
+            margin: 0 0 27px;
+            color: #476181;
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            line-height: 1.5;
+            text-align: center
+        }
+
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: clamp(14px, 2.2vw, 24px)
+        }
+
+        .pricing-card {
+            position: relative;
+            min-width: 0;
+            min-height: 310px;
+            padding: 28px 18px 35px;
+            overflow: hidden;
+            text-align: center;
+            background: rgba(255, 255, 255, .8);
+            border: 1px solid rgba(28, 50, 92, .12);
+            border-radius: 22px;
+            box-shadow: 0 9px 22px rgba(28, 50, 92, .08)
+        }
+
+        .pricing-card:after {
+            content: '';
+            position: absolute;
+            z-index: 0;
+            right: -12%;
+            bottom: -46px;
+            left: -12%;
+            height: 96px;
+            background: linear-gradient(135deg, #f3f8fe, #edf4fc);
+            border-radius: 48% 55% 0 0 / 34% 52% 0 0;
+            transform: rotate(-3deg)
+        }
+
+        .pricing-card>* {
+            position: relative;
+            z-index: 1
+        }
+
+        .pricing-card-icon,
+        .pricing-info-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0966bd;
+            background: linear-gradient(145deg, #f1f7fd, #e9f2fb);
+            border-radius: 50%
+        }
+
+        .pricing-card-icon {
+            width: 78px;
+            height: 78px;
+            margin: 0 auto 18px
+        }
+
+        .pricing-card-icon svg {
+            width: 50px;
+            height: 50px
+        }
+
+        .pricing-card-title {
+            margin: 0 0 13px;
+            color: #062c56;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.65rem, 3vw, 2.15rem);
+            font-weight: 700;
+            line-height: 1.1
+        }
+
+        .pricing-card-age {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 36px;
+            margin: 0;
+            padding: 7px 16px;
+            color: #064e9d;
+            font-size: .94rem;
+            line-height: 1.2;
+            background: linear-gradient(110deg, #f1f7fd, #eaf3fb);
+            border-radius: 999px
+        }
+
+        .pricing-card-divider {
+            display: block;
+            width: 58%;
+            height: 2px;
+            margin: 21px auto 18px;
+            background: #dbe5ef;
+            border-radius: 2px
+        }
+
+        .pricing-card-price {
+            margin: 0;
+            color: #0870cf;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.7rem, 3.1vw, 2.2rem);
+            font-weight: 700;
+            line-height: 1.1;
+            white-space: nowrap
+        }
+
+        .pricing-options {
+            margin-top: 25px
+        }
+
+        .pricing-information {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            margin-top: 34px;
+            padding-top: 27px;
+            border-top: 1px solid #dce4eb
+        }
+
+        .pricing-info-icon {
+            width: 72px;
+            height: 72px;
+            min-width: 72px
+        }
+
+        .pricing-info-icon svg {
+            width: 47px;
+            height: 47px
+        }
+
+        .pricing-info-content {
+            min-width: 0
+        }
+
+        .pricing-info-title {
+            margin: 0 0 7px;
+            color: #1689e6;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.35rem, 2.6vw, 1.75rem);
+            font-weight: 700
+        }
+
+        .pricing-info-text,
+        .pricing-info-text>*:last-child {
+            margin-bottom: 0
+        }
+
+        .pricing-info-text {
+            color: #293648;
+            line-height: 1.72
+        }
+
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -948,6 +1127,40 @@
             .price-table {
                 font-size: .9rem
             }
+
+            .pricing-showcase {
+                padding: 28px 18px
+            }
+
+            .pricing-cards {
+                grid-template-columns: 1fr
+            }
+
+            .pricing-card {
+                min-height: 290px
+            }
+
+            .pricing-information {
+                align-items: flex-start;
+                gap: 15px
+            }
+
+            .pricing-info-icon {
+                width: 54px;
+                height: 54px;
+                min-width: 54px
+            }
+
+            .pricing-info-icon svg {
+                width: 35px;
+                height: 35px
+            }
+        }
+
+        @media(min-width:576px) and (max-width:767px) {
+            .pricing-cards {
+                grid-template-columns: repeat(2, minmax(0, 1fr))
+            }
         }
 
         @media(max-width:420px) {
@@ -1443,62 +1656,89 @@
                     @endif
 
                     @if ($prices->count() || $hasCategoryPricing || $pricingInformation)
-                        <section class="content-section">
+                        <section class="content-section pricing-showcase">
                             <h2 class="section-header">{{ __('Pricing & Packages') }}</h2>
                             @if ($comparePrice > 0)
                                 <p class="section-subtitle">
                                     {{ __('Compare Price:') }}
-                                    <span
-                                        style="text-decoration: line-through;">{{ $currencySymbol }}{{ number_format($comparePrice, 2) }}</span>
+                                    <del>{{ $currencySymbol }}{{ number_format($comparePrice, 2) }}</del>
                                 </p>
                             @endif
 
                             @if ($hasCategoryPricing)
-                                <div class="price-box mb-4">
-                                    <div class="price-table-wrap">
-                                        <table class="price-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>{{ __('Guest Category') }}</th>
-                                                    <th>{{ __('Age') }}</th>
-                                                    <th>{{ __('Price') }}</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @if ($package->adult_price !== null)
-                                                    <tr>
-                                                        <td>{{ __('Adult') }}</td>
-                                                        <td>{{ $package->adult_min_age }}+ {{ __('years') }}</td>
-                                                        <td>{{ $currencySymbol }}{{ number_format((float) $package->adult_price, 2) }}
-                                                        </td>
-                                                    </tr>
-                                                @endif
-                                                @if ($package->child_price !== null)
-                                                    <tr>
-                                                        <td>{{ __('Child') }}</td>
-                                                        <td>{{ $package->child_min_age }} -
-                                                            {{ $package->child_max_age }} {{ __('years') }}</td>
-                                                        <td>{{ $currencySymbol }}{{ number_format((float) $package->child_price, 2) }}
-                                                        </td>
-                                                    </tr>
-                                                @endif
-                                                @if ($package->infant_price !== null)
-                                                    <tr>
-                                                        <td>{{ __('Infant') }}</td>
-                                                        <td>{{ $package->infant_min_age }} -
-                                                            {{ $package->infant_max_age }} {{ __('years') }}</td>
-                                                        <td>{{ $currencySymbol }}{{ number_format((float) $package->infant_price, 2) }}
-                                                        </td>
-                                                    </tr>
-                                                @endif
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                <div class="pricing-cards">
+                                    @if ($package->adult_price !== null)
+                                        <article class="pricing-card">
+                                            <div class="pricing-card-icon" aria-hidden="true">
+                                                <svg viewBox="0 0 64 64" fill="none" stroke="currentColor"
+                                                    stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <circle cx="32" cy="20" r="10"></circle>
+                                                    <path d="M15 52v-5c0-9.4 7.6-17 17-17s17 7.6 17 17v5H15Z"></path>
+                                                </svg>
+                                            </div>
+                                            <h3 class="pricing-card-title">{{ __('Adult') }}</h3>
+                                            <p class="pricing-card-age">{{ $package->adult_min_age }}+ {{ __('years') }}</p>
+                                            <span class="pricing-card-divider"></span>
+                                            <p class="pricing-card-price">
+                                                {{ $currencySymbol }}{{ number_format((float) $package->adult_price, 2) }}
+                                            </p>
+                                        </article>
+                                    @endif
+
+                                    @if ($package->child_price !== null)
+                                        <article class="pricing-card">
+                                            <div class="pricing-card-icon" aria-hidden="true">
+                                                <svg viewBox="0 0 64 64" fill="none" stroke="currentColor"
+                                                    stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M14.5 30.5C14.5 18.6 22.3 11 32 11s17.5 7.6 17.5 19.5v7C49.5 48.3 41.7 56 32 56s-17.5-7.7-17.5-18.5v-7Z"></path>
+                                                    <path d="M19 20c5 1.2 11.5-1.1 15-6 2.5 5.2 7.3 8.2 14 8"></path>
+                                                    <path d="M14.5 29.5c-4 0-5.5 2.8-5.5 6s2.2 6 6 6M49.5 29.5c4 0 5.5 2.8 5.5 6s-2.2 6-6 6"></path>
+                                                    <circle cx="25" cy="34" r="1.6" fill="currentColor" stroke="none"></circle>
+                                                    <circle cx="39" cy="34" r="1.6" fill="currentColor" stroke="none"></circle>
+                                                    <path d="M26 44c1.8 2 3.8 3 6 3s4.2-1 6-3"></path>
+                                                </svg>
+                                            </div>
+                                            <h3 class="pricing-card-title">{{ __('Child') }}</h3>
+                                            <p class="pricing-card-age">
+                                                {{ $package->child_min_age }} - {{ $package->child_max_age }}
+                                                {{ __('years') }}
+                                            </p>
+                                            <span class="pricing-card-divider"></span>
+                                            <p class="pricing-card-price">
+                                                {{ $currencySymbol }}{{ number_format((float) $package->child_price, 2) }}
+                                            </p>
+                                        </article>
+                                    @endif
+
+                                    @if ($package->infant_price !== null)
+                                        <article class="pricing-card">
+                                            <div class="pricing-card-icon" aria-hidden="true">
+                                                <svg viewBox="0 0 64 64" fill="none" stroke="currentColor"
+                                                    stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M18 29.5C18 19 24.2 12 32 12s14 7 14 17.5V36c0 9.2-6.2 16-14 16s-14-6.8-14-16v-6.5Z"></path>
+                                                    <path d="M32 12c-1.7-2.7-.7-5.4 1.8-6.8M18.5 39c7.5 1.7 16.7 6.8 21.5 11.5M45.5 35.5 32 43"></path>
+                                                    <path d="M18.2 29c-3.7 0-5.2 2.6-5.2 5.5s2 5.5 5.5 5.5M45.8 29c3.7 0 5.2 2.6 5.2 5.5s-2 5.5-5.5 5.5"></path>
+                                                    <circle cx="26" cy="28" r="1.5" fill="currentColor" stroke="none"></circle>
+                                                    <circle cx="38" cy="28" r="1.5" fill="currentColor" stroke="none"></circle>
+                                                    <path d="M27 35c1.5 1.7 3.2 2.5 5 2.5s3.5-.8 5-2.5"></path>
+                                                </svg>
+                                            </div>
+                                            <h3 class="pricing-card-title">{{ __('Infant') }}</h3>
+                                            <p class="pricing-card-age">
+                                                {{ $package->infant_min_age }} - {{ $package->infant_max_age }}
+                                                {{ __('years') }}
+                                            </p>
+                                            <span class="pricing-card-divider"></span>
+                                            <p class="pricing-card-price">
+                                                {{ $currencySymbol }}{{ number_format((float) $package->infant_price, 2) }}
+                                            </p>
+                                        </article>
+                                    @endif
                                 </div>
                             @endif
 
                             @if ($prices->count())
-                                <div class="price-box">
+                                <div class="price-box pricing-options">
                                     <div class="price-table-wrap">
                                         <table class="price-table">
                                             <thead>
@@ -1568,9 +1808,18 @@
                             @endif
 
                             @if ($pricingInformation)
-                                <div class="about-content mt-4">
-                                    <h4>{{ __('Pricing Information') }}</h4>
-                                    {!! $pricingInformation !!}
+                                <div class="pricing-information">
+                                    <div class="pricing-info-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor"
+                                            stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M32 6c7 5 14 7.5 23 8.5V30c0 13.5-8.4 22.6-23 29-14.6-6.4-23-15.5-23-29V14.5C18 13.5 25 11 32 6Z"></path>
+                                            <path d="m23.5 31.5 6 6 12-13"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="pricing-info-content">
+                                        <h4 class="pricing-info-title">{{ __('Pricing Information') }}</h4>
+                                        <div class="pricing-info-text">{!! $pricingInformation !!}</div>
+                                    </div>
                                 </div>
                             @endif
                         </section>
