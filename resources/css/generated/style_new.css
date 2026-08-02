@@ -156,24 +156,6 @@
     }
 }
 
-.hero-cta {
-    background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light));
-    color: var(--primary-blue);
-    padding: 16px 40px;
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 1.1rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    transition: all 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
-    box-shadow: 0 10px 30px rgba(214, 158, 46, 0.3);
-    position: relative;
-    overflow: hidden;
-    animation: ctaFloat 4s ease-in-out infinite;
-}
-
 @keyframes ctaFloat {
 
     0%,
@@ -184,27 +166,6 @@
     50% {
         transform: translateY(-10px);
     }
-}
-
-.hero-cta::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.6s;
-}
-
-.hero-cta:hover::before {
-    left: 100%;
-}
-
-.hero-cta:hover {
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 15px 35px rgba(214, 158, 46, 0.4);
-    color: var(--primary-blue);
 }
 
 /* Enhanced Trust Section - Blue Theme */
@@ -487,20 +448,6 @@
     border-color: var(--light-blue);
 }
 
-.deal-badge,.destination-badge {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    background: linear-gradient(135deg, #e53e3e, #fc8181);
-    color: var(--pure-white);
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    z-index: 2;
-    animation: badgeShake 2s ease-in-out infinite;
-}
-
 @keyframes badgeShake {
 
     0%,
@@ -544,7 +491,7 @@
     }
 }
 
-.deal-btn,.destination-btn ,.luxury-cta-btn ,.quote-btn {
+.deal-btn,.destination-btn ,.luxury-cta-btn  {
     background: linear-gradient(135deg, var(--light-blue), var(--secondary-blue));
     color: var(--pure-white);
     padding: 12px 25px;
@@ -658,23 +605,6 @@
 }
 
 /* Floating Particles Background */
-.floating-particles {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.particle {
-    position: absolute;
-    background: var(--light-blue);
-    border-radius: 50%;
-    opacity: 0.2;
-    animation: floatParticle 20s linear infinite;
-}
 
 @keyframes floatParticle {
     0% {
@@ -797,34 +727,6 @@
 }
 
 /* Enhanced Loading Animation */
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--primary-blue);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    opacity: 1;
-    transition: opacity 0.5s ease;
-}
-
-.loading-overlay.loaded {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.loading-spinner {
-    width: 80px;
-    height: 80px;
-    border: 4px solid rgba(255, 255, 255, 0.1);
-    border-left-color: var(--light-blue);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
 
 @keyframes spin {
     0% {
@@ -868,17 +770,12 @@ html {
     .testimonial-card {
         margin: 0 10px;
     }
-
-    .floating-particles {
-        display: none;
-        /* Disable particles on mobile for performance */
-    }
 }
 
 /* Print Styles */
 @media print {
 
-    .hero-cta,
+    
     .deal-btn,
     .whatsapp-fixed,
     .feature-card:hover {
@@ -886,7 +783,7 @@ html {
         transform: none !important;
     }
 
-    .floating-particles,
+    
     .hero-section::before {
         display: none;
     }
@@ -1699,8 +1596,7 @@ html {
     transform: translateX(10px);
 }
 
-.mobile-submenu-link i,
-.mobile-language-link span.flag-icon {
+.mobile-submenu-link i {
     color: var(--accent-gold);
     font-size: 1rem;
     transition: all 0.3s ease;
@@ -1802,13 +1698,6 @@ html {
 }
 
 /* Language Menu */
-.language-menu .flag-icon {
-    width: 16px;
-    height: 12px;
-    margin-right: 10px;
-    border-radius: 2px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
 
 /* Responsive Design */
 @media (max-width: 991.98px) {

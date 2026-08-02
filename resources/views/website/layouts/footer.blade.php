@@ -7,7 +7,7 @@
     <div class="container">
         <div class="footer-content">
             <div class="footer-section">
-                <h4>{{ __('Etro Tours') }}</h4>
+                <h3 class="footer-heading">{{ __('Etro Tours') }}</h3>
                 <p>{{ __('Etro Tours best travel agency in Egypt specialized in providing professional advice on planning Travel Packages, Nile Cruises and Day Tours.') }}
                 </p>
                 <ul class="footer-contact-list">
@@ -17,7 +17,7 @@
                     <li><i class="la la-phone" style="color: var(--rich-gold); margin-right: 8px;"></i><a
                             href="tel:+201553383000">+20 15 53383000</a></li>
                     <li><i class="lab la-whatsapp" style="color: var(--rich-gold); margin-right: 8px;"></i><a
-                            href="https://wa.me/201553383000" target="_blank">+20 15 53383000</a></li>
+                            href="https://wa.me/201553383000" target="_blank" rel="noopener noreferrer">+20 15 53383000</a></li>
                     <li><i class="la la-envelope" style="color: var(--rich-gold); margin-right: 8px;"></i><a
                             href="mailto:info@etrotours.com">info@etrotours.com</a></li>
                     <li><i class="la la-envelope" style="color: var(--rich-gold); margin-right: 8px;"></i><a
@@ -26,7 +26,7 @@
             </div>
 
             <div class="footer-section">
-                <h4>{{ __('Destinations') }}</h4>
+                <h3 class="footer-heading">{{ __('Destinations') }}</h3>
                 <ul>
                     @forelse ($navigationDestinations as $destination)
                         <li><a href="{{ $destination['url'] }}"><i
@@ -39,7 +39,7 @@
             </div>
 
             <div class="footer-section">
-                <h4>{{ __('General') }}</h4>
+                <h3 class="footer-heading">{{ __('General') }}</h3>
                 <ul>
                     <li><a href="{{ route('website.pages.show', 'about-etrotours') }}"><i
                                 class="las la-chevron-right mr-1"></i>{{ __('About Etro Tours') }}</a></li>
@@ -67,14 +67,15 @@
                     </div>
                     <div class="award-image-container">
 
-                        <img loading="lazy" src="{{ request()->root() }}/website/photos/tripadvisor/TA2026.png"
+                        <img loading="lazy" decoding="async" width="1009" height="1031"
+                            src="{{ request()->root() }}/website/photos/tripadvisor/TA2026.png"
                             alt="{{ __('Tripadvisor 2026 Travelers\' Choice Award') }}" class="award-image">
                         <div class="award-glow"></div>
                     </div>
                     <div class="award-content">
                         <h3 class="award-title">
                             <a href="https://www.tripadvisor.com/Attraction_Review-g294205-d19981172-Reviews-Etro_tours-Luxor_Nile_River_Valley.html"
-                                target="_blank">
+                                target="_blank" rel="noopener noreferrer">
                                 {{ __('Travelers\' Choice Award') }}
                             </a>
                         </h3>
@@ -116,15 +117,15 @@
                     <div class="social-links" style="text-align: right;">
                         <ul
                             style="display: flex; list-style: none; padding: 0; margin: 0; gap: 15px; justify-content: flex-end;">
-                            <li><a href="https://www.facebook.com/share/1CwkGsZJXe/?mibextid=wwXIfr" target="_blank"
+                            <li><a href="https://www.facebook.com/share/1CwkGsZJXe/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer"
                                     aria-label="{{ __('Facebook') }}"
                                     style="color: #fff; font-size: 1.5rem; transition: all 0.3s ease;"><i
                                         class="lab la-facebook-f"></i></a></li>
                             <li><a href="https://www.instagram.com/etro_tours?igsh=MTl5cXpqeXlpMWtvZg%3D%3D&utm_source=qr"
-                                    target="_blank" aria-label="{{ __('Instagram') }}"
+                                    target="_blank" rel="noopener noreferrer" aria-label="{{ __('Instagram') }}"
                                     style="color: #fff; font-size: 1.5rem; transition: all 0.3s ease;"><i
                                         class="lab la-instagram"></i></a></li>
-                            <li><a href="https://www.tripadvisor.com/" target="_blank"
+                            <li><a href="https://www.tripadvisor.com/" target="_blank" rel="noopener noreferrer"
                                     aria-label="{{ __('TripAdvisor') }}"
                                     style="color: #fff; font-size: 1.5rem; transition: all 0.3s ease;"><i
                                         class="la la-tripadvisor"></i></a></li>

@@ -27,8 +27,6 @@
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="choose-card"
                     style="background: white; border-radius: 25px; padding: 40px 30px; text-align: center; box-shadow: var(--shadow-medium); border: 2px solid transparent; transition: all 0.4s ease; height: 100%; position: relative; overflow: hidden;"
-                    onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.style.borderColor='var(--rich-gold)'; this.style.transform='translateY(-8px)'; this.style.boxShadow='var(--shadow-dramatic)'"
-                    onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.style.borderColor='transparent'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-medium)'"
                     data-cf-modified-f0204fdc2db4420a2ffe2135-="">
                     <div class="choose-icon"
                         style="width: 80px; height: 80px; background: var(--gradient-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2.2rem; color: white; box-shadow: var(--shadow-gold); transition: all 0.3s ease;">
@@ -61,8 +59,6 @@
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="choose-card"
                     style="background: white; border-radius: 25px; padding: 40px 30px; text-align: center; box-shadow: var(--shadow-medium); border: 2px solid transparent; transition: all 0.4s ease; height: 100%; position: relative; overflow: hidden;"
-                    onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.style.borderColor='var(--rich-gold)'; this.style.transform='translateY(-8px)'; this.style.boxShadow='var(--shadow-dramatic)'"
-                    onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.style.borderColor='transparent'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-medium)'"
                     data-cf-modified-f0204fdc2db4420a2ffe2135-="">
                     <div class="choose-icon"
                         style="width: 80px; height: 80px; background: var(--gradient-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2.2rem; color: white; box-shadow: var(--shadow-gold); transition: all 0.3s ease;">
@@ -91,8 +87,6 @@
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="choose-card"
                     style="background: white; border-radius: 25px; padding: 40px 30px; text-align: center; box-shadow: var(--shadow-medium); border: 2px solid transparent; transition: all 0.4s ease; height: 100%; position: relative; overflow: hidden;"
-                    onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.style.borderColor='var(--rich-gold)'; this.style.transform='translateY(-8px)'; this.style.boxShadow='var(--shadow-dramatic)'"
-                    onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.style.borderColor='transparent'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-medium)'"
                     data-cf-modified-f0204fdc2db4420a2ffe2135-="">
                     <div class="choose-icon"
                         style="width: 80px; height: 80px; background: var(--gradient-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2.2rem; color: white; box-shadow: var(--shadow-gold); transition: all 0.3s ease;">
@@ -121,8 +115,6 @@
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="choose-card"
                     style="background: white; border-radius: 25px; padding: 40px 30px; text-align: center; box-shadow: var(--shadow-medium); border: 2px solid transparent; transition: all 0.4s ease; height: 100%; position: relative; overflow: hidden;"
-                    onmouseover="if (!window.__cfRLUnblockHandlers) return false; this.style.borderColor='var(--rich-gold)'; this.style.transform='translateY(-8px)'; this.style.boxShadow='var(--shadow-dramatic)'"
-                    onmouseout="if (!window.__cfRLUnblockHandlers) return false; this.style.borderColor='transparent'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-medium)'"
                     data-cf-modified-f0204fdc2db4420a2ffe2135-="">
                     <div class="choose-icon"
                         style="width: 80px; height: 80px; background: var(--gradient-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 2.2rem; color: white; box-shadow: var(--shadow-gold); transition: all 0.3s ease;">

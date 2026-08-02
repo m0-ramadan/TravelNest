@@ -42,24 +42,25 @@
             <a href="tel:+201553383000" aria-label="{{ __('Call Us') }}" class="mobile-action-btn call-btn">
                 <i class="la la-phone"></i>
             </a>
-             <a href="viber://chat?number=201553383000" target="_blank" aria-label="{{ __('Viber') }}"
+             <a href="viber://chat?number=201553383000" target="_blank" rel="noopener noreferrer" aria-label="{{ __('Viber') }}"
                  class="mobile-action-btn viber communication-btn">
                  <i class="lab la-viber"></i>
              </a>
-             <a href="https://wa.me/201553383000" target="_blank" aria-label="{{ __('WhatsApp') }}"
+             <a href="https://wa.me/201553383000" target="_blank" rel="noopener noreferrer" aria-label="{{ __('WhatsApp') }}"
                  class="mobile-action-btn whatsapp communication-btn">
                  <i class="lab la-whatsapp"></i>
              </a>
          </div>
 
          <!-- Mobile Toggle Button -->
-         <div class="d-lg-none mobile-toggle" onclick="toggleMobileMenu()">
+         <button type="button" class="d-lg-none mobile-toggle" data-mobile-menu-toggle
+             aria-label="{{ __('Open Menu') }}" aria-controls="modernMobileMenu" aria-expanded="false">
              <div class="hamburger" id="hamburger">
                  <span></span>
                  <span></span>
                  <span></span>
              </div>
-         </div>
+         </button>
 
          <!-- Desktop Navigation -->
          <div class="d-none d-lg-flex w-100 justify-content-between align-items-center">
@@ -71,14 +72,14 @@
                      </a>
                  </li>
                  <li class="nav-item dropdown">
-                     <a class="nav-link dropdown-toggle{{ $isDestinationsPage ? ' is-active' : '' }}"
-                         href="javascript:void(0)" data-bs-toggle="dropdown" data-navbar-dropdown-toggle
-                         aria-expanded="false">
+                     <button type="button" class="nav-link dropdown-toggle{{ $isDestinationsPage ? ' is-active' : '' }}"
+                         data-bs-toggle="dropdown" data-navbar-dropdown-toggle aria-expanded="false"
+                         aria-controls="desktopDestinationsMenu">
                          <i class="la la-globe"></i>
                          {{-- <i class="la la-map-marker"></i> --}}
                          {{ __('Destinations') }}
-                     </a>
-                     <ul class="dropdown-menu">
+                     </button>
+                     <ul class="dropdown-menu" id="desktopDestinationsMenu">
                          @forelse ($navigationDestinations as $destination)
                              <li><a class="dropdown-item" href="{{ $destination['url'] }}">
                                      <i class="la la-map-marker"></i> {{ $destination['title'] }}
@@ -138,17 +139,18 @@
                              },
                          );
                      @endphp
-                     <a class="language-toggle" href="javascript:void(0)" data-bs-toggle="dropdown"
-                         data-navbar-dropdown-toggle aria-expanded="false" role="button">
+                     <button type="button" class="language-toggle" data-bs-toggle="dropdown"
+                         data-navbar-dropdown-toggle aria-expanded="false" aria-controls="desktopLanguageMenu">
                          <i class="la la-language"></i>
                          <span>{{ strtoupper($currentLocale) }}</span>
-                     </a>
-                     <ul class="dropdown-menu dropdown-menu-end language-menu">
+                     </button>
+                     <ul class="dropdown-menu dropdown-menu-end language-menu" id="desktopLanguageMenu">
                          @foreach ($activeLanguages as $lang)
                              <li>
                                  <a class="dropdown-item {{ strtolower($currentLocale) === strtolower($lang->code) ? 'active' : '' }}"
                                      href="{{ route('website.lang.switch', $lang->code) }}">
-                                     <span class="flag-icon flag-icon-{{ $lang->display_flag_code }}"></span>
+                                     <img src="{{ asset('website/flags/4x3/' . $lang->display_flag_code . '.webp') }}"
+                                         alt="" width="22" height="17" loading="lazy" decoding="async" aria-hidden="true">
                                      {{ $lang->display_name }}
                                  </a>
                              </li>
@@ -159,78 +161,14 @@
          </div>
      </div>
  </nav>
-   <style>
-      @media (min-width: 992px) {
-          /*
-           * Keep the desktop dropdown open while the pointer crosses the visual
-           * gap between its toggle and menu.
-           */
-          body.website-theme-shell .navbar .dropdown-menu::before {
-              content: "";
-              position: absolute;
-              top: -12px;
-              right: 0;
-              left: 0;
-              height: 12px;
-          }
-      }
-
-      @media (max-width: 991px) {
-          body.website-theme-shell .navbar-brand img {
-                 width: 130px !important;
-                 height: auto !important;
-                 max-height: 42px !important;
-          }
-      }
-      @media (max-width: 500px) {
-          body.website-theme-shell .navbar-brand img {
-                 width: 95px !important;
-                 height: auto !important;
-                 max-height: 32px !important;
-          }
-          body.website-theme-shell .mobile-actions .viber,
-          body.website-theme-shell .mobile-actions .whatsapp {
-              display: none !important;
-          }
-          body.website-theme-shell .mobile-actions .mobile-action-btn,
-          body.website-theme-shell .mobile-toggle {
-              width: 34px !important;
-              height: 34px !important;
-              min-height: 34px !important;
-              border-radius: 10px !important;
-          }
-          body.website-theme-shell .mobile-actions .mobile-action-btn i {
-              font-size: 1rem !important;
-          }
-          body.website-theme-shell .hamburger {
-              width: 18px !important;
-              height: 12px !important;
-          }
-          body.website-theme-shell .hamburger span {
-              height: 2px !important;
-          }
-          body.website-theme-shell .hamburger span:nth-child(2) {
-              top: 5px !important;
-          }
-          body.website-theme-shell .hamburger span:nth-child(3) {
-              top: 10px !important;
-          }
-          body.website-theme-shell .hamburger.active span:nth-child(1) {
-              top: 5px !important;
-          }
-          body.website-theme-shell .hamburger.active span:nth-child(3) {
-              top: 5px !important;
-          }
-      }
-  </style>
  <!-- Modern Mobile Menu -->
- <div class="modern-mobile-menu" id="modernMobileMenu">
+ <div class="modern-mobile-menu" id="modernMobileMenu" aria-label="{{ __('Mobile Navigation') }}">
      <div class="mobile-menu-header">
          <div class="mobile-menu-brand">
              <img src="{{ asset('website/logo/logo-lat.png') }}" alt="{{ __('Etro Tours') }}" width="132"
                  height="42">
          </div>
-         <button class="mobile-close-btn" onclick="toggleMobileMenu()" aria-label="{{ __('Close Menu') }}">
+         <button type="button" class="mobile-close-btn" data-mobile-menu-toggle aria-label="{{ __('Close Menu') }}">
              <i class="la la-times"></i>
          </button>
      </div>
@@ -244,14 +182,14 @@
 
          <!-- Destinations Submenu -->
          <div class="mobile-nav-item">
-             <div class="mobile-destinations-toggle{{ $isDestinationsPage ? ' is-active' : '' }}"
-                 onclick="toggleMobileDestinations()">
+             <button type="button" class="mobile-destinations-toggle{{ $isDestinationsPage ? ' is-active' : '' }}"
+                 data-mobile-destinations-toggle aria-expanded="false" aria-controls="mobileDestinationsSubmenu">
                  <div style="display: flex; align-items: center;">
                      <i class="la la-globe" style="margin-right: 15px;"></i>
                      {{ __('Destinations') }}
                  </div>
                  <i class="la la-angle-down chevron"></i>
-             </div>
+             </button>
              <div class="mobile-destinations-submenu" id="mobileDestinationsSubmenu">
                  @forelse ($navigationDestinations as $destination)
                      <div class="mobile-submenu-item">
@@ -318,19 +256,21 @@
 
          <!-- Language Submenu -->
          <div class="mobile-nav-item">
-             <div class="mobile-language-toggle" onclick="toggleMobileLanguage()">
+             <button type="button" class="mobile-language-toggle" data-mobile-language-toggle
+                 aria-expanded="false" aria-controls="mobileLanguageSubmenu">
                  <div style="display: flex; align-items: center;">
                      <i class="la la-language" style="margin-right: 12px;"></i>
                      {{ __('Language') }}
                  </div>
                  <i class="la la-angle-down chevron"></i>
-             </div>
+             </button>
              <div class="mobile-language-submenu" id="mobileLanguageSubmenu">
                  @foreach ($activeLanguages as $lang)
                      <div class="mobile-language-item">
                          <a href="{{ route('website.lang.switch', $lang->code) }}"
                              class="mobile-language-link {{ strtolower($currentLocale) === strtolower($lang->code) ? 'active' : '' }}">
-                             <span class="flag-icon flag-icon-{{ $lang->display_flag_code }}"></span>
+                             <img src="{{ asset('website/flags/4x3/' . $lang->display_flag_code . '.webp') }}"
+                                 alt="" width="22" height="17" loading="lazy" decoding="async" aria-hidden="true">
                              {{ $lang->display_name }}
                          </a>
                      </div>
@@ -372,9 +312,14 @@
 
          mobileMenu.classList.toggle('active');
          hamburger.classList.toggle('active');
+         const isOpen = mobileMenu.classList.contains('active');
+
+         document.querySelectorAll('[data-mobile-menu-toggle]').forEach(function(button) {
+             button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+         });
 
          // Prevent body scroll when menu is open
-         if (mobileMenu.classList.contains('active')) {
+         if (isOpen) {
              document.body.style.overflow = 'hidden';
          } else {
              document.body.style.overflow = '';
@@ -385,9 +330,11 @@
      function toggleMobileDestinations() {
          const submenu = document.getElementById('mobileDestinationsSubmenu');
          const icon = document.querySelector('.mobile-destinations-toggle i.chevron');
+         const toggle = document.querySelector('[data-mobile-destinations-toggle]');
 
          submenu.classList.toggle('active');
          icon.classList.toggle('rotated');
+         toggle.setAttribute('aria-expanded', submenu.classList.contains('active') ? 'true' : 'false');
 
          // Close other submenu
          const languageSubmenu = document.getElementById('mobileLanguageSubmenu');
@@ -395,15 +342,18 @@
          if (languageSubmenu.classList.contains('active')) {
              languageSubmenu.classList.remove('active');
              languageIcon.classList.remove('rotated');
+             document.querySelector('[data-mobile-language-toggle]')?.setAttribute('aria-expanded', 'false');
          }
      }
 
      function toggleMobileLanguage() {
          const submenu = document.getElementById('mobileLanguageSubmenu');
          const icon = document.querySelector('.mobile-language-toggle i.chevron');
+         const toggle = document.querySelector('[data-mobile-language-toggle]');
 
          submenu.classList.toggle('active');
          icon.classList.toggle('rotated');
+         toggle.setAttribute('aria-expanded', submenu.classList.contains('active') ? 'true' : 'false');
 
          // Close other submenu
          const destinationsSubmenu = document.getElementById('mobileDestinationsSubmenu');
@@ -411,6 +361,7 @@
          if (destinationsSubmenu.classList.contains('active')) {
              destinationsSubmenu.classList.remove('active');
              destinationsIcon.classList.remove('rotated');
+             document.querySelector('[data-mobile-destinations-toggle]')?.setAttribute('aria-expanded', 'false');
          }
      }
 
@@ -421,17 +372,24 @@
 
          submenus.forEach(submenu => submenu.classList.remove('active'));
          icons.forEach(icon => icon.classList.remove('rotated'));
+         document.querySelectorAll('[data-mobile-destinations-toggle], [data-mobile-language-toggle]')
+             .forEach(toggle => toggle.setAttribute('aria-expanded', 'false'));
      }
 
      // Navbar scroll effect
+     const navbar = document.querySelector('.navbar');
+     let navbarScrollFrame = null;
+
      window.addEventListener('scroll', function() {
-         const navbar = document.querySelector('.navbar');
-         if (window.scrollY > 50) {
-             navbar.classList.add('scrolled');
-         } else {
-             navbar.classList.remove('scrolled');
+         if (!navbar || navbarScrollFrame !== null) {
+             return;
          }
-     });
+
+         navbarScrollFrame = window.requestAnimationFrame(function() {
+             navbar.classList.toggle('scrolled', window.scrollY > 50);
+             navbarScrollFrame = null;
+         });
+     }, { passive: true });
 
      // Close menu on ESC key
      document.addEventListener('keydown', function(e) {
