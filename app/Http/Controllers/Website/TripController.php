@@ -46,7 +46,7 @@ class TripController extends BaseWebsiteController
                 'itineraries',
                 'inclusions',
                 'prices.currency',
-                'packageAttractions.attraction',
+                'packageAttractions.attraction.city',
                 'cruise',
                 'reviews',
                 'testimonials',

@@ -949,7 +949,27 @@
             </div>
         </div>
     </section>
+    <section class="destination-overview">
+        <div class="container">
+            <div class="overview-grid">
+                <div class="overview-panel">
+                    <div class="section-kicker">
+                        <i class="la la-compass"></i>
+                        {{ __('About this destination') }}
+                    </div>
+                    <h2>{{ __('Discover') }} {{ $destination->display_name }}</h2>
 
+                    @if ($descriptionHtml)
+                        <div class="overview-body">{!! $descriptionHtml !!}</div>
+                    @else
+                        <p class="overview-summary">
+                            {{ $overviewText ?: $heroSubtitle }}
+                        </p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </section>
     <section class="destination-results" id="destination-journeys">
         <div class="container">
             <div class="filters-card">
@@ -1137,12 +1157,18 @@
                         <div class="col-lg-4 col-md-6">
                             <article class="attraction-card">
                                 <div class="attraction-image">
-                                    <img src="{{ $attraction['image'] }}" alt="{{ $attraction['title'] }}"
-                                        loading="lazy"
-                                        onerror="this.onerror=null;this.src='{{ asset('website/photos/home2.webp') }}';">
+                                    <a href="{{ $attraction['url'] }}">
+                                        <img src="{{ $attraction['image'] }}" alt="{{ $attraction['title'] }}"
+                                            loading="lazy"
+                                            onerror="this.onerror=null;this.src='{{ asset('website/photos/home2.webp') }}';">
+                                    </a>
                                 </div>
                                 <div class="attraction-body">
-                                    <h3 class="attraction-title">{{ $attraction['title'] }}</h3>
+                                    <h3 class="attraction-title">
+                                        <a href="{{ $attraction['url'] }}" style="color: inherit; text-decoration: none;">
+                                            {{ $attraction['title'] }}
+                                        </a>
+                                    </h3>
                                     <p class="attraction-description">{{ $attraction['description'] }}</p>
 
                                     @if ($attraction['opening_hours'])
@@ -1154,13 +1180,19 @@
                                         </div>
                                     @endif
 
-                                    @if ($attraction['map_url'])
-                                        <a href="{{ $attraction['map_url'] }}" target="_blank" rel="noopener"
-                                            class="attraction-link">
-                                            <i class="la la-map"></i>
-                                            {{ __('Open Map') }}
+                                    <div class="d-flex gap-2 flex-wrap mt-auto pt-2">
+                                        <a href="{{ $attraction['url'] }}" class="attraction-link">
+                                            <i class="la la-eye"></i>
+                                            {{ __('Explore Place') }}
                                         </a>
-                                    @endif
+                                        @if ($attraction['map_url'])
+                                            <a href="{{ $attraction['map_url'] }}" target="_blank" rel="noopener"
+                                                class="attraction-link">
+                                                <i class="la la-map"></i>
+                                                {{ __('Open Map') }}
+                                            </a>
+                                        @endif
+                                    </div>
                                 </div>
                             </article>
                         </div>
@@ -1170,25 +1202,5 @@
         </section>
     @endif
 
-    <section class="destination-overview">
-        <div class="container">
-            <div class="overview-grid">
-                <div class="overview-panel">
-                    <div class="section-kicker">
-                        <i class="la la-compass"></i>
-                        {{ __('About this destination') }}
-                    </div>
-                    <h2>{{ __('Discover') }} {{ $destination->display_name }}</h2>
-
-                    @if ($descriptionHtml)
-                        <div class="overview-body">{!! $descriptionHtml !!}</div>
-                    @else
-                        <p class="overview-summary">
-                            {{ $overviewText ?: $heroSubtitle }}
-                        </p>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </section>
+ 
 @endsection

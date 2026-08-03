@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Website\AttractionController;
 use App\Http\Controllers\Website\BlogController;
 use App\Http\Controllers\Website\ContactController;
 use App\Http\Controllers\Website\DestinationController;
@@ -97,6 +98,15 @@ Route::name('website.')->group(function () {
         Route::get('/', [DestinationController::class, 'index'])->name('index');
 
         Route::get('/{slug}', [DestinationController::class, 'show'])->name('show');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Attractions
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('attractions')->name('attractions.')->group(function () {
+        Route::get('/{slug}', [AttractionController::class, 'show'])->name('show');
     });
 
     /*

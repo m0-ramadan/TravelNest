@@ -363,10 +363,17 @@
             color: var(--tour-dark);
         }
 
-        .hero-floating-card-inner > picture,
-        .certificate-card > picture {
+        .hero-floating-card-inner > picture {
             display: block;
             width: 100%;
+        }
+
+        .certificate-card > picture {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
         }
 
         .hero-floating-card-inner > picture > img,
@@ -463,15 +470,17 @@
 
         .tripadvisor-row {
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             justify-content: center;
-            gap: 22px;
+            align-items: center;
+            gap: clamp(10px, 1.6vw, 22px);
             margin-top: 35px;
         }
 
         .certificate-card {
-            width: 145px;
-            height: 145px;
+            width: clamp(110px, 10.5vw, 145px);
+            height: clamp(110px, 10.5vw, 145px);
+            flex: 0 0 auto;
             border-radius: 26px;
             background: #fff;
             border: 1px solid rgba(8, 47, 73, .08);
@@ -479,7 +488,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 18px;
+            padding: 16px;
             transition: all .35s ease;
         }
 
@@ -489,7 +498,10 @@
         }
 
         .certificate-img {
+            max-width: 100%;
             max-height: 100%;
+            width: auto;
+            height: auto;
             object-fit: contain;
         }
 
@@ -1540,6 +1552,33 @@
             .section-pad {
                 padding: 80px 0;
             }
+
+            .tripadvisor-row {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 14px;
+                justify-items: center;
+                align-items: center;
+                max-width: 480px;
+                margin: 35px auto 0;
+            }
+
+            .certificate-card {
+                width: 100%;
+                max-width: 135px;
+                height: auto;
+                aspect-ratio: 1 / 1;
+                border-radius: 20px;
+                padding: 14px;
+            }
+
+            .certificate-card:nth-child(4) {
+                grid-column: 2;
+            }
+
+            .certificate-card:nth-child(5) {
+                grid-column: 1;
+            }
         }
 
         @media (max-width: 767px) {
@@ -1655,12 +1694,6 @@
                 font-size: 1.2rem;
             }
 
-            .tripadvisor-row {
-                display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 14px;
-            }
-
             .card-image {
                 height: 230px;
             }
@@ -1677,14 +1710,6 @@
 
             .newsletter-form button {
                 width: 100%;
-            }
-
-            .certificate-card {
-                width: 100%;
-                max-width: none;
-                height: 118px;
-                border-radius: 20px;
-                padding: 14px;
             }
         }
 
@@ -1710,6 +1735,16 @@
 
             .hero-stat:last-child {
                 grid-column: 1 / -1;
+            }
+
+            .tripadvisor-row {
+                gap: 10px;
+                max-width: 100%;
+            }
+
+            .certificate-card {
+                border-radius: 16px;
+                padding: 10px;
             }
         }
 
@@ -1741,10 +1776,6 @@
             .quote-card,
             .newsletter-box {
                 padding: 28px 18px;
-            }
-
-            .tripadvisor-row {
-                grid-template-columns: 1fr;
             }
         }
 

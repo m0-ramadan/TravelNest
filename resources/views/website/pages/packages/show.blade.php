@@ -1196,6 +1196,164 @@
                 margin-bottom: 10px
             }
         }
+
+        /* Attractions Highlight Section & Cards */
+        .attractions-highlight-section {
+            background: #faf7f2;
+            border: 1px solid rgba(197, 149, 91, 0.22);
+            border-radius: 28px;
+            padding: 36px 32px;
+            box-shadow: 0 10px 30px rgba(28, 50, 92, 0.04);
+        }
+
+        .attractions-highlight-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+            font-weight: 700;
+            color: #1c325c;
+            text-align: center;
+            margin-bottom: 0;
+        }
+
+        .attractions-highlight-divider {
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #c5955b 0%, #b8860b 100%);
+            border-radius: 4px;
+            margin: 10px auto 28px auto;
+        }
+
+        .attractions-highlight-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .attraction-highlight-card {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            background: #ffffff;
+            border: 1.5px solid rgba(28, 50, 92, 0.08);
+            border-radius: 20px;
+            padding: 16px 22px;
+            text-decoration: none !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+            position: relative;
+        }
+
+        .attraction-highlight-card:hover,
+        .attraction-highlight-card:focus {
+            border-color: #c5955b;
+            box-shadow: 0 8px 25px rgba(197, 149, 91, 0.22);
+            transform: translateY(-2px);
+        }
+
+        .attraction-highlight-img {
+            width: 64px;
+            height: 64px;
+            min-width: 64px;
+            border-radius: 14px;
+            object-fit: cover;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .attraction-highlight-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .attraction-highlight-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.12rem;
+            font-weight: 700;
+            color: #1c325c;
+            margin-bottom: 4px;
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .attraction-highlight-card:hover .attraction-highlight-name {
+            color: #c5955b;
+        }
+
+        .attraction-highlight-sub {
+            font-size: 0.88rem;
+            font-style: italic;
+            color: #718096;
+            margin-bottom: 0;
+            line-height: 1.4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .attraction-highlight-arrow {
+            color: #c5955b;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            margin-inline-start: auto;
+        }
+
+        .attraction-highlight-card:hover .attraction-highlight-arrow {
+            transform: translateX(4px);
+        }
+
+        html[dir="rtl"] .attraction-highlight-card:hover .attraction-highlight-arrow,
+        body.rtl .attraction-highlight-card:hover .attraction-highlight-arrow {
+            transform: translateX(-4px);
+        }
+
+        html[data-theme='dark'] .attractions-highlight-section {
+            background: #111827;
+            border-color: rgba(197, 149, 91, 0.3);
+        }
+
+        html[data-theme='dark'] .attractions-highlight-title {
+            color: #ffffff;
+        }
+
+        html[data-theme='dark'] .attraction-highlight-card {
+            background: #1a233a;
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        html[data-theme='dark'] .attraction-highlight-name {
+            color: #ffffff;
+        }
+
+        html[data-theme='dark'] .attraction-highlight-sub {
+            color: #a0aec0;
+        }
+
+        @media (max-width: 576px) {
+            .attractions-highlight-section {
+                padding: 24px 16px;
+                border-radius: 20px;
+            }
+
+            .attraction-highlight-card {
+                padding: 14px 16px;
+                gap: 14px;
+            }
+
+            .attraction-highlight-img {
+                width: 54px;
+                height: 54px;
+                min-width: 54px;
+                border-radius: 12px;
+            }
+
+            .attraction-highlight-name {
+                font-size: 1rem;
+            }
+        }
     </style>
 @endsection
 
@@ -1512,38 +1670,58 @@
                     @endif
 
                     @if ($package->packageAttractions && $package->packageAttractions->count())
-                        <section class="content-section">
-                            <h2 class="section-header">{{ __('Places You\'ll Visit') }}</h2>
-                            <div class="row g-4 mt-2">
+                        <section class="content-section attractions-highlight-section">
+                            <h2 class="attractions-highlight-title">{{ __('Places You\'ll Visit') }}</h2>
+                            <div class="attractions-highlight-divider"></div>
+                            <div class="attractions-highlight-list">
                                 @foreach ($package->packageAttractions as $attraction)
                                     @php
+                                        $attractionModel = $attraction->attraction;
                                         $attractionTitle =
-                                            $attraction->display_title ?: $attraction->attraction?->display_name;
+                                            $attraction->display_title ?: $attractionModel?->display_name;
                                         $attractionTeaser =
                                             $attraction->getTranslation('teaser') ?:
-                                            $attraction->attraction?->display_short_description;
+                                            $attractionModel?->display_short_description;
+
+                                        $citySlug = $attractionModel?->city?->slug
+                                            ?: $package->destination?->city?->slug
+                                            ?: $package->destination?->slug;
+
+                                        if ($attractionModel && $attractionModel->slug) {
+                                            $attractionUrl = route('website.attractions.show', $attractionModel->slug);
+                                            $target = '_self';
+                                        } elseif ($attractionModel?->map_url) {
+                                            $attractionUrl = $attractionModel->map_url;
+                                            $target = '_blank';
+                                        } elseif ($citySlug) {
+                                            $attractionUrl = route('website.destinations.show', $citySlug);
+                                            $target = '_self';
+                                        } else {
+                                            $attractionUrl = route('website.destinations.index');
+                                            $target = '_self';
+                                        }
+
+                                        if ($attraction->image) {
+                                            $imgSrc = asset('storage/' . ltrim($attraction->image, '/'));
+                                        } elseif ($attractionModel && $attractionModel->image) {
+                                            $imgSrc = asset('storage/' . ltrim($attractionModel->image, '/'));
+                                        } else {
+                                            $imgSrc = asset('website/photos/home2.webp');
+                                        }
                                     @endphp
-                                    <div class="col-md-6 col-lg-4">
-                                        <div class="related-card h-100">
-                                            @if ($attraction->image)
-                                                <img src="{{ asset('storage/' . ltrim($attraction->image, '/')) }}"
-                                                    alt="{{ $attractionTitle }}" loading="lazy">
-                                            @elseif($attraction->attraction && $attraction->attraction->image)
-                                                <img src="{{ asset('storage/' . ltrim($attraction->attraction->image, '/')) }}"
-                                                    alt="{{ $attractionTitle }}" loading="lazy">
-                                            @else
-                                                <img src="{{ asset('website/photos/home2.webp') }}"
-                                                    alt="{{ $attractionTitle }}" loading="lazy">
-                                            @endif
-                                            <div class="related-card-body">
-                                                <h5 class="related-card-title mb-2">{{ $attractionTitle }}</h5>
-                                                @if ($attractionTeaser)
-                                                    <p class="mb-0 text-muted" style="font-size: 0.9rem;">
-                                                        {{ \Illuminate\Support\Str::limit($attractionTeaser, 100) }}</p>
-                                                @endif
-                                            </div>
+                                    <a href="{{ $attractionUrl }}" target="{{ $target }}" class="attraction-highlight-card" @if($target === '_blank') rel="noopener noreferrer" @endif>
+                                        <img src="{{ $imgSrc }}"
+                                            alt="{{ $attractionTitle }}"
+                                            class="attraction-highlight-img"
+                                            loading="lazy">
+                                        <div class="attraction-highlight-content">
+                                            <h3 class="attraction-highlight-name">{{ $attractionTitle }}</h3>
+                                            <p class="attraction-highlight-sub">{{ __('Click to explore') }}</p>
                                         </div>
-                                    </div>
+                                        <div class="attraction-highlight-arrow" aria-hidden="true">
+                                            <i class="la {{ app()->getLocale() === 'ar' ? 'la-angle-left' : 'la-angle-right' }}"></i>
+                                        </div>
+                                    </a>
                                 @endforeach
                             </div>
                         </section>

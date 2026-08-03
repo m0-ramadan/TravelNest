@@ -209,6 +209,7 @@ class DestinationController extends BaseWebsiteController
             ->take(6)
             ->map(function (Attraction $attraction) {
                 return [
+                    'slug' => $attraction->slug,
                     'title' => $attraction->display_name,
                     'description' => Str::limit(
                         trim(strip_tags($attraction->display_short_description ?: $attraction->display_description)),
@@ -217,6 +218,7 @@ class DestinationController extends BaseWebsiteController
                     'image' => $this->imageUrl($attraction->image, 'website/photos/home2.webp'),
                     'opening_hours' => $this->translated($attraction->getRawOriginal('opening_hours') ?? $attraction->opening_hours),
                     'map_url' => trim((string) $attraction->map_url),
+                    'url' => route('website.attractions.show', $attraction->slug),
                 ];
             })
             ->values();
