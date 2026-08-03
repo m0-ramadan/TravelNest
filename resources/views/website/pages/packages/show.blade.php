@@ -1404,18 +1404,11 @@
         $pricingInformation = $package->getTranslation('pricing_information');
 
         if ($priceFrom > 0 || $priceTo > 0) {
-            if ($priceTo > $priceFrom && $priceFrom > 0) {
-                $priceText = __('trips.from_to_price', [
-                    'currency' => $currencySymbol,
-                    'from' => number_format($priceFrom, 2),
-                    'to' => number_format($priceTo, 2),
-                ]);
-            } else {
-                $priceText = __('trips.from_price', [
-                    'currency' => $currencySymbol,
-                    'amount' => number_format(max($priceFrom, $priceTo), 2),
-                ]);
-            }
+            $effectivePrice = $priceFrom > 0 ? $priceFrom : $priceTo;
+            $priceText = __('trips.from_price', [
+                'currency' => $currencySymbol,
+                'amount' => number_format($effectivePrice, 2),
+            ]);
         }
     @endphp
 
