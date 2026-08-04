@@ -199,7 +199,9 @@ class TripController extends BaseWebsiteController
                     'from' => __('Starts From'),
                     'fixed' => __('Fixed'),
                     'seasonal' => __('Seasonal'),
-                    default => Str::headline((string) $price->price_type),
+                    'per_person' => __('Per Person'),
+                    'per_group' => __('Per Group'),
+                    default => __((string) Str::headline((string) $price->price_type)),
                 };
                 $price->display_room_type = $price->room_type
                     ? __(Str::headline((string) $price->room_type))

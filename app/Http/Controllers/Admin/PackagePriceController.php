@@ -52,15 +52,17 @@ class PackagePriceController extends Controller
             'package_id' => ['nullable', 'integer'],
             'label' => ['nullable', 'string'],
             'season_name' => ['nullable', 'string'],
-            'price' => ['nullable', 'numeric'],
-            'sale_price' => ['nullable', 'numeric'],
+            'price_type' => ['nullable', 'string'],
+            'room_type' => ['nullable', 'string'],
+            'amount' => ['nullable', 'numeric'],
             'currency_id' => ['nullable', 'integer'],
             'pax_min' => ['nullable', 'integer'],
             'pax_max' => ['nullable', 'integer'],
-            'start_date' => ['nullable', 'date'],
-            'end_date' => ['nullable', 'date'],
+            'group_size_min' => ['nullable', 'integer'],
+            'group_size_max' => ['nullable', 'integer'],
+            'valid_from' => ['nullable', 'date'],
+            'valid_to' => ['nullable', 'date'],
             'notes' => ['nullable', 'string'],
-            'is_active' => ['nullable', 'boolean'],
         ]);
 
         $data = $this->translateModelFields($data, ['label', 'season_name', 'notes']);
@@ -77,7 +79,9 @@ class PackagePriceController extends Controller
 
     public function edit(PackagePrice $packagePrice): View
     {
-        return $this->view('admin.package-prices.edit', compact('packagePrice'));
+        $packages = Package::all();
+        $currencies = Currency::all();
+        return $this->view('admin.package-prices.edit', compact('packagePrice', 'packages', 'currencies'));
     }
 
     public function update(Request $request, PackagePrice $packagePrice): RedirectResponse
@@ -86,15 +90,17 @@ class PackagePriceController extends Controller
             'package_id' => ['nullable', 'integer'],
             'label' => ['nullable', 'string'],
             'season_name' => ['nullable', 'string'],
-            'price' => ['nullable', 'numeric'],
-            'sale_price' => ['nullable', 'numeric'],
+            'price_type' => ['nullable', 'string'],
+            'room_type' => ['nullable', 'string'],
+            'amount' => ['nullable', 'numeric'],
             'currency_id' => ['nullable', 'integer'],
             'pax_min' => ['nullable', 'integer'],
             'pax_max' => ['nullable', 'integer'],
-            'start_date' => ['nullable', 'date'],
-            'end_date' => ['nullable', 'date'],
+            'group_size_min' => ['nullable', 'integer'],
+            'group_size_max' => ['nullable', 'integer'],
+            'valid_from' => ['nullable', 'date'],
+            'valid_to' => ['nullable', 'date'],
             'notes' => ['nullable', 'string'],
-            'is_active' => ['nullable', 'boolean'],
         ]);
 
         $data = $this->translateModelFields($data, ['label', 'season_name', 'notes']);
