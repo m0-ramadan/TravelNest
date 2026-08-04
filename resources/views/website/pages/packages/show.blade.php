@@ -1039,24 +1039,32 @@
         .fixed-mobile-btn {
             position: fixed;
             bottom: 18px;
-            left: 15px;
-            right: 15px;
-            z-index: 999
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%);
+            z-index: 999;
+            width: auto;
+            max-width: 85%;
+            display: flex;
+            justify-content: center;
         }
 
         .mobile-enquiry-btn {
-            width: 100%;
+            width: auto;
+            min-width: 180px;
+            max-width: 260px;
             background: var(--gradient-gold, #c5955b);
             color: var(--primary-navy, #1c325c);
             border-radius: 50px;
-            padding: 14px 20px;
+            padding: 12px 24px;
             text-decoration: none;
             font-weight: 900;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, .2)
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .2);
+            white-space: nowrap;
         }
 
         .alert-success {
@@ -2236,7 +2244,8 @@
                                             <span class="pricing-card-divider"></span>
                                             <p class="pricing-card-price">
                                                 @if ((float) $package->child_price > 0)
-                                                    {{ $currencySymbol }}{{ number_format((float) $package->child_price, 2) }}
+                                                    {{-- $currencySymbol }}{{ number_format((float) $package->child_price, 2) --}}
+                                                    --
                                                 @else
                                                     <span class="free-price-badge">--</span>
                                                 @endif

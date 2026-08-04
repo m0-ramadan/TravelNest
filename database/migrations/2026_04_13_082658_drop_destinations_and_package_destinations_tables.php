@@ -9,6 +9,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
         // لو attractions ما زال فيها destination_id
         if (Schema::hasTable('attractions') && Schema::hasColumn('attractions', 'destination_id')) {
             Schema::table('attractions', function (Blueprint $table) {

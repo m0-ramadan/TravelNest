@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        if (Schema::hasTable('package_destinations') && Schema::hasTable('destinations')) {
+        if (Schema::hasTable('package_destinations') && Schema::hasTable('destinations') && DB::getDriverName() === 'mysql') {
             DB::statement("
                 INSERT INTO package_cities (package_id, city_id, stop_order, is_primary, nights, created_at, updated_at)
                 SELECT

@@ -19,8 +19,7 @@ return new class extends Migration
             $table->json('seo_description')->nullable()->after('seo_title');
         });
 
-        // نقل city_id من destinations إلى attractions
-        if (Schema::hasTable('destinations')) {
+        if (Schema::hasTable('destinations') && DB::getDriverName() === 'mysql') {
             DB::statement("
                 UPDATE attractions
                 INNER JOIN destinations ON attractions.destination_id = destinations.id
@@ -28,10 +27,12 @@ return new class extends Migration
             ");
         }
 
-        Schema::table('attractions', function (Blueprint $table) {
-            $table->dropForeign(['destination_id']);
-            $table->dropColumn('destination_id');
-        });
+        if (DB::getDriverName() === 'mysql') {
+            Schema::table('attractions', function (Blueprint $table) {
+                $table->dropForeign(['destination_id']);
+                $table->dropColumn('destination_id');
+            });
+        }
     }
 
     public function down(): void

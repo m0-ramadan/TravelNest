@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('destinations') || !Schema::hasTable('cities')) {
+        if (!Schema::hasTable('destinations') || !Schema::hasTable('cities') || DB::getDriverName() !== 'mysql') {
             return;
         }
 

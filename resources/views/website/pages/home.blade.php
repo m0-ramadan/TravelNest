@@ -142,7 +142,7 @@
                             <div class="trust-icon"><i class="la la-trophy"></i></div>
                             <h2 class="trust-title">{{ __('Award-Winning Service') }}</h2>
                             <p class="trust-description">
-                                {{ __('Recognized excellence backed by outstanding guest feedback.') }}
+                                {{ __('Recognized excellence & top guest reviews.') }}
                             </p>
                             <span class="trust-line" aria-hidden="true"></span>
                         </article>
@@ -150,7 +150,7 @@
                             <div class="trust-icon"><i class="la la-certificate"></i></div>
                             <h2 class="trust-title">{{ __('Licensed & Certified') }}</h2>
                             <p class="trust-description">
-                                {{ __('Officially licensed operators and qualified tourism professionals.') }}
+                                {{ __('Officially licensed tourism professionals.') }}
                             </p>
                             <span class="trust-line" aria-hidden="true"></span>
                         </article>
@@ -158,7 +158,7 @@
                             <div class="trust-icon"><i class="la la-clock"></i></div>
                             <h2 class="trust-title">{{ __('24/7 Travel Support') }}</h2>
                             <p class="trust-description">
-                                {{ __('Personal support before and during your journey across Egypt.') }}
+                                {{ __('24/7 personal support across Egypt.') }}
                             </p>
                             <span class="trust-line" aria-hidden="true"></span>
                         </article>
@@ -166,7 +166,7 @@
                             <div class="trust-icon"><i class="la la-lock"></i></div>
                             <h2 class="trust-title">{{ __('Secure Payment') }}</h2>
                             <p class="trust-description">
-                                {{ __('Secure Payment - Use your debit card or credit card. Your transactions are protected by 3D Secure and SecureCode.') }}
+                                {{ __('Protected by 3D Secure & encryption.') }}
                             </p>
                             <span class="trust-line" aria-hidden="true"></span>
                         </article>
