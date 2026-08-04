@@ -2314,7 +2314,7 @@
 
         html[data-theme='dark'] body.home-reference-page .whatsapp-fixed {
             right: 28px;
-            bottom: 26px;
+            bottom: 95px;
             width: 64px;
             height: 64px;
             color: #fff;
@@ -2425,7 +2425,7 @@
 
             html[data-theme='dark'] body.home-reference-page .whatsapp-fixed {
                 right: 18px;
-                bottom: 20px;
+                bottom: 85px;
                 width: 60px;
                 height: 60px;
             }
@@ -2988,7 +2988,7 @@
 
         html[data-theme='light'] body.home-reference-page .whatsapp-fixed {
             right: 40px;
-            bottom: 35px;
+            bottom: 95px;
             width: 72px;
             height: 72px;
             color: #fff;
@@ -3132,7 +3132,7 @@
 
             html[data-theme='light'] body.home-reference-page .whatsapp-fixed {
                 right: 18px;
-                bottom: 20px;
+                bottom: 85px;
                 width: 64px;
                 height: 64px;
             }
@@ -3523,7 +3523,7 @@
 
         html[data-theme] body.home-reference-page .whatsapp-fixed {
             right: 40px;
-            bottom: 35px;
+            bottom: 95px;
             width: 72px;
             height: 72px;
         }
@@ -3656,7 +3656,7 @@
 
             html[data-theme] body.home-reference-page .whatsapp-fixed {
                 right: 18px;
-                bottom: 20px;
+                bottom: 85px;
                 width: 64px;
                 height: 64px;
             }
