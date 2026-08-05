@@ -96,6 +96,7 @@ class PackageController extends Controller
             $this->syncItineraries($package, $request);
             $this->syncInclusions($package, $request);
             $this->syncPrices($package, $request);
+            $this->syncPackageCities($package);
         });
 
         return redirect()->route('admin.packages.index')->with('success', 'تم إنشاء الرحلة بنجاح.');
@@ -154,6 +155,7 @@ class PackageController extends Controller
             $this->syncItineraries($package, $request);
             $this->syncInclusions($package, $request);
             $this->syncPrices($package, $request);
+            $this->syncPackageCities($package);
         });
 
         return $this->success('admin.packages.index', 'تم تعديل الرحلة بنجاح.');
@@ -269,6 +271,7 @@ class PackageController extends Controller
             $this->createInclusionsFromArray($package, $aiData['included'] ?? [], 'included');
             $this->createInclusionsFromArray($package, $aiData['excluded'] ?? [], 'excluded');
             $this->createPricesFromArray($package, $aiData['prices'] ?? [], $package->currency_id);
+            $this->syncPackageCities($package);
         });
 
         return redirect()
@@ -361,6 +364,8 @@ class PackageController extends Controller
                     'notes',
                 ]));
             }
+
+            $this->syncPackageCities($copy);
 
             session()->flash('duplicated_package_id', $copy->id);
         });
@@ -820,6 +825,27 @@ class PackageController extends Controller
                 'sort_order' => $sortOrder,
             ]);
         }
+    }
+
+    private function syncPackageCities(Package $package): void
+    {
+        $package->loadMissing(['destination', 'packageAttractions.attraction']);
+
+        $cityIds = collect();
+
+        if ($package->destination?->city_id) {
+            $cityIds->push($package->destination->city_id);
+        }
+
+        foreach ($package->packageAttractions as $pa) {
+            if ($pa->attraction?->city_id) {
+                $cityIds->push($pa->attraction->city_id);
+            }
+        }
+
+        $uniqueCityIds = $cityIds->filter()->unique()->values();
+
+        $package->cities()->sync($uniqueCityIds);
     }
 
     private function syncItineraries(Package $package, Request $request): void

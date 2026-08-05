@@ -158,11 +158,16 @@ class Package extends Model
 
 
 
-    public function destinations(): BelongsToMany
+    public function cities(): BelongsToMany
     {
-        return $this->belongsToMany(Attraction::class, 'package_destinations', 'package_id', 'destination_id')
+        return $this->belongsToMany(City::class, 'package_cities', 'package_id', 'city_id')
             ->withPivot(['stop_order', 'is_primary', 'nights'])
             ->withTimestamps();
+    }
+
+    public function destinations(): BelongsToMany
+    {
+        return $this->cities();
     }
 
     public function tags(): BelongsToMany
