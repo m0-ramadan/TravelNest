@@ -2313,8 +2313,9 @@
         }
 
         html[data-theme='dark'] body.home-reference-page .whatsapp-fixed {
-            right: 28px;
-            bottom: 95px;
+            left: 28px;
+            right: auto;
+            bottom: 28px;
             width: 64px;
             height: 64px;
             color: #fff;
@@ -2424,8 +2425,9 @@
             }
 
             html[data-theme='dark'] body.home-reference-page .whatsapp-fixed {
-                right: 18px;
-                bottom: 85px;
+                left: 18px;
+                right: auto;
+                bottom: 20px;
                 width: 60px;
                 height: 60px;
             }
@@ -2987,8 +2989,9 @@
         }
 
         html[data-theme='light'] body.home-reference-page .whatsapp-fixed {
-            right: 40px;
-            bottom: 95px;
+            left: 28px;
+            right: auto;
+            bottom: 28px;
             width: 72px;
             height: 72px;
             color: #fff;
@@ -3131,8 +3134,9 @@
             }
 
             html[data-theme='light'] body.home-reference-page .whatsapp-fixed {
-                right: 18px;
-                bottom: 85px;
+                left: 18px;
+                right: auto;
+                bottom: 20px;
                 width: 64px;
                 height: 64px;
             }
@@ -3522,8 +3526,9 @@
         }
 
         html[data-theme] body.home-reference-page .whatsapp-fixed {
-            right: 40px;
-            bottom: 95px;
+            left: 28px;
+            right: auto;
+            bottom: 28px;
             width: 72px;
             height: 72px;
         }
@@ -3655,8 +3660,9 @@
             }
 
             html[data-theme] body.home-reference-page .whatsapp-fixed {
-                right: 18px;
-                bottom: 85px;
+                left: 18px;
+                right: auto;
+                bottom: 20px;
                 width: 64px;
                 height: 64px;
             }

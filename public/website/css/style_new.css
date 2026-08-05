@@ -758,8 +758,9 @@
 /* Enhanced WhatsApp Button */
 .whatsapp-fixed {
     position: fixed;
-    bottom: 100px;
-    right: 30px;
+    bottom: 30px;
+    left: 30px;
+    right: auto;
     z-index: 1000;
     background: linear-gradient(135deg, #25d366, #128c7e);
     color: var(--pure-white);
