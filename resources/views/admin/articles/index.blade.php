@@ -561,11 +561,8 @@
                                 </div>
                             @endforeach
 
-                            @if ($articles->hasPages())
-                                <div class="m-3">
-                                    {{ $articles->links() }}
-                                </div>
-                            @endif
+                            @include('admin.layout.pagination', ['paginator' => $articles])
+
                         @endif
                     </div>
                 </div>

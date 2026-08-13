@@ -374,9 +374,8 @@
                     </div>
                 @endforelse
 
-                @if (method_exists($countries, 'links'))
-                    <div class="mt-4">{{ $countries->links() }}</div>
-                @endif
+                @include('admin.layout.pagination', ['paginator' => $countries])
+
             </div>
         </div>
     </div>

@@ -78,6 +78,10 @@ class Package extends Model
         'created_by',
         'updated_by',
         'offer_price',
+        'source_type',
+        'source_remote_id',
+        'source_remote_slug',
+        'source_synced_at',
     ];
 
     protected $casts = [

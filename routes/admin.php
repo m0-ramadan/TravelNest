@@ -15,13 +15,16 @@ use App\Http\Controllers\Admin\ErrorController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\InquiryController;
 use App\Http\Controllers\Admin\LanguageController;
+use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\MenuController;
+
 use App\Http\Controllers\Admin\PackageCategoryController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\PackagePriceController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PaymentMethodController;
 use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\ReadyTourController;
 use App\Http\Controllers\Admin\RegionController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SeoMetaController;
@@ -249,6 +252,21 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
 
         /*
         |--------------------------------------------------------------------------
+        | Ready Tours / الرحلات الجاهزة
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('ready-tours')->name('ready-tours.')->group(function () {
+            Route::get('/', [ReadyTourController::class, 'index'])->name('index');
+            Route::post('sync', [ReadyTourController::class, 'sync'])->name('sync');
+            Route::get('sync-progress/{process}', [ReadyTourController::class, 'syncProgress'])->name('sync-progress');
+            Route::post('{template}/import', [ReadyTourController::class, 'import'])->name('import');
+            Route::get('import-progress/{process}', [ReadyTourController::class, 'importProgress'])->name('import-progress');
+            Route::post('import-selected', [ReadyTourController::class, 'importSelected'])->name('import-selected');
+            Route::post('import-all', [ReadyTourController::class, 'importAll'])->name('import-all');
+        });
+
+        /*
+        |--------------------------------------------------------------------------
         | Booking / CRM
         |--------------------------------------------------------------------------
         */
@@ -317,6 +335,13 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
         Route::resource('static-pages', StaticPageController::class);
         Route::resource('faqs', FaqController::class);
         Route::resource('testimonials', TestimonialController::class)->except(['create', 'edit']);
+
+        Route::prefix('media')->name('media.')->group(function () {
+            Route::get('/', [MediaController::class, 'index'])->name('index');
+            Route::post('/sync', [MediaController::class, 'sync'])->name('sync');
+            Route::get('/sync-progress', [MediaController::class, 'syncProgress'])->name('sync-progress');
+        });
+
 
 
         Route::prefix('article')->name('articles.')->group(function () {

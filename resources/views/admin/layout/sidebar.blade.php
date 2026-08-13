@@ -50,6 +50,7 @@
                 'admin.destinations.*',
                 'admin.package-categories.*',
                 'admin.packages.*',
+                'admin.ready-tours.*',
                 'admin.package-prices.*',
                 'admin.banners.*',
                 'admin.testimonials.*',
@@ -98,6 +99,12 @@
                 <li class="menu-item {{ request()->routeIs('admin.packages.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.packages.index') }}" class="menu-link">
                         <div>{{ admin_t('Packages') }}</div>
+                    </a>
+                </li>
+
+                <li class="menu-item {{ request()->routeIs('admin.ready-tours.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ready-tours.index') }}" class="menu-link">
+                        <div>{{ admin_t('Ready Tours') }}</div>
                     </a>
                 </li>
 
@@ -179,6 +186,7 @@
         {{-- Content --}}
         @php
             $contentOpen = request()->routeIs(
+                'admin.media.*',
                 'admin.articles.*',
                 'admin.articles.statistics',
                 'admin.static-pages.*',
@@ -192,12 +200,20 @@
                 <div>{{ admin_t('Content') }}</div>
             </a>
             <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.media.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.media.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-photo"></i>
+                        <div>{{ admin_t('Media') }}</div>
+                    </a>
+                </li>
+
                 <li
                     class="menu-item {{ request()->routeIs('admin.articles.index', 'admin.articles.show', 'admin.articles.edit', 'admin.articles.create') ? 'active' : '' }}">
                     <a href="{{ route('admin.articles.index') }}" class="menu-link">
                         <div>{{ admin_t('Articles') }}</div>
                     </a>
                 </li>
+
 
                 <li class="menu-item {{ request()->routeIs('admin.articles.create-with-ai') ? 'active' : '' }}">
                     <a href="{{ route('admin.articles.create-with-ai') }}" class="menu-link">

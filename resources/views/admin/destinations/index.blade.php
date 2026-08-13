@@ -360,51 +360,8 @@
                     </div>
                 @endforelse
                 <!-- Pagination -->
-                @if ($destinations->hasPages())
-                    <div class="m-3">
-                        <nav>
-                            <ul class="pagination">
-                                {{-- Previous Page Link --}}
-                                @if ($destinations->onFirstPage())
-                                    <li class="page-item disabled" aria-disabled="true">
-                                        <span class="page-link waves-effect" aria-hidden="true">‹</span>
-                                    </li>
-                                @else
-                                    <li class="page-item">
-                                        <a class="page-link waves-effect" href="{{ $destinations->previousPageUrl() }}"
-                                            rel="prev">‹</a>
-                                    </li>
-                                @endif
+                @include('admin.layout.pagination', ['paginator' => $destinations])
 
-                                {{-- Pagination Elements --}}
-                                @foreach ($destinations->links()->elements[0] as $page => $url)
-                                    @if ($page == $destinations->currentPage())
-                                        <li class="page-item active" aria-current="page">
-                                            <span class="page-link waves-effect">{{ $page }}</span>
-                                        </li>
-                                    @else
-                                        <li class="page-item">
-                                            <a class="page-link waves-effect"
-                                                href="{{ $url }}">{{ $page }}</a>
-                                        </li>
-                                    @endif
-                                @endforeach
-
-                                {{-- Next Page Link --}}
-                                @if ($destinations->hasMorePages())
-                                    <li class="page-item">
-                                        <a class="page-link waves-effect" href="{{ $destinations->nextPageUrl() }}"
-                                            rel="next">›</a>
-                                    </li>
-                                @else
-                                    <li class="page-item disabled" aria-disabled="true">
-                                        <span class="page-link waves-effect" aria-hidden="true">›</span>
-                                    </li>
-                                @endif
-                            </ul>
-                        </nav>
-                    </div>
-                @endif
 
             </div>
         </div>

@@ -48,4 +48,13 @@ return [
         'timeout' => 60,
         'auto_translate_missing' => env('DEEPSEEK_AUTO_TRANSLATE_MISSING', false),
     ],
+
+    'savvyhost' => [
+        'base_url' => env('SAVVYHOST_API_URL', 'https://api.savvyhost.net'),
+        'tenant' => env('SAVVYHOST_TENANT_SUBDOMAIN', 'etrotours'),
+        'email' => env('SAVVYHOST_LOGIN_EMAIL'),
+        'password' => env('SAVVYHOST_LOGIN_PASSWORD'),
+        'token' => env('SAVVYHOST_API_TOKEN'),
+    ],
 ];
+

@@ -406,9 +406,8 @@
                     </div>
                 @endforelse
 
-                @if (method_exists($packages, 'links'))
-                    <div class="mt-4">{{ $packages->links() }}</div>
-                @endif
+                @include('admin.layout.pagination', ['paginator' => $packages])
+
             </div>
         </div>
     </div>
