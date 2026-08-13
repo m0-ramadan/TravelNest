@@ -15,14 +15,9 @@ class ReadyTourTaxonomyMapper
      * Map remote tour_type to local package_type.
      * Rule #15: excursion -> day_tour, package -> travel_package, nile_cruise -> nile_cruise
      */
-    public function mapPackageType(?string $remoteTourType, ?string $remoteCategory = null, ?string $title = null): string
+    public function mapPackageType(?string $remoteTourType): string
     {
         $normalized = $this->normalizeSlug($remoteTourType);
-        $combinedText = strtolower(($remoteTourType ?? '') . ' ' . ($remoteCategory ?? '') . ' ' . ($title ?? ''));
-
-        if (str_contains($combinedText, 'nile') || str_contains($combinedText, 'cruise') || str_contains($combinedText, 'dahabiya') || str_contains($combinedText, 'lake nasser')) {
-            return 'nile_cruise';
-        }
 
         return match ($normalized) {
             'excursion', 'day-tour', 'day_tour' => 'day_tour',
@@ -34,61 +29,6 @@ class ReadyTourTaxonomyMapper
             'custom' => 'custom',
             default => 'travel_package',
         };
-    }
-
-    /**
-     * Resolve Nile Cruise Type and Category from template metadata.
-     * Return ['nile_cruise_type_id' => int|null, 'nile_cruise_category_id' => int|null]
-     */
-    public function resolveNileCruiseTaxonomy(?string $remoteCategory, ?string $title = '', ?string $tourType = ''): array
-    {
-        $haystack = strtolower(($remoteCategory ?? '') . ' ' . ($title ?? '') . ' ' . ($tourType ?? ''));
-
-        // Determine Nile Cruise Type
-        $typeSlug = null;
-        if (str_contains($haystack, 'dahabiya') || str_contains($haystack, 'dahabeya')) {
-            $typeSlug = 'dahabiya-nile-cruise';
-        } elseif (str_contains($haystack, 'lake nasser') || str_contains($haystack, 'lake-nasser') || str_contains($haystack, 'nasser')) {
-            $typeSlug = 'lake-nasser-cruise';
-        } else {
-            $typeSlug = 'luxor-aswan-nile-cruises';
-        }
-
-        $type = \App\Models\NileCruiseType::where('slug', $typeSlug)->first()
-            ?? \App\Models\NileCruiseType::first();
-
-        if (!$type) {
-            return [
-                'nile_cruise_type_id' => null,
-                'nile_cruise_category_id' => null,
-            ];
-        }
-
-        $catId = null;
-        if ($type->slug === 'luxor-aswan-nile-cruises') {
-            $catSlug = 'standard-nile-cruises'; // default fallback for luxor & aswan
-
-            if (str_contains($haystack, 'ultra deluxe') || str_contains($haystack, 'ultra-deluxe')) {
-                $catSlug = 'ultra-deluxe-nile-cruises';
-            } elseif (str_contains($haystack, 'deluxe')) {
-                $catSlug = 'deluxe-nile-cruises';
-            } elseif (str_contains($haystack, 'luxury') || str_contains($haystack, 'ultra luxury')) {
-                $catSlug = 'luxury-nile-cruises';
-            } elseif (str_contains($haystack, 'standard')) {
-                $catSlug = 'standard-nile-cruises';
-            }
-
-            $cat = \App\Models\NileCruiseCategory::where('nile_cruise_type_id', $type->id)
-                ->where('slug', $catSlug)
-                ->first();
-
-            $catId = $cat?->id;
-        }
-
-        return [
-            'nile_cruise_type_id' => $type->id,
-            'nile_cruise_category_id' => $catId,
-        ];
     }
 
     /**
@@ -148,7 +88,7 @@ class ReadyTourTaxonomyMapper
             ?? PackageCategory::first();
 
         if ($remoteCategory) {
-            $warnings[] = "Original category ('{$remoteCategory}') did not match local category directly. Directed to '{$fallback?->display_name}'.";
+            $warnings[] = "التصنيف الأصلي ('{$remoteCategory}') لم يطابق تصميمًا محليًا بدقة. تم التوجيه إلى '{$fallback?->display_name}'.";
         }
 
         return $fallback;
@@ -187,7 +127,7 @@ class ReadyTourTaxonomyMapper
                     'nights' => null,
                 ]);
             } else {
-                $warnings[] = "City ('{$remoteCityName}') not found locally and will be skipped from direct assignment.";
+                $warnings[] = "المدينة ('{$remoteCityName}') غير موجودة محليًا وسوف يتم تجاهلها من الربط المباشر.";
             }
         }
 
