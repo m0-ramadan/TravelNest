@@ -1,7 +1,7 @@
 @extends('website.layouts.master')
 
 @php
-    $indexRoute = route('website.destinations.show', $destination->slug);
+    $indexRoute = route('website.destinations.show', $destination->slug, false);
     $countryRoute = $destination->country?->slug
         ? route('website.destinations.index', ['country' => $destination->country->slug])
         : route('website.destinations.index');
@@ -440,6 +440,85 @@
             margin-bottom: 32px;
         }
 
+        .journey-type-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .journey-type-card {
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            min-height: 180px;
+            overflow: hidden;
+            padding: 0;
+            border-radius: 24px;
+            background: #dfe8ef;
+            border: 1px solid rgba(26, 54, 93, 0.08);
+            box-shadow: 0 16px 36px rgba(16, 33, 63, 0.08);
+            color: #fff;
+            text-decoration: none;
+            transition: transform 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
+        }
+
+        .journey-type-card:hover,
+        .journey-type-card.is-active {
+            transform: translateY(-4px);
+            border-color: rgba(197, 149, 91, 0.42);
+            box-shadow: 0 22px 48px rgba(16, 33, 63, 0.13);
+            color: #fff;
+        }
+
+        .journey-type-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.35s ease;
+        }
+
+        .journey-type-card:hover .journey-type-image,
+        .journey-type-card.is-active .journey-type-image {
+            transform: scale(1.06);
+        }
+
+        .journey-type-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(7, 16, 34, 0.08) 0%, rgba(7, 16, 34, 0.42) 45%, rgba(7, 16, 34, 0.82) 100%);
+            z-index: 1;
+        }
+
+        .journey-type-content strong,
+        .journey-type-content span {
+            display: block;
+        }
+
+        .journey-type-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            padding: 24px;
+        }
+
+        .journey-type-content strong {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem;
+            line-height: 1.25;
+            margin-bottom: 6px;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.38);
+        }
+
+        .journey-type-content span {
+            color: rgba(255, 255, 255, 0.86);
+            font-size: 0.92rem;
+            font-weight: 700;
+        }
+
         .filters-title {
             display: flex;
             align-items: center;
@@ -765,6 +844,7 @@
         html[data-theme='dark'] .overview-panel,
         html[data-theme='dark'] .sidebar-card,
         html[data-theme='dark'] .filters-card,
+        html[data-theme='dark'] .journey-type-card,
         html[data-theme='dark'] .journey-card,
         html[data-theme='dark'] .journey-empty,
         html[data-theme='dark'] .cta-card,
@@ -783,6 +863,10 @@
         html[data-theme='dark'] .attraction-description,
         html[data-theme='dark'] .cta-card p,
         html[data-theme='dark'] .fact-item span {
+            color: var(--warm-gray) !important;
+        }
+
+        html[data-theme='dark'] .journey-type-content span {
             color: var(--warm-gray) !important;
         }
 
@@ -972,6 +1056,31 @@
     </section>
     <section class="destination-results" id="destination-journeys">
         <div class="container">
+            @if ($typeCards->count())
+                <div class="results-head">
+                    <div>
+                        <h2>{{ __('Explore :destination by trip type', ['destination' => $destination->display_name]) }}</h2>
+                        <p>{{ __('Choose a section to see matching trips only for this city.') }}</p>
+                    </div>
+                </div>
+
+                <div class="journey-type-grid" aria-label="{{ __('Journey types') }}">
+                    @foreach ($typeCards as $typeCard)
+                        <a href="{{ $typeCard['url'] }}"
+                            class="journey-type-card{{ $typeCard['active'] ? ' is-active' : '' }}">
+                            <img src="{{ asset($typeCard['image']) }}"
+                                alt="{{ $typeCard['label'] }}"
+                                class="journey-type-image"
+                                loading="lazy">
+                            <span class="journey-type-content">
+                                <strong>{{ $typeCard['label'] }}</strong>
+                                <span>{{ trans_choice(':count trip|:count trips', $typeCard['count'], ['count' => $typeCard['count']]) }}</span>
+                            </span>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+
             <div class="filters-card">
                 <h2 class="filters-title">
                     <i class="la la-sliders-h"></i>

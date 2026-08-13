@@ -2,6 +2,7 @@
 
 @section('title', $package->getTranslation('seo_title') ?: $title . ' - Etro Tours')
 @section('description', $package->getTranslation('seo_description') ?: $shortDescription)
+@section('body_class', 'package-show-template')
 @section('keywords',
     trim(
     collect([
@@ -169,7 +170,14 @@
 
         .main-container {
             background: linear-gradient(135deg, var(--cream-elegant, #f8f2e8), var(--light-sand, #efe4d3));
+            display: flow-root;
             padding: 70px 0
+        }
+
+        body.package-show-template .footer {
+            clear: both;
+            float: none;
+            width: 100%;
         }
 
         .content-wrapper {
@@ -365,6 +373,76 @@
 
         .styled-list li:last-child {
             border-bottom: 0
+        }
+
+        .facilities-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .cruise-facility-list {
+            list-style: none;
+            margin: 0 0 28px;
+            padding: 0;
+        }
+
+        .cruise-facility-list li {
+            position: relative;
+            padding: 9px 0 11px 24px;
+            border-bottom: 1px solid rgba(28, 50, 92, .1);
+            color: #4f5d6f;
+            font-size: 1.02rem;
+            line-height: 1.45;
+        }
+
+        .cruise-facility-list li:before {
+            content: '';
+            position: absolute;
+            top: 18px;
+            left: 3px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--rich-gold, #c5955b);
+        }
+
+        .cruise-facility-list li:last-child {
+            border-bottom: 0;
+        }
+
+        .facility-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 56px;
+            padding: 14px 16px;
+            background: var(--pearl-luxury, #faf8f3);
+            border: 1px solid rgba(197, 149, 91, .16);
+            border-radius: 14px;
+            color: var(--primary-navy, #1c325c);
+            font-weight: 600;
+        }
+
+        .facility-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            min-width: 18px;
+            color: var(--rich-gold, #c5955b);
+        }
+
+        .facility-icon svg {
+            width: 18px;
+            height: 18px;
+            display: block;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .included-box,
@@ -1049,6 +1127,13 @@
             justify-content: center;
         }
 
+        .fixed-mobile-btn.is-footer-visible {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translate(-50%, 14px);
+        }
+
         .mobile-enquiry-btn {
             width: auto;
             min-width: 180px;
@@ -1136,6 +1221,10 @@
         }
 
         @media(max-width:991px) {
+            body.package-show-template #main-content {
+                padding-bottom: 76px;
+            }
+
             .package-hero {
                 min-height: auto;
                 padding: 105px 0 46px;
@@ -1233,6 +1322,10 @@
             }
 
             .gallery-grid {
+                grid-template-columns: 1fr
+            }
+
+            .facilities-grid {
                 grid-template-columns: 1fr
             }
 
@@ -1583,6 +1676,136 @@
             background: rgba(255, 255, 255, 0.03);
         }
 
+        html[data-theme='dark'] .facility-card {
+            background: #1a233a;
+            border-color: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+        }
+
+        html[data-theme='dark'] .cruise-facility-list li {
+            color: #e2e8f0;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Group Pricing Grid CSS */
+        .group-pricing-subtitle {
+            font-size: 1rem;
+            color: #64748b;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        .group-pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .group-pricing-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .group-tier-card {
+            position: relative;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 24px 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
+        }
+
+        .group-tier-card:hover {
+            border-color: rgba(197, 149, 91, 0.4);
+            box-shadow: 0 8px 20px rgba(197, 149, 91, 0.1);
+        }
+
+        .group-tier-badge {
+            position: absolute;
+            top: -14px;
+            right: 20px;
+            background: linear-gradient(135deg, #c5955b 0%, #a87943 100%);
+            color: #ffffff;
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(197, 149, 91, 0.35);
+            letter-spacing: 0.3px;
+            z-index: 2;
+        }
+
+        [dir="rtl"] .group-tier-badge {
+            right: auto;
+            left: 20px;
+        }
+
+        .group-tier-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .group-tier-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1c325c;
+            margin: 0 0 6px 0;
+            line-height: 1.2;
+        }
+
+        .group-tier-pax-tag {
+            display: inline-block;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            color: #c5955b;
+            background: rgba(197, 149, 91, 0.12);
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+
+        .group-tier-price-wrap {
+            margin-top: 14px;
+        }
+
+        .group-tier-price {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #1c325c;
+            line-height: 1;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .group-tier-sub {
+            font-size: 0.88rem;
+            color: #64748b;
+            font-style: italic;
+            margin-top: 6px;
+        }
+
+        html[data-theme='dark'] .group-tier-card {
+            background: #1a233a;
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        html[data-theme='dark'] .group-tier-title,
+        html[data-theme='dark'] .group-tier-price {
+            color: #ffffff;
+        }
+
+        html[data-theme='dark'] .group-tier-subtitle {
+            color: #94a3b8;
+        }
+
         @media (max-width: 576px) {
             .attractions-highlight-section {
                 padding: 24px 16px;
@@ -1916,7 +2139,101 @@
                         </section>
                     @endif
 
-                    @if ($package->packageAttractions && $package->packageAttractions->count())
+                    @php
+                        $isNileCruisePackage = $package->package_type === 'nile_cruise';
+                        $cruiseFacilityList = [
+                            'Large panoramic / ultra violet windows',
+                            'Private bath with bath tub, hair dryer',
+                            'All cabins are air-conditioned with individual controls.',
+                            'Internet access',
+                            'Non smoking cabins',
+                            'Doctor on calls on board.',
+                            'Colored TV within house music and video channels',
+                            'Dedicated movie channel showing 3 films daily',
+                            'Mini Bar & Room service',
+                            'Telephone system with international calls',
+                            'Swimming Pool and sundeck',
+                            'Safe box in each cabin',
+                            'Gymnasium',
+                            'Laundry service & housekeeping',
+                            'All major credit cards accepted',
+                        ];
+                        $cruiseAmenityCards = [
+                            ['label' => 'WiFi', 'icon' => 'wifi'],
+                            ['label' => 'Pool', 'icon' => 'pool'],
+                            ['label' => 'Air condition', 'icon' => 'snowflake'],
+                            ['label' => 'Private bath with Shower', 'icon' => 'bath'],
+                            ['label' => 'TV', 'icon' => 'tv'],
+                            ['label' => 'Mini Bar', 'icon' => 'glass'],
+                            ['label' => 'Doctor available 24 hours', 'icon' => 'medical'],
+                            ['label' => 'Gift Shop', 'icon' => 'gift'],
+                        ];
+                    @endphp
+                    @if ($isNileCruisePackage || $facilities->count())
+                        <section class="content-section">
+                            <h2 class="section-header">
+                                {{ $isNileCruisePackage ? __('Cruise Facilities') : __('Trip Facilities') }}
+                            </h2>
+                            @if ($isNileCruisePackage)
+                                <ul class="cruise-facility-list">
+                                    @foreach ($cruiseFacilityList as $facilityText)
+                                        <li>{{ __($facilityText) }}</li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                            <div class="facilities-grid">
+                                @foreach (($isNileCruisePackage ? $cruiseAmenityCards : $facilities) as $facility)
+                                    <div class="facility-card">
+                                        @if ($isNileCruisePackage)
+                                            <span class="facility-icon" aria-hidden="true">
+                                                @switch($facility['icon'])
+                                                    @case('wifi')
+                                                        <svg viewBox="0 0 24 24"><path d="M5 13a10 10 0 0 1 14 0"></path><path d="M8.5 16.5a5 5 0 0 1 7 0"></path><path d="M12 20h.01"></path></svg>
+                                                        @break
+
+                                                    @case('pool')
+                                                        <svg viewBox="0 0 24 24"><path d="M4 18c2 0 2-1 4-1s2 1 4 1 2-1 4-1 2 1 4 1"></path><path d="M4 21c2 0 2-1 4-1s2 1 4 1 2-1 4-1 2 1 4 1"></path><path d="M8 17V5a3 3 0 0 1 6 0"></path><path d="M8 9h8"></path></svg>
+                                                        @break
+
+                                                    @case('snowflake')
+                                                        <svg viewBox="0 0 24 24"><path d="M12 2v20"></path><path d="m17 5-5 5-5-5"></path><path d="m17 19-5-5-5 5"></path><path d="M2 12h20"></path><path d="m5 7 5 5-5 5"></path><path d="m19 7-5 5 5 5"></path></svg>
+                                                        @break
+
+                                                    @case('bath')
+                                                        <svg viewBox="0 0 24 24"><path d="M4 12h16v4a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-4Z"></path><path d="M7 12V6a3 3 0 0 1 5.1-2.1"></path><path d="M14 5l2 2"></path><path d="M7 20l-1 2"></path><path d="M17 20l1 2"></path></svg>
+                                                        @break
+
+                                                    @case('tv')
+                                                        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2"></rect><path d="M8 21h8"></path><path d="M12 17v4"></path></svg>
+                                                        @break
+
+                                                    @case('glass')
+                                                        <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 8a3 3 0 0 1-6 0L8 3Z"></path><path d="M12 14v7"></path><path d="M9 21h6"></path><path d="M9 8h6"></path></svg>
+                                                        @break
+
+                                                    @case('medical')
+                                                        <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path><path d="M12 11v5"></path><path d="M9.5 13.5h5"></path></svg>
+                                                        @break
+
+                                                    @case('gift')
+                                                        <svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M12 8v13"></path><path d="M3 12h18"></path><path d="M12 8H8.5a2.5 2.5 0 1 1 2.1-3.9L12 8Z"></path><path d="M12 8h3.5a2.5 2.5 0 1 0-2.1-3.9L12 8Z"></path></svg>
+                                                        @break
+                                                @endswitch
+                                            </span>
+                                            <span>{{ __($facility['label']) }}</span>
+                                        @else
+                                            <span class="facility-icon" aria-hidden="true">
+                                                <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg>
+                                            </span>
+                                            <span>{{ $facility->display_title }}</span>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </section>
+                    @endif
+
+                    @if (!$isNileCruisePackage && $package->packageAttractions && $package->packageAttractions->count())
                         <section class="content-section attractions-highlight-section">
                             <h2 class="attractions-highlight-title">{{ __('Places You\'ll Visit') }}</h2>
                             <div class="attractions-highlight-divider"></div>
@@ -1974,23 +2291,14 @@
                         </section>
                     @endif
 
-                    @if ($videoEmbedUrl)
-                        <section class="content-section">
-                            <h2 class="section-header">{{ __('Video Tour') }}</h2>
-                            <div
-                                style="border-radius:18px; overflow:hidden; position:relative; padding-bottom:56.25%; height:0; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-                                <iframe src="{{ $videoEmbedUrl }}" title="{{ __('Video Tour') }}: {{ $title }}"
-                                    style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
-                                    loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                    allowfullscreen></iframe>
-                            </div>
-                        </section>
-                    @endif
-
                     @if ($itineraries->count())
+                        @php
+                            $isDayTourActive = !empty($isDayTour) || ($package->duration_type === 'hours' || (int) $package->duration_days <= 1 || $package->tour_type === 'day_tour');
+                            $sectionHeadingText = $isDayTourActive ? __('Trip Steps') : __('Itinerary');
+                            $stepUnitText = $isDayTourActive ? __('Step') : ($itineraryUnit ?? __('Day'));
+                        @endphp
                         <section id="itinerary" class="content-section">
-                            <h2 class="section-header">{{ $title }} {{ __('Itinerary') }}</h2>
+                            <h2 class="section-header">{{ $title }} {{ $sectionHeadingText }}</h2>
                             <div class="itinerary-section">
                                 @foreach ($itineraries as $day)
                                     <div class="day-card">
@@ -2002,11 +2310,11 @@
                                                 {{ $day->day_number }}</div>
                                             <div>
                                                 <h3 class="day-title">
-                                                    {{ $itineraryUnit }} {{ $day->day_number }}@if ($day->display_title)
+                                                    {{ $stepUnitText }} {{ $day->day_number }}@if ($day->display_title)
                                                         : {{ $day->display_title }}
                                                     @endif
                                                 </h3>
-                                                @if ($day->duration)
+                                                @if ($day->duration && !$isDayTourActive)
                                                     <small>
                                                         <i class="la la-clock"></i>
                                                         {{ $day->duration }}
@@ -2019,7 +2327,7 @@
                                             id="day-{{ $day->id }}">
                                             <div class="day-content">
                                                 {!! nl2br(e($day->display_description ?: __('No itinerary description added yet.'))) !!}
-                                                @if ($day->display_overnight)
+                                                @if ($day->display_overnight && !$isDayTourActive)
                                                     <p><strong>{{ __('Overnight:') }}</strong>
                                                         {{ $day->display_overnight }}</p>
                                                 @endif
@@ -2080,209 +2388,40 @@
                         </section>
                     @endif
 
-                    @if ($prices->count() || $hasCategoryPricing || $pricingInformation)
-                        <section class="content-section pricing-showcase">
+                    @if ($prices->count() || $hasCategoryPricing || $pricingInformation || true)
+                        <section class="content-section pricing-showcase" id="pricing-section">
                             <h2 class="section-header">{{ __('Pricing & Packages') }}</h2>
-                            @if ($priceFrom > 0 || $priceTo > 0 || $comparePrice > 0)
-                                <div class="section-subtitle d-flex align-items-center justify-content-center flex-wrap gap-2 mb-4">
-                                    @if ($priceTo > $priceFrom && $priceFrom > 0)
-                                        <span class="price-badge-item" style="background: rgba(197, 149, 91, 0.12); color: #1c325c; border: 1px solid rgba(197, 149, 91, 0.3); padding: 8px 18px; border-radius: 20px; font-weight: 700; font-size: 0.95rem;">
-                                            <i class="la la-tag text-gold me-1"></i>
-                                            {{ __('Price Range:') }} {{ $currencySymbol }}{{ number_format($priceFrom, 2) }} - {{ $currencySymbol }}{{ number_format($priceTo, 2) }}
-                                        </span>
-                                    @elseif ($priceFrom > 0)
-                                        <span class="price-badge-item" style="background: rgba(197, 149, 91, 0.12); color: #1c325c; border: 1px solid rgba(197, 149, 91, 0.3); padding: 8px 18px; border-radius: 20px; font-weight: 700; font-size: 0.95rem;">
-                                            <i class="la la-tag text-gold me-1"></i>
-                                            {{ __('Starts From:') }} {{ $currencySymbol }}{{ number_format($priceFrom, 2) }}
-                                        </span>
-                                    @endif
-
-                                    @if ($comparePrice > max($priceFrom, $priceTo, 0))
-                                        <span class="price-badge-item" style="background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; padding: 8px 18px; border-radius: 20px; font-weight: 600; font-size: 0.95rem; text-decoration: line-through;">
-                                            {{ __('Was:') }} {{ $currencySymbol }}{{ number_format($comparePrice, 2) }}
-                                        </span>
-                                        @php
-                                            $basePrice = $priceFrom > 0 ? $priceFrom : $priceTo;
-                                            $saveAmount = $comparePrice - $basePrice;
-                                            $savePercent = round(($saveAmount / $comparePrice) * 100);
-                                        @endphp
-                                        @if ($savePercent > 0)
-                                            <span class="price-badge-item" style="background: #ef4444; color: #ffffff; padding: 8px 18px; border-radius: 20px; font-weight: 700; font-size: 0.95rem;">
-                                                <i class="la la-percentage me-1"></i> {{ __('Save') }} {{ $savePercent }}%
-                                            </span>
-                                        @endif
-                                    @endif
-                                </div>
-                            @endif
+                            <p class="group-pricing-subtitle">
+                                {{ __('Choose your preferred group size. Prices are quoted in US Dollars per person.') }}
+                            </p>
 
                             @php
-                                $tierPrices = $prices->filter(function($p) {
-                                    return ($p->pax_min !== null || $p->pax_max !== null || $p->group_size_min !== null || $p->group_size_max !== null) && (float)$p->amount > 0;
-                                })->values();
+                                $groupTiers = $package->group_pricing_tiers;
                             @endphp
 
-                            <!-- Interactive Person Count Calculator -->
-                            <div class="price-calculator-card">
-                                <div class="row align-items-center g-3">
-                                    <div class="col-lg-5">
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div class="pricing-card-icon m-0 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; min-width: 52px; background: rgba(197, 149, 91, 0.15); border-radius: 14px;" aria-hidden="true">
-                                                <i class="la la-calculator" style="font-size: 1.8rem; color: #c5955b;"></i>
-                                            </div>
+                            <div class="group-pricing-grid">
+                                @foreach ($groupTiers as $tier)
+                                    <div class="group-tier-card">
+                                        @if ($tier['badge'])
+                                            <div class="group-tier-badge">{{ $tier['badge'] }}</div>
+                                        @endif
+
+                                        <div class="group-tier-header">
                                             <div>
-                                                <h4 class="mb-1" style="font-weight: 700; font-size: 1.15rem; color: var(--text-heading, #1c325c);">
-                                                    {{ __('Calculate Price by Travelers') }}
-                                                </h4>
-                                                <p class="mb-0 text-muted small">
-                                                    {{ __('Change traveler count to calculate live price') }}
-                                                </p>
+                                                <h3 class="group-tier-title">{{ $tier['title'] }}</h3>
+                                                <span class="group-tier-pax-tag">{{ $tier['persons_label'] }}</span>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div class="col-lg-7">
-                                        <div class="d-flex align-items-center justify-content-lg-end justify-content-start flex-wrap gap-4">
-                                            <!-- Counter -->
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span class="fw-semibold me-1 text-nowrap" style="font-size: 0.95rem;">{{ __('Travelers:') }}</span>
-                                                <button type="button" class="counter-btn js-pax-decrement" aria-label="Decrease travelers">-</button>
-                                                <span class="counter-value js-pax-count">1</span>
-                                                <button type="button" class="counter-btn js-pax-increment" aria-label="Increase travelers">+</button>
+                                        <div class="group-tier-price-wrap">
+                                            <div class="group-tier-price">
+                                                {{ $currencySymbol }}{{ number_format($tier['price_per_person'], 0) }}
                                             </div>
-
-                                            <!-- Price Result Output -->
-                                            <div class="text-lg-end text-start border-start ps-4" style="border-color: rgba(197, 149, 91, 0.25) !important;">
-                                                <span class="text-muted d-block small" style="font-size: 0.8rem;">{{ __('Estimated Total:') }}</span>
-                                                <span class="js-calc-total-price" style="font-size: 1.6rem; font-weight: 800; color: #c5955b; font-family: 'Playfair Display', serif;">
-                                                    {{ $currencySymbol }}0.00
-                                                </span>
-                                                <span class="js-calc-per-person d-block text-muted" style="font-size: 0.8rem;"></span>
-                                            </div>
+                                            <div class="group-tier-sub">{{ __('per person') }}</div>
                                         </div>
                                     </div>
-                                </div>
+                                @endforeach
                             </div>
-
-                            @if ($tierPrices->count())
-                                <!-- Tiered Pricing Cards -->
-                                <div class="mb-4">
-                                    <h4 class="mb-3" style="font-weight: 700; font-size: 1.1rem; color: var(--text-heading, #1c325c);">
-                                        <i class="la la-users me-1 text-gold"></i> {{ __('Pricing Tiers by Group Size') }}
-                                    </h4>
-                                    <div class="row g-3">
-                                        @foreach ($tierPrices as $tp)
-                                            @php
-                                                $minP = $tp->pax_min ?: ($tp->group_size_min ?: 1);
-                                                $maxP = $tp->pax_max ?: ($tp->group_size_max ?: 0);
-                                            @endphp
-                                            <div class="col-6 col-md-4 col-lg-3">
-                                                <div class="pax-tier-card js-tier-card" 
-                                                    data-min="{{ $minP }}" 
-                                                    data-max="{{ $maxP }}" 
-                                                    data-amount="{{ (float)$tp->amount }}"
-                                                    data-type="{{ $tp->price_type }}">
-                                                    <div class="pax-tier-title">
-                                                        @if ($minP === $maxP)
-                                                            {{ $minP }} {{ __('Person') }}
-                                                        @elseif ($maxP > 0)
-                                                            {{ $minP }} - {{ $maxP }} {{ __('Persons') }}
-                                                        @else
-                                                            {{ $minP }}+ {{ __('Persons') }}
-                                                        @endif
-                                                    </div>
-                                                    <div class="pax-tier-price">
-                                                        {{ $currencySymbol }}{{ number_format((float)$tp->amount, 2) }}
-                                                    </div>
-                                                    <div class="pax-tier-sub">
-                                                        {{ $tp->display_price_type }}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
-
-                            @if ($hasCategoryPricing)
-                                <div class="pricing-cards">
-                                    @if ($package->adult_price !== null && (float) $package->adult_price > 0)
-                                        <article class="pricing-card">
-                                            <div class="pricing-card-icon" aria-hidden="true">
-                                                <svg viewBox="0 0 64 64" fill="none" stroke="currentColor"
-                                                    stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-                                                    <circle cx="32" cy="20" r="10"></circle>
-                                                    <path d="M15 52v-5c0-9.4 7.6-17 17-17s17 7.6 17 17v5H15Z"></path>
-                                                </svg>
-                                            </div>
-                                            <h3 class="pricing-card-title">{{ __('Adult') }}</h3>
-                                            <p class="pricing-card-age">{{ $package->adult_min_age ?: 12 }}+ {{ __('years') }}</p>
-                                            <span class="pricing-card-divider"></span>
-                                            <p class="pricing-card-price">
-                                                {{ $currencySymbol }}{{ number_format((float) $package->adult_price, 2) }}
-                                            </p>
-                                        </article>
-                                    @endif
-
-                                    @if ($package->child_price !== null)
-                                        <article class="pricing-card">
-                                            <div class="pricing-card-icon" aria-hidden="true">
-                                                <svg viewBox="0 0 64 64" fill="none" stroke="currentColor"
-                                                    stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M14.5 30.5C14.5 18.6 22.3 11 32 11s17.5 7.6 17.5 19.5v7C49.5 48.3 41.7 56 32 56s-17.5-7.7-17.5-18.5v-7Z"></path>
-                                                    <path d="M19 20c5 1.2 11.5-1.1 15-6 2.5 5.2 7.3 8.2 14 8"></path>
-                                                    <path d="M14.5 29.5c-4 0-5.5 2.8-5.5 6s2.2 6 6 6M49.5 29.5c4 0 5.5 2.8 5.5 6s-2.2 6-6 6"></path>
-                                                    <circle cx="25" cy="34" r="1.6" fill="currentColor" stroke="none"></circle>
-                                                    <circle cx="39" cy="34" r="1.6" fill="currentColor" stroke="none"></circle>
-                                                    <path d="M26 44c1.8 2 3.8 3 6 3s4.2-1 6-3"></path>
-                                                </svg>
-                                            </div>
-                                            <h3 class="pricing-card-title">{{ __('Child') }}</h3>
-                                            <p class="pricing-card-age">
-                                                {{ $package->child_min_age ?: 2 }} - {{ $package->child_max_age ?: 11 }}
-                                                {{ __('years') }}
-                                            </p>
-                                            <span class="pricing-card-divider"></span>
-                                            <p class="pricing-card-price">
-                                                @if ((float) $package->child_price > 0)
-                                                    {{-- $currencySymbol }}{{ number_format((float) $package->child_price, 2) --}}
-                                                    --
-                                                @else
-                                                    <span class="free-price-badge">--</span>
-                                                @endif
-                                            </p>
-                                        </article>
-                                    @endif
-
-                                    @if ($package->infant_price !== null)
-                                        <article class="pricing-card">
-                                            <div class="pricing-card-icon" aria-hidden="true">
-                                                <svg viewBox="0 0 64 64" fill="none" stroke="currentColor"
-                                                    stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M18 29.5C18 19 24.2 12 32 12s14 7 14 17.5V36c0 9.2-6.2 16-14 16s-14-6.8-14-16v-6.5Z"></path>
-                                                    <path d="M32 12c-1.7-2.7-.7-5.4 1.8-6.8M18.5 39c7.5 1.7 16.7 6.8 21.5 11.5M45.5 35.5 32 43"></path>
-                                                    <path d="M18.2 29c-3.7 0-5.2 2.6-5.2 5.5s2 5.5 5.5 5.5M45.8 29c3.7 0 5.2 2.6 5.2 5.5s-2 5.5-5.5 5.5"></path>
-                                                    <circle cx="26" cy="28" r="1.5" fill="currentColor" stroke="none"></circle>
-                                                    <circle cx="38" cy="28" r="1.5" fill="currentColor" stroke="none"></circle>
-                                                    <path d="M27 35c1.5 1.7 3.2 2.5 5 2.5s3.5-.8 5-2.5"></path>
-                                                </svg>
-                                            </div>
-                                            <h3 class="pricing-card-title">{{ __('Infant') }}</h3>
-                                            <p class="pricing-card-age">
-                                                {{ $package->infant_min_age !== null ? $package->infant_min_age : 0 }} - {{ $package->infant_max_age ?: 1 }}
-                                                {{ __('years') }}
-                                            </p>
-                                            <span class="pricing-card-divider"></span>
-                                            <p class="pricing-card-price">
-                                                @if ((float) $package->infant_price > 0)
-                                                    {{ $currencySymbol }}{{ number_format((float) $package->infant_price, 2) }}
-                                                @else
-                                                    <span class="free-price-badge">{{ __('Free') }}</span>
-                                                @endif
-                                            </p>
-                                        </article>
-                                    @endif
-                                </div>
-                            @endif
 
                             @if ($prices->count())
                                 <div class="price-box pricing-options">
@@ -2669,6 +2808,39 @@
                 });
             });
 
+            const mobileFixedButton = document.querySelector('.fixed-mobile-btn');
+            const footer = document.querySelector('.footer');
+
+            if (mobileFixedButton && footer) {
+                if ('IntersectionObserver' in window) {
+                    const footerObserver = new IntersectionObserver((entries) => {
+                        mobileFixedButton.classList.toggle(
+                            'is-footer-visible',
+                            entries.some((entry) => entry.isIntersecting)
+                        );
+                    }, {
+                        rootMargin: '0px 0px -24px 0px',
+                        threshold: 0
+                    });
+
+                    footerObserver.observe(footer);
+                } else {
+                    const syncMobileButtonWithFooter = () => {
+                        const footerTop = footer.getBoundingClientRect().top;
+                        mobileFixedButton.classList.toggle(
+                            'is-footer-visible',
+                            footerTop < window.innerHeight - 24
+                        );
+                    };
+
+                    window.addEventListener('scroll', syncMobileButtonWithFooter, {
+                        passive: true
+                    });
+                    window.addEventListener('resize', syncMobileButtonWithFooter);
+                    syncMobileButtonWithFooter();
+                }
+            }
+
             document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
                 anchor.addEventListener('click', function(e) {
                     const href = this.getAttribute('href');
@@ -2771,95 +2943,6 @@
                     showPrev();
                 }
             });
-        });
-
-        /* Dynamic Pax Pricing Calculator Logic */
-        document.addEventListener('DOMContentLoaded', function () {
-            const decBtn = document.querySelector('.js-pax-decrement');
-            const incBtn = document.querySelector('.js-pax-increment');
-            const paxCountEl = document.querySelector('.js-pax-count');
-            const totalPriceEl = document.querySelector('.js-calc-total-price');
-            const perPersonEl = document.querySelector('.js-calc-per-person');
-            const tierCards = document.querySelectorAll('.js-tier-card');
-
-            if (!paxCountEl) return;
-
-            const currencySymbol = "{{ $currencySymbol }}";
-            const baseAdultPrice = parseFloat("{{ (float)($package->adult_price ?: ($package->price_from ?: 0)) }}");
-
-            let currentPax = 1;
-
-            function updateCalculator() {
-                paxCountEl.textContent = currentPax;
-                if (decBtn) decBtn.disabled = currentPax <= 1;
-
-                let matchedAmount = baseAdultPrice;
-                let isPerGroup = false;
-                let activeCard = null;
-
-                tierCards.forEach(card => {
-                    const min = parseInt(card.dataset.min, 10) || 1;
-                    const max = parseInt(card.dataset.max, 10) || 0;
-                    const amt = parseFloat(card.dataset.amount) || 0;
-                    const type = card.dataset.type;
-
-                    card.classList.remove('active');
-
-                    if (currentPax >= min && (max === 0 || currentPax <= max)) {
-                        matchedAmount = amt;
-                        isPerGroup = (type === 'per_group');
-                        activeCard = card;
-                    }
-                });
-
-                if (activeCard) {
-                    activeCard.classList.add('active');
-                }
-
-                let total = 0;
-                let perPerson = 0;
-
-                if (isPerGroup) {
-                    total = matchedAmount;
-                    perPerson = currentPax > 0 ? (matchedAmount / currentPax) : matchedAmount;
-                } else {
-                    perPerson = matchedAmount;
-                    total = matchedAmount * currentPax;
-                }
-
-                if (totalPriceEl) {
-                    totalPriceEl.textContent = currencySymbol + total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                }
-                if (perPersonEl && perPerson > 0) {
-                    perPersonEl.textContent = '(' + currencySymbol + perPerson.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' {{ __('per person') }}' + ')';
-                }
-            }
-
-            if (decBtn) {
-                decBtn.addEventListener('click', function () {
-                    if (currentPax > 1) {
-                        currentPax--;
-                        updateCalculator();
-                    }
-                });
-            }
-
-            if (incBtn) {
-                incBtn.addEventListener('click', function () {
-                    currentPax++;
-                    updateCalculator();
-                });
-            }
-
-            tierCards.forEach(card => {
-                card.addEventListener('click', function () {
-                    const min = parseInt(card.dataset.min, 10) || 1;
-                    currentPax = min;
-                    updateCalculator();
-                });
-            });
-
-            updateCalculator();
         });
     </script>
 @endsection

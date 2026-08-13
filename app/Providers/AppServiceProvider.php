@@ -40,7 +40,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::composer(['website.layouts.header', 'website.layouts.footer'], function ($view) {
-            $view->with('navigationDestinations', app(WebsiteDestinationService::class)->homeDestinations());
+            $view->with('navigationDestinations', app(WebsiteDestinationService::class)->homeDestinations(24));
         });
 
         $invalidateWebsiteCache = static function (): void {

@@ -401,6 +401,7 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
         Route::prefix('attractions')->name('attractions.')->group(function () {
             Route::get('statistics', [AttractionController::class, 'statistics'])->name('statistics');
             Route::post('bulk-actions', [AttractionController::class, 'bulkActions'])->name('bulk-actions');
+            Route::post('quick-store', [AttractionController::class, 'quickStore'])->name('quick-store');
             Route::patch('{attraction}/toggle-status', [AttractionController::class, 'toggleStatus'])->name('toggle-status');
         });
 

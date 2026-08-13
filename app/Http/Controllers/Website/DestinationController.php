@@ -87,7 +87,7 @@ class DestinationController extends BaseWebsiteController
                 'country' => $city->country?->display_name ?: __('Destination'),
                 'description' => Str::limit(trim(strip_tags($city->display_short_description ?: $city->display_description)), 150),
                 'image' => $this->imageUrl($city->featured_image ?: $city->hero_image, 'website/photos/home2.webp'),
-                'url' => route('website.destinations.show', $city->slug),
+                'url' => route('website.destinations.show', $city->slug, false),
                 'attractions_count' => (int) $city->attractions_count,
                 'packages_count' => (int) $city->packages_count,
             ];
@@ -223,6 +223,12 @@ class DestinationController extends BaseWebsiteController
             })
             ->values();
 
+        $primaryDestinationTypes = [
+            'day_tour',
+            'nile_cruise',
+            'travel_package',
+        ];
+
         $availableTypes = (clone $statsQuery)
             ->select('package_type')
             ->distinct()
@@ -230,13 +236,41 @@ class DestinationController extends BaseWebsiteController
             ->filter()
             ->values();
 
+        $typeCounts = (clone $statsQuery)
+            ->select('package_type', DB::raw('COUNT(*) as total'))
+            ->whereNotNull('package_type')
+            ->groupBy('package_type')
+            ->pluck('total', 'package_type');
+
         $typeOptions = $availableTypes
+            ->merge($primaryDestinationTypes)
+            ->unique()
             ->map(fn (string $type) => [
                 'value' => $type,
                 'label' => $this->typeLabel($type),
             ])
             ->values()
             ->all();
+
+        $typeImageMap = [
+            'day_tour' => 'website/photos/home2.webp',
+            'nile_cruise' => 'website/images/nile-cruises/luxor-aswan.jpg',
+            'travel_package' => 'website/photos/Dest/Egypt.jpg',
+        ];
+
+        $typeCards = collect($primaryDestinationTypes)
+            ->map(fn (string $type) => [
+                'value' => $type,
+                'label' => $this->typeLabel($type),
+                'count' => (int) ($typeCounts[$type] ?? 0),
+                'image' => $typeImageMap[$type] ?? 'website/photos/home2.webp',
+                'url' => route('website.destinations.show', [
+                    'slug' => $destination->slug,
+                    'type' => $type,
+                ], false) . '#destination-journeys',
+                'active' => $selectedType === $type,
+            ])
+            ->values();
 
         $stats = [
             'count' => (clone $statsQuery)->count(),
@@ -255,6 +289,7 @@ class DestinationController extends BaseWebsiteController
             'shortDescription',
             'attractions',
             'typeOptions',
+            'typeCards',
             'selectedType',
             'search',
             'stats'

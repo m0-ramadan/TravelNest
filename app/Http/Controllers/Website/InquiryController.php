@@ -45,10 +45,38 @@ class InquiryController extends BaseWebsiteController
         $children = (int) $request->input('children', $request->input('child', 0));
         $infants = (int) $request->input('infants', 0);
 
-        $adultPrice = (float) ($package?->adult_price ?? 0);
-        $childPrice = (float) ($package?->child_price ?? 0);
-        $infantPrice = (float) ($package?->infant_price ?? 0);
-        $calculatedTotal = ($adults * $adultPrice) + ($children * $childPrice) + ($infants * $infantPrice);
+        $tierKey = match (true) {
+            $adults <= 1 => '1_person',
+            $adults === 2 => '2_persons',
+            $adults === 3 => '3_persons',
+            $adults === 4 => '4_persons',
+            $adults === 5 => '5_persons',
+            default => '6_plus_persons',
+        };
+
+        $calculatedTotal = 0;
+        $tierSummaryText = null;
+
+        if ($package) {
+            $groupTiers = collect($package->group_pricing_tiers)->keyBy('id');
+            $tierData = $groupTiers->get($tierKey) ?: $groupTiers->first();
+
+            if ($tierData) {
+                $pricePerPerson = (float) $tierData['price_per_person'];
+                $calculatedTotal = $adults * $pricePerPerson;
+                
+                $tierSummaryText = sprintf(
+                    'Pricing Tier: %s (%d %s) @ %s%s/person = %s%s total',
+                    $tierData['title'],
+                    $adults,
+                    $adults === 1 ? 'Person' : 'Persons',
+                    $package->currency?->symbol ?? '$',
+                    number_format($pricePerPerson, 2),
+                    $package->currency?->symbol ?? '$',
+                    number_format($calculatedTotal, 2)
+                );
+            }
+        }
 
         $data = [
             'package_id' => $request->input('package_id'),
@@ -65,12 +93,8 @@ class InquiryController extends BaseWebsiteController
             'source' => url()->previous(),
             'message' => trim(collect([
                 $request->input('comment') ?: $request->input('message') ?: '',
-                'Tour: ' . $request->input('title'),
-                $package ? sprintf(
-                    'Calculated total: %s%s',
-                    $package->currency?->symbol ?? '$',
-                    number_format($calculatedTotal, 2)
-                ) : null,
+                $request->input('title') ? 'Tour: ' . $request->input('title') : null,
+                $tierSummaryText,
             ])->filter()->implode("\n\n")),
             'status' => 'new',
             'created_at' => now(),
@@ -79,10 +103,17 @@ class InquiryController extends BaseWebsiteController
 
         /* حماية لو نسخة قاعدة البيانات عندك ناقصة أعمدة */
         $columns = Schema::getColumnListing('inquiries');
-        $data = array_intersect_key($data, array_flip($columns));
+        $filteredData = array_filter($data, fn($key) => in_array($key, $columns, true), ARRAY_FILTER_USE_KEY);
 
-        DB::table('inquiries')->insert($data);
+        DB::table('inquiries')->insert($filteredData);
 
-        return back()->with('success', 'Your enquiry has been sent successfully. We will contact you soon.');
+        if ($request->wantsJson()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => __('Your inquiry has been submitted successfully! We will contact you soon.'),
+            ]);
+        }
+
+        return redirect()->back()->with('success', __('Your inquiry has been submitted successfully! We will contact you soon.'));
     }
 }

@@ -233,4 +233,43 @@ class AttractionController extends Controller
 
         return back()->with('success', 'Attraction featured updated.');
     }
+
+    public function quickStore(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'city_id' => ['nullable', 'exists:cities,id'],
+            'description' => ['nullable', 'string'],
+        ]);
+
+        $data = $this->translateModelFields($validated, [
+            'name',
+            'description',
+        ]);
+
+        $slugSource = is_array($data['name'])
+            ? ($data['name']['en'] ?? $data['name']['ar'] ?? reset($data['name']))
+            : $data['name'];
+
+        $data['slug'] = Str::slug($slugSource ?: 'attraction-' . time()) . '-' . uniqid();
+        $data['is_active'] = true;
+        $data['is_featured'] = false;
+
+        $attraction = Attraction::create($data);
+        $attraction->load('city');
+
+        $nameDisplay = $attraction->display_name ?: $request->input('name');
+        $cityName = $attraction->city ? ($attraction->city->display_name ?: 'City') : 'No city';
+
+        return response()->json([
+            'status' => 'success',
+            'message' => __('Facility / Place added successfully!'),
+            'attraction' => [
+                'id' => $attraction->id,
+                'name' => $nameDisplay,
+                'city_name' => $cityName,
+                'search_text' => mb_strtolower($nameDisplay . ' ' . $cityName),
+            ],
+        ]);
+    }
 }

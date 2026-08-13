@@ -311,7 +311,6 @@ class PackageController extends Controller
             foreach ($package->facilities as $facility) {
                 $copy->facilities()->create([
                     'title' => $facility->title,
-                    'description' => $facility->description ?? '',
                     'sort_order' => $facility->sort_order,
                 ]);
             }
@@ -453,6 +452,12 @@ class PackageController extends Controller
             'adult_price' => ['required', 'numeric', 'min:0'],
             'child_price' => ['nullable', 'numeric', 'min:0'],
             'infant_price' => ['nullable', 'numeric', 'min:0'],
+            'price_1_person' => ['nullable', 'numeric', 'min:0'],
+            'price_2_persons' => ['nullable', 'numeric', 'min:0'],
+            'price_3_persons' => ['nullable', 'numeric', 'min:0'],
+            'price_4_persons' => ['nullable', 'numeric', 'min:0'],
+            'price_5_persons' => ['nullable', 'numeric', 'min:0'],
+            'price_6_plus_persons' => ['nullable', 'numeric', 'min:0'],
             'adult_min_age' => ['required', 'integer', 'min:0'],
             'child_min_age' => ['required', 'integer', 'min:0'],
             'child_max_age' => ['required', 'integer', 'gte:child_min_age'],
@@ -730,6 +735,12 @@ class PackageController extends Controller
             $data['adult_price'] ?? null,
             $data['child_price'] ?? null,
             $data['infant_price'] ?? null,
+            $data['price_1_person'] ?? null,
+            $data['price_2_persons'] ?? null,
+            $data['price_3_persons'] ?? null,
+            $data['price_4_persons'] ?? null,
+            $data['price_5_persons'] ?? null,
+            $data['price_6_plus_persons'] ?? null,
         ])->filter(fn ($price) => $price !== null && $price !== '');
 
         $paidPrices = $prices->filter(fn ($price) => (float) $price > 0);
@@ -835,7 +846,6 @@ class PackageController extends Controller
 
             $package->facilities()->create([
                 'title' => $facility['title'],
-                'description' => '',
                 'sort_order' => $facility['sort_order'] ?? $index,
             ]);
         }
@@ -989,7 +999,6 @@ class PackageController extends Controller
 
             $package->facilities()->create([
                 'title' => $title,
-                'description' => '',
                 'sort_order' => $index,
             ]);
         }

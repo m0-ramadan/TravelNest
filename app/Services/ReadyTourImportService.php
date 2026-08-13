@@ -401,7 +401,7 @@ class ReadyTourImportService
                 continue;
             }
 
-            $package->facilities()->create([
+            $package->highlights()->create([
                 'title' => trim($highlightText),
                 'description' => '',
                 'sort_order' => $index,

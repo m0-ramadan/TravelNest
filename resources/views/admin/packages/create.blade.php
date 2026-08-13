@@ -2133,15 +2133,92 @@
                                     <div class="section-icon"><i class="ti ti-cash"></i></div>
                                     <div>
                                         <h3>{{ admin_t('الأسعار والباقات') }}</h3>
-                                        <p>{{ admin_t('أضف أسعارًا مرنة حسب الموسم أو نوع الغرفة أو الفترة الزمنية.') }}
+                                        <p>{{ admin_t('أضف أسعارًا مرنة حسب حجم المجموعة والعدد أو نوع الغرفة.') }}
                                         </p>
                                     </div>
                                 </div>
 
                                 <div class="section-body">
+                                    <div class="card mb-4 border-light bg-light p-3 w-100">
+                                        <h6 class="fw-bold mb-3 text-primary"><i class="la la-users me-1"></i> {{ __('أسعار المجموعات والأفراد (Group Pricing Tiers - Per Person)') }}</h6>
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label fw-bold">Solo Traveler (1 Person)</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">$</span>
+                                                    <input type="number" step="0.01" min="0" name="price_1_person" class="form-control"
+                                                        placeholder="e.g. 236.00" value="{{ old('price_1_person', '') }}">
+                                                </div>
+                                                @error('price_1_person')
+                                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label fw-bold">Couple's Journey (2 Persons)</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">$</span>
+                                                    <input type="number" step="0.01" min="0" name="price_2_persons" class="form-control"
+                                                        placeholder="e.g. 162.00" value="{{ old('price_2_persons', '') }}">
+                                                </div>
+                                                @error('price_2_persons')
+                                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label fw-bold">Small Group (3 Persons)</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">$</span>
+                                                    <input type="number" step="0.01" min="0" name="price_3_persons" class="form-control"
+                                                        placeholder="e.g. 153.00" value="{{ old('price_3_persons', '') }}">
+                                                </div>
+                                                @error('price_3_persons')
+                                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label fw-bold">Family Adventure (4 Persons)</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">$</span>
+                                                    <input type="number" step="0.01" min="0" name="price_4_persons" class="form-control"
+                                                        placeholder="e.g. 145.00" value="{{ old('price_4_persons', '') }}">
+                                                </div>
+                                                @error('price_4_persons')
+                                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label fw-bold">Extended Group (5 Persons)</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">$</span>
+                                                    <input type="number" step="0.01" min="0" name="price_5_persons" class="form-control"
+                                                        placeholder="e.g. 140.00" value="{{ old('price_5_persons', '') }}">
+                                                </div>
+                                                @error('price_5_persons')
+                                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label fw-bold">Large Group (6+ Persons)</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">$</span>
+                                                    <input type="number" step="0.01" min="0" name="price_6_plus_persons" class="form-control"
+                                                        placeholder="e.g. 135.00" value="{{ old('price_6_plus_persons', '') }}">
+                                                </div>
+                                                @error('price_6_plus_persons')
+                                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="fields-grid">
                                         <div>
-                                            <label class="form-label" for="adult_price">{{ admin_t('سعر البالغ') }}</label>
+                                            <label class="form-label" for="adult_price">{{ admin_t('سعر البالغ (افتراضي)') }}</label>
                                             <input id="adult_price" type="number" step="0.01" min="0"
                                                 name="adult_price" class="form-control"
                                                 value="{{ old('adult_price', '') }}">
@@ -2374,23 +2451,79 @@
                                 </div>
                             </div>
 
+                            @php
+                                $facilityPresets = [
+                                    'WiFi',
+                                    'Pool',
+                                    'Air condition',
+                                    'Private bath with Shower',
+                                    'TV',
+                                    'Mini Bar',
+                                    'Doctor available 24 hours',
+                                    'Gift Shop',
+                                    'Large panoramic / ultra violet windows',
+                                    'Laundry service & housekeeping',
+                                    'Safe box in each cabin',
+                                    'Gymnasium',
+                                ];
+                                $oldFacilityTitles = collect(old('facilities', []))
+                                    ->pluck('title')
+                                    ->filter()
+                                    ->map(fn ($title) => trim((string) $title))
+                                    ->all();
+                            @endphp
                             <div class="form-section-card">
                                 <div class="section-header">
-                                    <div class="section-icon"><i class="ti ti-map-pin-star"></i></div>
+                                    <div class="section-icon"><i class="ti ti-layout-grid-add"></i></div>
                                     <div>
-                                        <h3>Trip Facilities</h3>
-                                        <p>Select the attractions associated with this trip from the existing list.</p>
+                                        <h3>{{ admin_t('مرافق الرحلة / Cruise Facilities') }}</h3>
+                                        <p>{{ admin_t('اختر المرافق والخدمات التي تظهر في صفحة الرحلة أو الكروز.') }}</p>
                                     </div>
                                 </div>
 
                                 <div class="section-body">
-                                    <div class="attractions-picker-toolbar">
-                                        <div class="attractions-search">
+                                    <div class="attractions-picker-grid">
+                                        @foreach ($facilityPresets as $facilityIndex => $facilityTitle)
+                                            <label class="attraction-choice">
+                                                <input type="checkbox"
+                                                    name="facilities[{{ $facilityIndex }}][title]"
+                                                    value="{{ $facilityTitle }}"
+                                                    {{ in_array($facilityTitle, $oldFacilityTitles, true) ? 'checked' : '' }}>
+                                                <input type="hidden" name="facilities[{{ $facilityIndex }}][sort_order]"
+                                                    value="{{ $facilityIndex }}">
+                                                <span class="attraction-choice-icon"><i class="ti ti-check"></i></span>
+                                                <span class="attraction-choice-copy">
+                                                    <strong>{{ $facilityTitle }}</strong>
+                                                    <small>{{ admin_t('سيظهر ضمن مرافق الرحلة') }}</small>
+                                                </span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section-card">
+                                <div class="section-header">
+                                    <div class="section-icon"><i class="ti ti-map-pin-star"></i></div>
+                                    <div>
+                                        <h3>Places / Attractions</h3>
+                                        <p>Select the places associated with this trip from the existing list.</p>
+                                    </div>
+                                </div>
+
+                                <div class="section-body">
+                                    <div class="attractions-picker-toolbar d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3">
+                                        <div class="attractions-search flex-grow-1" style="max-width: 400px;">
                                             <i class="ti ti-search"></i>
                                             <input type="search" class="form-control" id="attractionSearch"
                                                 placeholder="Search attractions by name or city..." autocomplete="off">
                                         </div>
-                                        <span class="attractions-selected-count" id="attractionsSelectedCount">0 selected</span>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="attractions-selected-count" id="attractionsSelectedCount">0 selected</span>
+                                            <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#quickAddAttractionModal">
+                                                <i class="ti ti-plus"></i> {{ __('Add New Facility / Place') }}
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <div class="attractions-picker-grid" id="attractionsPicker">
@@ -3926,6 +4059,163 @@
             if ({{ $viewErrors->any() ? 'true' : 'false' }}) {
                 focusFirstInvalid(initialStep);
             }
+
+            // Quick Add Attraction Handler (Prevent any page reload)
+            const handleQuickAddAttraction = function(e) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+                }
+                
+                const form = document.getElementById('quickAddAttractionForm');
+                const nameInput = form?.querySelector('[name="name"]');
+                const saveBtn = document.getElementById('saveQuickAttractionBtn');
+                const alertBox = document.getElementById('quickAttractionAlert');
+                
+                if (!nameInput || !nameInput.value.trim()) {
+                    if (alertBox) {
+                        alertBox.className = 'alert alert-danger mt-2';
+                        alertBox.textContent = '{{ __("Please enter the place/facility name.") }}';
+                        alertBox.classList.remove('d-none');
+                    }
+                    if (nameInput) nameInput.focus();
+                    return false;
+                }
+
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> {{ __("Saving...") }}';
+                }
+                if (alertBox) alertBox.classList.add('d-none');
+
+                const formData = new FormData(form);
+
+                fetch('{{ route("admin.attractions.quick-store") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (saveBtn) {
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = '<i class="ti ti-check"></i> {{ __("Save & Select") }}';
+                    }
+
+                    if (data.status === 'success' && data.attraction) {
+                        const attr = data.attraction;
+                        const picker = document.getElementById('attractionsPicker');
+                        
+                        if (picker) {
+                            const emptyState = picker.querySelector('.empty-state, .field-span-3, .text-white-50');
+                            if (emptyState) emptyState.remove();
+
+                            const newCard = document.createElement('label');
+                            newCard.className = 'attraction-choice';
+                            newCard.dataset.attractionChoice = '';
+                            newCard.dataset.attractionSearch = attr.search_text;
+                            newCard.innerHTML = `
+                                <input type="checkbox" name="attraction_ids[]" value="${attr.id}" checked>
+                                <span class="attraction-choice-icon"><i class="ti ti-map-pin"></i></span>
+                                <span class="attraction-choice-copy">
+                                    <strong>${attr.name}</strong>
+                                    <small>${attr.city_name}</small>
+                                </span>
+                            `;
+
+                            picker.prepend(newCard);
+                            const chk = newCard.querySelector('input');
+                            if (chk) chk.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+
+                        if (form) form.reset();
+                        const modalEl = document.getElementById('quickAddAttractionModal');
+                        if (modalEl) {
+                            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                            modal.hide();
+                        }
+
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '{{ __("Added!") }}',
+                                text: data.message || 'Facility added and selected successfully.',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        }
+                    } else {
+                        if (alertBox) {
+                            alertBox.className = 'alert alert-danger mt-2';
+                            alertBox.textContent = data.message || 'Error adding facility.';
+                            alertBox.classList.remove('d-none');
+                        }
+                    }
+                })
+                .catch(err => {
+                    if (saveBtn) {
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = '<i class="ti ti-check"></i> {{ __("Save & Select") }}';
+                    }
+                    if (alertBox) {
+                        alertBox.className = 'alert alert-danger mt-2';
+                        alertBox.textContent = 'An unexpected error occurred.';
+                        alertBox.classList.remove('d-none');
+                    }
+                });
+
+                return false;
+            };
+
+            document.getElementById('saveQuickAttractionBtn')?.addEventListener('click', handleQuickAddAttraction);
+            document.getElementById('quickAddAttractionForm')?.addEventListener('submit', handleQuickAddAttraction);
         });
     </script>
+
+    <!-- Quick Add Attraction Modal -->
+    <div class="modal fade" id="quickAddAttractionModal" tabindex="-1" aria-labelledby="quickAddAttractionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: var(--dark-card, #2b3b4c); color: #fff; border: 1px solid rgba(255,255,255,0.15);">
+                <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <h5 class="modal-title text-white d-flex align-items-center gap-2" id="quickAddAttractionModalLabel">
+                        <i class="ti ti-map-pin-plus"></i> {{ __('Add New Facility / Place') }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="quickAddAttractionForm" action="javascript:void(0);" onsubmit="event.preventDefault(); return false;">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label text-white fw-bold">{{ __('Place / Facility Name') }} <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control text-white" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2);" placeholder="e.g. Pyramids of Giza / Karnak Temple" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white fw-bold">{{ __('City / Destination') }}</label>
+                            <select name="city_id" class="form-select text-white" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2);">
+                                <option value="">-- {{ __('Select City (Optional)') }} --</option>
+                                @foreach ($cities ?? collect() as $city)
+                                    <option value="{{ $city->id }}">{{ adminTrans($city->name) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white fw-bold">{{ __('Description / Details') }}</label>
+                            <textarea name="description" rows="3" class="form-control text-white" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2);" placeholder="Brief details about this location..."></textarea>
+                        </div>
+                        <div id="quickAttractionAlert" class="alert d-none mt-2"></div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.1);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                        <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-1" id="saveQuickAttractionBtn">
+                            <i class="ti ti-check"></i> {{ __('Save & Select') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection

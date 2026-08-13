@@ -11,6 +11,9 @@
     @endphp
     <input type="hidden" name="package_id" value="{{ $package->id }}">
     <input type="hidden" name="title" value="{{ $title }}">
+    <input type="hidden" name="selected_pricing_tier" value="2_persons">
+    <input type="hidden" name="price_per_person" value="">
+    <input type="hidden" name="calculated_total" value="">
 
     <div class="input-box">
         <label class="label-text">{{ __('Your Name *') }}</label>
@@ -134,7 +137,7 @@
         <label class="label-text">{{ __('trips.total') }}</label>
         <div class="form-group">
             <span class="la la-calculator form-icon"></span>
-            <input class="form-control" type="text" id="booking_total_{{ $suffix }}"
+            <input class="form-control js-booking-total-display" type="text" id="booking_total_{{ $suffix }}"
                 value="{{ $currencySymbol }}0.00" readonly>
         </div>
     </div>
@@ -170,44 +173,93 @@
 
 <script>
     (function() {
-        const adultPrice = @json((float) ($package->adult_price ?? 0));
-        const childPrice = @json((float) ($package->child_price ?? 0));
-        const infantPrice = @json((float) ($package->infant_price ?? 0));
+        @php
+            $groupTiers = $package->group_pricing_tiers;
+        @endphp
+
+        const tierRates = {
+            1: @json((float) $groupTiers[0]['price_per_person']),
+            2: @json((float) $groupTiers[1]['price_per_person']),
+            3: @json((float) $groupTiers[2]['price_per_person']),
+            4: @json((float) $groupTiers[3]['price_per_person']),
+            5: @json((float) $groupTiers[4]['price_per_person']),
+            6: @json((float) $groupTiers[5]['price_per_person'])
+        };
+
+        const tierKeys = {
+            1: '1_person',
+            2: '2_persons',
+            3: '3_persons',
+            4: '4_persons',
+            5: '5_persons',
+            6: '6_plus_persons'
+        };
+
         const currencySymbol = @json($currencySymbol);
         const suffix = @json($suffix);
         const adultsInput = document.getElementById(`adults_book_${suffix}`);
-        const childrenInput = document.getElementById(`children_book_${suffix}`);
-        const infantsInput = document.getElementById(`infants_book_${suffix}`);
         const totalInput = document.getElementById(`booking_total_${suffix}`);
 
-        function recalculateTotal() {
-            if (!totalInput) {
-                return;
-            }
-
-            const adults = parseInt(adultsInput?.value || '0', 10);
-            const children = parseInt(childrenInput?.value || '0', 10);
-            const infants = parseInt(infantsInput?.value || '0', 10);
-            const total = (adults * adultPrice) + (children * childPrice) + (infants * infantPrice);
-
-            totalInput.value = `${currencySymbol}${total.toFixed(2)}`;
+        function getTierRate(adultsCount) {
+            if (adultsCount <= 1) return tierRates[1];
+            if (adultsCount === 2) return tierRates[2];
+            if (adultsCount === 3) return tierRates[3];
+            if (adultsCount === 4) return tierRates[4];
+            if (adultsCount === 5) return tierRates[5];
+            return tierRates[6];
         }
 
-        document.querySelectorAll(`[data-qty-target$="${suffix}"]`).forEach((button) => {
+        function getTierKey(adultsCount) {
+            if (adultsCount <= 1) return tierKeys[1];
+            if (adultsCount === 2) return tierKeys[2];
+            if (adultsCount === 3) return tierKeys[3];
+            if (adultsCount === 4) return tierKeys[4];
+            if (adultsCount === 5) return tierKeys[5];
+            return tierKeys[6];
+        }
+
+        function formatMoney(amount) {
+            return currencySymbol + Number(amount || 0).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function updateBookingTotal() {
+            if (!adultsInput || !totalInput) return;
+
+            const form = adultsInput.closest('form');
+            const adultsCount = Math.max(parseInt(adultsInput.value || '1', 10), 1);
+            const pricePerPerson = getTierRate(adultsCount);
+            const calculatedTotal = pricePerPerson * adultsCount;
+
+            totalInput.value = formatMoney(calculatedTotal);
+
+            if (form) {
+                const selectedTierInput = form.querySelector('input[name="selected_pricing_tier"]');
+                const pricePerPersonInput = form.querySelector('input[name="price_per_person"]');
+                const calculatedTotalInput = form.querySelector('input[name="calculated_total"]');
+
+                if (selectedTierInput) selectedTierInput.value = getTierKey(adultsCount);
+                if (pricePerPersonInput) pricePerPersonInput.value = pricePerPerson;
+                if (calculatedTotalInput) calculatedTotalInput.value = calculatedTotal;
+            }
+        }
+
+        document.querySelectorAll(`[data-qty-target$="_${suffix}"]`).forEach((button) => {
             button.addEventListener('click', function() {
                 const input = document.getElementById(this.dataset.qtyTarget);
-                if (!input) {
-                    return;
-                }
+                if (!input) return;
 
                 const min = parseInt(input.getAttribute('min') || '0', 10);
-                const current = parseInt(input.value || String(min), 10);
-                const next = Math.max(min, current + parseInt(this.dataset.qtyStep || '0', 10));
-                input.value = next;
-                recalculateTotal();
+                const step = parseInt(this.dataset.qtyStep || '0', 10);
+                const current = parseInt(input.value || min, 10);
+
+                input.value = Math.max(min, current + step);
+                updateBookingTotal();
             });
         });
 
-        recalculateTotal();
+        updateBookingTotal();
     })();
 </script>

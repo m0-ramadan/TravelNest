@@ -43,6 +43,7 @@ class TripController extends BaseWebsiteController
                 'primaryCountry',
                 'destination.city',
                 'highlights',
+                'facilities',
                 'itineraries',
                 'inclusions',
                 'prices.currency',
@@ -135,7 +136,8 @@ class TripController extends BaseWebsiteController
             $gallery[] = $heroImage;
         }
 
-        $itineraryUnit = $package->duration_type === 'hours' ? __('Step') : __('Day');
+        $isDayTour = $package->duration_type === 'hours' || (int) $package->duration_days <= 1 || $package->tour_type === 'day_tour';
+        $itineraryUnit = $isDayTour ? __('Step') : __('Day');
 
         $itineraries = $package->itineraries
             ->map(function ($item) use ($itineraryUnit) {
@@ -163,6 +165,18 @@ class TripController extends BaseWebsiteController
                 return $highlight;
             })
             ->filter(fn($highlight) => $highlight->display_title !== '' || $highlight->display_description !== '')
+            ->values();
+
+        $facilities = $package->facilities
+            ->map(function ($facility) {
+                $facility->display_title = $this->transValue(
+                    $facility->getRawOriginal('title') ?? $facility->title,
+                    ''
+                );
+
+                return $facility;
+            })
+            ->filter(fn($facility) => $facility->display_title !== '')
             ->values();
 
         $inclusions = $package->inclusions
@@ -313,6 +327,7 @@ class TripController extends BaseWebsiteController
             'heroImage',
             'gallery',
             'highlights',
+            'facilities',
             'itineraries',
             'included',
             'excluded',
@@ -321,7 +336,8 @@ class TripController extends BaseWebsiteController
             'testimonials',
             'reviews',
             'countries',
-            'itineraryUnit'
+            'itineraryUnit',
+            'isDayTour'
         ));
     }
 

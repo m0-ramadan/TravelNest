@@ -84,6 +84,12 @@ class Package extends Model
         'source_remote_id',
         'source_remote_slug',
         'source_synced_at',
+        'price_1_person',
+        'price_2_persons',
+        'price_3_persons',
+        'price_4_persons',
+        'price_5_persons',
+        'price_6_plus_persons',
     ];
 
     protected $casts = [
@@ -108,6 +114,12 @@ class Package extends Model
         'infant_price' => 'decimal:2',
         'price_from' => 'decimal:2',
         'price_to' => 'decimal:2',
+        'price_1_person' => 'decimal:2',
+        'price_2_persons' => 'decimal:2',
+        'price_3_persons' => 'decimal:2',
+        'price_4_persons' => 'decimal:2',
+        'price_5_persons' => 'decimal:2',
+        'price_6_plus_persons' => 'decimal:2',
         'rating_avg' => 'decimal:2',
         'duration_days' => 'integer',
         'duration_nights' => 'integer',
@@ -150,7 +162,7 @@ class Package extends Model
     }
     public function facilities(): HasMany
     {
-        return $this->hasMany(PackageHighlight::class)->orderBy('sort_order');
+        return $this->hasMany(PackageFacility::class)->orderBy('sort_order');
     }
     public function creator(): BelongsTo
     {
@@ -454,5 +466,86 @@ class Package extends Model
         }
 
         return asset('website/photos/home2.webp');
+    }
+
+    public function getGroupPricingTiersAttribute(): array
+    {
+        $priceFrom = (float) ($this->price_from ?: ($this->start_from_price ?: ($this->adult_price ?: 150)));
+
+        $p1 = $this->price_1_person !== null ? (float) $this->price_1_person : round($priceFrom * 1.3, 2);
+        $p2 = $this->price_2_persons !== null ? (float) $this->price_2_persons : round($priceFrom, 2);
+        $p3 = $this->price_3_persons !== null ? (float) $this->price_3_persons : round($priceFrom * 0.95, 2);
+        $p4 = $this->price_4_persons !== null ? (float) $this->price_4_persons : round($priceFrom * 0.90, 2);
+        $p5 = $this->price_5_persons !== null ? (float) $this->price_5_persons : round($priceFrom * 0.86, 2);
+        $p6 = $this->price_6_plus_persons !== null ? (float) $this->price_6_plus_persons : round($priceFrom * 0.83, 2);
+
+        return [
+            [
+                'id' => '1_person',
+                'title' => __('Solo Traveler'),
+                'persons_count' => 1,
+                'persons_label' => __('1 Person'),
+                'price_per_person' => $p1,
+                'badge' => null,
+                'is_popular' => false,
+                'is_best_value' => false,
+                'is_variable' => false,
+            ],
+            [
+                'id' => '2_persons',
+                'title' => __("Couple's Journey"),
+                'persons_count' => 2,
+                'persons_label' => __('2 Persons'),
+                'price_per_person' => $p2,
+                'badge' => __('♥ Most Popular'),
+                'is_popular' => true,
+                'is_best_value' => false,
+                'is_variable' => false,
+            ],
+            [
+                'id' => '3_persons',
+                'title' => __('Small Group'),
+                'persons_count' => 3,
+                'persons_label' => __('3 Persons'),
+                'price_per_person' => $p3,
+                'badge' => null,
+                'is_popular' => false,
+                'is_best_value' => false,
+                'is_variable' => false,
+            ],
+            [
+                'id' => '4_persons',
+                'title' => __('Family Adventure'),
+                'persons_count' => 4,
+                'persons_label' => __('4 Persons'),
+                'price_per_person' => $p4,
+                'badge' => null,
+                'is_popular' => false,
+                'is_best_value' => false,
+                'is_variable' => false,
+            ],
+            [
+                'id' => '5_persons',
+                'title' => __('Extended Group'),
+                'persons_count' => 5,
+                'persons_label' => __('5 Persons'),
+                'price_per_person' => $p5,
+                'badge' => null,
+                'is_popular' => false,
+                'is_best_value' => false,
+                'is_variable' => false,
+            ],
+            [
+                'id' => '6_plus_persons',
+                'title' => __('Large Group'),
+                'persons_count' => 6,
+                'persons_label' => __('6+ Persons'),
+                'price_per_person' => $p6,
+                'badge' => __('🏆 Best Value'),
+                'is_popular' => false,
+                'is_best_value' => true,
+                'is_variable' => true,
+            ],
+        ];
     }
 }
