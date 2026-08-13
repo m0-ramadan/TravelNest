@@ -311,6 +311,10 @@
          const mobileMenu = document.getElementById('modernMobileMenu');
          const hamburger = document.getElementById('hamburger');
 
+         if (!mobileMenu || !hamburger) {
+             return;
+         }
+
          mobileMenu.classList.toggle('active');
          hamburger.classList.toggle('active');
          const isOpen = mobileMenu.classList.contains('active');
@@ -333,16 +337,20 @@
          const icon = document.querySelector('.mobile-destinations-toggle i.chevron');
          const toggle = document.querySelector('[data-mobile-destinations-toggle]');
 
+         if (!submenu || !toggle) {
+             return;
+         }
+
          submenu.classList.toggle('active');
-         icon.classList.toggle('rotated');
+         icon?.classList.toggle('rotated');
          toggle.setAttribute('aria-expanded', submenu.classList.contains('active') ? 'true' : 'false');
 
          // Close other submenu
          const languageSubmenu = document.getElementById('mobileLanguageSubmenu');
          const languageIcon = document.querySelector('.mobile-language-toggle i.chevron');
-         if (languageSubmenu.classList.contains('active')) {
+         if (languageSubmenu?.classList.contains('active')) {
              languageSubmenu.classList.remove('active');
-             languageIcon.classList.remove('rotated');
+             languageIcon?.classList.remove('rotated');
              document.querySelector('[data-mobile-language-toggle]')?.setAttribute('aria-expanded', 'false');
          }
      }
@@ -352,16 +360,20 @@
          const icon = document.querySelector('.mobile-language-toggle i.chevron');
          const toggle = document.querySelector('[data-mobile-language-toggle]');
 
+         if (!submenu || !toggle) {
+             return;
+         }
+
          submenu.classList.toggle('active');
-         icon.classList.toggle('rotated');
+         icon?.classList.toggle('rotated');
          toggle.setAttribute('aria-expanded', submenu.classList.contains('active') ? 'true' : 'false');
 
          // Close other submenu
          const destinationsSubmenu = document.getElementById('mobileDestinationsSubmenu');
          const destinationsIcon = document.querySelector('.mobile-destinations-toggle i.chevron');
-         if (destinationsSubmenu.classList.contains('active')) {
+         if (destinationsSubmenu?.classList.contains('active')) {
              destinationsSubmenu.classList.remove('active');
-             destinationsIcon.classList.remove('rotated');
+             destinationsIcon?.classList.remove('rotated');
              document.querySelector('[data-mobile-destinations-toggle]')?.setAttribute('aria-expanded', 'false');
          }
      }
@@ -396,7 +408,7 @@
      document.addEventListener('keydown', function(e) {
          if (e.key === 'Escape') {
              const mobileMenu = document.getElementById('modernMobileMenu');
-             if (mobileMenu.classList.contains('active')) {
+             if (mobileMenu?.classList.contains('active')) {
                  toggleMobileMenu();
              }
          }
@@ -432,7 +444,7 @@
      document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
          link.addEventListener('click', function(e) {
 
-             // ❌ تجاهل أي Dropdown
+             // Ignore dropdown links.
              if (this.classList.contains('dropdown-toggle')) return;
              if (this.closest('.dropdown')) return;
 
@@ -453,7 +465,7 @@
          anchor.addEventListener('click', function(e) {
              const href = this.getAttribute('href');
 
-             // تجاهل #
+             // Ignore empty hash links.
              if (href === '#') return;
 
              const target = document.querySelector(href);
@@ -467,14 +479,6 @@
                  behavior: 'smooth'
              });
          });
-      document.querySelector('[data-mobile-nile-toggle]')?.addEventListener('click', function() {
-          const submenu = document.getElementById('mobileNileSubmenu');
-          const icon = this.querySelector('i.chevron');
-          if (submenu) {
-              submenu.classList.toggle('active');
-              if (icon) icon.classList.toggle('rotated');
-              this.setAttribute('aria-expanded', submenu.classList.contains('active') ? 'true' : 'false');
-          }
       });
   </script>
 
