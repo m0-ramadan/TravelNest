@@ -15,6 +15,7 @@ class SitemapController extends BaseWebsiteController
     public function index(): Response
     {
         $urls = $this->staticUrls()
+            ->merge($this->nileCruiseUrls())
             ->merge($this->pageUrls())
             ->merge($this->destinationUrls())
             ->merge($this->blogCategoryUrls())
@@ -26,6 +27,20 @@ class SitemapController extends BaseWebsiteController
         return response()
             ->view('website.sitemap', ['urls' => $urls])
             ->header('Content-Type', 'application/xml; charset=UTF-8');
+    }
+
+    private function nileCruiseUrls(): Collection
+    {
+        return collect([
+            $this->makeUrl(route('website.nile_cruises.index'), null, 'daily', '0.9'),
+            $this->makeUrl(route('website.nile_cruises.luxor_aswan'), null, 'daily', '0.9'),
+            $this->makeUrl(route('website.nile_cruises.luxor_aswan.category', 'standard-nile-cruises'), null, 'weekly', '0.8'),
+            $this->makeUrl(route('website.nile_cruises.luxor_aswan.category', 'deluxe-nile-cruises'), null, 'weekly', '0.8'),
+            $this->makeUrl(route('website.nile_cruises.luxor_aswan.category', 'ultra-deluxe-nile-cruises'), null, 'weekly', '0.8'),
+            $this->makeUrl(route('website.nile_cruises.luxor_aswan.category', 'luxury-nile-cruises'), null, 'weekly', '0.8'),
+            $this->makeUrl(route('website.nile_cruises.type', 'dahabiya-nile-cruise'), null, 'weekly', '0.8'),
+            $this->makeUrl(route('website.nile_cruises.type', 'lake-nasser-cruise'), null, 'weekly', '0.8'),
+        ]);
     }
 
     private function staticUrls(): Collection

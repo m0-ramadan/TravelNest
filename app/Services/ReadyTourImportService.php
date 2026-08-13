@@ -68,9 +68,18 @@ class ReadyTourImportService
 
             // 3. Resolve taxonomy (Type & Category)
             $this->updateProgress($cacheKey, 20, 'Matching package type and category');
-            $packageType = $this->taxonomyMapper->mapPackageType($template->remote_tour_type);
+            $packageType = $this->taxonomyMapper->mapPackageType($template->remote_tour_type, $template->remote_category, $template->display_name);
             $localTourType = $this->taxonomyMapper->mapLocalTourType($template->remote_tour_type);
             $category = $this->taxonomyMapper->resolveCategory($template->remote_category, $packageType, $warnings);
+
+            $nileCruiseData = ['nile_cruise_type_id' => null, 'nile_cruise_category_id' => null];
+            if ($packageType === 'nile_cruise') {
+                $nileCruiseData = $this->taxonomyMapper->resolveNileCruiseTaxonomy(
+                    $template->remote_category,
+                    $template->display_name,
+                    $template->remote_tour_type
+                );
+            }
 
             // 4. Resolve Cities & Primary Destination
             $this->updateProgress($cacheKey, 30, 'Resolving cities and destinations');
@@ -100,6 +109,7 @@ class ReadyTourImportService
                 $packageType,
                 $localTourType,
                 $category,
+                $nileCruiseData,
                 $primaryDestination,
                 $primaryCountryId,
                 $durationData,
@@ -113,6 +123,7 @@ class ReadyTourImportService
                     $packageType,
                     $localTourType,
                     $category,
+                    $nileCruiseData,
                     $primaryDestination,
                     $primaryCountryId,
                     $durationData,
@@ -317,6 +328,7 @@ class ReadyTourImportService
         string $packageType,
         string $localTourType,
         $category,
+        array $nileCruiseData,
         $primaryDestination,
         ?int $primaryCountryId,
         array $durationData,
@@ -341,6 +353,8 @@ class ReadyTourImportService
         // 1. Create Package record
         $package = Package::create([
             'category_id' => $category?->id,
+            'nile_cruise_type_id' => $nileCruiseData['nile_cruise_type_id'] ?? null,
+            'nile_cruise_category_id' => $nileCruiseData['nile_cruise_category_id'] ?? null,
             'destination_id' => $primaryDestination?->id,
             'primary_country_id' => $primaryCountryId,
             'package_type' => $packageType,

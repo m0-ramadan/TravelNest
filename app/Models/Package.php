@@ -19,6 +19,8 @@ class Package extends Model
         'destination_id',
         'primary_country_id',
         'package_type',
+        'nile_cruise_type_id',
+        'nile_cruise_category_id',
         'slug',
         'title',
         'subtitle',
@@ -158,6 +160,45 @@ class Package extends Model
     public function updater(): BelongsTo
     {
         return $this->belongsTo(Admin::class, 'updated_by');
+    }
+
+    public function nileCruiseType(): BelongsTo
+    {
+        return $this->belongsTo(NileCruiseType::class, 'nile_cruise_type_id');
+    }
+
+    public function nileCruiseCategory(): BelongsTo
+    {
+        return $this->belongsTo(NileCruiseCategory::class, 'nile_cruise_category_id');
+    }
+
+    public function scopeNileCruises($query)
+    {
+        return $query->where('package_type', 'nile_cruise');
+    }
+
+    public function scopeForNileCruiseType($query, $typeIdOrSlug)
+    {
+        return $query->where('package_type', 'nile_cruise')
+            ->where(function ($q) use ($typeIdOrSlug) {
+                if (is_numeric($typeIdOrSlug)) {
+                    $q->where('nile_cruise_type_id', (int) $typeIdOrSlug);
+                } else {
+                    $q->whereHas('nileCruiseType', fn($sub) => $sub->where('slug', $typeIdOrSlug));
+                }
+            });
+    }
+
+    public function scopeForNileCruiseCategory($query, $categoryIdOrSlug)
+    {
+        return $query->where('package_type', 'nile_cruise')
+            ->where(function ($q) use ($categoryIdOrSlug) {
+                if (is_numeric($categoryIdOrSlug)) {
+                    $q->where('nile_cruise_category_id', (int) $categoryIdOrSlug);
+                } else {
+                    $q->whereHas('nileCruiseCategory', fn($sub) => $sub->where('slug', $categoryIdOrSlug));
+                }
+            });
     }
 
 
@@ -366,5 +407,52 @@ class Package extends Model
         }
 
         return $symbol . number_format(max($priceFrom, $priceTo), 2);
+    }
+
+    public function getImageUrlAttribute(): string
+    {
+        if (!empty($this->featured_image)) {
+            $path = ltrim((string) $this->featured_image, '/');
+            if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+                return $path;
+            }
+            if (file_exists(public_path($path))) {
+                return asset($path);
+            }
+            if (file_exists(public_path('storage/' . $path))) {
+                return asset('storage/' . $path);
+            }
+        }
+
+        $gallery = $this->gallery_images;
+        if (!empty($gallery)) {
+            $decoded = is_array($gallery) ? $gallery : json_decode((string) $gallery, true);
+            if (is_array($decoded)) {
+                foreach ($decoded as $item) {
+                    $p = is_array($item) ? ($item['path'] ?? $item['url'] ?? null) : $item;
+                    if ($p) {
+                        $p = ltrim((string) $p, '/');
+                        if (file_exists(public_path($p))) {
+                            return asset($p);
+                        }
+                        if (file_exists(public_path('storage/' . $p))) {
+                            return asset('storage/' . $p);
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($this->package_type === 'nile_cruise') {
+            if ($this->nileCruiseCategory?->image_url) {
+                return $this->nileCruiseCategory->image_url;
+            }
+            if ($this->nileCruiseType?->image_url) {
+                return $this->nileCruiseType->image_url;
+            }
+            return asset('website/images/nile-cruises/luxor-aswan.jpg');
+        }
+
+        return asset('website/photos/home2.webp');
     }
 }

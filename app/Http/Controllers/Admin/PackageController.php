@@ -77,6 +77,7 @@ class PackageController extends Controller
             'destinations' => $this->packageCities(),
             'currencies' => Currency::all(),
             'attractions' => $this->packageAttractionOptions(),
+            'nileCruiseTypes' => \App\Models\NileCruiseType::where('is_active', true)->with('categories')->orderBy('sort_order')->get(),
         ]);
     }
 
@@ -136,6 +137,7 @@ class PackageController extends Controller
             'attractions' => $this->packageAttractionOptions(
                 $package->packageAttractions->pluck('attraction_id')->all()
             ),
+            'nileCruiseTypes' => \App\Models\NileCruiseType::where('is_active', true)->with('categories')->orderBy('sort_order')->get(),
         ]);
     }
 
@@ -431,6 +433,8 @@ class PackageController extends Controller
             'destination_id' => ['nullable', 'integer'],
             'primary_country_id' => ['nullable', 'integer'],
             'package_type' => ['nullable', 'string', 'in:' . implode(',', self::PACKAGE_TYPES)],
+            'nile_cruise_type_id' => ['nullable', 'integer', 'exists:nile_cruise_types,id'],
+            'nile_cruise_category_id' => ['nullable', 'integer', 'exists:nile_cruise_categories,id'],
             'slug' => ['nullable', 'string'],
             'title' => ['nullable', 'string'],
             'subtitle' => ['nullable', 'string'],
@@ -554,6 +558,35 @@ class PackageController extends Controller
                 $validator->errors()->add('adult_min_age', 'حد البالغين يجب أن يكون أكبر من الحد الأعلى للرضع.');
             }
 
+            $packageType = $request->input('package_type');
+            $nileCruiseTypeId = $request->input('nile_cruise_type_id');
+            $nileCruiseCategoryId = $request->input('nile_cruise_category_id');
+
+            if ($packageType === 'nile_cruise') {
+                if (empty($nileCruiseTypeId)) {
+                    $validator->errors()->add('nile_cruise_type_id', 'Nile Cruise Type is required when package type is Nile Cruise.');
+                } else {
+                    $cruiseType = \App\Models\NileCruiseType::find($nileCruiseTypeId);
+                    if ($cruiseType) {
+                        $hasCategories = $cruiseType->categories()->count() > 0;
+                        if ($hasCategories) {
+                            if (empty($nileCruiseCategoryId)) {
+                                $validator->errors()->add('nile_cruise_category_id', 'Nile Cruise Category is required for ' . ($cruiseType->display_name ?: 'this cruise type') . '.');
+                            } else {
+                                $category = \App\Models\NileCruiseCategory::find($nileCruiseCategoryId);
+                                if (!$category || (int) $category->nile_cruise_type_id !== (int) $cruiseType->id) {
+                                    $validator->errors()->add('nile_cruise_category_id', 'The selected Nile Cruise Category does not belong to the selected Nile Cruise Type.');
+                                }
+                            }
+                        } else {
+                            if (!empty($nileCruiseCategoryId)) {
+                                $validator->errors()->add('nile_cruise_category_id', 'Nile Cruise Category should be empty for this cruise type.');
+                            }
+                        }
+                    }
+                }
+            }
+
             foreach ((array) $request->input('prices', []) as $index => $price) {
                 $paxMin = $price['pax_min'] ?? null;
                 $paxMax = $price['pax_max'] ?? null;
@@ -595,6 +628,16 @@ class PackageController extends Controller
         $data['destination_id'] = $selectedAttraction?->id;
         $data['package_type'] = $this->normalizePackageType($data['package_type'] ?? null);
         $data['duration_type'] = $data['duration_type'] ?? 'days';
+
+        if ($data['package_type'] !== 'nile_cruise') {
+            $data['nile_cruise_type_id'] = null;
+            $data['nile_cruise_category_id'] = null;
+        } elseif (!empty($data['nile_cruise_type_id'])) {
+            $cruiseType = \App\Models\NileCruiseType::find($data['nile_cruise_type_id']);
+            if ($cruiseType && $cruiseType->categories()->count() === 0) {
+                $data['nile_cruise_category_id'] = null;
+            }
+        }
 
         if ($data['duration_type'] === 'hours') {
             $data['duration_days'] = null;

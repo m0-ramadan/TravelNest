@@ -7,6 +7,7 @@ use App\Http\Controllers\Website\DestinationController;
 use App\Http\Controllers\Website\HomeController;
 use App\Http\Controllers\Website\InquiryController;
 use App\Http\Controllers\Website\NewsletterController;
+use App\Http\Controllers\Website\NileCruiseController;
 use App\Http\Controllers\Website\PackageController;
 use App\Http\Controllers\Website\PageController;
 use App\Http\Controllers\Website\SearchController;
@@ -55,6 +56,18 @@ Route::name('website.')->group(function () {
     Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
     Route::get('/', [HomeController::class, 'index'])->name('home');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Nile Cruises
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('nile-cruises')->name('nile_cruises.')->controller(NileCruiseController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/luxor-aswan-nile-cruises', 'showLuxorAswan')->name('luxor_aswan');
+        Route::get('/luxor-aswan-nile-cruises/{categorySlug}', 'showLuxorAswanCategory')->name('luxor_aswan.category');
+        Route::get('/{typeSlug}', 'showType')->where('typeSlug', 'dahabiya-nile-cruise|lake-nasser-cruise')->name('type');
+    });
 
     /*
     |--------------------------------------------------------------------------

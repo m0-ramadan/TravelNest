@@ -1618,6 +1618,49 @@
                                             @error('package_type')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
+
+                                            <!-- Nile Cruise Fields -->
+                                            <div id="nile_cruise_type_wrapper" style="display: {{ old('package_type') == 'nile_cruise' ? 'block' : 'none' }};" class="mt-3">
+                                                <label class="form-label" for="nile_cruise_type_id">
+                                                    {{ admin_t('Nile Cruise Type') }}
+                                                    <span class="required-mark">*</span>
+                                                </label>
+                                                <select id="nile_cruise_type_id" name="nile_cruise_type_id"
+                                                    class="form-select @error('nile_cruise_type_id') is-invalid @enderror">
+                                                    <option value="">{{ admin_t('Select Nile Cruise Type') }}</option>
+                                                    @foreach($nileCruiseTypes ?? [] as $nType)
+                                                        <option value="{{ $nType->id }}" data-slug="{{ $nType->slug }}" data-has-categories="{{ $nType->categories->count() > 0 ? 'true' : 'false' }}"
+                                                            {{ old('nile_cruise_type_id') == $nType->id ? 'selected' : '' }}>
+                                                            {{ $nType->display_name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('nile_cruise_type_id')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+
+                                            <div id="nile_cruise_category_wrapper" style="display: {{ (old('package_type') == 'nile_cruise' && old('nile_cruise_type_id')) ? 'block' : 'none' }};" class="mt-3">
+                                                <label class="form-label" for="nile_cruise_category_id">
+                                                    {{ admin_t('Nile Cruise Category') }}
+                                                    <span class="required-mark">*</span>
+                                                </label>
+                                                <select id="nile_cruise_category_id" name="nile_cruise_category_id"
+                                                    class="form-select @error('nile_cruise_category_id') is-invalid @enderror">
+                                                    <option value="">{{ admin_t('Select Nile Cruise Category') }}</option>
+                                                    @foreach($nileCruiseTypes ?? [] as $nType)
+                                                        @foreach($nType->categories as $nCat)
+                                                            <option value="{{ $nCat->id }}" data-type-id="{{ $nType->id }}" class="nile-cat-option nile-cat-type-{{ $nType->id }}"
+                                                                {{ old('nile_cruise_category_id') == $nCat->id ? 'selected' : '' }}>
+                                                                {{ $nCat->display_name }}
+                                                            </option>
+                                                        @endforeach
+                                                    @endforeach
+                                                </select>
+                                                @error('nile_cruise_category_id')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
                                         </div>
 
                                         <div>
@@ -2859,7 +2902,56 @@
             const mobileStepTitle = document.getElementById('mobileStepTitle');
             const mobileStepCounter = document.getElementById('mobileStepCounter');
             const mobileStepBar = document.getElementById('mobileStepBar');
-            const galleryInput = document.getElementById('gallery_images');
+            const packageTypeSelect = document.getElementById('package_type');
+            const nileTypeWrapper = document.getElementById('nile_cruise_type_wrapper');
+            const nileTypeSelect = document.getElementById('nile_cruise_type_id');
+            const nileCatWrapper = document.getElementById('nile_cruise_category_wrapper');
+            const nileCatSelect = document.getElementById('nile_cruise_category_id');
+
+            function updateNileCruiseFields() {
+                if (!packageTypeSelect || !nileTypeWrapper || !nileCatWrapper) return;
+
+                if (packageTypeSelect.value === 'nile_cruise') {
+                    nileTypeWrapper.style.display = 'block';
+
+                    const selectedTypeOpt = nileTypeSelect && nileTypeSelect.selectedIndex >= 0 ? nileTypeSelect.options[nileTypeSelect.selectedIndex] : null;
+                    const hasCategories = selectedTypeOpt && selectedTypeOpt.getAttribute('data-has-categories') === 'true';
+                    const typeId = selectedTypeOpt ? selectedTypeOpt.value : null;
+
+                    if (hasCategories && typeId) {
+                        nileCatWrapper.style.display = 'block';
+                        if (nileCatSelect) {
+                            Array.from(nileCatSelect.options).forEach(opt => {
+                                if (!opt.value) return;
+                                const optTypeId = opt.getAttribute('data-type-id');
+                                if (optTypeId === typeId) {
+                                    opt.style.display = 'block';
+                                    opt.disabled = false;
+                                } else {
+                                    opt.style.display = 'none';
+                                    opt.disabled = true;
+                                }
+                            });
+                            const currentCatOpt = nileCatSelect.selectedIndex >= 0 ? nileCatSelect.options[nileCatSelect.selectedIndex] : null;
+                            if (currentCatOpt && currentCatOpt.disabled) {
+                                nileCatSelect.value = '';
+                            }
+                        }
+                    } else {
+                        nileCatWrapper.style.display = 'none';
+                        if (nileCatSelect) nileCatSelect.value = '';
+                    }
+                } else {
+                    nileTypeWrapper.style.display = 'none';
+                    nileCatWrapper.style.display = 'none';
+                    if (nileTypeSelect) nileTypeSelect.value = '';
+                    if (nileCatSelect) nileCatSelect.value = '';
+                }
+            }
+
+            if (packageTypeSelect) packageTypeSelect.addEventListener('change', updateNileCruiseFields);
+            if (nileTypeSelect) nileTypeSelect.addEventListener('change', updateNileCruiseFields);
+            updateNileCruiseFields();
             const featuredInput = document.getElementById('featured_image');
             const galleryPreview = document.getElementById('galleryPreview');
             const featuredPreview = document.getElementById('featuredPreview');

@@ -14,6 +14,7 @@
      $isOffersPage = request()->routeIs('website.offers');
      $isContactPage = request()->routeIs('website.contact.*');
      $isTailorMadePage = request()->routeIs('website.tailor_made.*');
+     $isNileCruisesPage = request()->routeIs('website.nile_cruises.*');
  @endphp
 
  <!-- Enhanced Navigation -->
@@ -92,10 +93,10 @@
                      </ul>
                  </li>
                  <li class="nav-item">
-                     <a class="nav-link{{ $isMultiCountryPage ? ' is-active' : '' }}"
-                         href="{{ route('website.multi_country') }}">
-                         <i class="la la-globe-americas"></i>
-                        {{ __('Egypt Nile Cruise') }}
+                     <a class="nav-link{{ $isNileCruisesPage ? ' is-active' : '' }}"
+                         href="{{ route('website.nile_cruises.index') }}">
+                         <i class="la la-ship"></i>
+                         {{ __('Egypt Nile Cruise') }}
                      </a>
                  </li>
                  <li class="nav-item">
@@ -208,9 +209,9 @@
          </div>
 
          <div class="mobile-nav-item">
-             <a href="{{ route('website.multi_country') }}"
-                 class="mobile-nav-link{{ $isMultiCountryPage ? ' is-active' : '' }}">
-                <i class="la la-globe-americas"></i> {{ __('Egypt Nile Cruise') }}
+             <a href="{{ route('website.nile_cruises.index') }}"
+                 class="mobile-nav-link{{ $isNileCruisesPage ? ' is-active' : '' }}">
+                 <i class="la la-ship"></i> {{ __('Egypt Nile Cruise') }}
              </a>
          </div>
 
@@ -466,5 +467,38 @@
                  behavior: 'smooth'
              });
          });
-     });
- </script>
+      document.querySelector('[data-mobile-nile-toggle]')?.addEventListener('click', function() {
+          const submenu = document.getElementById('mobileNileSubmenu');
+          const icon = this.querySelector('i.chevron');
+          if (submenu) {
+              submenu.classList.toggle('active');
+              if (icon) icon.classList.toggle('rotated');
+              this.setAttribute('aria-expanded', submenu.classList.contains('active') ? 'true' : 'false');
+          }
+      });
+  </script>
+
+  <style>
+      .dropdown-submenu {
+          position: relative;
+      }
+      .dropdown-submenu > .dropdown-submenu-menu {
+          top: 0;
+          left: 100%;
+          margin-top: -6px;
+          display: none;
+          position: absolute;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+          border-radius: 8px;
+          border: none;
+          min-width: 220px;
+          background: #ffffff;
+      }
+      [dir="rtl"] .dropdown-submenu > .dropdown-submenu-menu {
+          left: auto;
+          right: 100%;
+      }
+      .dropdown-submenu:hover > .dropdown-submenu-menu {
+          display: block;
+      }
+  </style>

@@ -184,6 +184,51 @@ abstract class BaseWebsiteController extends Controller
         };
     }
 
+    protected function getPackageImage(Package $package, ?string $fallback = null): string
+    {
+        if (!empty($package->featured_image)) {
+            $url = $this->imageUrl($package->featured_image, '');
+            if ($url !== '') {
+                return $url;
+            }
+        }
+
+        $gallery = $package->getRawOriginal('gallery_images') ?? $package->gallery_images;
+        if (!empty($gallery)) {
+            $decoded = is_array($gallery) ? $gallery : json_decode((string) $gallery, true);
+            if (is_array($decoded)) {
+                foreach ($decoded as $item) {
+                    $path = is_array($item) ? ($item['path'] ?? $item['url'] ?? null) : $item;
+                    if ($path) {
+                        $url = $this->imageUrl((string) $path, '');
+                        if ($url !== '') {
+                            return $url;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($package->relationLoaded('category') && !empty($package->category?->image)) {
+            $url = $this->imageUrl($package->category->image, '');
+            if ($url !== '') {
+                return $url;
+            }
+        }
+
+        if ($package->package_type === 'nile_cruise') {
+            if ($package->relationLoaded('nileCruiseCategory') && $package->nileCruiseCategory?->image_url) {
+                return $package->nileCruiseCategory->image_url;
+            }
+            if ($package->relationLoaded('nileCruiseType') && $package->nileCruiseType?->image_url) {
+                return $package->nileCruiseType->image_url;
+            }
+            return asset('website/images/nile-cruises/luxor-aswan.jpg');
+        }
+
+        return $fallback ?: asset('website/photos/home2.webp');
+    }
+
     protected function packageCard(Package $package): array
     {
         $highlights = $package->relationLoaded('highlights')
@@ -200,7 +245,7 @@ abstract class BaseWebsiteController extends Controller
             'title' => $this->translated($package->getRawOriginal('title') ?? $package->title),
             'subtitle' => $this->translated($package->getRawOriginal('subtitle') ?? $package->subtitle),
             'description' => $this->shortText($package->getRawOriginal('short_description') ?: $package->getRawOriginal('description'), 190),
-            'image' => $this->imageUrl($package->featured_image, 'website/photos/home2.webp'),
+            'image' => $this->getPackageImage($package),
             'price' => $this->packagePrice($package),
             'duration' => $this->packageDuration($package),
             'tour_type' => $this->packageTourTypeLabel($package),
@@ -225,7 +270,7 @@ abstract class BaseWebsiteController extends Controller
         return [
             'title' => $this->translated($package->getRawOriginal('title') ?? $package->title),
             'url' => $this->packageRoute($package),
-            'image' => $this->imageUrl($package->featured_image, 'website/photos/home2.webp'),
+            'image' => $this->getPackageImage($package),
             'price' => $this->packagePrice($package),
             'badge' => $package->is_ultra_luxury
                 ? __('Ultra Luxury')
