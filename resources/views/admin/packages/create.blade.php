@@ -3085,7 +3085,9 @@
             if (packageTypeSelect) packageTypeSelect.addEventListener('change', updateNileCruiseFields);
             if (nileTypeSelect) nileTypeSelect.addEventListener('change', updateNileCruiseFields);
             updateNileCruiseFields();
+
             const featuredInput = document.getElementById('featured_image');
+            const galleryInput = document.getElementById('gallery_images');
             const galleryPreview = document.getElementById('galleryPreview');
             const featuredPreview = document.getElementById('featuredPreview');
             const destinationSelector = document.getElementById('destination_selector');
@@ -3093,6 +3095,11 @@
             const attractionSearch = document.getElementById('attractionSearch');
             const attractionsPicker = document.getElementById('attractionsPicker');
             const attractionsSelectedCount = document.getElementById('attractionsSelectedCount');
+            const addItineraryBtn = document.getElementById('addItineraryBtn');
+            const addIncludedBtn = document.getElementById('addIncludedBtn');
+            const addExcludedBtn = document.getElementById('addExcludedBtn');
+            const addPriceBtn = document.getElementById('addPriceBtn');
+            const addFaqBtn = document.getElementById('addFaqBtn');
             const totalSteps = {{ count($steps) }};
             const initialStep = {{ $initialStep }};
             const draftKey = 'travelnest-package-create-draft';
@@ -3160,40 +3167,47 @@
             }
 
             function scrollToTopOfWizard() {
-                form.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+                if (form) {
+                    form.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
             }
 
             function markStepState() {
                 stepButtons.forEach((button, index) => {
                     const step = index + 1;
                     button.classList.toggle('is-active', step === currentStep);
-                    button.classList.toggle('is-complete', step < currentStep || step <= highestStep &&
-                        step !== currentStep);
+                    button.classList.toggle('is-complete', step < currentStep || (step <= highestStep && step !== currentStep));
                     button.classList.toggle('is-disabled', step > highestStep + 1);
-                    button.querySelector('.wizard-step-badge').innerHTML = step < currentStep || (step <
-                        highestStep && step !== currentStep) ? '<i class="ti ti-check"></i>' : step;
+                    const badge = button.querySelector('.wizard-step-badge');
+                    if (badge) {
+                        badge.innerHTML = step < currentStep || (step < highestStep && step !== currentStep) ? '<i class="ti ti-check"></i>' : step;
+                    }
                 });
             }
 
             function updateActionState() {
-                stepLabel.textContent = replacePlaceholders(texts.dayFormat, {
-                    current: currentStep,
-                    total: totalSteps
-                }) + ' - ' + stepTitles[currentStep - 1];
+                if (stepLabel) {
+                    stepLabel.textContent = replacePlaceholders(texts.dayFormat, {
+                        current: currentStep,
+                        total: totalSteps
+                    }) + ' - ' + (stepTitles[currentStep - 1] || '');
+                }
 
-                mobileStepTitle.textContent = stepTitles[currentStep - 1];
-                mobileStepCounter.textContent = replacePlaceholders(texts.dayFormat, {
-                    current: currentStep,
-                    total: totalSteps
-                });
-                mobileStepBar.style.width = `${(currentStep / totalSteps) * 100}%`;
+                if (mobileStepTitle) mobileStepTitle.textContent = stepTitles[currentStep - 1] || '';
+                if (mobileStepCounter) {
+                    mobileStepCounter.textContent = replacePlaceholders(texts.dayFormat, {
+                        current: currentStep,
+                        total: totalSteps
+                    });
+                }
+                if (mobileStepBar) mobileStepBar.style.width = `${(currentStep / totalSteps) * 100}%`;
 
-                prevBtn.disabled = currentStep === 1;
-                nextBtn.classList.toggle('d-none-force', currentStep === totalSteps);
-                submitBtn.classList.toggle('d-none-force', currentStep !== totalSteps);
+                if (prevBtn) prevBtn.disabled = currentStep === 1;
+                if (nextBtn) nextBtn.classList.toggle('d-none-force', currentStep === totalSteps);
+                if (submitBtn) submitBtn.classList.toggle('d-none-force', currentStep !== totalSteps);
             }
 
             function showStep(step) {
@@ -3214,6 +3228,7 @@
 
             function focusFirstInvalid(step) {
                 const panel = document.querySelector(`[data-step-panel="${step}"]`);
+                if (!panel) return;
                 const invalidField = panel.querySelector('.field-error, .is-invalid');
                 if (invalidField) {
                     invalidField.focus({
@@ -3223,8 +3238,11 @@
             }
 
             function validateStep(step) {
+                if (!form) return true;
                 const requiredFields = requiredFieldsByStep[step] || [];
                 const panel = document.querySelector(`[data-step-panel="${step}"]`);
+                if (!panel) return true;
+
                 let isValid = true;
                 let firstInvalid = null;
 
@@ -3261,10 +3279,10 @@
             }
 
             function serializeDraft() {
+                if (!form) return {};
                 const data = {};
                 Array.from(form.elements).forEach(element => {
-                    if (!element.name || element.type === 'file' || element.type === 'password' || element
-                        .disabled) {
+                    if (!element.name || element.type === 'file' || element.type === 'password' || element.disabled) {
                         return;
                     }
 
@@ -3295,6 +3313,7 @@
             }
 
             function restoreDraft(data) {
+                if (!form) return;
                 Object.entries(data).forEach(([name, value]) => {
                     const field = form.querySelector(`[name="${CSS.escape(name)}"]`);
                     if (!field) {
@@ -3369,23 +3388,30 @@
             }
 
             function updateDurationFields() {
-                const selected = form.querySelector('input[name="duration_type"]:checked');
+                const selected = form?.querySelector('input[name="duration_type"]:checked');
                 const type = selected ? selected.value : 'days';
-                document.getElementById('daysFieldWrapper').classList.toggle('d-none-force', type !== 'days');
-                document.getElementById('nightsFieldWrapper').classList.toggle('d-none-force', type !== 'days');
-                document.getElementById('hoursFieldWrapper').classList.toggle('d-none-force', type !== 'hours');
+                document.getElementById('daysFieldWrapper')?.classList.toggle('d-none-force', type !== 'days');
+                document.getElementById('nightsFieldWrapper')?.classList.toggle('d-none-force', type !== 'days');
+                document.getElementById('hoursFieldWrapper')?.classList.toggle('d-none-force', type !== 'hours');
                 updateItineraryMode();
             }
 
             function updateItineraryMode() {
-                const type = form.querySelector('input[name="duration_type"]:checked')?.value || 'days';
+                const type = form?.querySelector('input[name="duration_type"]:checked')?.value || 'days';
                 const isHourly = type === 'hours';
 
-                document.getElementById('itinerarySectionTitle').textContent = isHourly ? 'Trip Steps' : 'Daily Itinerary';
-                document.getElementById('itinerarySectionCopy').textContent = isHourly
-                    ? 'Split the trip into ordered steps and add the timing and details for each step.'
-                    : 'Split the trip into days with meal and activity details.';
-                document.getElementById('addItineraryText').textContent = isHourly ? 'Add New Step' : 'Add New Day';
+                const titleEl = document.getElementById('itinerarySectionTitle');
+                if (titleEl) titleEl.textContent = isHourly ? 'Trip Steps' : 'Daily Itinerary';
+
+                const copyEl = document.getElementById('itinerarySectionCopy');
+                if (copyEl) {
+                    copyEl.textContent = isHourly
+                        ? 'Split the trip into ordered steps and add the timing and details for each step.'
+                        : 'Split the trip into days with meal and activity details.';
+                }
+
+                const addBtnTextEl = document.getElementById('addItineraryText');
+                if (addBtnTextEl) addBtnTextEl.textContent = isHourly ? 'Add New Step' : 'Add New Day';
 
                 document.querySelectorAll('.itinerary-item').forEach(item => {
                     const label = item.querySelector('.item-order-label');
@@ -3408,6 +3434,7 @@
             }
 
             function updateCounter(input) {
+                if (!input) return;
                 const max = Number(input.dataset.counterMax || 0);
                 if (!max) {
                     return;
@@ -3422,6 +3449,7 @@
             }
 
             function renderFeaturedPreview() {
+                if (!featuredPreview) return;
                 featuredPreview.innerHTML = '';
 
                 if (!featuredFile) {
@@ -3446,12 +3474,18 @@
             }
 
             function syncGalleryInput() {
-                const dataTransfer = new DataTransfer();
-                galleryFiles.forEach(file => dataTransfer.items.add(file));
-                galleryInput.files = dataTransfer.files;
+                if (!galleryInput) return;
+                try {
+                    const dataTransfer = new DataTransfer();
+                    galleryFiles.forEach(file => dataTransfer.items.add(file));
+                    galleryInput.files = dataTransfer.files;
+                } catch (e) {
+                    console.warn('DataTransfer not fully supported:', e);
+                }
             }
 
             function renderGalleryPreview() {
+                if (!galleryPreview) return;
                 galleryPreview.innerHTML = '';
 
                 if (!galleryFiles.length) {
@@ -3530,18 +3564,21 @@
 
             function appendAnimatedItem(wrapperId, markup) {
                 const wrapper = document.getElementById(wrapperId);
+                if (!wrapper) return null;
                 wrapper.querySelector('.empty-state')?.remove();
                 wrapper.insertAdjacentHTML('beforeend', markup);
                 const item = wrapper.lastElementChild;
                 isDirty = true;
-                item.classList.add('is-entering');
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => item.classList.remove('is-entering'));
-                });
+                if (item) {
+                    item.classList.add('is-entering');
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => item.classList.remove('is-entering'));
+                    });
 
-                item.querySelector('input, select, textarea')?.focus({
-                    preventScroll: true
-                });
+                    item.querySelector('input, select, textarea')?.focus({
+                        preventScroll: true
+                    });
+                }
                 return item;
             }
 
@@ -3572,6 +3609,7 @@
             }
 
             function syncMealInputs(selectElement) {
+                if (!selectElement) return;
                 const card = selectElement.closest('.itinerary-item');
                 if (!card) {
                     return;
@@ -3631,7 +3669,7 @@
             let faqIndex = {{ count($faqItems) }};
 
             function addItinerary() {
-                const isHourly = form.querySelector('input[name="duration_type"]:checked')?.value === 'hours';
+                const isHourly = form?.querySelector('input[name="duration_type"]:checked')?.value === 'hours';
                 appendAnimatedItem('itinerary-wrapper', `
                     <div class="repeat-box itinerary-item itinerary-item-card">
                         <div class="itinerary-item-grid">
@@ -3691,11 +3729,12 @@
 
             function addInclusion(type) {
                 const wrapper = document.getElementById(`${type}-wrapper`);
+                if (!wrapper) return;
                 const index = type === 'included' ? includedIndex++ : excludedIndex++;
-                wrapper.insertAdjacentHTML('beforeend', `
+                appendAnimatedItem(`${type}-wrapper`, `
                     <div class="repeat-box ${type}-item">
                         <div class="d-flex gap-2">
-                            <input type="text" name="${type}[${index}][title]" class="form-control">
+                            <input type="text" name="${type}[${index}][title]" class="form-control" placeholder="${type === 'included' ? 'Included item' : 'Excluded item'}">
                             ${createRemoveButton()}
                         </div>
                     </div>
@@ -3705,7 +3744,7 @@
             }
 
             function addPrice() {
-                document.getElementById('prices-wrapper').insertAdjacentHTML('beforeend', `
+                appendAnimatedItem('prices-wrapper', `
                     <div class="repeat-box editor-card price-item">
                         <div class="editor-card-head">
                             <div class="editor-card-title editor-inline-input">
@@ -3810,30 +3849,30 @@
             }
 
             function updateSummary() {
-                const destinationOption = destinationSelector?.options[destinationSelector.selectedIndex];
-                const categoryOption = document.getElementById('category_id')?.options[document.getElementById(
-                    'category_id').selectedIndex];
-                const durationText = document.getElementById('duration_text').value || [
-                    document.getElementById('duration_days').value ? document.getElementById('duration_days')
-                    .value + ' {{ admin_t('يوم') }}' : '',
-                    document.getElementById('duration_nights').value ? document.getElementById(
-                        'duration_nights').value + ' {{ admin_t('ليلة') }}' : '',
-                    document.getElementById('duration_hours').value ? document.getElementById('duration_hours')
-                    .value + ' {{ admin_t('ساعة') }}' : ''
+                const destinationOption = destinationSelector && destinationSelector.selectedIndex >= 0 ? destinationSelector.options[destinationSelector.selectedIndex] : null;
+                const categorySelect = document.getElementById('category_id');
+                const categoryOption = categorySelect && categorySelect.selectedIndex >= 0 ? categorySelect.options[categorySelect.selectedIndex] : null;
+                
+                const durationTextEl = document.getElementById('duration_text');
+                const durationDaysEl = document.getElementById('duration_days');
+                const durationNightsEl = document.getElementById('duration_nights');
+                const durationHoursEl = document.getElementById('duration_hours');
+
+                const durationText = (durationTextEl?.value || '').trim() || [
+                    durationDaysEl?.value ? durationDaysEl.value + ' {{ admin_t('يوم') }}' : '',
+                    durationNightsEl?.value ? durationNightsEl.value + ' {{ admin_t('ليلة') }}' : '',
+                    durationHoursEl?.value ? durationHoursEl.value + ' {{ admin_t('ساعة') }}' : ''
                 ].filter(Boolean).join(' / ');
                 const imagesCount = (featuredFile ? 1 : 0) + galleryFiles.length;
                 const itineraryCount = document.querySelectorAll('.itinerary-item').length;
 
                 const summary = {
-                    title: document.getElementById('title').value || texts.noData,
-                    destination: destinationOption && destinationOption.value ? destinationOption.textContent
-                        .trim() : texts.noData,
+                    title: document.getElementById('title')?.value || texts.noData,
+                    destination: destinationOption && destinationOption.value ? destinationOption.textContent.trim() : texts.noData,
                     duration: durationText || texts.noData,
-                    price: document.getElementById('adult_price').value || texts.noData,
-                    category: categoryOption && categoryOption.value ? categoryOption.textContent.trim() : texts
-                        .noData,
-                    status: form.querySelector('input[name="is_active"]').checked ? texts.active : texts
-                        .inactive,
+                    price: document.getElementById('adult_price')?.value || texts.noData,
+                    category: categoryOption && categoryOption.value ? categoryOption.textContent.trim() : texts.noData,
+                    status: form?.querySelector('input[name="is_active"]')?.checked ? texts.active : texts.inactive,
                     images: imagesCount,
                     daysCount: itineraryCount
                 };
@@ -3852,7 +3891,7 @@
             updateAttractionsPicker();
             renderGalleryPreview();
             renderFeaturedPreview();
-            form.querySelectorAll('[data-meal-select]').forEach(syncMealInputs);
+            form?.querySelectorAll('[data-meal-select]').forEach(syncMealInputs);
             document.querySelectorAll('[data-counter-max]').forEach(updateCounter);
             showStep(currentStep);
             ensureEmptyState('#itinerary-wrapper', '.itinerary-item', 'itineraryEmptyState', texts.noItinerary);
@@ -3882,13 +3921,13 @@
                 });
             });
 
-            prevBtn.addEventListener('click', () => {
+            prevBtn?.addEventListener('click', () => {
                 if (currentStep > 1) {
                     showStep(currentStep - 1);
                 }
             });
 
-            nextBtn.addEventListener('click', () => {
+            nextBtn?.addEventListener('click', () => {
                 if (!validateStep(currentStep)) {
                     focusFirstInvalid(currentStep);
                     return;
@@ -3898,15 +3937,15 @@
                 }
             });
 
-            saveDraftBtn.addEventListener('click', saveDraft);
+            saveDraftBtn?.addEventListener('click', saveDraft);
 
             destinationSelector?.addEventListener('change', syncCountryFromDestination);
 
-            form.querySelectorAll('input[name="duration_type"]').forEach(radio => {
+            form?.querySelectorAll('input[name="duration_type"]').forEach(radio => {
                 radio.addEventListener('change', updateDurationFields);
             });
 
-            form.addEventListener('input', function(event) {
+            form?.addEventListener('input', function(event) {
                 isDirty = true;
                 const input = event.target;
                 if (input.matches('[data-counter-max]')) {
@@ -3915,7 +3954,7 @@
                 updateSummary();
             });
 
-            form.addEventListener('change', function(event) {
+            form?.addEventListener('change', function(event) {
                 isDirty = true;
                 if (event.target.matches('[data-meal-select]')) {
                     syncMealInputs(event.target);
@@ -3926,30 +3965,30 @@
                 updateSummary();
             });
 
-            featuredInput.addEventListener('change', function() {
-                featuredFile = this.files[0] || null;
+            featuredInput?.addEventListener('change', function() {
+                featuredFile = this.files ? this.files[0] || null : null;
                 renderFeaturedPreview();
                 updateSummary();
             });
 
-            galleryInput.addEventListener('change', function() {
-                galleryFiles = Array.from(this.files);
+            galleryInput?.addEventListener('change', function() {
+                galleryFiles = Array.from(this.files ? this.files : []);
                 renderGalleryPreview();
                 updateSummary();
             });
 
-            featuredPreview.addEventListener('click', function(event) {
+            featuredPreview?.addEventListener('click', function(event) {
                 const removeButton = event.target.closest('[data-remove-featured]');
                 if (!removeButton) {
                     return;
                 }
                 featuredFile = null;
-                featuredInput.value = '';
+                if (featuredInput) featuredInput.value = '';
                 renderFeaturedPreview();
                 updateSummary();
             });
 
-            galleryPreview.addEventListener('click', function(event) {
+            galleryPreview?.addEventListener('click', function(event) {
                 const removeButton = event.target.closest('[data-gallery-index]');
                 if (!removeButton) {
                     return;
@@ -3961,11 +4000,11 @@
                 updateSummary();
             });
 
-            document.getElementById('addItineraryBtn').addEventListener('click', addItinerary);
-            document.getElementById('addIncludedBtn').addEventListener('click', () => addInclusion('included'));
-            document.getElementById('addExcludedBtn').addEventListener('click', () => addInclusion('excluded'));
-            document.getElementById('addPriceBtn').addEventListener('click', addPrice);
-            document.getElementById('addFaqBtn').addEventListener('click', addFaq);
+            addItineraryBtn?.addEventListener('click', addItinerary);
+            addIncludedBtn?.addEventListener('click', () => addInclusion('included'));
+            addExcludedBtn?.addEventListener('click', () => addInclusion('excluded'));
+            addPriceBtn?.addEventListener('click', addPrice);
+            addFaqBtn?.addEventListener('click', addFaq);
 
             document.addEventListener('click', function(event) {
                 const removeButton = event.target.closest('.js-remove');
@@ -3988,12 +4027,9 @@
                         renumberDynamicItems('itinerary-wrapper', '.itinerary-item', true);
                         renumberDynamicItems('faq-wrapper', '.faq-item');
 
-                        ensureEmptyState('#itinerary-wrapper', '.itinerary-item', 'itineraryEmptyState', texts
-                            .noItinerary);
-                        ensureEmptyState('#included-wrapper', '.included-item', 'includedEmptyState', texts
-                            .noIncluded);
-                        ensureEmptyState('#excluded-wrapper', '.excluded-item', 'excludedEmptyState', texts
-                            .noExcluded);
+                        ensureEmptyState('#itinerary-wrapper', '.itinerary-item', 'itineraryEmptyState', texts.noItinerary);
+                        ensureEmptyState('#included-wrapper', '.included-item', 'includedEmptyState', texts.noIncluded);
+                        ensureEmptyState('#excluded-wrapper', '.excluded-item', 'excludedEmptyState', texts.noExcluded);
                         ensureEmptyState('#prices-wrapper', '.price-item', 'pricesEmptyState', texts.noPrices);
                         ensureEmptyState('#faq-wrapper', '.faq-item', 'faqEmptyState', @json(admin_t('لا توجد أسئلة شائعة مضافة حتى الآن.')));
                         updateItineraryMode();
@@ -4010,14 +4046,13 @@
                 });
             });
 
-            form.addEventListener('keydown', function(event) {
-                if (event.key === 'Enter' && event.target.tagName !== 'TEXTAREA' && currentStep !==
-                    totalSteps) {
+            form?.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter' && event.target.tagName !== 'TEXTAREA' && currentStep !== totalSteps) {
                     event.preventDefault();
                 }
             });
 
-            form.addEventListener('submit', function(event) {
+            form?.addEventListener('submit', function(event) {
                 if (currentStep !== totalSteps) {
                     event.preventDefault();
                     return;
@@ -4029,9 +4064,10 @@
                 }
 
                 isSubmitting = true;
-                submitBtn.disabled = true;
-                submitBtn.innerHTML =
-                    `<span class="btn-icon-text"><span class="spinner-border spinner-border-sm"></span><span>${texts.saving}</span></span>`;
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = `<span class="btn-icon-text"><span class="spinner-border spinner-border-sm"></span><span>${texts.saving}</span></span>`;
+                }
                 localStorage.removeItem(draftKey);
             });
 
@@ -4135,8 +4171,12 @@
                         if (form) form.reset();
                         const modalEl = document.getElementById('quickAddAttractionModal');
                         if (modalEl) {
-                            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-                            modal.hide();
+                            const modal = (typeof bootstrap !== 'undefined' && bootstrap.Modal) ? (bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl)) : null;
+                            if (modal) {
+                                modal.hide();
+                            } else if (window.jQuery) {
+                                window.jQuery(modalEl).modal('hide');
+                            }
                         }
 
                         if (typeof Swal !== 'undefined') {

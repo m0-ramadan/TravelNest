@@ -1266,7 +1266,7 @@
             if (destinationSelector) {
                 destinationSelector.addEventListener('change', syncCountryFromDestination);
 
-                if (destinationSelector.value && !primaryCountryInput.value) {
+                if (destinationSelector.value && primaryCountryInput && !primaryCountryInput.value) {
                     syncCountryFromDestination();
                 }
             }
@@ -1279,8 +1279,7 @@
 
                 attractionsPicker?.querySelectorAll('[data-attraction-choice]').forEach(choice => {
                     const searchText = (choice.dataset.attractionSearch || '').toLocaleLowerCase();
-                    choice.classList.toggle('is-filtered-out', query !== '' && !searchText.includes(
-                        query));
+                    choice.classList.toggle('is-filtered-out', query !== '' && !searchText.includes(query));
                 });
             });
 
@@ -1378,29 +1377,34 @@
             if (addButton) addButton.textContent = isHourly ? '+ Add New Step' : '+ Add New Day';
 
             document.querySelectorAll('[data-itinerary-item]').forEach(item => {
-                item.querySelector('[data-itinerary-unit]').textContent = isHourly ? 'Step' : 'Day';
-                item.querySelector('[data-itinerary-duration-label]').textContent = isHourly ?
-                    'Time / Duration' :
-                    'Date / Day label';
-                item.querySelector('[data-itinerary-title-label]').textContent = isHourly ?
-                    'Step title / Place' :
-                    'Day title / Place';
-                item.querySelector('[data-itinerary-details-label]').textContent = isHourly ?
-                    'Step details and activities' :
-                    'Day details and activities';
+                const unit = item.querySelector('[data-itinerary-unit]');
+                if (unit) unit.textContent = isHourly ? 'Step' : 'Day';
+
+                const durationLabel = item.querySelector('[data-itinerary-duration-label]');
+                if (durationLabel) durationLabel.textContent = isHourly ? 'Time / Duration' : 'Date / Day label';
+
+                const titleLabel = item.querySelector('[data-itinerary-title-label]');
+                if (titleLabel) titleLabel.textContent = isHourly ? 'Step title / Place' : 'Day title / Place';
+
+                const detailsLabel = item.querySelector('[data-itinerary-details-label]');
+                if (detailsLabel) detailsLabel.textContent = isHourly ? 'Step details and activities' : 'Day details and activities';
 
                 const durationInput = item.querySelector('[data-itinerary-duration-input]');
-                durationInput.placeholder = isHourly ?
-                    'Example: 09:00 AM - 10:30 AM' :
-                    'Optional date or day label';
+                if (durationInput) {
+                    durationInput.placeholder = isHourly ?
+                        'Example: 09:00 AM - 10:30 AM' :
+                        'Optional date or day label';
+                }
             });
 
             renumberItineraryItems();
         }
 
         function addItinerary() {
+            const wrapper = document.getElementById('itinerary-wrapper');
+            if (!wrapper) return;
             const isHourly = document.querySelector('input[name="duration_type"]:checked')?.value === 'hours';
-            document.getElementById('itinerary-wrapper').insertAdjacentHTML('beforeend', `
+            wrapper.insertAdjacentHTML('beforeend', `
                 <div class="repeat-box" data-itinerary-item>
                     <input type="hidden" name="itinerary[${itineraryIndex}][day_number]" value="${itineraryIndex + 1}" data-itinerary-number-input>
                     <span class="itinerary-sequence">
@@ -1453,7 +1457,9 @@
         }
 
         function addIncluded() {
-            document.getElementById('included-wrapper').insertAdjacentHTML('beforeend', `
+            const wrapper = document.getElementById('included-wrapper');
+            if (!wrapper) return;
+            wrapper.insertAdjacentHTML('beforeend', `
                 <div class="repeat-box">
                     <div class="row">
                         <div class="col-md-10 mb-2">
@@ -1472,7 +1478,9 @@
         }
 
         function addExcluded() {
-            document.getElementById('excluded-wrapper').insertAdjacentHTML('beforeend', `
+            const wrapper = document.getElementById('excluded-wrapper');
+            if (!wrapper) return;
+            wrapper.insertAdjacentHTML('beforeend', `
                 <div class="repeat-box">
                     <div class="row">
                         <div class="col-md-10 mb-2">
@@ -1491,7 +1499,9 @@
         }
 
         function addPrice() {
-            document.getElementById('prices-wrapper').insertAdjacentHTML('beforeend', `
+            const wrapper = document.getElementById('prices-wrapper');
+            if (!wrapper) return;
+            wrapper.insertAdjacentHTML('beforeend', `
                 <div class="repeat-box price-item">
                     <div class="row">
                         <div class="col-md-10 mb-2">
@@ -1568,7 +1578,9 @@
                 emptyState.remove();
             }
 
-            document.getElementById('faq-wrapper').insertAdjacentHTML('beforeend', `
+            const wrapper = document.getElementById('faq-wrapper');
+            if (!wrapper) return;
+            wrapper.insertAdjacentHTML('beforeend', `
                 <div class="repeat-box faq-item">
                     <div class="row">
                         <div class="col-md-10 mb-2">
