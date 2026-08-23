@@ -20,7 +20,22 @@
             $key = (string) $key;
             $locale = app()->getLocale();
             $maps = admin_translation_maps();
-            $translated = $maps[$locale][$key] ?? $key;
+
+            if ($locale === 'en') {
+                if (isset($maps['en'][$key])) {
+                    $val = $maps['en'][$key];
+                    if (preg_match('/[\x{0600}-\x{06FF}]/u', $val) && !preg_match('/[\x{0600}-\x{06FF}]/u', $key)) {
+                        $translated = $key;
+                    } else {
+                        $translated = $val;
+                    }
+                } else {
+                    $translated = $key;
+                }
+            } else {
+                $translated = $maps[$locale][$key] ?? $key;
+            }
+
             foreach ($replace as $name => $value) {
                 $translated = str_replace(':' . $name, (string) $value, $translated);
             }

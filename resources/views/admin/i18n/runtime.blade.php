@@ -55,7 +55,11 @@
         let core = value.trim();
         if (!core) return value;
         if (Object.prototype.hasOwnProperty.call(dictionary, core)) {
-            return leading + dictionary[core] + trailing;
+            const val = dictionary[core];
+            if (locale === 'en' && /[\u0600-\u06FF]/.test(val) && !/[\u0600-\u06FF]/.test(core)) {
+                return value;
+            }
+            return leading + val + trailing;
         }
         const safePrefixes = [
             'مرحباً بك في لوحة تحكم تطبيق', 'مرحباً بك في', 'إرسال إشعار لجميع',
@@ -65,7 +69,11 @@
         ];
         for (const source of safePrefixes) {
             if (core.startsWith(source) && Object.prototype.hasOwnProperty.call(dictionary, source)) {
-                return leading + dictionary[source] + core.slice(source.length) + trailing;
+                const val = dictionary[source];
+                if (locale === 'en' && /[\u0600-\u06FF]/.test(val) && !/[\u0600-\u06FF]/.test(source)) {
+                    continue;
+                }
+                return leading + val + core.slice(source.length) + trailing;
             }
         }
         return value;
