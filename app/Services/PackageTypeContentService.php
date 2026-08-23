@@ -37,6 +37,7 @@ class PackageTypeContentService
 
         if ($package->package_type === 'travel_package') {
             $this->syncTourPackageDetail($package, (array) $request->input('tour_package', []));
+            $this->syncTourPackagePricing($package, $request);
         }
     }
 
@@ -191,6 +192,107 @@ class PackageTypeContentService
         $package->tags()->sync(array_values(array_unique($ids)));
     }
 
+    public function syncTourPackagePricing(Package $package, Request $request): void
+    {
+        if ($package->package_type !== 'travel_package' || !$request->has('tour_package_accommodations')) {
+            return;
+        }
+
+        $accommodationsData = (array) $request->input('tour_package_accommodations', []);
+        $keepAccIds = [];
+
+        foreach ($accommodationsData as $accIndex => $accData) {
+            $name = trim((string) ($accData['name'] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+
+            $acc = $package->tourPackageAccommodations()->updateOrCreate(
+                ['id' => $accData['id'] ?? null],
+                [
+                    'name' => $name,
+                    'description' => $this->nullableString($accData['description'] ?? null),
+                    'sort_order' => $accIndex,
+                    'is_active' => array_key_exists('is_active', $accData) ? !empty($accData['is_active']) : true,
+                ]
+            );
+            $keepAccIds[] = $acc->id;
+
+            // Sync Seasons
+            if (isset($accData['seasons']) && is_array($accData['seasons'])) {
+                $keepSeasonIds = [];
+                foreach ($accData['seasons'] as $sIndex => $sData) {
+                    $sName = trim((string) (is_array($sData['name'] ?? null) ? ($sData['name']['en'] ?? '') : ($sData['name'] ?? '')));
+                    if ($sName === '') {
+                        continue;
+                    }
+
+                    $seasonNameJson = is_array($sData['name'] ?? null) ? $sData['name'] : ['en' => $sName, 'ar' => $sName];
+
+                    $season = $acc->seasons()->updateOrCreate(
+                        ['id' => $sData['id'] ?? null],
+                        [
+                            'package_id' => $package->id,
+                            'name' => $seasonNameJson,
+                            'date_from' => !empty($sData['date_from']) ? $sData['date_from'] : null,
+                            'date_to' => !empty($sData['date_to']) ? $sData['date_to'] : null,
+                            'currency_id' => !empty($sData['currency_id']) ? (int) $sData['currency_id'] : $package->currency_id,
+                            'sort_order' => $sIndex,
+                            'is_active' => array_key_exists('is_active', $sData) ? !empty($sData['is_active']) : true,
+                        ]
+                    );
+                    $keepSeasonIds[] = $season->id;
+
+                    // Sync Price Items
+                    if (isset($sData['items']) && is_array($sData['items'])) {
+                        $season->items()->delete();
+                        foreach ($sData['items'] as $iIndex => $iData) {
+                            $price = $this->nullableFloat($iData['price'] ?? null);
+                            if ($price === null) continue;
+
+                            $labelStr = trim((string) (is_array($iData['label'] ?? null) ? ($iData['label']['en'] ?? '') : ($iData['label'] ?? '')));
+                            $labelJson = is_array($iData['label'] ?? null) ? $iData['label'] : ($labelStr !== '' ? ['en' => $labelStr, 'ar' => $labelStr] : null);
+
+                            $season->items()->create([
+                                'occupancy_type' => $this->nullableString($iData['occupancy_type'] ?? null),
+                                'label' => $labelJson,
+                                'price' => $price,
+                                'price_unit' => $this->nullableString($iData['price_unit'] ?? 'per_person'),
+                                'sort_order' => $iIndex,
+                                'is_active' => array_key_exists('is_active', $iData) ? !empty($iData['is_active']) : true,
+                            ]);
+                        }
+                    }
+                }
+                $acc->seasons()->whereNotIn('id', $keepSeasonIds)->delete();
+            }
+
+            // Sync Hotels
+            if (isset($accData['hotels']) && is_array($accData['hotels'])) {
+                $acc->hotels()->delete();
+                foreach ($accData['hotels'] as $hIndex => $hData) {
+                    $hotelName = trim((string) ($hData['hotel_name'] ?? ''));
+                    if ($hotelName === '') continue;
+
+                    $acc->hotels()->create([
+                        'city_id' => !empty($hData['city_id']) ? (int) $hData['city_id'] : null,
+                        'city_name' => $this->nullableString($hData['city_name'] ?? null),
+                        'hotel_name' => $hotelName,
+                        'star_rating' => $this->nullableInt($hData['star_rating'] ?? null),
+                        'description' => $this->nullableString($hData['description'] ?? null),
+                        'room_type' => $this->nullableString($hData['room_type'] ?? null),
+                        'meal_plan' => $this->nullableString($hData['meal_plan'] ?? null),
+                        'alternative_note' => $this->nullableString($hData['alternative_note'] ?? null),
+                        'sort_order' => $hIndex,
+                        'is_active' => array_key_exists('is_active', $hData) ? !empty($hData['is_active']) : true,
+                    ]);
+                }
+            }
+        }
+
+        $package->tourPackageAccommodations()->whereNotIn('id', $keepAccIds)->delete();
+    }
+
     private function normalizeGroupPricingTiers(mixed $value): array
     {
         if (is_string($value)) {
@@ -203,18 +305,26 @@ class PackageTypeContentService
             if (!is_array($row)) {
                 continue;
             }
-            $min = isset($row['min']) && $row['min'] !== '' ? max(1, (int) $row['min']) : null;
+            $min = isset($row['min']) && $row['min'] !== '' ? max(1, (int) $row['min']) : (isset($row['persons_count']) ? (int)$row['persons_count'] : null);
             $max = isset($row['max']) && $row['max'] !== '' ? max(1, (int) $row['max']) : null;
-            $price = isset($row['price_per_person']) && $row['price_per_person'] !== '' ? max(0, (float) $row['price_per_person']) : null;
+            $price = isset($row['price_per_person']) && $row['price_per_person'] !== '' ? max(0, (float) $row['price_per_person']) : (isset($row['price']) ? (float)$row['price'] : null);
             if ($min === null && $max === null && $price === null) {
                 continue;
             }
             $rows[] = [
                 'id' => (string) ($row['id'] ?? ('tier-' . ($index + 1))),
-                'label' => trim((string) ($row['label'] ?? '')),
+                'title' => trim((string) ($row['title'] ?? $row['label'] ?? '')),
+                'label' => trim((string) ($row['label'] ?? $row['title'] ?? '')),
+                'persons_count' => $min ?: 1,
                 'min' => $min,
                 'max' => $max,
+                'persons_label' => trim((string) ($row['persons_label'] ?? $row['title'] ?? '')),
                 'price_per_person' => $price,
+                'badge' => trim((string) ($row['badge'] ?? $row['badge_label'] ?? '')),
+                'badge_label' => trim((string) ($row['badge_label'] ?? $row['badge'] ?? '')),
+                'is_featured' => !empty($row['is_featured']),
+                'is_popular' => !empty($row['is_popular']),
+                'is_best_value' => !empty($row['is_best_value']),
             ];
         }
 

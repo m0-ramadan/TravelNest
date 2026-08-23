@@ -2392,82 +2392,9 @@
                                 </div>
 
                                 <div class="section-body">
-                                    <div class="card mb-4 border-light bg-light p-3 w-100">
-                                        <h6 class="fw-bold mb-3 text-primary"><i class="la la-users me-1"></i> {{ __('أسعار المجموعات والأفراد (Group Pricing Tiers - Per Person)') }}</h6>
-                                        <div class="row">
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label fw-bold">Solo Traveler (1 Person)</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text">$</span>
-                                                    <input type="number" step="0.01" min="0" name="price_1_person" class="form-control"
-                                                        placeholder="e.g. 236.00" value="{{ old('price_1_person', '') }}">
-                                                </div>
-                                                @error('price_1_person')
-                                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
-                                                @enderror
-                                            </div>
-
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label fw-bold">Couple's Journey (2 Persons)</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text">$</span>
-                                                    <input type="number" step="0.01" min="0" name="price_2_persons" class="form-control"
-                                                        placeholder="e.g. 162.00" value="{{ old('price_2_persons', '') }}">
-                                                </div>
-                                                @error('price_2_persons')
-                                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
-                                                @enderror
-                                            </div>
-
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label fw-bold">Small Group (3 Persons)</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text">$</span>
-                                                    <input type="number" step="0.01" min="0" name="price_3_persons" class="form-control"
-                                                        placeholder="e.g. 153.00" value="{{ old('price_3_persons', '') }}">
-                                                </div>
-                                                @error('price_3_persons')
-                                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
-                                                @enderror
-                                            </div>
-
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label fw-bold">Family Adventure (4 Persons)</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text">$</span>
-                                                    <input type="number" step="0.01" min="0" name="price_4_persons" class="form-control"
-                                                        placeholder="e.g. 145.00" value="{{ old('price_4_persons', '') }}">
-                                                </div>
-                                                @error('price_4_persons')
-                                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
-                                                @enderror
-                                            </div>
-
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label fw-bold">Extended Group (5 Persons)</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text">$</span>
-                                                    <input type="number" step="0.01" min="0" name="price_5_persons" class="form-control"
-                                                        placeholder="e.g. 140.00" value="{{ old('price_5_persons', '') }}">
-                                                </div>
-                                                @error('price_5_persons')
-                                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
-                                                @enderror
-                                            </div>
-
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label fw-bold">Large Group (6+ Persons)</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text">$</span>
-                                                    <input type="number" step="0.01" min="0" name="price_6_plus_persons" class="form-control"
-                                                        placeholder="e.g. 135.00" value="{{ old('price_6_plus_persons', '') }}">
-                                                </div>
-                                                @error('price_6_plus_persons')
-                                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                    </div>
+                                    @include('admin.packages.partials.pricing-day-tour')
+                                    @include('admin.packages.partials.pricing-travel-package')
+                                    @include('admin.packages.partials.pricing-nile-cruise')
 
                                     <div class="fields-grid">
                                         <div>
@@ -4753,4 +4680,5 @@
             </div>
         </div>
     </div>
+    <script src="{{ asset('admin/js/unified-pricing.js') }}"></script>
 @endsection

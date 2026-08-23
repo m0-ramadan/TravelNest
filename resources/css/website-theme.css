@@ -1477,6 +1477,7 @@
         body.website-theme-shell .feature-icon,
         body.website-theme-shell .contact-method-icon,
         body.website-theme-shell .contact-icon,
+        body.website-theme-shell .detail-item i,
         body.website-theme-shell .cta-icon-container {
             background: var(--website-shell-icon-primary) !important;
             color: #ffffff !important;
@@ -1487,7 +1488,6 @@
         body.website-theme-shell .step-number,
         body.website-theme-shell .share-button,
         body.website-theme-shell .social-link,
-        body.website-theme-shell .detail-item i,
         body.website-theme-shell .support-item i,
         body.website-theme-shell .office-detail i {
             background: var(--website-shell-icon-gold) !important;
@@ -1495,16 +1495,20 @@
             box-shadow: var(--website-shell-icon-gold-shadow) !important;
         }
 
-        body.website-theme-shell .trust-icon,
-        body.website-theme-shell .day-number {
+        body.website-theme-shell .trust-icon {
             background: var(--website-shell-icon-dark) !important;
             color: var(--rich-gold) !important;
             box-shadow: var(--website-shell-icon-dark-shadow) !important;
         }
 
+        body.website-theme-shell .day-number {
+            background: var(--website-shell-icon-dark) !important;
+            color: #ffffff !important;
+            box-shadow: var(--website-shell-icon-dark-shadow) !important;
+        }
+
         body.website-theme-shell .trust-icon i,
         body.website-theme-shell .day-number i,
-        body.website-theme-shell .day-number,
         body.website-theme-shell .step-number {
             color: inherit !important;
         }
@@ -1536,6 +1540,18 @@
             font-weight: 700;
         }
 
+        body.website-theme-shell .detail-item i {
+            background: #163c67 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(22, 60, 103, 0.2) !important;
+        }
+
+        html[data-theme='dark'] .detail-item i {
+            background: #1d4ed8 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3) !important;
+        }
+
         body.website-theme-shell .feature-icon i,
         body.website-theme-shell .contact-method-icon i,
         body.website-theme-shell .contact-icon i,
@@ -1543,7 +1559,6 @@
         body.website-theme-shell .choose-icon i,
         body.website-theme-shell .share-button i,
         body.website-theme-shell .social-link i,
-        body.website-theme-shell .detail-item i,
         body.website-theme-shell .support-item i,
         body.website-theme-shell .office-detail i {
             color: inherit !important;
@@ -1685,4 +1700,224 @@
 
         .listing-hero .container {
             padding-top: 65px !important;
+        }
+
+        /* Nile Cruise Dark Mode Support */
+        html[data-theme='dark'] .cruise-type-card,
+        html[data-theme='dark'] .cat-card,
+        html[data-theme='dark'] .feature-box,
+        html[data-theme='dark'] .nc-list-card,
+        html[data-theme='dark'] .nc-price-duration,
+        html[data-theme='dark'] .nc-policy-card,
+        html[data-theme='dark'] .nc-schedule,
+        html[data-theme='dark'] .nc-cabin,
+        html[data-theme='dark'] .nc-day,
+        html[data-theme='dark'] .nc-addon {
+            background: var(--dark-surface) !important;
+            border-color: var(--dark-border) !important;
+            color: var(--charcoal-deep) !important;
+            box-shadow: var(--shadow-medium) !important;
+        }
+
+        html[data-theme='dark'] .cruise-type-name,
+        html[data-theme='dark'] .cat-title,
+        html[data-theme='dark'] .feature-box h4,
+        html[data-theme='dark'] .nc-day summary,
+        html[data-theme='dark'] .nc-price-duration-name {
+            color: var(--charcoal-deep) !important;
+        }
+
+        html[data-theme='dark'] .cruise-type-desc,
+        html[data-theme='dark'] .cat-desc,
+        html[data-theme='dark'] .feature-box p {
+            color: var(--warm-gray) !important;
+        }
+
+        html[data-theme='dark'] .category-chip {
+            background: rgba(244, 195, 106, 0.12) !important;
+            color: var(--rich-gold) !important;
+            border: 1px solid rgba(244, 195, 106, 0.25) !important;
+        }
+
+        html[data-theme='dark'] .category-chip:hover {
+            background: var(--rich-gold) !important;
+            color: #0f172a !important;
+        }
+
+        html[data-theme='dark'] .feature-icon {
+            background: rgba(244, 195, 106, 0.14) !important;
+            color: var(--rich-gold) !important;
+        }
+
+        html[data-theme='dark'] .search-box {
+            background: var(--dark-surface-soft) !important;
+            border: 1px solid var(--dark-border) !important;
+        }
+
+        html[data-theme='dark'] .search-box input {
+            background: transparent !important;
+            color: var(--charcoal-deep) !important;
+        }
+
+        html[data-theme='dark'] .bg-light,
+        html[data-theme='dark'] section.bg-light {
+            background-color: var(--dark-surface-muted) !important;
+            color: var(--charcoal-deep) !important;
+        }
+
+        html[data-theme='dark'] .text-dark {
+            color: #f8fafc !important;
+        }
+
+        html[data-theme='dark'] .text-muted {
+            color: #94a3b8 !important;
+        }
+
+        html[data-theme='dark'] .border-top,
+        html[data-theme='dark'] .border-bottom {
+            border-color: rgba(148, 163, 184, 0.18) !important;
+        }
+
+        /* Itinerary Base & Dark Mode System */
+        .itinerary-section .day-card {
+            background: #ffffff;
+            border: 1px solid rgba(28, 50, 92, 0.12);
+            border-radius: 16px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .itinerary-section .day-header {
+            background: #faf8f3;
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(28, 50, 92, 0.08);
+        }
+
+        .itinerary-section .day-content {
+            background: #ffffff;
+            padding: 24px;
+        }
+
+        .nc-duration-summary {
+            background: #faf8f3;
+            border: 1px solid rgba(197, 149, 91, 0.2);
+            color: #1c325c;
+        }
+
+        .meals-included-card {
+            background: rgba(197, 149, 91, 0.08);
+            border-left: 4px solid #c5955b;
+            color: #1c325c;
+        }
+
+        .meals-included-card .meal-badge {
+            background-color: #c5955b;
+            color: #ffffff;
+        }
+
+        .nc-activity {
+            border-left-color: #c5955b !important;
+        }
+
+        .nc-activity .activity-link {
+            color: #1c325c;
+            text-decoration: underline;
+        }
+
+        /* Dark Mode Overrides for Itinerary */
+        html[data-theme='dark'] .itinerary-section .day-card,
+        html[data-theme='dark'] .itinerary-section .collapsible-content,
+        html[data-theme='dark'] .itinerary-section .day-content {
+            background: #151d30 !important;
+            background-color: #151d30 !important;
+            color: #f1f5f9 !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        html[data-theme='dark'] .itinerary-section .day-header {
+            background: #1c273e !important;
+            background-color: #1c273e !important;
+            color: #ffffff !important;
+            border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        html[data-theme='dark'] .itinerary-section .day-title {
+            color: #f8fafc !important;
+        }
+
+        html[data-theme='dark'] .itinerary-section .day-description,
+        html[data-theme='dark'] .itinerary-section p,
+        html[data-theme='dark'] .itinerary-section span {
+            color: #cbd5e1 !important;
+        }
+
+        html[data-theme='dark'] .itinerary-section strong {
+            color: #f8fafc !important;
+        }
+
+        html[data-theme='dark'] .nc-duration-summary {
+            background: #1c273e !important;
+            background-color: #1c273e !important;
+            border-color: rgba(244, 195, 106, 0.3) !important;
+            color: #f8fafc !important;
+        }
+
+        html[data-theme='dark'] .nc-duration-summary strong,
+        html[data-theme='dark'] .nc-duration-summary .nc-duration-title {
+            color: #f8fafc !important;
+        }
+
+        html[data-theme='dark'] .nc-duration-summary small,
+        html[data-theme='dark'] .nc-duration-summary .text-muted {
+            color: #94a3b8 !important;
+        }
+
+        html[data-theme='dark'] .nc-activity {
+            border-left-color: #f4c36a !important;
+            color: #cbd5e1 !important;
+        }
+
+        html[data-theme='dark'] .nc-activity .activity-link,
+        html[data-theme='dark'] .nc-activity a {
+            color: #f4c36a !important;
+        }
+
+        html[data-theme='dark'] .nc-activity .activity-title {
+            color: #f8fafc !important;
+        }
+
+        html[data-theme='dark'] .nc-activity .text-muted {
+            color: #94a3b8 !important;
+        }
+
+        html[data-theme='dark'] .overnight-info strong,
+        html[data-theme='dark'] .activity-header {
+            color: #f8fafc !important;
+        }
+
+        html[data-theme='dark'] .meals-included-card {
+            background: rgba(244, 195, 106, 0.12) !important;
+            background-color: rgba(244, 195, 106, 0.12) !important;
+            border-left-color: #f4c36a !important;
+            color: #f8fafc !important;
+        }
+
+        html[data-theme='dark'] .meals-included-card .fw-bold {
+            color: #f8fafc !important;
+        }
+
+        html[data-theme='dark'] .meals-included-card .meal-badge {
+            background-color: #f4c36a !important;
+            color: #0f172a !important;
+            font-weight: 700 !important;
+        }
+
+        .nc-media-box {
+            background: transparent !important;
+            border: 1px solid rgba(197, 149, 91, 0.25) !important;
+        }
+
+        html[data-theme='dark'] .nc-media-box {
+            background: transparent !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
         }

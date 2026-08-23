@@ -156,6 +156,31 @@
             background: linear-gradient(135deg, #163c67, #20548a);
             color: #fff;
         }
+
+        /* Dark Mode Support */
+        html[data-theme='dark'] .cat-card {
+            background: #111827;
+            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        html[data-theme='dark'] .cat-title {
+            color: #f8fafc;
+        }
+
+        html[data-theme='dark'] .cat-desc {
+            color: #cbd5e1;
+        }
+
+        html[data-theme='dark'] .cat-btn {
+            background: linear-gradient(135deg, #c5955b, #e7b762);
+            color: #0f172a;
+        }
+
+        html[data-theme='dark'] .cat-btn:hover {
+            background: linear-gradient(135deg, #e7b762, #f4c36a);
+            color: #0f172a;
+        }
     </style>
 @endsection
 

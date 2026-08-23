@@ -235,6 +235,62 @@
             font-size: 1.8rem;
             margin-bottom: 20px;
         }
+
+        /* Dark Mode Support */
+        html[data-theme='dark'] .cruise-type-card {
+            background: #111827 !important;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4) !important;
+        }
+
+        html[data-theme='dark'] .cruise-type-name {
+            color: #f8fafc !important;
+        }
+
+        html[data-theme='dark'] .cruise-type-desc {
+            color: #cbd5e1 !important;
+        }
+
+        html[data-theme='dark'] .category-chip {
+            background: rgba(244, 195, 106, 0.12) !important;
+            color: #f4c36a !important;
+            border: 1px solid rgba(244, 195, 106, 0.25) !important;
+        }
+
+        html[data-theme='dark'] .category-chip:hover {
+            background: #f4c36a !important;
+            color: #0f172a !important;
+        }
+
+        html[data-theme='dark'] .cruise-btn {
+            background: linear-gradient(135deg, #c5955b, #e7b762) !important;
+            color: #0f172a !important;
+            box-shadow: 0 8px 20px rgba(197, 149, 91, 0.25) !important;
+        }
+
+        html[data-theme='dark'] .cruise-btn:hover {
+            background: linear-gradient(135deg, #e7b762, #f4c36a) !important;
+            color: #0f172a !important;
+        }
+
+        html[data-theme='dark'] .feature-box {
+            background: #111827 !important;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        html[data-theme='dark'] .feature-box h4 {
+            color: #f4c36a !important;
+        }
+
+        html[data-theme='dark'] .feature-box p {
+            color: #cbd5e1 !important;
+        }
+
+        html[data-theme='dark'] .feature-icon {
+            background: rgba(244, 195, 106, 0.15) !important;
+            color: #f4c36a !important;
+        }
     </style>
 @endsection
 

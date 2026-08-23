@@ -27,7 +27,7 @@
 
 @section('title', $package->getTranslation('seo_title') ?: $title . ' - Etro Tours')
 @section('description', $package->getTranslation('seo_description') ?: $shortDescription)
-@section('body_class', 'package-show-template')
+@section('body_class', trim('package-show-template ' . ($package->package_type === 'nile_cruise' ? 'nile-cruise-page' : '')))
 @section('keywords',
     $metaKeywordList->isNotEmpty()
         ? $metaKeywordList->implode(', ')
@@ -1839,6 +1839,323 @@
             color: #94a3b8;
         }
 
+
+        /* =========================================================
+           Nile Cruise body redesign — body only, shared header/footer untouched
+           ========================================================= */
+        .nile-cruise-page .main-container {
+            background:
+                radial-gradient(circle at 8% 8%, rgba(215, 239, 250, .58), transparent 34%),
+                radial-gradient(circle at 92% 36%, rgba(245, 226, 194, .38), transparent 31%),
+                #fffdf9;
+            padding: 54px 0 64px;
+        }
+
+        .nile-cruise-page .content-wrapper > .row {
+            --bs-gutter-x: 28px;
+            align-items: flex-start;
+        }
+
+        .nile-cruise-page .content-section {
+            border-radius: 18px;
+            padding: 26px 28px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(28, 50, 92, .09);
+            box-shadow: 0 12px 34px rgba(28, 50, 92, .075);
+            background: rgba(255,255,255,.96);
+        }
+
+        .nile-cruise-page .section-header {
+            text-align: center;
+            font-size: clamp(1.28rem, 2.3vw, 1.78rem);
+            margin-bottom: 18px;
+            line-height: 1.2;
+        }
+
+        .nile-cruise-page .section-header:after {
+            width: 48px;
+            height: 3px;
+            margin: 9px auto 0;
+        }
+
+        .nile-cruise-page .section-subtitle {
+            max-width: 720px;
+            margin: -4px auto 18px;
+            text-align: center;
+            font-size: .92rem;
+            line-height: 1.65;
+        }
+
+        .nile-cruise-page #about .about-content {
+            text-align: center;
+            color: #5d6878;
+            font-size: .95rem;
+            line-height: 1.8;
+        }
+
+        .nc-about-features {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0,1fr));
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(28,50,92,.08);
+        }
+
+        .nc-about-feature {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #1c325c;
+            font-size: .82rem;
+            font-weight: 700;
+        }
+
+        .nc-about-feature i { color:#c5955b; font-size:1.2rem; }
+
+        .nile-cruise-page #nile-cruise-details .cruise-details {
+            grid-template-columns: repeat(3, minmax(0,1fr));
+            gap: 12px;
+            margin-top: 0;
+        }
+
+        .nile-cruise-page #nile-cruise-details .detail-item {
+            min-height: 78px;
+            padding: 14px 15px;
+            background: #fff;
+            border-color: rgba(28,50,92,.10);
+            box-shadow: 0 4px 14px rgba(28,50,92,.035);
+        }
+
+        .nile-cruise-page #nile-cruise-details .detail-item i {
+            background: rgba(197,149,91,.12);
+            color: #c5955b !important;
+            width: 34px;
+            height: 34px;
+            min-width: 34px;
+        }
+
+        .nile-cruise-page #nile-cruise-details .detail-text {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+        }
+
+        .nile-cruise-page #nile-cruise-details .detail-label {
+            font-size: .72rem;
+            color: #7a8594;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .nile-cruise-page #nile-cruise-details .detail-value {
+            color: #1c325c;
+            font-size: .9rem;
+            font-weight: 750;
+        }
+
+        .nc-subsection { margin-bottom: 25px; }
+        .nc-subsection:last-child { margin-bottom: 0; }
+        .nc-subsection-title {
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            margin:0 0 13px;
+            padding-bottom:9px;
+            border-bottom:1px solid rgba(28,50,92,.08);
+            color:#1c325c;
+            font-family:'Playfair Display',serif;
+            font-size:1.2rem;
+            font-weight:700;
+        }
+        .nc-subsection-title .title-left{display:flex;align-items:center;gap:9px}
+        .nc-subsection-title i{color:#c5955b}
+
+        .nile-cruise-page .nc-schedule-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap:12px; }
+        .nile-cruise-page .nc-schedule {
+            padding:14px 16px;
+            border-radius:13px;
+            background:#fbfcfe;
+            border-color:rgba(28,50,92,.09);
+            box-shadow:none;
+        }
+
+        .nile-cruise-page .nc-cabin-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap:14px; }
+        .nile-cruise-page .nc-cabin {
+            padding:0;
+            overflow:hidden;
+            border-radius:15px;
+            box-shadow:0 7px 20px rgba(28,50,92,.06);
+        }
+        .nile-cruise-page .nc-cabin-body { padding:16px; }
+        .nile-cruise-page .nc-cabin img { height:165px; margin:0; border-radius:0; }
+        .nile-cruise-page .nc-pill { padding:5px 9px; font-size:.72rem; background:#f8fafc; }
+
+        .nc-route-line {
+            display:grid;
+            grid-template-columns:repeat(var(--route-count, 5), minmax(82px,1fr));
+            position:relative;
+            gap:0;
+            padding:12px 6px 0;
+            overflow-x:auto;
+        }
+        .nc-route-line:before {
+            content:'';
+            position:absolute;
+            left:8%; right:8%; top:25px;
+            height:2px;
+            background:linear-gradient(90deg,#1c325c,#3d76aa);
+        }
+        .nc-route-stop { position:relative; min-width:82px; text-align:center; z-index:1; }
+        .nc-route-dot {
+            width:22px; height:22px; margin:2px auto 8px;
+            display:flex; align-items:center; justify-content:center;
+            border-radius:50%; background:#1c325c; color:#fff;
+            border:4px solid #fff; box-shadow:0 0 0 1px rgba(28,50,92,.12);
+            font-size:.62rem;
+        }
+        .nc-route-name { color:#1c325c;font-weight:800;font-size:.82rem; }
+        .nc-route-note { color:#7a8594;font-size:.68rem;line-height:1.25;margin-top:2px; }
+
+        .nile-cruise-page .nc-duration-tabs {
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+            gap:6px;
+            background:#f5f7fa;
+            padding:4px;
+            border-radius:999px;
+            margin-bottom:14px;
+        }
+        .nile-cruise-page .nc-duration-tab {
+            border:0;
+            border-radius:999px;
+            padding:9px 12px;
+            background:transparent;
+            color:#43536a;
+            font-size:.8rem;
+        }
+        .nile-cruise-page .nc-duration-tab.active,
+        .nile-cruise-page .nc-duration-tab:hover {
+            background:#0e3c68;
+            color:#fff;
+            box-shadow:0 5px 15px rgba(14,60,104,.18);
+        }
+        .nile-cruise-page .nc-duration-summary {
+            padding:12px 14px;
+            margin-bottom:12px;
+            border:1px solid rgba(28,50,92,.08);
+            border-radius:12px;
+            background:#fbfcfe;
+        }
+        .nile-cruise-page .nc-day { margin-bottom:7px; border-radius:10px; box-shadow:none; }
+        .nile-cruise-page .nc-day summary { padding:12px 14px; font-size:.88rem; background:#fff; }
+        .nile-cruise-page .nc-day-body { padding:4px 15px 15px; font-size:.88rem; }
+
+        .nile-cruise-page #includes-excludes .nc-list-card {
+            height:100%; padding:20px; border-radius:14px;
+            background:#fff; border:1px solid rgba(28,50,92,.09);
+        }
+        .nc-list-title { display:flex;align-items:center;gap:9px;color:#1c325c;font-family:'Playfair Display',serif;font-size:1.08rem;font-weight:800;margin-bottom:12px; }
+        .nc-list-title .ok{color:#c5955b}.nc-list-title .no{color:#e29352}
+        .nc-clean-list { list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px; }
+        .nc-clean-list li { display:flex;align-items:flex-start;gap:8px;color:#536072;font-size:.82rem;line-height:1.45; }
+        .nc-clean-list li i { color:#c5955b;margin-top:2px; }
+
+        .nile-cruise-page #pricing-packages { padding:28px; }
+        .nc-price-duration { border:1px solid rgba(28,50,92,.10); border-radius:15px; overflow:hidden; margin-bottom:11px; background:#fff; }
+        .nc-price-duration summary {
+            list-style:none; cursor:pointer; display:grid;
+            grid-template-columns:minmax(150px,1.2fr) 1fr auto;
+            align-items:center; gap:14px;
+            padding:15px 17px;
+            background:linear-gradient(100deg,#16295a,#18516e);
+            color:#fff;
+        }
+        .nc-price-duration summary::-webkit-details-marker{display:none}
+        .nc-price-duration-name{font-family:'Playfair Display',serif;font-weight:800;font-size:1rem}
+        .nc-price-seasons{font-size:.76rem;opacity:.82;text-align:center}
+        .nc-price-from{color:#e5ad45;font-weight:800;white-space:nowrap}
+        .nc-price-body{padding:0;overflow-x:auto}
+        .nc-price-matrix{width:100%;min-width:620px;border-collapse:collapse}
+        .nc-price-matrix th{background:#d59c05;color:#142653;padding:11px 10px;text-align:center;font-size:.72rem;text-transform:uppercase;letter-spacing:.03em;border-right:1px solid rgba(255,255,255,.16)}
+        .nc-price-matrix td{padding:11px 10px;border-bottom:1px solid #edf0f3;text-align:center;font-size:.79rem;color:#34455f}
+        .nc-price-matrix td:first-child{font-weight:800;color:#1c325c;text-transform:uppercase}
+        .nc-price-matrix .price-value{color:#c58d39;font-family:'Playfair Display',serif;font-size:.92rem;font-weight:800}
+
+        .nile-cruise-page #cruise-facilities .facilities-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+        .nile-cruise-page #cruise-facilities .facility-card { min-height:48px;padding:11px 12px;border-radius:11px;background:#fbfcfe;font-size:.78rem;box-shadow:none; }
+
+        .nc-policy-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px; }
+        .nc-policy-card { padding:14px;border:1px solid rgba(28,50,92,.09);border-radius:12px;background:#fbfcfe; }
+        .nc-policy-card h4 { display:flex;align-items:center;gap:7px;margin:0 0 6px;color:#1c325c;font-size:.84rem;font-weight:800; }
+        .nc-policy-card h4 i{color:#c5955b}
+        .nc-policy-card .policy-copy{font-size:.75rem;color:#667386;line-height:1.5;margin:0}
+
+        .nile-cruise-page .faq-accordion { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }
+        .nile-cruise-page .faq-accordion .day-card { margin:0 !important;border-radius:10px; }
+        .nile-cruise-page .faq-accordion .day-header { padding:10px 12px;background:#fff;gap:9px; }
+        .nile-cruise-page .faq-accordion .day-number { width:28px !important;height:28px !important;min-width:28px !important;font-size:.9rem !important; }
+        .nile-cruise-page .faq-accordion .day-title { font-size:.78rem !important; }
+
+        .nile-cruise-page .related-grid { grid-template-columns:repeat(3,minmax(0,1fr));gap:12px; }
+        .nile-cruise-page .related-card { border-radius:13px;overflow:hidden;box-shadow:0 8px 20px rgba(28,50,92,.06); }
+        .nile-cruise-page .related-card img { height:120px; }
+        .nile-cruise-page .related-card-body { padding:12px; }
+        .nile-cruise-page .related-card-title { font-size:.82rem;line-height:1.35;min-height:2.2em; }
+        .nile-cruise-page .related-card .gold-btn { padding:7px 13px;font-size:.72rem; }
+
+        .nile-cruise-page .sidebar {
+            position:sticky;
+            top:96px;
+            border-radius:16px;
+            overflow:hidden;
+            box-shadow:0 18px 42px rgba(28,50,92,.13);
+        }
+        .nile-cruise-page .sidebar-header {
+            padding:19px 20px;
+            background:linear-gradient(135deg,#163f70,#0f5272);
+        }
+        .nile-cruise-page .sidebar-title { font-size:1.12rem;margin-bottom:4px; }
+        .nile-cruise-page .nc-sidebar-subtitle { margin:0 0 7px;color:rgba(255,255,255,.78);font-size:.72rem;line-height:1.45; }
+        .nile-cruise-page .sidebar-content { padding:18px; }
+        .nile-cruise-page .sidebar-price { margin-top:5px; }
+
+        html[data-theme='dark'] .nile-cruise-page .main-container { background:#101827; }
+        html[data-theme='dark'] .nile-cruise-page .content-section,
+        html[data-theme='dark'] .nile-cruise-page .nc-list-card,
+        html[data-theme='dark'] .nile-cruise-page .nc-policy-card,
+        html[data-theme='dark'] .nile-cruise-page #nile-cruise-details .detail-item { background:#1a233a;color:#e2e8f0;border-color:rgba(255,255,255,.1); }
+        html[data-theme='dark'] .nile-cruise-page .nc-price-duration { background:#1a233a;border-color:rgba(255,255,255,.1); }
+        html[data-theme='dark'] .nile-cruise-page .nc-price-matrix td { color:#d7e0ec;border-color:rgba(255,255,255,.08); }
+
+        @media(max-width:991.98px){
+            .nc-about-features{grid-template-columns:repeat(2,minmax(0,1fr))}
+            .nile-cruise-page #nile-cruise-details .cruise-details{grid-template-columns:repeat(2,minmax(0,1fr))}
+            .nile-cruise-page #cruise-facilities .facilities-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+            .nc-policy-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+        }
+        @media(max-width:767.98px){
+            .nile-cruise-page .main-container{padding:34px 0 80px}
+            .nile-cruise-page .content-section{padding:21px 17px;border-radius:15px;margin-bottom:13px}
+            .nile-cruise-page #nile-cruise-details .cruise-details{grid-template-columns:1fr}
+            .nile-cruise-page .nc-cabin-grid,.nile-cruise-page .nc-schedule-grid{grid-template-columns:1fr}
+            .nile-cruise-page .faq-accordion{grid-template-columns:1fr}
+            .nile-cruise-page .related-grid{grid-template-columns:1fr}
+            .nc-policy-grid{grid-template-columns:1fr}
+            .nc-price-duration summary{grid-template-columns:1fr auto;gap:6px}
+            .nc-price-seasons{text-align:left;grid-column:1/2}
+            .nc-price-from{grid-row:1/3;grid-column:2/3}
+        }
+        @media(max-width:520px){
+            .nc-about-features{grid-template-columns:1fr 1fr}
+            .nc-about-feature{font-size:.72rem}
+            .nile-cruise-page #cruise-facilities .facilities-grid{grid-template-columns:1fr}
+            .nile-cruise-page .nc-duration-tabs{grid-template-columns:1fr;border-radius:15px}
+            .nile-cruise-page .nc-duration-tab{border-radius:11px}
+        }
+
         @media (max-width: 576px) {
             .attractions-highlight-section {
                 padding: 24px 16px;
@@ -1939,6 +2256,14 @@
             <div class="hero-content">
                 <div class="hero-badges" aria-label="{{ __('Trip badges') }}">
                     <span class="hero-badge"><i class="la la-compass"></i> {{ $packageTypeText }}</span>
+                    @if ($package->package_type === 'nile_cruise')
+                        @if ($package->category?->display_name)
+                            <span class="hero-badge"><i class="la la-anchor"></i> {{ $package->category->display_name }}</span>
+                        @endif
+                        @if ($package->cruise?->cruise_class)
+                            <span class="hero-badge"><i class="la la-crown"></i> {{ $package->cruise->cruise_class }}</span>
+                        @endif
+                    @endif
                     @if ($package->is_best_seller)
                         <span class="hero-badge"><i class="la la-fire"></i> {{ __('Best Seller') }}</span>
                     @endif
@@ -2000,6 +2325,28 @@
                                 {!! $description !!}
                             @else
                                 <p class="empty-state">{{ __('No description added for this package yet.') }}</p>
+                            @endif
+
+                            @if($package->package_type === 'nile_cruise')
+                                @php
+                                    $aboutNcDetail = $package->nileCruiseDetail;
+                                    $aboutNcCruise = $package->cruise;
+                                    $aboutNcLanguages = collect((array) ($aboutNcDetail?->on_tour_languages ?? []))->filter();
+                                @endphp
+                                <div class="nc-about-features">
+                                    @if($aboutNcCruise?->cruise_class)
+                                        <div class="nc-about-feature"><i class="la la-ship"></i><span>{{ $aboutNcCruise->cruise_class }}</span></div>
+                                    @endif
+                                    @if($aboutNcDetail?->tour_style)
+                                        <div class="nc-about-feature"><i class="la la-user-friends"></i><span>{{ $aboutNcDetail->tour_style }}</span></div>
+                                    @endif
+                                    @if($aboutNcDetail?->all_inclusive)
+                                        <div class="nc-about-feature"><i class="la la-utensils"></i><span>{{ __('All Meals Included') }}</span></div>
+                                    @endif
+                                    @if($aboutNcLanguages->isNotEmpty())
+                                        <div class="nc-about-feature"><i class="la la-language"></i><span>{{ $aboutNcLanguages->take(3)->implode(' · ') }}</span></div>
+                                    @endif
+                                </div>
                             @endif
 
                             @if(!in_array($package->package_type, ['day_tour', 'travel_package', 'nile_cruise'], true))
@@ -2209,10 +2556,10 @@
                         };
                         $hasDynamicNileFacilities = $isNileCruisePackage && ($facilities->isNotEmpty() || $nileFacilityStats->isNotEmpty());
                     @endphp
-                    @if (($isNileCruisePackage && $hasDynamicNileFacilities) || (!$isNileCruisePackage && $facilities->count()))
+                    @if (!$isNileCruisePackage && $facilities->count())
                         <section class="content-section">
                             <h2 class="section-header">
-                                {{ $isNileCruisePackage ? __('Cruise Facilities') : __('Trip Facilities') }}
+                                {{ __('Trip Facilities') }}
                             </h2>
                             <div class="facilities-grid">
                                 @if($isNileCruisePackage)
@@ -2278,7 +2625,7 @@
                         </section>
                     @endif
 
-                    @if (!$isNileCruisePackage && $package->packageAttractions && $package->packageAttractions->count())
+                    @if ($package->packageAttractions && $package->packageAttractions->count())
                         <section class="content-section attractions-highlight-section">
                             <h2 class="attractions-highlight-title">{{ __('Places You\'ll Visit') }}</h2>
                             <div class="attractions-highlight-divider"></div>
@@ -2448,7 +2795,7 @@
                         </section>
                     @endif
 
-                    @if ($included->count() || $excluded->count())
+                    @if (!$isNileCruisePackage && ($included->count() || $excluded->count()))
                         <section class="content-section">
                             <h2 class="section-header">{{ __('What\'s Included') }}</h2>
                             <div class="row g-4">
@@ -2489,7 +2836,8 @@
                     @php
                         $groupTiersForDisplay = collect((array) ($package->group_pricing_tiers ?? []))
                             ->filter(fn($tier) => is_array($tier) && (($tier['price_per_person'] ?? null) !== null));
-                        $hasAnyStandardPricing = $prices->count() || $hasCategoryPricing || $pricingInformation || $priceFrom > 0 || $priceTo > 0 || $groupTiersForDisplay->isNotEmpty();
+                        $hasAccommodations = $package->tourPackageAccommodations && $package->tourPackageAccommodations->isNotEmpty();
+                        $hasAnyStandardPricing = $prices->count() || $hasCategoryPricing || $pricingInformation || $priceFrom > 0 || $priceTo > 0 || $groupTiersForDisplay->isNotEmpty() || $hasAccommodations;
                     @endphp
                     @if (!$isExtendedNileCruise && $hasAnyStandardPricing)
                         <section class="content-section pricing-showcase" id="pricing-section">
@@ -2504,7 +2852,7 @@
                                         @php
                                             $tierMin = $tier['min'] ?? null;
                                             $tierMax = $tier['max'] ?? null;
-                                            $tierLabel = trim((string) ($tier['label'] ?? ''));
+                                            $tierLabel = trim((string) ($tier['label'] ?? $tier['title'] ?? ''));
                                             $personsLabel = $tierMin && $tierMax
                                                 ? ($tierMin == $tierMax ? $tierMin . ' ' . __('Pax') : $tierMin . '–' . $tierMax . ' ' . __('Pax'))
                                                 : ($tierMin ? $tierMin . '+ ' . __('Pax') : ($tierMax ? __('Up to') . ' ' . $tierMax . ' ' . __('Pax') : __('Group')));
@@ -2520,6 +2868,82 @@
                                             </div>
                                         </div>
                                     @endforeach
+                                </div>
+                            @endif
+
+                            @if($hasAccommodations)
+                                <div class="tour-accommodations-showcase mt-4">
+                                    <h3 class="fw-bold mb-3" style="color: var(--primary-navy, #1c325c); font-family: 'Playfair Display', serif;">{{ __('Accommodation Tiers & Season Pricing') }}</h3>
+                                    <div class="accordion" id="accPricingAccordion">
+                                        @foreach($package->tourPackageAccommodations as $accIndex => $acc)
+                                            <div class="accordion-item mb-3 border rounded shadow-sm" style="border-color: rgba(28, 50, 92, 0.12) !important;">
+                                                <h2 class="accordion-header" id="accHeading{{ $acc->id }}">
+                                                    <button class="accordion-button {{ $accIndex > 0 ? 'collapsed' : '' }} fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#accCollapse{{ $acc->id }}" style="color: var(--primary-navy, #1c325c);">
+                                                        <i class="la la-building me-2" style="color: var(--rich-gold, #c5955b);"></i> {{ $acc->name }}
+                                                        @if($acc->description)
+                                                            <small class="text-muted ms-2">({{ $acc->description }})</small>
+                                                        @endif
+                                                    </button>
+                                                </h2>
+                                                <div id="accCollapse{{ $acc->id }}" class="accordion-collapse collapse {{ $accIndex === 0 ? 'show' : '' }}" data-bs-parent="#accPricingAccordion">
+                                                    <div class="accordion-body">
+                                                        @if($acc->hotels->isNotEmpty())
+                                                            <div class="mb-4 p-3 rounded" style="background: var(--pearl-luxury, #faf8f3); border: 1px solid rgba(28, 50, 92, 0.08);">
+                                                                <h5 class="fw-bold mb-2" style="color: var(--primary-navy, #1c325c);"><i class="la la-hotel" style="color: var(--rich-gold, #c5955b);"></i> {{ __('Assigned Hotels') }}</h5>
+                                                                <div class="row g-2">
+                                                                    @foreach($acc->hotels as $hotel)
+                                                                        <div class="col-md-6 col-lg-4">
+                                                                            <div class="p-2 border rounded bg-white">
+                                                                                <span class="badge mb-1" style="background: var(--primary-navy, #1c325c); color: #fff;">{{ $hotel->city_name ?: __('Hotel') }}</span>
+                                                                                <strong class="d-block text-dark">{{ $hotel->hotel_name }}</strong>
+                                                                                @if($hotel->star_rating)
+                                                                                    <div class="text-warning small">{{ str_repeat('★', $hotel->star_rating) }}</div>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                        @endif
+
+                                                        @if($acc->seasons->isNotEmpty())
+                                                            <div class="price-table-wrap">
+                                                                <table class="price-table">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>{{ __('Season / Period') }}</th>
+                                                                            <th>{{ __('Occupancy / Room Type') }}</th>
+                                                                            <th>{{ __('Price per Person') }}</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        @foreach($acc->seasons as $season)
+                                                                            @foreach($season->items as $item)
+                                                                                <tr>
+                                                                                    @if($loop->first)
+                                                                                        <td rowspan="{{ $season->items->count() }}" class="fw-bold" style="background: var(--pearl-luxury, #faf8f3);">
+                                                                                            {{ $season->display_season_name }}
+                                                                                            @if($season->date_from || $season->date_to)
+                                                                                                <div class="small text-muted fw-normal">
+                                                                                                    {{ $season->date_from?->format('M d') }} - {{ $season->date_to?->format('M d') }}
+                                                                                                </div>
+                                                                                            @endif
+                                                                                        </td>
+                                                                                    @endif
+                                                                                    <td>{{ $item->display_label }}</td>
+                                                                                    <td><strong style="color: var(--rich-gold, #c5955b); font-size: 1.1rem;">{{ $currencySymbol }}{{ number_format((float)$item->price, 0) }}</strong></td>
+                                                                                </tr>
+                                                                            @endforeach
+                                                                        @endforeach
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 </div>
                             @endif
 
@@ -2641,7 +3065,7 @@
                         $childrenPolicy = $package->getTranslation('children_policy');
                         $pickupPolicy = $package->getTranslation('pickup_policy');
                     @endphp
-                    @if ($cancellationPolicy || $termsConditions || $childrenPolicy || $pickupPolicy)
+                    @if (($cancellationPolicy || $termsConditions || $childrenPolicy || $pickupPolicy) && !$isNileCruisePackage)
                         <section class="content-section">
                             <h2 class="section-header">{{ __('Important Information') }}</h2>
 
@@ -2793,7 +3217,10 @@
                 <div class="col-lg-4 d-none d-lg-block">
                     <div class="sidebar" id="reserve">
                         <div class="sidebar-header">
-                            <h3 class="sidebar-title">{{ __('Reserve Your Journey') }}</h3>
+                            <h3 class="sidebar-title">{{ $package->package_type === 'nile_cruise' ? __('Inquire / Book This Cruise') : __('Reserve Your Journey') }}</h3>
+                            @if($package->package_type === 'nile_cruise')
+                                <p class="nc-sidebar-subtitle">{{ __('Fill out the form and our travel team will get back to you shortly.') }}</p>
+                            @endif
                             @if ($priceText)
                                 <div class="sidebar-price"><span class="item">{{ $priceText }}</span></div>
                             @else

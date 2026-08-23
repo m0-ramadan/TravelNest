@@ -629,7 +629,7 @@ class NileCruisePackageService
         }
     }
 
-    private function recalculateStartingPrice(Package $package): void
+    public function recalculateStartingPrice(Package $package): void
     {
         $durationPrices = $package->nileCruiseDurations()
             ->where('is_active', true)

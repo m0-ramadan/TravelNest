@@ -255,6 +255,16 @@ class Package extends Model
         return $this->hasOne(TourPackageDetail::class);
     }
 
+    public function tourPackageAccommodations(): HasMany
+    {
+        return $this->hasMany(TourPackageAccommodation::class)->orderBy('sort_order');
+    }
+
+    public function tourPackageSeasons(): HasMany
+    {
+        return $this->hasMany(TourPackageSeason::class)->orderBy('sort_order');
+    }
+
     public function scopeNileCruises($query)
     {
         return $query->where('package_type', 'nile_cruise');
@@ -541,6 +551,29 @@ class Package extends Model
 
     public function getGroupPricingTiersAttribute(): array
     {
+        $raw = $this->attributes['group_pricing_tiers'] ?? null;
+        if (!empty($raw)) {
+            $decoded = is_array($raw) ? $raw : json_decode($raw, true);
+            if (is_array($decoded) && count($decoded) > 0) {
+                return array_map(function ($item) {
+                    return [
+                        'id' => $item['id'] ?? ($item['persons_count'] ?? 1) . '_persons',
+                        'title' => $item['title'] ?? ($item['label'] ?? __('Group Tier')),
+                        'persons_count' => (int) ($item['persons_count'] ?? $item['min'] ?? 1),
+                        'min' => (int) ($item['min'] ?? $item['persons_count'] ?? 1),
+                        'max' => isset($item['max']) ? (int) $item['max'] : null,
+                        'persons_label' => $item['persons_label'] ?? ($item['title'] ?? ''),
+                        'price_per_person' => (float) ($item['price_per_person'] ?? $item['price'] ?? 0),
+                        'badge' => $item['badge'] ?? $item['badge_label'] ?? null,
+                        'is_popular' => !empty($item['is_popular']) || ($item['badge'] ?? '') === __('♥ Most Popular'),
+                        'is_best_value' => !empty($item['is_best_value']) || ($item['badge'] ?? '') === __('🏆 Best Value'),
+                        'is_featured' => !empty($item['is_featured']),
+                        'is_variable' => !empty($item['is_variable']),
+                    ];
+                }, $decoded);
+            }
+        }
+
         $priceFrom = (float) ($this->price_from ?: ($this->start_from_price ?: ($this->adult_price ?: 150)));
 
         $p1 = $this->price_1_person !== null ? (float) $this->price_1_person : round($priceFrom * 1.3, 2);
@@ -555,66 +588,84 @@ class Package extends Model
                 'id' => '1_person',
                 'title' => __('Solo Traveler'),
                 'persons_count' => 1,
+                'min' => 1,
+                'max' => 1,
                 'persons_label' => __('1 Person'),
                 'price_per_person' => $p1,
                 'badge' => null,
                 'is_popular' => false,
                 'is_best_value' => false,
+                'is_featured' => false,
                 'is_variable' => false,
             ],
             [
                 'id' => '2_persons',
                 'title' => __("Couple's Journey"),
                 'persons_count' => 2,
+                'min' => 2,
+                'max' => 2,
                 'persons_label' => __('2 Persons'),
                 'price_per_person' => $p2,
                 'badge' => __('♥ Most Popular'),
                 'is_popular' => true,
                 'is_best_value' => false,
+                'is_featured' => true,
                 'is_variable' => false,
             ],
             [
                 'id' => '3_persons',
                 'title' => __('Small Group'),
                 'persons_count' => 3,
+                'min' => 3,
+                'max' => 3,
                 'persons_label' => __('3 Persons'),
                 'price_per_person' => $p3,
                 'badge' => null,
                 'is_popular' => false,
                 'is_best_value' => false,
+                'is_featured' => false,
                 'is_variable' => false,
             ],
             [
                 'id' => '4_persons',
                 'title' => __('Family Adventure'),
                 'persons_count' => 4,
+                'min' => 4,
+                'max' => 4,
                 'persons_label' => __('4 Persons'),
                 'price_per_person' => $p4,
                 'badge' => null,
                 'is_popular' => false,
                 'is_best_value' => false,
+                'is_featured' => false,
                 'is_variable' => false,
             ],
             [
                 'id' => '5_persons',
                 'title' => __('Extended Group'),
                 'persons_count' => 5,
+                'min' => 5,
+                'max' => 5,
                 'persons_label' => __('5 Persons'),
                 'price_per_person' => $p5,
                 'badge' => null,
                 'is_popular' => false,
                 'is_best_value' => false,
+                'is_featured' => false,
                 'is_variable' => false,
             ],
             [
                 'id' => '6_plus_persons',
                 'title' => __('Large Group'),
                 'persons_count' => 6,
+                'min' => 6,
+                'max' => 99,
                 'persons_label' => __('6+ Persons'),
                 'price_per_person' => $p6,
                 'badge' => __('🏆 Best Value'),
                 'is_popular' => false,
                 'is_best_value' => true,
+                'is_featured' => true,
                 'is_variable' => true,
             ],
         ];

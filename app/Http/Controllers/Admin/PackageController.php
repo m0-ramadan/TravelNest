@@ -104,6 +104,7 @@ class PackageController extends Controller
             $this->syncPackageCities($package, $request);
             app(PackageTypeContentService::class)->syncFromRequest($package, $request);
             app(NileCruisePackageService::class)->syncFromRequest($package, $request);
+            app(\App\Services\PackagePricingService::class)->recalculate($package);
         });
 
         return redirect()->route('admin.packages.index')->with('success', 'تم إنشاء الرحلة بنجاح.');
@@ -132,6 +133,8 @@ class PackageController extends Controller
             'nileCruiseAddons.currency',
             'addons.currency',
             'tourPackageDetail',
+            'tourPackageAccommodations.seasons.items.currency',
+            'tourPackageAccommodations.hotels',
             'tags',
             'nileCruiseDurations.currency',
             'nileCruiseDurations.departureCity',
@@ -162,6 +165,8 @@ class PackageController extends Controller
             'nileCruiseAddons.currency',
             'addons.currency',
             'tourPackageDetail',
+            'tourPackageAccommodations.seasons.items.currency',
+            'tourPackageAccommodations.hotels',
             'tags',
             'nileCruiseDurations.itineraryDays.activities.attraction',
             'nileCruiseDurations.seasonPrices.items.cabin',
@@ -199,6 +204,7 @@ class PackageController extends Controller
             $this->syncPackageCities($package, $request);
             app(PackageTypeContentService::class)->syncFromRequest($package, $request);
             app(NileCruisePackageService::class)->syncFromRequest($package, $request);
+            app(\App\Services\PackagePricingService::class)->recalculate($package);
         });
 
         return $this->success('admin.packages.index', 'تم تعديل الرحلة بنجاح.');
