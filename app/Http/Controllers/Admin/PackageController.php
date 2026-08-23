@@ -596,7 +596,7 @@ class PackageController extends Controller
 
             'tour_city_ids' => ['nullable', 'array'],
             'tour_city_ids.*' => ['integer', 'distinct', 'exists:cities,id'],
-            'highlights' => ['nullable', 'array'],
+            'highlights' => ['nullable'],
             'highlights.*.title' => ['nullable', 'string', 'max:500'],
             'tags' => ['nullable'],
 
@@ -770,37 +770,37 @@ class PackageController extends Controller
             $infantMaxAge = (int) $request->input('infant_max_age', 1);
 
             if ($infantMaxAge >= $childMinAge) {
-                $validator->errors()->add('infant_max_age', 'يجب أن تنتهي فئة الرضع قبل بداية فئة الأطفال.');
+                $validator->errors()->add('infant_max_age', __('يجب أن يكون الحد الأعلى لعمر الرضع أقل من الحد الأدنى لعمر الأطفال.'));
             }
 
             if ($childMaxAge >= $adultMinAge) {
-                $validator->errors()->add('child_max_age', 'يجب أن تنتهي فئة الأطفال قبل بداية فئة البالغين.');
+                $validator->errors()->add('child_max_age', __('يجب أن يكون الحد الأعلى لعمر الأطفال أقل من الحد الأدنى لعمر البالغين.'));
             }
 
             if ($adultMinAge <= $infantMaxAge) {
-                $validator->errors()->add('adult_min_age', 'حد البالغين يجب أن يكون أكبر من الحد الأعلى للرضع.');
+                $validator->errors()->add('adult_min_age', __('حد البالغين يجب أن يكون أكبر من الحد الأعلى للرضع.'));
             }
 
             $packageType = $request->input('package_type');
 
             if ($packageType === 'day_tour') {
                 if ($request->input('duration_type') !== 'hours') {
-                    $validator->errors()->add('duration_type', 'Day Trip duration must be measured in hours.');
+                    $validator->errors()->add('duration_type', __('مدة الرحلة اليومية يجب أن تحسب بالساعات.'));
                 }
                 if ((int) $request->input('duration_hours', 0) < 1) {
-                    $validator->errors()->add('duration_hours', 'Day Trip duration in hours is required.');
+                    $validator->errors()->add('duration_hours', __('يرجى تحديد مدة الرحلة اليومية بالساعات (ساعة واحدة على الأقل).'));
                 }
             }
 
             if ($packageType === 'travel_package') {
                 if ($request->input('duration_type') !== 'days') {
-                    $validator->errors()->add('duration_type', 'Tour Package duration must use days and nights.');
+                    $validator->errors()->add('duration_type', __('مدة الباقة السياحية يجب أن تحسب بالأيام والليالي.'));
                 }
                 if ((int) $request->input('duration_days', 0) < 1) {
-                    $validator->errors()->add('duration_days', 'Tour Package days are required.');
+                    $validator->errors()->add('duration_days', __('يرجى تحديد عدد أيام الرحلة (يوم واحد على الأقل).'));
                 }
                 if ((int) $request->input('duration_nights', 0) < 0) {
-                    $validator->errors()->add('duration_nights', 'Tour Package nights cannot be negative.');
+                    $validator->errors()->add('duration_nights', __('عدد الليالي لا يمكن أن يكون بالسالب.'));
                 }
             }
             $nileCruiseTypeId = $request->input('nile_cruise_type_id');
@@ -808,23 +808,23 @@ class PackageController extends Controller
 
             if ($packageType === 'nile_cruise') {
                 if (empty($nileCruiseTypeId)) {
-                    $validator->errors()->add('nile_cruise_type_id', 'Nile Cruise Type is required when package type is Nile Cruise.');
+                    $validator->errors()->add('nile_cruise_type_id', __('يرجى اختيار نوع نايل كروز (Nile Cruise Type).'));
                 } else {
                     $cruiseType = \App\Models\NileCruiseType::find($nileCruiseTypeId);
                     if ($cruiseType) {
                         $hasCategories = $cruiseType->categories()->count() > 0;
                         if ($hasCategories) {
                             if (empty($nileCruiseCategoryId)) {
-                                $validator->errors()->add('nile_cruise_category_id', 'Nile Cruise Category is required for ' . ($cruiseType->display_name ?: 'this cruise type') . '.');
+                                $validator->errors()->add('nile_cruise_category_id', __('يرجى اختيار فئة نايل كروز (Nile Cruise Category) لهذا النوع.'));
                             } else {
                                 $category = \App\Models\NileCruiseCategory::find($nileCruiseCategoryId);
                                 if (!$category || (int) $category->nile_cruise_type_id !== (int) $cruiseType->id) {
-                                    $validator->errors()->add('nile_cruise_category_id', 'The selected Nile Cruise Category does not belong to the selected Nile Cruise Type.');
+                                    $validator->errors()->add('nile_cruise_category_id', __('فئة نايل كروز المختارة لا تنتمي لنوع نايل كروز المختار.'));
                                 }
                             }
                         } else {
                             if (!empty($nileCruiseCategoryId)) {
-                                $validator->errors()->add('nile_cruise_category_id', 'Nile Cruise Category should be empty for this cruise type.');
+                                $validator->errors()->add('nile_cruise_category_id', __('فئة نايل كروز يجب أن تكون فارغة لهذا النوع.'));
                             }
                         }
                     }

@@ -2407,17 +2407,37 @@
                                                 @if ($package->package_type === 'travel_package' && $day->display_transport_notes)
                                                     <p><strong>{{ __('Transport:') }}</strong> {{ $day->display_transport_notes }}</p>
                                                 @endif
-                                                @if (!$isDayTourActive && ($day->meals_breakfast || $day->meals_lunch || $day->meals_dinner))
-                                                    <div class="meals-row">
-                                                        @if ($day->meals_breakfast)
-                                                            <span class="meal-badge">{{ __('Breakfast') }}</span>
-                                                        @endif
-                                                        @if ($day->meals_lunch)
-                                                            <span class="meal-badge">{{ __('Lunch') }}</span>
-                                                        @endif
-                                                        @if ($day->meals_dinner)
-                                                            <span class="meal-badge">{{ __('Dinner') }}</span>
-                                                        @endif
+                                                @php
+                                                    $dayMeals = [];
+                                                    if (!empty($day->meals) && (is_array($day->meals) || $day->meals instanceof \Illuminate\Support\Collection)) {
+                                                        $dayMeals = is_array($day->meals) ? $day->meals : $day->meals->toArray();
+                                                    }
+                                                    if (!empty($day->meals_breakfast) && !in_array('breakfast', $dayMeals)) $dayMeals[] = 'breakfast';
+                                                    if (!empty($day->meals_lunch) && !in_array('lunch', $dayMeals)) $dayMeals[] = 'lunch';
+                                                    if (!empty($day->meals_dinner) && !in_array('dinner', $dayMeals)) $dayMeals[] = 'dinner';
+                                                @endphp
+                                                @if (!empty($dayMeals))
+                                                    <div class="meals-included-card mt-3 p-3 rounded-3" style="background-color: #f8f6f0; border-left: 4px solid #c9974c;">
+                                                        <div class="fw-bold mb-2" style="color: #1e293b; font-size: 0.9rem;">{{ __('Meals Included') }}</div>
+                                                        <div class="d-flex flex-wrap gap-2">
+                                                            @foreach ($dayMeals as $m)
+                                                                @php
+                                                                    $mLower = strtolower((string)$m);
+                                                                    if (in_array($mLower, ['breakfast', 'إفطار', 'افطار'])) {
+                                                                        $mealText = __('Breakfast');
+                                                                    } elseif (in_array($mLower, ['lunch', 'غداء'])) {
+                                                                        $mealText = __('Lunch');
+                                                                    } elseif (in_array($mLower, ['dinner', 'عشاء'])) {
+                                                                        $mealText = __('Dinner');
+                                                                    } else {
+                                                                        $mealText = __(ucfirst($mLower));
+                                                                    }
+                                                                @endphp
+                                                                <span class="badge px-3 py-2 rounded-pill fw-medium" style="background-color: #c9974c; color: #ffffff; font-size: 0.85rem; border: none;">
+                                                                    {{ $mealText }}
+                                                                </span>
+                                                            @endforeach
+                                                        </div>
                                                     </div>
                                                 @endif
                                             </div>

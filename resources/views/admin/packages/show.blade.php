@@ -386,17 +386,39 @@
 
                             <div class="info-value mb-2">{{ adminTrans($day->description ?? '') ?: '-' }}</div>
 
-                            <div>
-                                @if ($day->meals_breakfast)
-                                    <span class="badge-soft">Breakfast</span>
-                                @endif
-                                @if ($day->meals_lunch)
-                                    <span class="badge-soft">Lunch</span>
-                                @endif
-                                @if ($day->meals_dinner)
-                                    <span class="badge-soft">Dinner</span>
-                                @endif
-                            </div>
+                            @php
+                                $dayMeals = [];
+                                if (!empty($day->meals) && (is_array($day->meals) || $day->meals instanceof \Illuminate\Support\Collection)) {
+                                    $dayMeals = is_array($day->meals) ? $day->meals : $day->meals->toArray();
+                                }
+                                if (!empty($day->meals_breakfast) && !in_array('breakfast', $dayMeals)) $dayMeals[] = 'breakfast';
+                                if (!empty($day->meals_lunch) && !in_array('lunch', $dayMeals)) $dayMeals[] = 'lunch';
+                                if (!empty($day->meals_dinner) && !in_array('dinner', $dayMeals)) $dayMeals[] = 'dinner';
+                            @endphp
+                            @if (!empty($dayMeals))
+                                <div class="meals-included-card mt-3 p-3 rounded-3" style="background-color: #f8f6f0; border-left: 4px solid #c9974c;">
+                                    <div class="fw-bold mb-2" style="color: #1e293b; font-size: 0.9rem;">{{ admin_t('Meals Included') }}</div>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @foreach ($dayMeals as $m)
+                                            @php
+                                                $mLower = strtolower((string)$m);
+                                                if (in_array($mLower, ['breakfast', 'إفطار', 'افطار'])) {
+                                                    $mealText = admin_t('Breakfast');
+                                                } elseif (in_array($mLower, ['lunch', 'غداء'])) {
+                                                    $mealText = admin_t('Lunch');
+                                                } elseif (in_array($mLower, ['dinner', 'عشاء'])) {
+                                                    $mealText = admin_t('Dinner');
+                                                } else {
+                                                    $mealText = admin_t(ucfirst($mLower));
+                                                }
+                                            @endphp
+                                            <span class="badge px-3 py-2 rounded-pill fw-medium" style="background-color: #c9974c; color: #ffffff; font-size: 0.85rem; border: none;">
+                                                {{ $mealText }}
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     @endforeach
                 @else

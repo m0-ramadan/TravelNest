@@ -57,13 +57,19 @@
         'destination_id' => 1,
         'primary_country_id' => 1,
         'package_type' => 1,
+        'nile_cruise_type_id' => 1,
+        'nile_cruise_category_id' => 1,
         'tour_type' => 1,
         'currency_id' => 1,
         'booking_mode' => 1,
+
         'short_description' => 2,
         'description' => 2,
         'featured_image' => 2,
         'gallery_images' => 2,
+        'experience.brochure' => 2,
+        'experience.og_image' => 2,
+
         'duration_type' => 3,
         'duration_days' => 3,
         'duration_nights' => 3,
@@ -76,7 +82,10 @@
         'destinations_text' => 3,
         'location_summary' => 3,
         'itinerary' => 3,
+        'nile_cruise' => 3,
+
         'attraction_ids' => 4,
+        'facilities' => 4,
         'included' => 4,
         'excluded' => 4,
         'adult_price' => 4,
@@ -95,6 +104,9 @@
         'terms_conditions' => 4,
         'prices' => 4,
         'faq_json' => 4,
+        'experience.addons' => 4,
+        'experience.group_pricing_tiers' => 4,
+
         'min_participants' => 5,
         'max_participants' => 5,
         'booking_lead_days' => 5,
@@ -115,6 +127,7 @@
     ];
 
     $initialStep = 1;
+    $errorSteps = [];
 
     if ($viewErrors->any()) {
         foreach ($viewErrors->keys() as $errorKey) {
@@ -128,8 +141,12 @@
             }
 
             if ($matchedStep !== null) {
-                $initialStep = $matchedStep;
-                break;
+                $errorSteps[$matchedStep] = true;
+                if ($initialStep === 1) {
+                    $initialStep = $matchedStep;
+                }
+            } else {
+                $errorSteps[1] = true;
             }
         }
     }
@@ -1527,10 +1544,16 @@
             <div class="wizard-stepper">
                 <div class="wizard-steps" id="wizardSteps">
                     @foreach ($steps as $number => $step)
-                        <button type="button" class="wizard-step" data-step-trigger="{{ $number }}">
-                            <span class="wizard-step-badge">{{ $number }}</span>
+                        @php $hasStepError = !empty($errorSteps[$number]); @endphp
+                        <button type="button" class="wizard-step {{ $hasStepError ? 'border-danger' : '' }}" data-step-trigger="{{ $number }}">
+                            <span class="wizard-step-badge {{ $hasStepError ? 'bg-danger text-white' : '' }}">
+                                @if($hasStepError) <i class="ti ti-alert-triangle"></i> @else {{ $number }} @endif
+                            </span>
                             <span>
-                                <span class="wizard-step-title">{{ $step['title'] }}</span>
+                                <span class="wizard-step-title {{ $hasStepError ? 'text-danger fw-bold' : '' }}">
+                                    {{ $step['title'] }}
+                                    @if($hasStepError) <span class="badge bg-danger-subtle text-danger ms-1" style="font-size:10px;">{{ admin_t('خطأ') }}</span> @endif
+                                </span>
                                 <span class="wizard-step-description">{{ $step['description'] }}</span>
                             </span>
                         </button>
@@ -1547,6 +1570,22 @@
             </div>
 
             <div class="wizard-body">
+                @if ($viewErrors->any())
+                    <div class="alert alert-danger mx-4 mt-3 mb-3 shadow-sm" style="border-radius: 16px; background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.5); color: #ffffff;">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="ti ti-alert-triangle-filled text-danger fs-3"></i>
+                            <h5 class="mb-0 text-white fw-bold">
+                                {{ admin_t('تعذر حفظ الرحلة! يرجى مراجعة الأخطاء الموضحة أدناه واستكمال الحقول المطلوب:') }}
+                            </h5>
+                        </div>
+                        <ul class="mb-0 ps-4" style="line-height: 1.8;">
+                            @foreach ($viewErrors->all() as $error)
+                                <li style="font-weight: 600;">{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <form id="packageWizardForm" action="{{ route('admin.packages.store') }}" method="POST"
                     enctype="multipart/form-data">
                     @csrf
@@ -3454,9 +3493,23 @@
 
             function validateStep(step) {
                 if (!form) return true;
-                const requiredFields = requiredFieldsByStep[step] || [];
                 const panel = document.querySelector(`[data-step-panel="${step}"]`);
                 if (!panel) return true;
+
+                let requiredFields = requiredFieldsByStep[step] ? [...requiredFieldsByStep[step]] : [];
+                const packageType = document.getElementById('package_type')?.value || '';
+
+                if (step === 1) {
+                    if (packageType === 'nile_cruise') {
+                        requiredFields.push('nile_cruise_type_id');
+                    }
+                } else if (step === 3) {
+                    if (packageType === 'day_tour') {
+                        requiredFields.push('duration_hours');
+                    } else if (packageType === 'travel_package') {
+                        requiredFields.push('duration_days');
+                    }
+                }
 
                 let isValid = true;
                 let firstInvalid = null;
@@ -4408,13 +4461,18 @@
             });
 
             form?.addEventListener('submit', function(event) {
-                if (currentStep !== totalSteps) {
-                    event.preventDefault();
-                    return;
+                let firstInvalidStep = null;
+                for (let s = 1; s <= totalSteps; s++) {
+                    if (!validateStep(s)) {
+                        if (!firstInvalidStep) firstInvalidStep = s;
+                    }
                 }
 
-                if (!validateStep(currentStep)) {
+                if (firstInvalidStep !== null) {
                     event.preventDefault();
+                    showStep(firstInvalidStep);
+                    focusFirstInvalid(firstInvalidStep);
+                    notify(texts.requiredMessage + ` (${stepTitles[firstInvalidStep - 1] || ''})`, 'error');
                     return;
                 }
 

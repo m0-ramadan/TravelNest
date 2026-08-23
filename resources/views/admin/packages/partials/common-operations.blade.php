@@ -46,7 +46,7 @@
             </div>
             <div>
                 <label class="form-label">{{ admin_t('Tour timezone') }}</label>
-                <input type="text" class="form-control" name="experience[tour_timezone]" value="{{ old('experience.tour_timezone',$opsPackage?->tour_timezone ?: ($opsLegacyNile?->timezone ?: 'Africa/Cairo')) }}" placeholder="Africa/Cairo">
+                <input type="text" class="form-control" name="experience[tour_timezone]" value="{{ old('experience.tour_timezone', $opsPackage?->tour_timezone ?? ($opsLegacyNile?->timezone ?? 'Africa/Cairo')) }}" placeholder="Africa/Cairo">
             </div>
         </div>
     </div>
@@ -84,8 +84,8 @@
     </div>
     <div class="section-body">
         <div class="fields-grid two-up">
-            <div><label class="form-label">{{ admin_t('Deposit Policy') }}</label><select class="form-select" name="experience[deposit_policy]">@php $dep=old('experience.deposit_policy',$opsPackage?->deposit_policy ?: ($opsLegacyNile?->deposit_policy ?: 'inherit')); @endphp<option value="inherit" {{ $dep==='inherit'?'selected':'' }}>Inherit</option><option value="required" {{ $dep==='required'?'selected':'' }}>Required</option><option value="not_required" {{ $dep==='not_required'?'selected':'' }}>Not required</option></select></div>
-            <div><label class="form-label">{{ admin_t('Deposit Type') }}</label><select class="form-select" name="experience[deposit_type]">@php $dept=old('experience.deposit_type',$opsPackage?->deposit_type ?: $opsLegacyNile?->deposit_type); @endphp<option value="">-</option><option value="percent" {{ $dept==='percent'?'selected':'' }}>Percent</option><option value="fixed" {{ $dept==='fixed'?'selected':'' }}>Fixed</option></select></div>
+            <div><label class="form-label">{{ admin_t('Deposit Policy') }}</label><select class="form-select" name="experience[deposit_policy]">@php $dep=old('experience.deposit_policy', $opsPackage?->deposit_policy ?? ($opsLegacyNile?->deposit_policy ?? 'inherit')); @endphp<option value="inherit" {{ $dep==='inherit'?'selected':'' }}>Inherit</option><option value="required" {{ $dep==='required'?'selected':'' }}>Required</option><option value="not_required" {{ $dep==='not_required'?'selected':'' }}>Not required</option></select></div>
+            <div><label class="form-label">{{ admin_t('Deposit Type') }}</label><select class="form-select" name="experience[deposit_type]">@php $dept=old('experience.deposit_type', $opsPackage?->deposit_type ?? $opsLegacyNile?->deposit_type); @endphp<option value="">-</option><option value="percent" {{ $dept==='percent'?'selected':'' }}>Percent</option><option value="fixed" {{ $dept==='fixed'?'selected':'' }}>Fixed</option></select></div>
             <div><label class="form-label">{{ admin_t('Deposit Value') }}</label><input type="number" min="0" step="0.01" class="form-control" name="experience[deposit_value]" value="{{ old('experience.deposit_value',$opsPackage?->deposit_value ?? $opsLegacyNile?->deposit_value) }}"></div>
             <div><label class="form-label">{{ admin_t('Allowed Payment Methods') }}</label><div class="d-flex flex-wrap gap-3 mt-2">@foreach($paymentMethods??collect() as $pm)<label><input type="checkbox" name="experience[allowed_payment_method_ids][]" value="{{ $pm->id }}" {{ in_array((int)$pm->id,$allowedPaymentIds,true)?'checked':'' }}> {{ $pm->name??('Payment #'.$pm->id) }}</label>@endforeach</div></div>
         </div>
