@@ -12,7 +12,7 @@
             </div>
         </div>
 
-        @if($package->nileCruiseDurations && $package->nileCruiseDurations->isNotEmpty())
+        @if(isset($package) && $package->nileCruiseDurations && $package->nileCruiseDurations->isNotEmpty())
             <div class="mt-3 pt-3 border-top">
                 <div class="row g-2">
                     @foreach($package->nileCruiseDurations as $dur)

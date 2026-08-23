@@ -12,7 +12,7 @@
 
         <div id="accommodationsWrapper" class="stack-list">
             @php
-                $accommodations = old('tour_package_accommodations', $package->tourPackageAccommodations ?? []);
+                $accommodations = old('tour_package_accommodations', isset($package) ? ($package->tourPackageAccommodations ?? []) : []);
             @endphp
             @forelse ($accommodations as $accIndex => $acc)
                 @php

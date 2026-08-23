@@ -12,7 +12,7 @@
 
         <div id="groupTiersWrapper" class="stack-list">
             @php
-                $tiers = old('experience.group_pricing_tiers', $package->group_pricing_tiers ?? []);
+                $tiers = old('experience.group_pricing_tiers', isset($package) ? ($package->group_pricing_tiers ?? []) : []);
             @endphp
             @foreach ((array)$tiers as $tierIndex => $tier)
                 <div class="repeat-box group-tier-row mb-3 p-3 border rounded bg-white">
