@@ -285,7 +285,12 @@ abstract class BaseWebsiteController extends Controller
             ),
             'highlights' => $highlights,
             'button_text' => $buttonText ?: $this->packageButtonText($package),
-            'type_label' => $this->typeLabel((string) $package->package_type),
+            'type_label' => match ((string) $package->package_type) {
+                'day_tour' => __('Day Trip'),
+                'travel_package' => __('Tour Package'),
+                'nile_cruise' => __('Nile Cruise'),
+                default => $this->typeLabel((string) $package->package_type),
+            },
         ];
     }
 

@@ -49,6 +49,22 @@ class TripController extends BaseWebsiteController
                 'prices.currency',
                 'packageAttractions.attraction.city',
                 'cruise',
+                'cities',
+                'tags',
+                'addons.currency',
+                'tourPackageDetail',
+                'nileCruiseType',
+                'nileCruiseCategory',
+                'nileCruiseDetail',
+                'nileCruiseSchedules.departureCity',
+                'nileCruiseSchedules.arrivalCity',
+                'nileCruiseCabins',
+                'nileCruiseDurations.currency',
+                'nileCruiseDurations.departureCity',
+                'nileCruiseDurations.arrivalCity',
+                'nileCruiseDurations.itineraryDays.activities.attraction',
+                'nileCruiseDurations.seasonPrices.currency',
+                'nileCruiseDurations.seasonPrices.items.cabin',
                 'reviews',
                 'testimonials',
             ])
@@ -63,7 +79,12 @@ class TripController extends BaseWebsiteController
         $breadcrumbTitle = $this->translated(
             $package->getRawOriginal('breadcrumb_title') ?? $package->breadcrumb_title
         ) ?: $title;
-        $packageTypeText = $this->typeLabel((string) $package->package_type);
+        $packageTypeText = match ((string) $package->package_type) {
+            'day_tour' => __('Day Trip'),
+            'travel_package' => __('Tour Package'),
+            'nile_cruise' => __('Nile Cruise'),
+            default => $this->typeLabel((string) $package->package_type),
+        };
         $bookingModeText = match ($package->booking_mode) {
             'instant' => __('Instant Confirmation'),
             'request' => __('On Request'),
@@ -136,7 +157,10 @@ class TripController extends BaseWebsiteController
             $gallery[] = $heroImage;
         }
 
-        $isDayTour = $package->duration_type === 'hours' || (int) $package->duration_days <= 1 || $package->tour_type === 'day_tour';
+        $canonicalTypes = ['day_tour', 'travel_package', 'nile_cruise'];
+        $isDayTour = $package->package_type === 'day_tour'
+            || (!in_array($package->package_type, $canonicalTypes, true)
+                && ($package->duration_type === 'hours' || (int) $package->duration_days <= 1));
         $itineraryUnit = $isDayTour ? __('Step') : __('Day');
 
         $itineraries = $package->itineraries
@@ -147,6 +171,21 @@ class TripController extends BaseWebsiteController
                 );
                 $item->display_description = $this->transValue($item->getRawOriginal('description') ?? $item->description, '');
                 $item->display_overnight = $this->transValue($item->getRawOriginal('overnight_location') ?? ($item->overnight_location ?? ''), '');
+                $item->display_accommodation = $this->transValue($item->getRawOriginal('accommodation') ?? ($item->accommodation ?? ''), '');
+                $item->display_transport_notes = $this->transValue($item->getRawOriginal('transport_notes') ?? ($item->transport_notes ?? ''), '');
+                $item->display_activities = collect((array) ($item->activities ?? []))
+                    ->map(function ($activity) {
+                        if (!is_array($activity)) return null;
+                        return [
+                            'time' => trim((string) ($activity['time'] ?? '')),
+                            'title' => trim((string) ($activity['title'] ?? '')),
+                            'location' => trim((string) ($activity['location'] ?? '')),
+                            'duration' => trim((string) ($activity['duration'] ?? '')),
+                            'description' => trim((string) ($activity['description'] ?? '')),
+                        ];
+                    })
+                    ->filter(fn ($activity) => $activity && collect($activity)->filter()->isNotEmpty())
+                    ->values();
                 return $item;
             })
             ->values();
@@ -254,6 +293,37 @@ class TripController extends BaseWebsiteController
             ->take(6)
             ->values();
 
+        $legacyNileDetail = $package->package_type === 'nile_cruise' ? $package->nileCruiseDetail : null;
+
+        $onTourLanguages = collect($package->on_tour_languages ?: ($legacyNileDetail?->on_tour_languages ?? []))
+            ->map(function ($value) {
+                $value = trim((string) $value);
+                return match (Str::lower($value)) {
+                    'english', 'en' => __('English'),
+                    'german', 'de' => __('German'),
+                    'french', 'fr' => __('French'),
+                    default => $value !== '' ? __(Str::headline($value)) : '',
+                };
+            })->filter()->unique()->values();
+        $whatToBring = collect($package->what_to_bring ?: ($legacyNileDetail?->what_to_bring ?? []))
+            ->map(fn ($value) => trim((string) $value))->filter()->unique()->values();
+        $operatingDays = collect($package->operating_days ?: ($legacyNileDetail?->operating_days ?? []))
+            ->map(fn ($value) => trim((string) $value))->filter()->unique()->values();
+        $departureTimes = $package->package_type === 'day_tour'
+            ? collect($package->departure_times ?? [])->map(fn ($value) => trim((string) $value))->filter()->values()
+            : collect();
+        $promotionalVideos = collect($package->promotional_videos ?: ($legacyNileDetail?->promotional_videos ?? []))
+            ->map(fn ($value) => trim((string) $value))->filter()->unique()->values();
+        $addons = $package->addons->where('is_active', true)->values();
+        if ($addons->isEmpty() && $package->package_type === 'nile_cruise' && method_exists($package, 'nileCruiseAddons')) {
+            $addons = $package->nileCruiseAddons->where('is_active', true)->values();
+        }
+        $tourPackageDetail = $package->package_type === 'travel_package' ? $package->tourPackageDetail : null;
+        $packageCities = $package->cities->sortBy(fn ($city) => $city->pivot?->stop_order ?? 999)->values();
+        $brochureUrl = $package->brochure_path ? asset('storage/' . ltrim((string) $package->brochure_path, '/')) : null;
+        $sharedTimezone = trim((string) ($package->tour_timezone ?: ($legacyNileDetail?->timezone ?? '')));
+        $sharedDepositPolicy = trim((string) ($package->deposit_policy ?: ($legacyNileDetail?->deposit_policy ?? '')));
+
         $countries = Country::query()
             ->orderBy('id')
             ->get()
@@ -336,6 +406,17 @@ class TripController extends BaseWebsiteController
             'testimonials',
             'reviews',
             'countries',
+            'onTourLanguages',
+            'whatToBring',
+            'operatingDays',
+            'departureTimes',
+            'promotionalVideos',
+            'addons',
+            'tourPackageDetail',
+            'packageCities',
+            'brochureUrl',
+            'sharedTimezone',
+            'sharedDepositPolicy',
             'itineraryUnit',
             'isDayTour'
         ));

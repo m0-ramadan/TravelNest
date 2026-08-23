@@ -214,4 +214,49 @@ class ReadyTourTaxonomyMapper
 
         return null;
     }
+
+    /**
+     * Resolve Nile Cruise type & category IDs from type & category strings or titles.
+     */
+    public function resolveNileCruiseTaxonomy(?string $typeStr, ?string $titleStr = ''): array
+    {
+        $typeNorm = $this->normalizeSlug($typeStr);
+        $titleNorm = $this->normalizeSlug($titleStr);
+        $combined = $typeNorm . ' ' . $titleNorm;
+
+        $typeId = null;
+        $catId = null;
+
+        if (str_contains($combined, 'dahabiya')) {
+            $type = \App\Models\NileCruiseType::where('slug', 'dahabiya-nile-cruise')->first();
+            $typeId = $type?->id;
+        } elseif (str_contains($combined, 'lake-nasser') || str_contains($combined, 'lake nasser')) {
+            $type = \App\Models\NileCruiseType::where('slug', 'lake-nasser-cruise')->first();
+            $typeId = $type?->id;
+        } else {
+            $type = \App\Models\NileCruiseType::where('slug', 'luxor-aswan-nile-cruises')->first() ?? \App\Models\NileCruiseType::first();
+            $typeId = $type?->id;
+
+            if ($typeId) {
+                if (str_contains($combined, 'luxury')) {
+                    $cat = \App\Models\NileCruiseCategory::where('slug', 'luxury-nile-cruises')->first();
+                    $catId = $cat?->id;
+                } elseif (str_contains($combined, 'ultra-deluxe') || str_contains($combined, 'ultra deluxe')) {
+                    $cat = \App\Models\NileCruiseCategory::where('slug', 'ultra-deluxe-nile-cruises')->first();
+                    $catId = $cat?->id;
+                } elseif (str_contains($combined, 'deluxe')) {
+                    $cat = \App\Models\NileCruiseCategory::where('slug', 'deluxe-nile-cruises')->first();
+                    $catId = $cat?->id;
+                } elseif (str_contains($combined, 'standard')) {
+                    $cat = \App\Models\NileCruiseCategory::where('slug', 'standard-nile-cruises')->first();
+                    $catId = $cat?->id;
+                }
+            }
+        }
+
+        return [
+            'nile_cruise_type_id' => $typeId,
+            'nile_cruise_category_id' => $catId,
+        ];
+    }
 }

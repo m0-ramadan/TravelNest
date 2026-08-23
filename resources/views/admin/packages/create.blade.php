@@ -695,6 +695,10 @@
             grid-area: date;
         }
 
+        .itinerary-hour-fields {
+            grid-area: date;
+        }
+
         .itinerary-place-field {
             grid-area: place;
         }
@@ -703,8 +707,67 @@
             grid-area: meals;
         }
 
+        .meal-options-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding-top: 4px;
+        }
+
+        .meal-pill-checkbox {
+            cursor: pointer;
+            user-select: none;
+            margin: 0;
+        }
+
+        .meal-pill-checkbox input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .meal-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .meal-pill-checkbox input[type="checkbox"]:checked + .meal-pill {
+            background: linear-gradient(135deg, rgba(124, 92, 255, 0.35), rgba(124, 92, 255, 0.18));
+            border-color: rgba(124, 92, 255, 0.6);
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(124, 92, 255, 0.25);
+        }
+
+        .meal-pill-checkbox:hover .meal-pill {
+            border-color: rgba(124, 92, 255, 0.4);
+            color: #ffffff;
+        }
+
         .itinerary-activities-field {
             grid-area: activities;
+        }
+
+        .itinerary-tour-package-fields,
+        .itinerary-tour-package-advanced {
+            grid-column: 2 / 4;
+            width: 100%;
+        }
+
+        .fields-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
         }
 
         .dynamic-remove-control {
@@ -1313,6 +1376,11 @@
                     ". meals ."
                     ". activities .";
             }
+
+            .itinerary-tour-package-fields,
+            .itinerary-tour-package-advanced {
+                grid-column: 2;
+            }
         }
 
         @media (max-width: 767px) {
@@ -1386,6 +1454,11 @@
                     "remove";
             }
 
+            .itinerary-tour-package-fields,
+            .itinerary-tour-package-advanced {
+                grid-column: 1 / -1;
+            }
+
             .item-order-badge {
                 width: 48px;
                 height: 48px;
@@ -1400,7 +1473,9 @@
                 padding: 16px;
             }
         }
-    </style>
+    
+        .nile-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:10px}.nile-choice-card{position:relative;display:block;border:1px solid var(--wizard-border);background:var(--wizard-input);border-radius:14px;padding:14px;cursor:pointer;transition:.18s}.nile-choice-card:hover{border-color:rgba(124,58,237,.65);transform:translateY(-1px)}.nile-choice-card.is-selected{border-color:var(--wizard-primary);background:var(--wizard-primary-soft);box-shadow:0 0 0 1px var(--wizard-primary)}.nile-choice-card input{position:absolute;opacity:0;pointer-events:none}.nile-choice-card strong{display:block;font-size:14px;margin-bottom:4px}.nile-choice-card small{display:block;color:var(--wizard-muted);font-size:11px;line-height:1.5}.nile-choice-card img{width:100%;height:72px;object-fit:cover;border-radius:9px;margin-bottom:10px}.nile-choice-select{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}.nile-cruise-advanced-host{grid-column:1/-1}.nile-cruise-advanced-host .nile-cruise-extended-section{margin-top:0}@media(max-width:900px){.nile-choice-grid{grid-template-columns:1fr}}
+</style>
 @endsection
 
 @section('content')
@@ -1501,6 +1576,73 @@
 
                                 <div class="section-body">
                                     <div class="fields-grid">
+                                        <div class="field-span-3 mb-2">
+                                            @include('admin.packages.partials.tour-type-selector')
+
+                                            <!-- Nile Cruise Fields -->
+                                            <div id="nile_cruise_type_wrapper" data-tour-type-section="nile_cruise" style="display: {{ old('package_type') == 'nile_cruise' ? 'block' : 'none' }};" class="mt-3">
+                                                <label class="form-label" for="nile_cruise_type_id">
+                                                    {{ admin_t('Nile Cruise Type') }}
+                                                    <span class="required-mark">*</span>
+                                                </label>
+                                                <select id="nile_cruise_type_id" name="nile_cruise_type_id"
+                                                    class="form-select nile-choice-select @error('nile_cruise_type_id') is-invalid @enderror">
+                                                    <option value="">{{ admin_t('Select Nile Cruise Type') }}</option>
+                                                    @foreach($nileCruiseTypes ?? [] as $nType)
+                                                        <option value="{{ $nType->id }}" data-slug="{{ $nType->slug }}" data-has-categories="{{ $nType->categories->count() > 0 ? 'true' : 'false' }}"
+                                                            {{ old('nile_cruise_type_id') == $nType->id ? 'selected' : '' }}>
+                                                            {{ $nType->display_name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="nile-choice-grid" id="nileCruiseTypeCards">
+                                                    @foreach($nileCruiseTypes ?? [] as $nType)
+                                                        <button type="button" class="nile-choice-card text-start" data-nile-type-card="{{ $nType->id }}" data-type-has-categories="{{ $nType->categories->count() > 0 ? 'true' : 'false' }}">
+                                                            <img src="{{ $nType->image_url }}" alt="{{ $nType->display_name }}">
+                                                            <strong>{{ $nType->display_name }}</strong>
+                                                            <small>{{ $nType->display_short_description ?: admin_t('اختر هذا النوع للرحلة النيلية') }}</small>
+                                                        </button>
+                                                    @endforeach
+                                                </div>
+                                                @error('nile_cruise_type_id')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+
+                                            <div id="nile_cruise_category_wrapper" data-tour-type-section="nile_cruise" style="display: {{ (old('package_type') == 'nile_cruise' && old('nile_cruise_type_id')) ? 'block' : 'none' }};" class="mt-3">
+                                                <label class="form-label" for="nile_cruise_category_id">
+                                                    {{ admin_t('Nile Cruise Category') }}
+                                                    <span class="required-mark">*</span>
+                                                </label>
+                                                <select id="nile_cruise_category_id" name="nile_cruise_category_id"
+                                                    class="form-select nile-choice-select @error('nile_cruise_category_id') is-invalid @enderror">
+                                                    <option value="">{{ admin_t('Select Nile Cruise Category') }}</option>
+                                                    @foreach($nileCruiseTypes ?? [] as $nType)
+                                                        @foreach($nType->categories as $nCat)
+                                                            <option value="{{ $nCat->id }}" data-type-id="{{ $nType->id }}" class="nile-cat-option nile-cat-type-{{ $nType->id }}"
+                                                                {{ old('nile_cruise_category_id') == $nCat->id ? 'selected' : '' }}>
+                                                                {{ $nCat->display_name }}
+                                                            </option>
+                                                        @endforeach
+                                                    @endforeach
+                                                </select>
+                                                <div class="nile-choice-grid" id="nileCruiseCategoryCards">
+                                                    @foreach($nileCruiseTypes ?? [] as $nType)
+                                                        @foreach($nType->categories as $nCat)
+                                                            <button type="button" class="nile-choice-card text-start" data-nile-category-card="{{ $nCat->id }}" data-type-id="{{ $nType->id }}">
+                                                                <img src="{{ $nCat->image_url }}" alt="{{ $nCat->display_name }}">
+                                                                <strong>{{ $nCat->display_name }}</strong>
+                                                                <small>{{ $nCat->display_short_description ?: admin_t('تصنيف الرحلة النيلية') }}</small>
+                                                            </button>
+                                                        @endforeach
+                                                    @endforeach
+                                                </div>
+                                                @error('nile_cruise_category_id')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+
                                         <div>
                                             <label class="form-label" for="title">
                                                 {{ admin_t('عنوان الرحلة') }}
@@ -1541,13 +1683,11 @@
 
                                         <div>
                                             <label class="form-label" for="category_id">
-                                                {{ admin_t('التصنيف') }}
-                                                <span class="required-mark">*</span>
+                                                {{ admin_t('Content Category / Theme') }} <small class="text-muted">({{ admin_t('optional') }})</small>
                                             </label>
                                             <select id="category_id" name="category_id"
-                                                class="form-select @error('category_id') is-invalid @enderror"
-                                                data-required-step="1">
-                                                <option value="">{{ admin_t('اختر التصنيف') }}</option>
+                                                class="form-select @error('category_id') is-invalid @enderror">
+                                                <option value="">{{ admin_t('Select optional content category') }}</option>
                                                 @foreach ($categories ?? collect() as $category)
                                                     <option value="{{ $category->id }}"
                                                         {{ old('category_id') == $category->id ? 'selected' : '' }}>
@@ -1586,85 +1726,11 @@
                                         </div>
 
                                         <div>
-                                            <label class="form-label" for="package_type">
-                                                {{ admin_t('نوع الرحلة') }}
-                                                <span class="required-mark">*</span>
-                                            </label>
-                                            <select id="package_type" name="package_type"
-                                                class="form-select @error('package_type') is-invalid @enderror"
-                                                data-required-step="1">
-                                                <option value="">{{ admin_t('اختر النوع') }}</option>
-                                                <option value="travel_package"
-                                                    {{ old('package_type') == 'travel_package' ? 'selected' : '' }}>
-                                                    {{ admin_t('باقة سفر') }}
-                                                </option>
-                                                <option value="nile_cruise"
-                                                    {{ old('package_type') == 'nile_cruise' ? 'selected' : '' }}>
-                                                    {{ admin_t('رحلة نيلية') }}
-                                                </option>
-                                                <option value="day_tour"
-                                                    {{ old('package_type') == 'day_tour' ? 'selected' : '' }}>
-                                                    {{ admin_t('جولة يومية') }}
-                                                </option>
-                                                <option value="shore_excursion"
-                                                    {{ old('package_type') == 'shore_excursion' ? 'selected' : '' }}>
-                                                    {{ admin_t('رحلة شاطئية') }}
-                                                </option>
-                                                <option value="custom"
-                                                    {{ old('package_type') == 'custom' ? 'selected' : '' }}>
-                                                    {{ admin_t('رحلة مخصصة') }}
-                                                </option>
-                                            </select>
-                                            @error('package_type')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-
-                                            <!-- Nile Cruise Fields -->
-                                            <div id="nile_cruise_type_wrapper" style="display: {{ old('package_type') == 'nile_cruise' ? 'block' : 'none' }};" class="mt-3">
-                                                <label class="form-label" for="nile_cruise_type_id">
-                                                    {{ admin_t('Nile Cruise Type') }}
-                                                    <span class="required-mark">*</span>
-                                                </label>
-                                                <select id="nile_cruise_type_id" name="nile_cruise_type_id"
-                                                    class="form-select @error('nile_cruise_type_id') is-invalid @enderror">
-                                                    <option value="">{{ admin_t('Select Nile Cruise Type') }}</option>
-                                                    @foreach($nileCruiseTypes ?? [] as $nType)
-                                                        <option value="{{ $nType->id }}" data-slug="{{ $nType->slug }}" data-has-categories="{{ $nType->categories->count() > 0 ? 'true' : 'false' }}"
-                                                            {{ old('nile_cruise_type_id') == $nType->id ? 'selected' : '' }}>
-                                                            {{ $nType->display_name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                                @error('nile_cruise_type_id')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-
-                                            <div id="nile_cruise_category_wrapper" style="display: {{ (old('package_type') == 'nile_cruise' && old('nile_cruise_type_id')) ? 'block' : 'none' }};" class="mt-3">
-                                                <label class="form-label" for="nile_cruise_category_id">
-                                                    {{ admin_t('Nile Cruise Category') }}
-                                                    <span class="required-mark">*</span>
-                                                </label>
-                                                <select id="nile_cruise_category_id" name="nile_cruise_category_id"
-                                                    class="form-select @error('nile_cruise_category_id') is-invalid @enderror">
-                                                    <option value="">{{ admin_t('Select Nile Cruise Category') }}</option>
-                                                    @foreach($nileCruiseTypes ?? [] as $nType)
-                                                        @foreach($nType->categories as $nCat)
-                                                            <option value="{{ $nCat->id }}" data-type-id="{{ $nType->id }}" class="nile-cat-option nile-cat-type-{{ $nType->id }}"
-                                                                {{ old('nile_cruise_category_id') == $nCat->id ? 'selected' : '' }}>
-                                                                {{ $nCat->display_name }}
-                                                            </option>
-                                                        @endforeach
-                                                    @endforeach
-                                                </select>
-                                                @error('nile_cruise_category_id')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
+                                            @include('admin.packages.partials.tour-package-cities')
                                         </div>
 
                                         <div>
-                                            <label class="form-label" for="tour_type">{{ admin_t('نوع الجولة') }}</label>
+                                            <label class="form-label" for="tour_type">{{ admin_t('Tour Style / Group Style') }}</label>
                                             <select id="tour_type" name="tour_type"
                                                 class="form-select @error('tour_type') is-invalid @enderror">
                                                 <option value="">{{ admin_t('اختر نوع الجولة') }}</option>
@@ -1863,6 +1929,9 @@
                                     </div>
                                 </div>
                             </div>
+
+                            @include('admin.packages.partials.common-experience-details')
+                            @include('admin.packages.partials.common-media-extra')
                         </div>
                     </div>
 
@@ -2037,6 +2106,20 @@
                                                                 value="{{ $day['day_number'] ?? $i + 1 }}">
                                                         </div>
 
+                                                        <div class="field-block itinerary-hour-fields" data-itinerary-hour-fields>
+                                                            <label class="field-block-label">Activity time</label>
+                                                            <div class="fields-grid fields-grid-2">
+                                                                <div class="field-shell">
+                                                                    <span class="field-shell-icon"><i class="ti ti-clock-play"></i></span>
+                                                                    <input type="time" name="itinerary[{{ $i }}][start_time]" value="{{ $day['start_time'] ?? '' }}" aria-label="Start time">
+                                                                </div>
+                                                                <div class="field-shell">
+                                                                    <span class="field-shell-icon"><i class="ti ti-clock-stop"></i></span>
+                                                                    <input type="time" name="itinerary[{{ $i }}][end_time]" value="{{ $day['end_time'] ?? '' }}" aria-label="End time">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
                                                         <div class="field-block itinerary-place-field">
                                                             <label class="field-block-label">Place / Stop</label>
                                                             <div class="field-shell">
@@ -2047,44 +2130,88 @@
                                                             </div>
                                                         </div>
 
-                                                        <div class="field-block itinerary-meals-field">
-                                                            <label class="field-block-label">Meals</label>
-                                                            <div class="field-shell">
-                                                                <span class="field-shell-icon"><i class="ti ti-tools-kitchen-2"></i></span>
-                                                                @php
-                                                                    $mealValue = 'none';
-                                                                    if (!empty($day['meals_breakfast']) && !empty($day['meals_lunch']) && !empty($day['meals_dinner'])) {
-                                                                        $mealValue = 'full_board';
-                                                                    } elseif (!empty($day['meals_breakfast'])) {
-                                                                        $mealValue = 'breakfast';
-                                                                    } elseif (!empty($day['meals_lunch'])) {
-                                                                        $mealValue = 'lunch';
-                                                                    } elseif (!empty($day['meals_dinner'])) {
-                                                                        $mealValue = 'dinner';
-                                                                    }
-                                                                @endphp
-                                                                <select data-meal-select>
-                                                                    <option value="none" {{ $mealValue === 'none' ? 'selected' : '' }}>No meals</option>
-                                                                    <option value="breakfast" {{ $mealValue === 'breakfast' ? 'selected' : '' }}>Breakfast</option>
-                                                                    <option value="lunch" {{ $mealValue === 'lunch' ? 'selected' : '' }}>Lunch</option>
-                                                                    <option value="dinner" {{ $mealValue === 'dinner' ? 'selected' : '' }}>Dinner</option>
-                                                                    <option value="full_board" {{ $mealValue === 'full_board' ? 'selected' : '' }}>Full board</option>
-                                                                </select>
+                                                        <div class="field-block itinerary-meals-field" data-itinerary-day-fields>
+                                                            <label class="field-block-label">Meals Included</label>
+                                                            @php
+                                                                $mealsList = [];
+                                                                if (!empty($day['meals']) && is_array($day['meals'])) {
+                                                                    $mealsList = $day['meals'];
+                                                                } else {
+                                                                    if (!empty($day['meals_breakfast'])) $mealsList[] = 'breakfast';
+                                                                    if (!empty($day['meals_lunch'])) $mealsList[] = 'lunch';
+                                                                    if (!empty($day['meals_dinner'])) $mealsList[] = 'dinner';
+                                                                }
+                                                            @endphp
+                                                            <div class="meal-options-pills">
+                                                                <label class="meal-pill-checkbox">
+                                                                    <input type="checkbox" name="itinerary[{{ $i }}][meals][]" value="breakfast"
+                                                                        {{ in_array('breakfast', $mealsList) ? 'checked' : '' }} class="js-meal-checkbox">
+                                                                    <span class="meal-pill"><i class="ti ti-coffee"></i> Breakfast</span>
+                                                                </label>
+                                                                <label class="meal-pill-checkbox">
+                                                                    <input type="checkbox" name="itinerary[{{ $i }}][meals][]" value="lunch"
+                                                                        {{ in_array('lunch', $mealsList) ? 'checked' : '' }} class="js-meal-checkbox">
+                                                                    <span class="meal-pill"><i class="ti ti-soup"></i> Lunch</span>
+                                                                </label>
+                                                                <label class="meal-pill-checkbox">
+                                                                    <input type="checkbox" name="itinerary[{{ $i }}][meals][]" value="dinner"
+                                                                        {{ in_array('dinner', $mealsList) ? 'checked' : '' }} class="js-meal-checkbox">
+                                                                    <span class="meal-pill"><i class="ti ti-glass-full"></i> Dinner</span>
+                                                                </label>
                                                             </div>
                                                             <input type="hidden" name="itinerary[{{ $i }}][meals_breakfast]"
-                                                                value="{{ !empty($day['meals_breakfast']) ? '1' : '0' }}">
+                                                                value="{{ in_array('breakfast', $mealsList) ? '1' : '0' }}" class="js-meal-hidden-breakfast">
                                                             <input type="hidden" name="itinerary[{{ $i }}][meals_lunch]"
-                                                                value="{{ !empty($day['meals_lunch']) ? '1' : '0' }}">
+                                                                value="{{ in_array('lunch', $mealsList) ? '1' : '0' }}" class="js-meal-hidden-lunch">
                                                             <input type="hidden" name="itinerary[{{ $i }}][meals_dinner]"
-                                                                value="{{ !empty($day['meals_dinner']) ? '1' : '0' }}">
+                                                                value="{{ in_array('dinner', $mealsList) ? '1' : '0' }}" class="js-meal-hidden-dinner">
                                                         </div>
 
                                                         <div class="field-block itinerary-activities-field">
-                                                            <label class="field-block-label">Activities</label>
+                                                            <label class="field-block-label">Activities / Day description</label>
                                                             <div class="field-shell field-shell-textarea">
                                                                 <span class="field-shell-icon"><i class="ti ti-route"></i></span>
                                                                 <textarea name="itinerary[{{ $i }}][description]" rows="4"
                                                                     placeholder="Enter activities">{{ $day['description'] ?? '' }}</textarea>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="field-block itinerary-tour-package-fields" data-itinerary-tour-package-fields>
+                                                            <label class="field-block-label">Tour Package day details</label>
+                                                            <div class="fields-grid fields-grid-2">
+                                                                <div>
+                                                                    <label class="field-block-label">Overnight location</label>
+                                                                    <input class="form-control" type="text" name="itinerary[{{ $i }}][overnight_location]" value="{{ $day['overnight_location'] ?? '' }}" placeholder="e.g. Luxor">
+                                                                </div>
+                                                                <div>
+                                                                    <label class="field-block-label">Accommodation</label>
+                                                                    <input class="form-control" type="text" name="itinerary[{{ $i }}][accommodation]" value="{{ $day['accommodation'] ?? '' }}" placeholder="e.g. 5-star hotel in Luxor">
+                                                                </div>
+                                                            </div>
+                                                            <div class="mt-2">
+                                                                <label class="field-block-label">Transport notes</label>
+                                                                <textarea class="form-control" name="itinerary[{{ $i }}][transport_notes]" rows="2" placeholder="Transfers, domestic flights, train, private vehicle...">{{ $day['transport_notes'] ?? '' }}</textarea>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="field-block itinerary-tour-package-advanced" data-itinerary-tour-package-advanced>
+                                                            <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                                                                <label class="field-block-label mb-0">Advanced day activities</label>
+                                                                <button type="button" class="btn btn-sm btn-outline-primary js-add-tour-package-activity" data-itinerary-index="{{ $i }}">+ Add Activity</button>
+                                                            </div>
+                                                            <div class="tour-package-activities-list" data-tour-package-activities-list>
+                                                                @foreach ((array) ($day['activities'] ?? []) as $activityIndex => $activity)
+                                                                    <div class="repeat-box tour-package-activity-row" data-tour-package-activity-row>
+                                                                        <div class="row g-2">
+                                                                            <div class="col-md-2"><input class="form-control" type="time" name="itinerary[{{ $i }}][activities][{{ $activityIndex }}][time]" value="{{ $activity['time'] ?? '' }}" aria-label="Activity time"></div>
+                                                                            <div class="col-md-3"><input class="form-control" type="text" name="itinerary[{{ $i }}][activities][{{ $activityIndex }}][title]" value="{{ $activity['title'] ?? '' }}" placeholder="Activity title"></div>
+                                                                            <div class="col-md-3"><input class="form-control" type="text" name="itinerary[{{ $i }}][activities][{{ $activityIndex }}][location]" value="{{ $activity['location'] ?? '' }}" placeholder="Location"></div>
+                                                                            <div class="col-md-2"><input class="form-control" type="text" name="itinerary[{{ $i }}][activities][{{ $activityIndex }}][duration]" value="{{ $activity['duration'] ?? '' }}" placeholder="Duration"></div>
+                                                                            <div class="col-md-2"><button type="button" class="btn btn-outline-danger w-100 js-remove-tour-package-activity">Remove</button></div>
+                                                                            <div class="col-12"><textarea class="form-control" rows="2" name="itinerary[{{ $i }}][activities][{{ $activityIndex }}][description]" placeholder="Activity details">{{ $activity['description'] ?? '' }}</textarea></div>
+                                                                        </div>
+                                                                    </div>
+                                                                @endforeach
                                                             </div>
                                                         </div>
 
@@ -2112,6 +2239,10 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="nile-cruise-advanced-host">
+                                @include('admin.packages.partials.nile-cruise-extended-fields')
+                            </div>
                         </div>
                     </div>
 
@@ -2128,6 +2259,8 @@
                         </div>
 
                         <div class="wizard-grid">
+                            @include('admin.packages.partials.common-operations')
+
                             <div class="form-section-card">
                                 <div class="section-header">
                                     <div class="section-icon"><i class="ti ti-cash"></i></div>
@@ -2903,6 +3036,8 @@
                                 </div>
                             </div>
 
+                            @include('admin.packages.partials.common-seo-extra')
+
                             <div class="form-section-card">
                                 <div class="section-header">
                                     <div class="section-icon"><i class="ti ti-checklist"></i></div>
@@ -2946,6 +3081,31 @@
                                             <span class="summary-label">{{ admin_t('عدد الأيام') }}</span>
                                             <span class="summary-value" data-summary="daysCount">0</span>
                                         </div>
+                                    </div>
+
+                                    <div class="summary-grid mb-4" data-day-trip-review-summary style="display:none;">
+                                        <div class="summary-item"><span class="summary-label">{{ admin_t('Tour Type') }}</span><span class="summary-value">🗺️ Day Trip</span></div>
+                                        <div class="summary-item"><span class="summary-label">{{ admin_t('Timeline Stops') }}</span><span class="summary-value" data-summary="dayTripStops">0</span></div>
+                                        <div class="summary-item"><span class="summary-label">{{ admin_t('Departure Times') }}</span><span class="summary-value" data-summary="dayTripDepartureTimes">-</span></div>
+                                        <div class="summary-item"><span class="summary-label">{{ admin_t('Operating Days') }}</span><span class="summary-value" data-summary="operatingDays">-</span></div>
+                                    </div>
+
+                                    <div class="summary-grid mb-4" data-tour-package-review-summary style="display:none;">
+                                        <div class="summary-item"><span class="summary-label">{{ admin_t('Tour Type') }}</span><span class="summary-value">📦 Tour Package</span></div>
+                                        <div class="summary-item"><span class="summary-label">{{ admin_t('Cities') }}</span><span class="summary-value" data-summary="tourPackageCities">-</span></div>
+                                        <div class="summary-item"><span class="summary-label">{{ admin_t('Accommodation') }}</span><span class="summary-value" data-summary="tourPackageAccommodation">-</span></div>
+                                        <div class="summary-item"><span class="summary-label">{{ admin_t('Meals') }}</span><span class="summary-value" data-summary="tourPackageMeals">-</span></div>
+                                        <div class="summary-item"><span class="summary-label">{{ admin_t('Flexible Itinerary') }}</span><span class="summary-value" data-summary="tourPackageFlexible">-</span></div>
+                                        <div class="summary-item"><span class="summary-label">{{ admin_t('Itinerary Mode') }}</span><span class="summary-value" data-summary="tourPackageItineraryMode">-</span></div>
+                                    </div>
+
+                                    <div class="summary-grid mb-4" data-nile-review-summary style="display:none;">
+                                        <div class="summary-item"><span class="summary-label">{{ admin_t('Nile Cruise Type') }}</span><span class="summary-value" data-summary="nileType">-</span></div>
+                                        <div class="summary-item"><span class="summary-label">{{ admin_t('Nile Cruise Category') }}</span><span class="summary-value" data-summary="nileCategory">-</span></div>
+                                        <div class="summary-item"><span class="summary-label">{{ admin_t('Cabins / Suites') }}</span><span class="summary-value" data-summary="nileCabins">0</span></div>
+                                        <div class="summary-item"><span class="summary-label">{{ admin_t('Duration Variants') }}</span><span class="summary-value" data-summary="nileDurations">0</span></div>
+                                        <div class="summary-item"><span class="summary-label">{{ admin_t('Sailing Schedules') }}</span><span class="summary-value" data-summary="nileSchedules">0</span></div>
+                                        <div class="summary-item"><span class="summary-label">{{ admin_t('Route Stops') }}</span><span class="summary-value" data-summary="nileRouteStops">0</span></div>
                                     </div>
 
                                     <div class="review-list">
@@ -3041,6 +3201,42 @@
             const nileCatWrapper = document.getElementById('nile_cruise_category_wrapper');
             const nileCatSelect = document.getElementById('nile_cruise_category_id');
 
+            function syncNileCruiseEditorMode() {
+                const isNile = packageTypeSelect?.value === 'nile_cruise';
+                const genericItineraryWrapper = document.getElementById('itinerary-wrapper');
+                const genericItineraryCard = genericItineraryWrapper?.closest('.form-section-card');
+                const itineraryTitle = document.getElementById('itinerary-section-title');
+                const itineraryCopy = document.getElementById('itinerary-section-copy');
+                const addGenericItinerary = document.getElementById('addItineraryBtn') || document.getElementById('add-itinerary-btn');
+                const pricesWrapper = document.getElementById('prices-wrapper');
+                const addGenericPrice = document.getElementById('addPriceBtn') || document.getElementById('add-price-btn');
+                const groupPricingCard = document.querySelector('[name="price_1_person"]')?.closest('.card');
+
+                if (genericItineraryCard) {
+                    genericItineraryCard.style.display = isNile ? 'none' : '';
+                    genericItineraryCard.querySelectorAll('input,select,textarea,button').forEach(el => el.disabled = isNile);
+                } else {
+                    [genericItineraryWrapper, itineraryTitle, itineraryCopy, addGenericItinerary].forEach(el => {
+                        if (el) el.style.display = isNile ? 'none' : '';
+                    });
+                    genericItineraryWrapper?.querySelectorAll('input,select,textarea,button').forEach(el => el.disabled = isNile);
+                    if (addGenericItinerary) addGenericItinerary.disabled = isNile;
+                }
+
+                if (pricesWrapper) {
+                    pricesWrapper.style.display = isNile ? 'none' : '';
+                    pricesWrapper.querySelectorAll('input,select,textarea,button').forEach(el => el.disabled = isNile);
+                }
+                if (addGenericPrice) {
+                    addGenericPrice.style.display = isNile ? 'none' : '';
+                    addGenericPrice.disabled = isNile;
+                }
+                if (groupPricingCard) {
+                    groupPricingCard.style.display = isNile ? 'none' : '';
+                    groupPricingCard.querySelectorAll('input,select,textarea,button').forEach(el => el.disabled = isNile);
+                }
+            }
+
             function updateNileCruiseFields() {
                 if (!packageTypeSelect || !nileTypeWrapper || !nileCatWrapper) return;
 
@@ -3080,11 +3276,30 @@
                     if (nileTypeSelect) nileTypeSelect.value = '';
                     if (nileCatSelect) nileCatSelect.value = '';
                 }
+                syncNileCruiseEditorMode();
             }
 
-            if (packageTypeSelect) packageTypeSelect.addEventListener('change', updateNileCruiseFields);
-            if (nileTypeSelect) nileTypeSelect.addEventListener('change', updateNileCruiseFields);
+            function syncNileChoiceCards() {
+                document.querySelectorAll('[data-nile-type-card]').forEach(card => {
+                    card.classList.toggle('is-selected', String(card.dataset.nileTypeCard) === String(nileTypeSelect?.value || ''));
+                });
+                document.querySelectorAll('[data-nile-category-card]').forEach(card => {
+                    const sameType = String(card.dataset.typeId) === String(nileTypeSelect?.value || '');
+                    card.style.display = sameType ? 'block' : 'none';
+                    card.classList.toggle('is-selected', String(card.dataset.nileCategoryCard) === String(nileCatSelect?.value || ''));
+                });
+            }
+            document.querySelectorAll('[data-nile-type-card]').forEach(card => card.addEventListener('click', () => {
+                if (!nileTypeSelect) return; nileTypeSelect.value = card.dataset.nileTypeCard; nileTypeSelect.dispatchEvent(new Event('change', {bubbles:true})); syncNileChoiceCards();
+            }));
+            document.querySelectorAll('[data-nile-category-card]').forEach(card => card.addEventListener('click', () => {
+                if (!nileCatSelect) return; nileCatSelect.value = card.dataset.nileCategoryCard; nileCatSelect.dispatchEvent(new Event('change', {bubbles:true})); syncNileChoiceCards();
+            }));
+            if (packageTypeSelect) packageTypeSelect.addEventListener('change', () => { updateNileCruiseFields(); syncNileChoiceCards(); });
+            if (nileTypeSelect) nileTypeSelect.addEventListener('change', () => { updateNileCruiseFields(); syncNileChoiceCards(); });
+            if (nileCatSelect) nileCatSelect.addEventListener('change', syncNileChoiceCards);
             updateNileCruiseFields();
+            syncNileChoiceCards();
 
             const featuredInput = document.getElementById('featured_image');
             const galleryInput = document.getElementById('gallery_images');
@@ -3397,21 +3612,27 @@
             }
 
             function updateItineraryMode() {
+                const packageType = document.getElementById('package_type')?.value || '';
                 const type = form?.querySelector('input[name="duration_type"]:checked')?.value || 'days';
-                const isHourly = type === 'hours';
+                const isHourly = packageType === 'day_tour' || type === 'hours';
+                const isTourPackage = packageType === 'travel_package';
+                const itineraryMode = document.querySelector('[data-tour-package-itinerary-mode]')?.value || 'simple';
+                const isAdvancedPackage = isTourPackage && itineraryMode === 'advanced';
 
                 const titleEl = document.getElementById('itinerarySectionTitle');
-                if (titleEl) titleEl.textContent = isHourly ? 'Trip Steps' : 'Daily Itinerary';
+                if (titleEl) titleEl.textContent = isHourly ? 'Activity Timeline' : 'Daily Itinerary';
 
                 const copyEl = document.getElementById('itinerarySectionCopy');
                 if (copyEl) {
                     copyEl.textContent = isHourly
-                        ? 'Split the trip into ordered steps and add the timing and details for each step.'
-                        : 'Split the trip into days with meal and activity details.';
+                        ? 'Build the Day Trip hour-by-hour / stop-by-stop with real start and end times.'
+                        : (isTourPackage
+                            ? 'Build the Tour Package day-by-day. Advanced mode supports multiple ordered activities inside each day.'
+                            : 'Split the trip into days with meal and activity details.');
                 }
 
                 const addBtnTextEl = document.getElementById('addItineraryText');
-                if (addBtnTextEl) addBtnTextEl.textContent = isHourly ? 'Add New Step' : 'Add New Day';
+                if (addBtnTextEl) addBtnTextEl.textContent = isHourly ? 'Add Stop' : 'Add New Day';
 
                 document.querySelectorAll('.itinerary-item').forEach(item => {
                     const label = item.querySelector('.item-order-label');
@@ -3419,17 +3640,39 @@
                     const durationInput = item.querySelector('[data-itinerary-duration-input]');
 
                     if (label) label.textContent = isHourly ? 'Step' : 'Day';
-                    if (durationLabel) durationLabel.textContent = isHourly ? 'Time / Duration' : 'Date / Day label';
+                    if (durationLabel) durationLabel.textContent = isHourly ? 'Time / Duration label' : 'Date / Day label';
                     if (durationInput) {
                         durationInput.placeholder = isHourly
-                            ? 'Example: 09:00 AM - 10:30 AM'
+                            ? 'Example: Morning / 2 hours (optional label)'
                             : 'Optional date or day label';
                     }
+
+                    item.querySelectorAll('[data-itinerary-hour-fields]').forEach(section => {
+                        section.style.display = isHourly ? '' : 'none';
+                        section.querySelectorAll('input,select,textarea').forEach(el => el.disabled = !isHourly);
+                    });
+
+                    item.querySelectorAll('[data-itinerary-day-fields]').forEach(section => {
+                        section.style.display = isHourly ? 'none' : '';
+                        section.querySelectorAll('input,select,textarea').forEach(el => el.disabled = isHourly);
+                    });
+
+                    item.querySelectorAll('[data-itinerary-tour-package-fields]').forEach(section => {
+                        section.style.display = isTourPackage ? '' : 'none';
+                        section.querySelectorAll('input,select,textarea').forEach(el => el.disabled = !isTourPackage);
+                    });
+
+                    item.querySelectorAll('[data-itinerary-tour-package-advanced]').forEach(section => {
+                        section.style.display = isAdvancedPackage ? '' : 'none';
+                        // Preserve advanced activity data while toggling simple/advanced mode.
+                        // Disable only when the selected top-level Tour Type is not Tour Package.
+                        section.querySelectorAll('input,select,textarea,button').forEach(el => el.disabled = !isTourPackage);
+                    });
                 });
 
                 const emptyMessage = document.querySelector('#itineraryEmptyState span');
                 if (emptyMessage) {
-                    emptyMessage.textContent = isHourly ? 'No trip steps added yet.' : 'No itinerary days added yet.';
+                    emptyMessage.textContent = isHourly ? 'No activity timeline stops added yet.' : 'No itinerary days added yet.';
                 }
             }
 
@@ -3608,39 +3851,20 @@
                 });
             }
 
-            function syncMealInputs(selectElement) {
-                if (!selectElement) return;
-                const card = selectElement.closest('.itinerary-item');
-                if (!card) {
-                    return;
-                }
+            function syncMealInputs(element) {
+                if (!element) return;
+                const card = element.closest('.itinerary-item');
+                if (!card) return;
 
-                const breakfast = card.querySelector('input[name*="[meals_breakfast]"]');
-                const lunch = card.querySelector('input[name*="[meals_lunch]"]');
-                const dinner = card.querySelector('input[name*="[meals_dinner]"]');
-                const selected = selectElement.value;
+                const checkedMeals = Array.from(card.querySelectorAll('.js-meal-checkbox:checked')).map(cb => cb.value);
 
-                const state = {
-                    breakfast: '0',
-                    lunch: '0',
-                    dinner: '0',
-                };
+                const bHidden = card.querySelector('.js-meal-hidden-breakfast');
+                const lHidden = card.querySelector('.js-meal-hidden-lunch');
+                const dHidden = card.querySelector('.js-meal-hidden-dinner');
 
-                if (selected === 'breakfast') {
-                    state.breakfast = '1';
-                } else if (selected === 'lunch') {
-                    state.lunch = '1';
-                } else if (selected === 'dinner') {
-                    state.dinner = '1';
-                } else if (selected === 'full_board') {
-                    state.breakfast = '1';
-                    state.lunch = '1';
-                    state.dinner = '1';
-                }
-
-                if (breakfast) breakfast.value = state.breakfast;
-                if (lunch) lunch.value = state.lunch;
-                if (dinner) dinner.value = state.dinner;
+                if (bHidden) bHidden.value = checkedMeals.includes('breakfast') ? '1' : '0';
+                if (lHidden) lHidden.value = checkedMeals.includes('lunch') ? '1' : '0';
+                if (dHidden) dHidden.value = checkedMeals.includes('dinner') ? '1' : '0';
             }
 
             function updateAttractionsPicker() {
@@ -3669,23 +3893,37 @@
             let faqIndex = {{ count($faqItems) }};
 
             function addItinerary() {
-                const isHourly = form?.querySelector('input[name="duration_type"]:checked')?.value === 'hours';
+                const packageType = document.getElementById('package_type')?.value || '';
+                const isHourly = packageType === 'day_tour' || form?.querySelector('input[name="duration_type"]:checked')?.value === 'hours';
                 appendAnimatedItem('itinerary-wrapper', `
                     <div class="repeat-box itinerary-item itinerary-item-card">
                         <div class="itinerary-item-grid">
                             <div class="dynamic-order-column">
                                 <span class="item-order-badge">
-                                    <small class="item-order-label">${isHourly ? 'Step' : 'Day'}</small>
+                                    <small class="item-order-label">${isHourly ? 'Stop' : 'Day'}</small>
                                     <span class="item-order-number">${String(itineraryIndex + 1).padStart(2, '0')}</span>
                                 </span>
                             </div>
                             <div class="field-block itinerary-date-field">
-                                <label class="field-block-label" data-itinerary-duration-label>${isHourly ? 'Time / Duration' : 'Date / Day label'}</label>
+                                <label class="field-block-label" data-itinerary-duration-label>${isHourly ? 'Time / Duration label' : 'Date / Day label'}</label>
                                 <div class="field-shell">
                                     <span class="field-shell-icon"><i class="ti ti-clock"></i></span>
-                                    <input type="text" data-itinerary-duration-input name="itinerary[${itineraryIndex}][duration]" placeholder="${isHourly ? 'Example: 09:00 AM - 10:30 AM' : 'Optional date or day label'}">
+                                    <input type="text" data-itinerary-duration-input name="itinerary[${itineraryIndex}][duration]" placeholder="${isHourly ? 'Example: Morning / 2 hours (optional label)' : 'Optional date or day label'}">
                                 </div>
                                 <input type="hidden" name="itinerary[${itineraryIndex}][day_number]" value="${itineraryIndex + 1}">
+                            </div>
+                            <div class="field-block itinerary-hour-fields" data-itinerary-hour-fields>
+                                <label class="field-block-label">Activity time</label>
+                                <div class="fields-grid fields-grid-2">
+                                    <div class="field-shell">
+                                        <span class="field-shell-icon"><i class="ti ti-clock-play"></i></span>
+                                        <input type="time" name="itinerary[${itineraryIndex}][start_time]" aria-label="Start time">
+                                    </div>
+                                    <div class="field-shell">
+                                        <span class="field-shell-icon"><i class="ti ti-clock-stop"></i></span>
+                                        <input type="time" name="itinerary[${itineraryIndex}][end_time]" aria-label="End time">
+                                    </div>
+                                </div>
                             </div>
                             <div class="field-block itinerary-place-field">
                                 <label class="field-block-label">Place / Stop</label>
@@ -3694,28 +3932,56 @@
                                     <input type="text" name="itinerary[${itineraryIndex}][title]" placeholder="Enter place or stop">
                                 </div>
                             </div>
-                            <div class="field-block itinerary-meals-field">
-                                <label class="field-block-label">Meals</label>
-                                <div class="field-shell">
-                                    <span class="field-shell-icon"><i class="ti ti-tools-kitchen-2"></i></span>
-                                    <select data-meal-select>
-                                        <option value="none">No meals</option>
-                                        <option value="breakfast">Breakfast</option>
-                                        <option value="lunch">Lunch</option>
-                                        <option value="dinner">Dinner</option>
-                                        <option value="full_board">Full board</option>
-                                    </select>
+                            <div class="field-block itinerary-meals-field" data-itinerary-day-fields>
+                                <label class="field-block-label">Meals Included</label>
+                                <div class="meal-options-pills">
+                                    <label class="meal-pill-checkbox">
+                                        <input type="checkbox" name="itinerary[${itineraryIndex}][meals][]" value="breakfast" class="js-meal-checkbox">
+                                        <span class="meal-pill"><i class="ti ti-coffee"></i> Breakfast</span>
+                                    </label>
+                                    <label class="meal-pill-checkbox">
+                                        <input type="checkbox" name="itinerary[${itineraryIndex}][meals][]" value="lunch" class="js-meal-checkbox">
+                                        <span class="meal-pill"><i class="ti ti-soup"></i> Lunch</span>
+                                    </label>
+                                    <label class="meal-pill-checkbox">
+                                        <input type="checkbox" name="itinerary[${itineraryIndex}][meals][]" value="dinner" class="js-meal-checkbox">
+                                        <span class="meal-pill"><i class="ti ti-glass-full"></i> Dinner</span>
+                                    </label>
                                 </div>
-                                <input type="hidden" name="itinerary[${itineraryIndex}][meals_breakfast]" value="0">
-                                <input type="hidden" name="itinerary[${itineraryIndex}][meals_lunch]" value="0">
-                                <input type="hidden" name="itinerary[${itineraryIndex}][meals_dinner]" value="0">
+                                <input type="hidden" name="itinerary[${itineraryIndex}][meals_breakfast]" value="0" class="js-meal-hidden-breakfast">
+                                <input type="hidden" name="itinerary[${itineraryIndex}][meals_lunch]" value="0" class="js-meal-hidden-lunch">
+                                <input type="hidden" name="itinerary[${itineraryIndex}][meals_dinner]" value="0" class="js-meal-hidden-dinner">
                             </div>
                             <div class="field-block itinerary-activities-field">
-                                <label class="field-block-label">Activities</label>
+                                <label class="field-block-label">Activities / Day description</label>
                                 <div class="field-shell field-shell-textarea">
                                     <span class="field-shell-icon"><i class="ti ti-route"></i></span>
                                     <textarea name="itinerary[${itineraryIndex}][description]" rows="4" placeholder="Enter activities"></textarea>
                                 </div>
+                            </div>
+                            <div class="field-block itinerary-tour-package-fields" data-itinerary-tour-package-fields>
+                                <label class="field-block-label">Tour Package day details</label>
+                                <div class="fields-grid fields-grid-2">
+                                    <div>
+                                        <label class="field-block-label">Overnight location</label>
+                                        <input class="form-control" type="text" name="itinerary[${itineraryIndex}][overnight_location]" placeholder="e.g. Luxor">
+                                    </div>
+                                    <div>
+                                        <label class="field-block-label">Accommodation</label>
+                                        <input class="form-control" type="text" name="itinerary[${itineraryIndex}][accommodation]" placeholder="e.g. 5-star hotel in Luxor">
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <label class="field-block-label">Transport notes</label>
+                                    <textarea class="form-control" name="itinerary[${itineraryIndex}][transport_notes]" rows="2" placeholder="Transfers, domestic flights, train, private vehicle..."></textarea>
+                                </div>
+                            </div>
+                            <div class="field-block itinerary-tour-package-advanced" data-itinerary-tour-package-advanced>
+                                <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                                    <label class="field-block-label mb-0">Advanced day activities</label>
+                                    <button type="button" class="btn btn-sm btn-outline-primary js-add-tour-package-activity" data-itinerary-index="${itineraryIndex}">+ Add Activity</button>
+                                </div>
+                                <div class="tour-package-activities-list" data-tour-package-activities-list></div>
                             </div>
                             ${createRemoveButton()}
                         </div>
@@ -3725,6 +3991,37 @@
                 renumberDynamicItems('itinerary-wrapper', '.itinerary-item', true);
                 ensureEmptyState('#itinerary-wrapper', '.itinerary-item', 'itineraryEmptyState', texts.noItinerary);
                 updateItineraryMode();
+            }
+
+            function addTourPackageActivity(button) {
+                const itineraryItem = button?.closest('.itinerary-item');
+                const list = itineraryItem?.querySelector('[data-tour-package-activities-list]');
+                if (!itineraryItem || !list) return;
+
+                const itineraryInput = itineraryItem.querySelector('input[name*="[day_number]"]');
+                const itineraryMatch = itineraryInput?.name?.match(/^itinerary\[(\d+)\]/);
+                const itineraryKey = button.dataset.itineraryIndex || itineraryMatch?.[1];
+                if (itineraryKey === undefined) return;
+
+                let nextActivityIndex = 0;
+                list.querySelectorAll('[name*="[activities]["]').forEach(input => {
+                    const match = input.name.match(/\[activities\]\[(\d+)\]/);
+                    if (match) nextActivityIndex = Math.max(nextActivityIndex, Number(match[1]) + 1);
+                });
+
+                list.insertAdjacentHTML('beforeend', `
+                    <div class="repeat-box tour-package-activity-row" data-tour-package-activity-row>
+                        <div class="row g-2">
+                            <div class="col-md-2"><input class="form-control" type="time" name="itinerary[${itineraryKey}][activities][${nextActivityIndex}][time]" aria-label="Activity time"></div>
+                            <div class="col-md-3"><input class="form-control" type="text" name="itinerary[${itineraryKey}][activities][${nextActivityIndex}][title]" placeholder="Activity title"></div>
+                            <div class="col-md-3"><input class="form-control" type="text" name="itinerary[${itineraryKey}][activities][${nextActivityIndex}][location]" placeholder="Location"></div>
+                            <div class="col-md-2"><input class="form-control" type="text" name="itinerary[${itineraryKey}][activities][${nextActivityIndex}][duration]" placeholder="Duration"></div>
+                            <div class="col-md-2"><button type="button" class="btn btn-outline-danger w-100 js-remove-tour-package-activity">Remove</button></div>
+                            <div class="col-12"><textarea class="form-control" rows="2" name="itinerary[${itineraryKey}][activities][${nextActivityIndex}][description]" placeholder="Activity details"></textarea></div>
+                        </div>
+                    </div>
+                `);
+                isDirty = true;
             }
 
             function addInclusion(type) {
@@ -3866,6 +4163,19 @@
                 const imagesCount = (featuredFile ? 1 : 0) + galleryFiles.length;
                 const itineraryCount = document.querySelectorAll('.itinerary-item').length;
 
+                const selectedPackageType = packageTypeSelect?.value || '';
+                const nileReview = document.querySelector('[data-nile-review-summary]');
+                const dayTripReview = document.querySelector('[data-day-trip-review-summary]');
+                const tourPackageReview = document.querySelector('[data-tour-package-review-summary]');
+                const isNileReview = selectedPackageType === 'nile_cruise';
+                const isDayTripReview = selectedPackageType === 'day_tour';
+                const isTourPackageReview = selectedPackageType === 'travel_package';
+                if (nileReview) nileReview.style.display = isNileReview ? '' : 'none';
+                if (dayTripReview) dayTripReview.style.display = isDayTripReview ? '' : 'none';
+                if (tourPackageReview) tourPackageReview.style.display = isTourPackageReview ? '' : 'none';
+                const nileTypeOption = nileTypeSelect && nileTypeSelect.selectedIndex >= 0 ? nileTypeSelect.options[nileTypeSelect.selectedIndex] : null;
+                const nileCategoryOption = nileCatSelect && nileCatSelect.selectedIndex >= 0 ? nileCatSelect.options[nileCatSelect.selectedIndex] : null;
+
                 const summary = {
                     title: document.getElementById('title')?.value || texts.noData,
                     destination: destinationOption && destinationOption.value ? destinationOption.textContent.trim() : texts.noData,
@@ -3874,7 +4184,27 @@
                     category: categoryOption && categoryOption.value ? categoryOption.textContent.trim() : texts.noData,
                     status: form?.querySelector('input[name="is_active"]')?.checked ? texts.active : texts.inactive,
                     images: imagesCount,
-                    daysCount: itineraryCount
+                    daysCount: itineraryCount,
+                    nileType: isNileReview && nileTypeOption?.value ? nileTypeOption.textContent.trim() : texts.noData,
+                    nileCategory: isNileReview && nileCategoryOption?.value ? nileCategoryOption.textContent.trim() : texts.noData,
+                    nileCabins: isNileReview ? document.querySelectorAll('#nileCruiseExtendedSection [data-nc-cabin]').length : 0,
+                    nileDurations: isNileReview ? document.querySelectorAll('#nileCruiseExtendedSection [data-nc-duration]').length : 0,
+                    nileSchedules: isNileReview ? document.querySelectorAll('#nileCruiseExtendedSection [data-nc-schedule]').length : 0,
+                    nileRouteStops: isNileReview ? document.querySelectorAll('#nileCruiseExtendedSection [data-nc-route-row]').length : 0,
+                    dayTripStops: isDayTripReview ? itineraryCount : 0,
+                    dayTripDepartureTimes: isDayTripReview
+                        ? ((form?.querySelector('[name="experience[departure_times]"]')?.value || '').split(/[\n,]+/).map(v => v.trim()).filter(Boolean).join(' · ') || texts.noData)
+                        : texts.noData,
+                    operatingDays: Array.from(form?.querySelectorAll('input[name="experience[operating_days][]"]:checked') || []).map(el => el.value).join(' · ') || texts.noData,
+                    tourPackageCities: isTourPackageReview
+                        ? (Array.from(form?.querySelectorAll('select[name="tour_city_ids[]"] option:checked') || []).map(el => el.textContent.trim()).filter(Boolean).join(' / ') || texts.noData)
+                        : texts.noData,
+                    tourPackageAccommodation: isTourPackageReview ? (form?.querySelector('[name="tour_package[accommodation_standard]"]')?.value || texts.noData) : texts.noData,
+                    tourPackageMeals: isTourPackageReview
+                        ? (Array.from(form?.querySelectorAll('input[name="tour_package[meals_included][]"]:checked') || []).map(el => el.value).join(' · ') || texts.noData)
+                        : texts.noData,
+                    tourPackageFlexible: isTourPackageReview ? (form?.querySelector('[name="tour_package[flexible_itinerary]"]')?.checked ? 'Yes' : 'No') : texts.noData,
+                    tourPackageItineraryMode: isTourPackageReview ? (form?.querySelector('[data-tour-package-itinerary-mode]')?.value || 'simple') : texts.noData
                 };
 
                 Object.entries(summary).forEach(([key, value]) => {
@@ -3962,6 +4292,9 @@
                 if (event.target.matches('input[name="attraction_ids[]"]')) {
                     updateAttractionsPicker();
                 }
+                if (event.target.matches('#package_type, [data-tour-package-itinerary-mode]')) {
+                    updateItineraryMode();
+                }
                 updateSummary();
             });
 
@@ -4006,7 +4339,29 @@
             addPriceBtn?.addEventListener('click', addPrice);
             addFaqBtn?.addEventListener('click', addFaq);
 
+            document.addEventListener('change', function(event) {
+                if (event.target && event.target.classList.contains('js-meal-checkbox')) {
+                    syncMealInputs(event.target);
+                    isDirty = true;
+                    updateSummary();
+                }
+            });
+
             document.addEventListener('click', function(event) {
+                const addActivityButton = event.target.closest('.js-add-tour-package-activity');
+                if (addActivityButton) {
+                    addTourPackageActivity(addActivityButton);
+                    return;
+                }
+
+                const removeActivityButton = event.target.closest('.js-remove-tour-package-activity');
+                if (removeActivityButton) {
+                    removeActivityButton.closest('[data-tour-package-activity-row]')?.remove();
+                    isDirty = true;
+                    updateSummary();
+                    return;
+                }
+
                 const removeButton = event.target.closest('.js-remove');
                 if (!removeButton) {
                     return;

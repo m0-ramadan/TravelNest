@@ -84,6 +84,30 @@ class Package extends Model
         'source_remote_id',
         'source_remote_slug',
         'source_synced_at',
+        'what_to_bring',
+        'on_tour_languages',
+        'operating_days',
+        'departure_times',
+        'tour_timezone',
+        'default_seat_capacity',
+        'brochure_path',
+        'promotional_videos',
+        'deposit_policy',
+        'deposit_type',
+        'deposit_value',
+        'allowed_payment_method_ids',
+        'focus_keyword',
+        'meta_keywords',
+        'og_title',
+        'og_description',
+        'og_image_path',
+        'twitter_card',
+        'twitter_title',
+        'twitter_description',
+        'robots_index',
+        'robots_follow',
+        'itinerary_mode',
+        'group_pricing_tiers',
         'price_1_person',
         'price_2_persons',
         'price_3_persons',
@@ -133,6 +157,18 @@ class Package extends Model
         'max_participants' => 'integer',
         'booking_lead_days' => 'integer',
         'faq_json' => 'array',
+        'what_to_bring' => 'array',
+        'on_tour_languages' => 'array',
+        'operating_days' => 'array',
+        'departure_times' => 'array',
+        'promotional_videos' => 'array',
+        'allowed_payment_method_ids' => 'array',
+        'meta_keywords' => 'array',
+        'group_pricing_tiers' => 'array',
+        'deposit_value' => 'decimal:2',
+        'default_seat_capacity' => 'integer',
+        'robots_index' => 'boolean',
+        'robots_follow' => 'boolean',
         'gallery_images' => 'array',
         'published_at' => 'datetime',
         'sort_order' => 'integer',
@@ -182,6 +218,41 @@ class Package extends Model
     public function nileCruiseCategory(): BelongsTo
     {
         return $this->belongsTo(NileCruiseCategory::class, 'nile_cruise_category_id');
+    }
+
+    public function nileCruiseDetail(): HasOne
+    {
+        return $this->hasOne(NileCruiseDetail::class);
+    }
+
+    public function nileCruiseSchedules(): HasMany
+    {
+        return $this->hasMany(NileCruiseSchedule::class)->orderBy('sort_order');
+    }
+
+    public function nileCruiseCabins(): HasMany
+    {
+        return $this->hasMany(NileCruiseCabin::class)->orderBy('sort_order');
+    }
+
+    public function nileCruiseDurations(): HasMany
+    {
+        return $this->hasMany(NileCruiseDuration::class)->orderBy('sort_order');
+    }
+
+    public function nileCruiseAddons(): HasMany
+    {
+        return $this->hasMany(NileCruiseAddon::class)->orderBy('sort_order');
+    }
+
+    public function addons(): HasMany
+    {
+        return $this->hasMany(PackageAddon::class)->orderBy('sort_order');
+    }
+
+    public function tourPackageDetail(): HasOne
+    {
+        return $this->hasOne(TourPackageDetail::class);
     }
 
     public function scopeNileCruises($query)

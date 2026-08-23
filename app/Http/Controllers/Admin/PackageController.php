@@ -7,7 +7,10 @@ use App\Models\City;
 use App\Models\Currency;
 use App\Models\Package;
 use App\Models\PackageCategory;
+use App\Models\PaymentMethod;
 use App\Services\PackageAiService;
+use App\Services\NileCruisePackageService;
+use App\Services\PackageTypeContentService;
 use App\Traits\ApiResponseTrait;
 use App\Traits\HandlesTranslatedFields;
 use Illuminate\Http\RedirectResponse;
@@ -78,6 +81,7 @@ class PackageController extends Controller
             'currencies' => Currency::all(),
             'attractions' => $this->packageAttractionOptions(),
             'nileCruiseTypes' => \App\Models\NileCruiseType::where('is_active', true)->with('categories')->orderBy('sort_order')->get(),
+            'paymentMethods' => PaymentMethod::active()->orderBy('id')->get(),
         ]);
     }
 
@@ -97,7 +101,9 @@ class PackageController extends Controller
             $this->syncItineraries($package, $request);
             $this->syncInclusions($package, $request);
             $this->syncPrices($package, $request);
-            $this->syncPackageCities($package);
+            $this->syncPackageCities($package, $request);
+            app(PackageTypeContentService::class)->syncFromRequest($package, $request);
+            app(NileCruisePackageService::class)->syncFromRequest($package, $request);
         });
 
         return redirect()->route('admin.packages.index')->with('success', 'تم إنشاء الرحلة بنجاح.');
@@ -110,10 +116,29 @@ class PackageController extends Controller
             'destination.city',
             'currency',
             'facilities',
+            'highlights',
             'packageAttractions.attraction',
             'itineraries',
             'inclusions',
             'prices.currency',
+            'nileCruiseType',
+            'nileCruiseCategory',
+            'cities',
+            'nileCruiseDetail',
+            'cruise',
+            'nileCruiseSchedules.departureCity',
+            'nileCruiseSchedules.arrivalCity',
+            'nileCruiseCabins',
+            'nileCruiseAddons.currency',
+            'addons.currency',
+            'tourPackageDetail',
+            'tags',
+            'nileCruiseDurations.currency',
+            'nileCruiseDurations.departureCity',
+            'nileCruiseDurations.arrivalCity',
+            'nileCruiseDurations.itineraryDays.activities.attraction',
+            'nileCruiseDurations.seasonPrices.currency',
+            'nileCruiseDurations.seasonPrices.items.cabin',
         ]);
 
         return view('admin.packages.show', compact('package'));
@@ -123,10 +148,23 @@ class PackageController extends Controller
     {
         $package->load([
             'facilities',
+            'highlights',
             'packageAttractions.attraction',
             'itineraries',
             'inclusions',
             'prices',
+            'cities',
+            'nileCruiseDetail',
+            'cruise',
+            'nileCruiseSchedules.departureCity',
+            'nileCruiseSchedules.arrivalCity',
+            'nileCruiseCabins',
+            'nileCruiseAddons.currency',
+            'addons.currency',
+            'tourPackageDetail',
+            'tags',
+            'nileCruiseDurations.itineraryDays.activities.attraction',
+            'nileCruiseDurations.seasonPrices.items.cabin',
         ]);
 
         return view('admin.packages.edit', [
@@ -138,6 +176,7 @@ class PackageController extends Controller
                 $package->packageAttractions->pluck('attraction_id')->all()
             ),
             'nileCruiseTypes' => \App\Models\NileCruiseType::where('is_active', true)->with('categories')->orderBy('sort_order')->get(),
+            'paymentMethods' => PaymentMethod::active()->orderBy('id')->get(),
         ]);
     }
 
@@ -157,7 +196,9 @@ class PackageController extends Controller
             $this->syncItineraries($package, $request);
             $this->syncInclusions($package, $request);
             $this->syncPrices($package, $request);
-            $this->syncPackageCities($package);
+            $this->syncPackageCities($package, $request);
+            app(PackageTypeContentService::class)->syncFromRequest($package, $request);
+            app(NileCruisePackageService::class)->syncFromRequest($package, $request);
         });
 
         return $this->success('admin.packages.index', 'تم تعديل الرحلة بنجاح.');
@@ -331,6 +372,7 @@ class PackageController extends Controller
                     'day_number',
                     'title',
                     'description',
+                    'meals',
                     'meals_breakfast',
                     'meals_lunch',
                     'meals_dinner',
@@ -449,7 +491,7 @@ class PackageController extends Controller
 
             'start_from_price' => ['nullable', 'numeric'],
             'compare_price' => ['nullable', 'numeric'],
-            'adult_price' => ['required', 'numeric', 'min:0'],
+            'adult_price' => ['nullable', 'numeric', 'min:0'],
             'child_price' => ['nullable', 'numeric', 'min:0'],
             'infant_price' => ['nullable', 'numeric', 'min:0'],
             'price_1_person' => ['nullable', 'numeric', 'min:0'],
@@ -516,6 +558,19 @@ class PackageController extends Controller
             'itinerary.*.day_number' => ['nullable', 'integer'],
             'itinerary.*.title' => ['nullable', 'string'],
             'itinerary.*.description' => ['nullable', 'string'],
+            'itinerary.*.start_time' => ['nullable', 'date_format:H:i'],
+            'itinerary.*.end_time' => ['nullable', 'date_format:H:i'],
+            'itinerary.*.overnight_location' => ['nullable', 'string'],
+            'itinerary.*.accommodation' => ['nullable', 'string'],
+            'itinerary.*.transport_notes' => ['nullable', 'string'],
+            'itinerary.*.activities' => ['nullable', 'array'],
+            'itinerary.*.activities.*.time' => ['nullable', 'string', 'max:50'],
+            'itinerary.*.activities.*.title' => ['nullable', 'string', 'max:255'],
+            'itinerary.*.activities.*.location' => ['nullable', 'string', 'max:255'],
+            'itinerary.*.activities.*.duration' => ['nullable', 'string', 'max:100'],
+            'itinerary.*.activities.*.description' => ['nullable', 'string'],
+            'itinerary.*.meals' => ['nullable', 'array'],
+            'itinerary.*.meals.*' => ['nullable', 'string'],
             'itinerary.*.meals_breakfast' => ['nullable', 'boolean'],
             'itinerary.*.meals_lunch' => ['nullable', 'boolean'],
             'itinerary.*.meals_dinner' => ['nullable', 'boolean'],
@@ -538,6 +593,169 @@ class PackageController extends Controller
             'prices.*.valid_from' => ['nullable', 'date'],
             'prices.*.valid_to' => ['nullable', 'date'],
             'prices.*.notes' => ['nullable', 'string'],
+
+            'tour_city_ids' => ['nullable', 'array'],
+            'tour_city_ids.*' => ['integer', 'distinct', 'exists:cities,id'],
+            'highlights' => ['nullable', 'array'],
+            'highlights.*.title' => ['nullable', 'string', 'max:500'],
+            'tags' => ['nullable'],
+
+            // Shared content used by Day Trip, Tour Package and Nile Cruise.
+            'experience' => ['nullable', 'array'],
+            'experience._present' => ['nullable', 'boolean'],
+            'experience.what_to_bring' => ['nullable'],
+            'experience.on_tour_languages' => ['nullable'],
+            'experience.operating_days' => ['nullable', 'array'],
+            'experience.operating_days.*' => ['nullable', 'string', 'max:20'],
+            'experience.departure_times' => ['nullable'],
+            'experience.tour_timezone' => ['nullable', 'string', 'max:100'],
+            'experience.default_seat_capacity' => ['nullable', 'integer', 'min:1'],
+            'experience.brochure' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'experience.remove_brochure' => ['nullable', 'boolean'],
+            'experience.promotional_videos' => ['nullable'],
+            'experience.deposit_policy' => ['nullable', 'string', 'in:inherit,required,not_required'],
+            'experience.deposit_type' => ['nullable', 'string', 'in:percent,fixed'],
+            'experience.deposit_value' => ['nullable', 'numeric', 'min:0'],
+            'experience.allowed_payment_method_ids' => ['nullable', 'array'],
+            'experience.allowed_payment_method_ids.*' => ['integer', 'exists:payment_methods,id'],
+            'experience.focus_keyword' => ['nullable', 'string', 'max:255'],
+            'experience.meta_keywords' => ['nullable'],
+            'experience.og_title' => ['nullable', 'string', 'max:255'],
+            'experience.og_description' => ['nullable', 'string', 'max:1000'],
+            'experience.og_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'experience.remove_og_image' => ['nullable', 'boolean'],
+            'experience.twitter_card' => ['nullable', 'string', 'in:summary,summary_large_image'],
+            'experience.twitter_title' => ['nullable', 'string', 'max:255'],
+            'experience.twitter_description' => ['nullable', 'string', 'max:1000'],
+            'experience.robots_index' => ['nullable', 'boolean'],
+            'experience.robots_follow' => ['nullable', 'boolean'],
+            'experience.itinerary_mode' => ['nullable', 'string', 'in:simple,advanced'],
+            'experience.group_pricing_tiers' => ['nullable', 'array'],
+            'experience.group_pricing_tiers.*.id' => ['nullable', 'string', 'max:80'],
+            'experience.group_pricing_tiers.*.label' => ['nullable', 'string', 'max:120'],
+            'experience.group_pricing_tiers.*.min' => ['nullable', 'integer', 'min:1'],
+            'experience.group_pricing_tiers.*.max' => ['nullable', 'integer', 'min:1'],
+            'experience.group_pricing_tiers.*.price_per_person' => ['nullable', 'numeric', 'min:0'],
+            'experience.addons' => ['nullable', 'array'],
+            'experience.addons.*.title' => ['nullable', 'string', 'max:255'],
+            'experience.addons.*.description' => ['nullable', 'string'],
+            'experience.addons.*.price' => ['nullable', 'numeric', 'min:0'],
+            'experience.addons.*.currency_id' => ['nullable', 'integer', 'exists:currencies,id'],
+            'experience.addons.*.price_unit' => ['nullable', 'string', 'max:80'],
+            'experience.addons.*.is_active' => ['nullable', 'boolean'],
+
+            // Tour Package-only details.
+            'tour_package' => ['nullable', 'array'],
+            'tour_package._present' => ['nullable', 'boolean'],
+            'tour_package.accommodation_standard' => ['nullable', 'string', 'max:120'],
+            'tour_package.meals_included' => ['nullable'],
+            'tour_package.flexible_itinerary' => ['nullable', 'boolean'],
+            'tour_package.additional_notes' => ['nullable', 'string'],
+
+            // Nile Cruise extended content: intentionally nullable and only consumed for nile_cruise packages.
+            'nile_cruise' => ['nullable', 'array'],
+            'nile_cruise._present' => ['nullable', 'boolean'],
+            'nile_cruise.facility_titles' => ['nullable', 'array'],
+            'nile_cruise.facility_titles.*' => ['nullable', 'string', 'max:255'],
+            'nile_cruise.decks' => ['nullable', 'integer', 'min:0'],
+            'nile_cruise.sun_beds' => ['nullable', 'integer', 'min:0'],
+            'nile_cruise.sun_deck_pergolas' => ['nullable', 'integer', 'min:0'],
+            'nile_cruise.tour_style' => ['nullable', 'string', 'max:255'],
+            'nile_cruise.ship_name' => ['nullable', 'string', 'max:255'],
+            'nile_cruise.cruise_class' => ['nullable', 'string', 'max:255'],
+            'nile_cruise.star_rating' => ['nullable', 'integer', 'min:1', 'max:5'],
+            'nile_cruise.all_inclusive' => ['nullable', 'boolean'],
+            'nile_cruise.what_to_bring' => ['nullable'],
+            'nile_cruise.on_tour_languages' => ['nullable'],
+            'nile_cruise.timezone' => ['nullable', 'string', 'max:100'],
+            'nile_cruise.operating_days' => ['nullable', 'array'],
+            'nile_cruise.operating_days.*' => ['nullable', 'string', 'max:20'],
+            'nile_cruise.promotional_videos' => ['nullable', 'string'],
+            'nile_cruise.deposit_policy' => ['nullable', 'string', 'in:inherit,required,not_required'],
+            'nile_cruise.deposit_type' => ['nullable', 'string', 'in:percent,fixed'],
+            'nile_cruise.deposit_value' => ['nullable', 'numeric', 'min:0'],
+            'nile_cruise.allowed_payment_method_ids' => ['nullable', 'array'],
+            'nile_cruise.allowed_payment_method_ids.*' => ['integer', 'exists:payment_methods,id'],
+            'nile_cruise.focus_keyword' => ['nullable', 'string', 'max:255'],
+            'nile_cruise.meta_keywords' => ['nullable'],
+            'nile_cruise.og_title' => ['nullable', 'string', 'max:255'],
+            'nile_cruise.og_description' => ['nullable', 'string', 'max:1000'],
+            'nile_cruise.social_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'nile_cruise.remove_social_image' => ['nullable', 'boolean'],
+            'nile_cruise.twitter_card' => ['nullable', 'string', 'in:summary,summary_large_image'],
+            'nile_cruise.twitter_title' => ['nullable', 'string', 'max:255'],
+            'nile_cruise.twitter_description' => ['nullable', 'string', 'max:1000'],
+            'nile_cruise.robots_index' => ['nullable', 'boolean'],
+            'nile_cruise.robots_follow' => ['nullable', 'boolean'],
+            'nile_cruise.addons' => ['nullable', 'array'],
+            'nile_cruise.addons.*.name' => ['nullable', 'string', 'max:255'],
+            'nile_cruise.addons.*.description' => ['nullable', 'string'],
+            'nile_cruise.addons.*.price' => ['nullable', 'numeric', 'min:0'],
+            'nile_cruise.addons.*.currency_id' => ['nullable', 'integer', 'exists:currencies,id'],
+            'nile_cruise.addons.*.is_active' => ['nullable', 'boolean'],
+            'nile_cruise.route_summary' => ['nullable', 'string', 'max:255'],
+            'nile_cruise.pickup_notes' => ['nullable', 'string'],
+            'nile_cruise.dropoff_notes' => ['nullable', 'string'],
+            'nile_cruise.additional_notes' => ['nullable', 'string'],
+            'nile_cruise.fact_sheet' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'nile_cruise.remove_fact_sheet' => ['nullable', 'boolean'],
+            'nile_cruise.route_city_ids' => ['nullable', 'array'],
+            'nile_cruise.route_city_ids.*' => ['nullable', 'integer', 'exists:cities,id'],
+            'nile_cruise.schedules' => ['nullable', 'array'],
+            'nile_cruise.schedules.*.departure_day' => ['nullable', 'string', 'max:50'],
+            'nile_cruise.schedules.*.departure_city_id' => ['nullable', 'integer', 'exists:cities,id'],
+            'nile_cruise.schedules.*.arrival_city_id' => ['nullable', 'integer', 'exists:cities,id'],
+            'nile_cruise.schedules.*.direction' => ['nullable', 'string', 'max:255'],
+            'nile_cruise.schedules.*.notes' => ['nullable', 'string'],
+            'nile_cruise.schedules.*.is_active' => ['nullable', 'boolean'],
+            'nile_cruise.cabins' => ['nullable', 'array'],
+            'nile_cruise.cabins.*.id' => ['nullable', 'integer'],
+            'nile_cruise.cabins.*.client_key' => ['nullable', 'string', 'max:100'],
+            'nile_cruise.cabins.*.name' => ['nullable', 'string', 'max:255'],
+            'nile_cruise.cabins.*.quantity' => ['nullable', 'integer', 'min:0'],
+            'nile_cruise.cabins.*.bed_type' => ['nullable', 'string', 'max:255'],
+            'nile_cruise.cabins.*.size_sqm' => ['nullable', 'numeric', 'min:0'],
+            'nile_cruise.cabins.*.max_adults' => ['nullable', 'integer', 'min:0'],
+            'nile_cruise.cabins.*.max_children' => ['nullable', 'integer', 'min:0'],
+            'nile_cruise.cabins.*.has_private_bathroom' => ['nullable', 'boolean'],
+            'nile_cruise.cabins.*.has_private_terrace' => ['nullable', 'boolean'],
+            'nile_cruise.cabins.*.amenities' => ['nullable'],
+            'nile_cruise.cabins.*.description' => ['nullable', 'string'],
+            'nile_cruise.cabins.*.existing_image' => ['nullable', 'string'],
+            'nile_cruise.cabins.*.image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'nile_cruise.durations' => ['nullable', 'array'],
+            'nile_cruise.durations.*.title' => ['nullable', 'string', 'max:255'],
+            'nile_cruise.durations.*.days' => ['nullable', 'integer', 'min:1'],
+            'nile_cruise.durations.*.nights' => ['nullable', 'integer', 'min:0'],
+            'nile_cruise.durations.*.direction' => ['nullable', 'string', 'max:255'],
+            'nile_cruise.durations.*.departure_city_id' => ['nullable', 'integer', 'exists:cities,id'],
+            'nile_cruise.durations.*.arrival_city_id' => ['nullable', 'integer', 'exists:cities,id'],
+            'nile_cruise.durations.*.departure_day' => ['nullable', 'string', 'max:50'],
+            'nile_cruise.durations.*.currency_id' => ['nullable', 'integer', 'exists:currencies,id'],
+            'nile_cruise.durations.*.is_default' => ['nullable', 'boolean'],
+            'nile_cruise.durations.*.is_active' => ['nullable', 'boolean'],
+            'nile_cruise.durations.*.itinerary' => ['nullable', 'array'],
+            'nile_cruise.durations.*.itinerary.*.day_number' => ['nullable', 'integer', 'min:1'],
+            'nile_cruise.durations.*.itinerary.*.title' => ['nullable', 'string'],
+            'nile_cruise.durations.*.itinerary.*.description' => ['nullable', 'string'],
+            'nile_cruise.durations.*.itinerary.*.meals' => ['nullable'],
+            'nile_cruise.durations.*.itinerary.*.overnight' => ['nullable', 'string'],
+            'nile_cruise.durations.*.itinerary.*.activities' => ['nullable', 'array'],
+            'nile_cruise.durations.*.itinerary.*.activities.*.title' => ['nullable', 'string'],
+            'nile_cruise.durations.*.itinerary.*.activities.*.description' => ['nullable', 'string'],
+            'nile_cruise.durations.*.itinerary.*.activities.*.attraction_id' => ['nullable', 'integer', 'exists:attractions,id'],
+            'nile_cruise.durations.*.seasons' => ['nullable', 'array'],
+            'nile_cruise.durations.*.seasons.*.season_name' => ['nullable', 'string', 'max:255'],
+            'nile_cruise.durations.*.seasons.*.date_from' => ['nullable', 'date'],
+            'nile_cruise.durations.*.seasons.*.date_to' => ['nullable', 'date'],
+            'nile_cruise.durations.*.seasons.*.currency_id' => ['nullable', 'integer', 'exists:currencies,id'],
+            'nile_cruise.durations.*.seasons.*.notes' => ['nullable', 'string'],
+            'nile_cruise.durations.*.seasons.*.is_active' => ['nullable', 'boolean'],
+            'nile_cruise.durations.*.seasons.*.items' => ['nullable', 'array'],
+            'nile_cruise.durations.*.seasons.*.items.*.cabin_key' => ['nullable', 'string', 'max:100'],
+            'nile_cruise.durations.*.seasons.*.items.*.occupancy_type' => ['nullable', 'string', 'max:50'],
+            'nile_cruise.durations.*.seasons.*.items.*.label' => ['nullable', 'string', 'max:255'],
+            'nile_cruise.durations.*.seasons.*.items.*.price' => ['nullable', 'numeric', 'min:0'],
 
             'faq_json' => ['nullable', 'array'],
             'faq_json.*.question' => ['nullable', 'string'],
@@ -564,6 +782,27 @@ class PackageController extends Controller
             }
 
             $packageType = $request->input('package_type');
+
+            if ($packageType === 'day_tour') {
+                if ($request->input('duration_type') !== 'hours') {
+                    $validator->errors()->add('duration_type', 'Day Trip duration must be measured in hours.');
+                }
+                if ((int) $request->input('duration_hours', 0) < 1) {
+                    $validator->errors()->add('duration_hours', 'Day Trip duration in hours is required.');
+                }
+            }
+
+            if ($packageType === 'travel_package') {
+                if ($request->input('duration_type') !== 'days') {
+                    $validator->errors()->add('duration_type', 'Tour Package duration must use days and nights.');
+                }
+                if ((int) $request->input('duration_days', 0) < 1) {
+                    $validator->errors()->add('duration_days', 'Tour Package days are required.');
+                }
+                if ((int) $request->input('duration_nights', 0) < 0) {
+                    $validator->errors()->add('duration_nights', 'Tour Package nights cannot be negative.');
+                }
+            }
             $nileCruiseTypeId = $request->input('nile_cruise_type_id');
             $nileCruiseCategoryId = $request->input('nile_cruise_category_id');
 
@@ -587,6 +826,21 @@ class PackageController extends Controller
                             if (!empty($nileCruiseCategoryId)) {
                                 $validator->errors()->add('nile_cruise_category_id', 'Nile Cruise Category should be empty for this cruise type.');
                             }
+                        }
+                    }
+                }
+            }
+
+            if ($request->input('package_type') === 'nile_cruise') {
+                foreach ((array) $request->input('nile_cruise.durations', []) as $durationIndex => $duration) {
+                    foreach ((array) ($duration['seasons'] ?? []) as $seasonIndex => $season) {
+                        $from = $season['date_from'] ?? null;
+                        $to = $season['date_to'] ?? null;
+                        if ($from && $to && strtotime((string) $to) < strtotime((string) $from)) {
+                            $validator->errors()->add(
+                                "nile_cruise.durations.{$durationIndex}.seasons.{$seasonIndex}.date_to",
+                                'Season end date must be on or after the start date.'
+                            );
                         }
                     }
                 }
@@ -621,6 +875,12 @@ class PackageController extends Controller
             'excluded',
             'prices',
             'faq_json',
+            'nile_cruise',
+            'experience',
+            'tour_package',
+            'tour_city_ids',
+            'highlights',
+            'tags',
         ])->toArray();
 
         $selectedCity = !empty($data['destination_id'])
@@ -632,7 +892,11 @@ class PackageController extends Controller
 
         $data['destination_id'] = $selectedAttraction?->id;
         $data['package_type'] = $this->normalizePackageType($data['package_type'] ?? null);
-        $data['duration_type'] = $data['duration_type'] ?? 'days';
+        $data['duration_type'] = match ($data['package_type']) {
+            'day_tour' => 'hours',
+            'travel_package' => 'days',
+            default => $data['duration_type'] ?? 'days',
+        };
 
         if ($data['package_type'] !== 'nile_cruise') {
             $data['nile_cruise_type_id'] = null;
@@ -880,10 +1144,46 @@ class PackageController extends Controller
         }
     }
 
-    private function syncPackageCities(Package $package): void
+    private function syncPackageCities(Package $package, ?Request $request = null): void
     {
-        $package->loadMissing(['destination', 'packageAttractions.attraction']);
+        // Advanced Nile Cruise route order is managed by NileCruisePackageService.
+        if ($package->package_type === 'nile_cruise' && $request?->boolean('nile_cruise._present')) {
+            return;
+        }
 
+        $primaryCityId = (int) ($request?->input('destination_id', 0) ?? 0);
+
+        if ($request && $package->package_type === 'travel_package' && $request->has('tour_city_ids')) {
+            $cityIds = collect((array) $request->input('tour_city_ids', []))
+                ->map(fn ($id) => (int) $id)
+                ->filter()
+                ->unique()
+                ->values();
+
+            if ($primaryCityId && !$cityIds->contains($primaryCityId)) {
+                $cityIds->prepend($primaryCityId);
+            }
+
+            $syncData = [];
+            foreach ($cityIds as $index => $cityId) {
+                $syncData[$cityId] = [
+                    'stop_order' => $index,
+                    'is_primary' => $cityId === $primaryCityId || (!$primaryCityId && $index === 0),
+                    'nights' => null,
+                ];
+            }
+            $package->cities()->sync($syncData);
+            return;
+        }
+
+        if ($request && $package->package_type === 'day_tour' && $primaryCityId) {
+            $package->cities()->sync([
+                $primaryCityId => ['stop_order' => 0, 'is_primary' => true, 'nights' => null],
+            ]);
+            return;
+        }
+
+        $package->loadMissing(['destination', 'packageAttractions.attraction']);
         $cityIds = collect();
 
         if ($package->destination?->city_id) {
@@ -896,13 +1196,26 @@ class PackageController extends Controller
             }
         }
 
-        $uniqueCityIds = $cityIds->filter()->unique()->values();
-
-        $package->cities()->sync($uniqueCityIds);
+        $syncData = [];
+        foreach ($cityIds->filter()->unique()->values() as $index => $cityId) {
+            $syncData[$cityId] = [
+                'stop_order' => $index,
+                'is_primary' => $index === 0,
+                'nights' => null,
+            ];
+        }
+        $package->cities()->sync($syncData);
     }
 
     private function syncItineraries(Package $package, Request $request): void
     {
+        // Advanced Nile Cruises own their itinerary per duration/route. Preserve
+        // any legacy generic itinerary rows as a fallback instead of deleting
+        // them when the Nile Cruise editor is submitted.
+        if ($package->package_type === 'nile_cruise' && $request?->boolean('nile_cruise._present')) {
+            return;
+        }
+
         $package->itineraries()->delete();
         $position = 0;
 
@@ -911,19 +1224,60 @@ class PackageController extends Controller
                 continue;
             }
 
+            $mealsInput = [];
+            if (isset($day['meals']) && is_array($day['meals'])) {
+                $mealsInput = array_values(array_filter($day['meals']));
+            }
+
+            $hasBreakfast = in_array('breakfast', $mealsInput, true) || !empty($day['meals_breakfast']);
+            $hasLunch = in_array('lunch', $mealsInput, true) || !empty($day['meals_lunch']);
+            $hasDinner = in_array('dinner', $mealsInput, true) || !empty($day['meals_dinner']);
+
+            $normalizedMeals = array_values(array_unique(array_filter(array_merge(
+                $mealsInput,
+                $hasBreakfast ? ['breakfast'] : [],
+                $hasLunch ? ['lunch'] : [],
+                $hasDinner ? ['dinner'] : []
+            ))));
+
             $package->itineraries()->create([
                 'duration' => $day['duration'] ?? null,
                 'day_number' => $position + 1,
                 'title' => $day['title'] ?? null,
                 'description' => $day['description'] ?? null,
-                'meals_breakfast' => !empty($day['meals_breakfast']),
-                'meals_lunch' => !empty($day['meals_lunch']),
-                'meals_dinner' => !empty($day['meals_dinner']),
+                'meals' => $package->package_type === 'day_tour' ? [] : $normalizedMeals,
+                'meals_breakfast' => $package->package_type === 'day_tour' ? false : $hasBreakfast,
+                'meals_lunch' => $package->package_type === 'day_tour' ? false : $hasLunch,
+                'meals_dinner' => $package->package_type === 'day_tour' ? false : $hasDinner,
+                'overnight_location' => $package->package_type === 'travel_package' ? ($day['overnight_location'] ?? null) : null,
+                'accommodation' => $package->package_type === 'travel_package' ? ($day['accommodation'] ?? null) : null,
+                'transport_notes' => $package->package_type === 'travel_package' ? ($day['transport_notes'] ?? null) : null,
+                'activities' => $package->package_type === 'travel_package' ? $this->normalizeTourPackageActivities($day['activities'] ?? []) : [],
+                'start_time' => $package->package_type === 'day_tour' ? ($day['start_time'] ?? null) : null,
+                'end_time' => $package->package_type === 'day_tour' ? ($day['end_time'] ?? null) : null,
                 'sort_order' => $position,
             ]);
 
             $position++;
         }
+    }
+
+    private function normalizeTourPackageActivities(mixed $activities): array
+    {
+        return collect((array) $activities)
+            ->filter(fn ($row) => is_array($row))
+            ->map(function (array $row) {
+                return [
+                    'time' => trim((string) ($row['time'] ?? '')) ?: null,
+                    'title' => trim((string) ($row['title'] ?? '')) ?: null,
+                    'location' => trim((string) ($row['location'] ?? '')) ?: null,
+                    'duration' => trim((string) ($row['duration'] ?? '')) ?: null,
+                    'description' => trim((string) ($row['description'] ?? '')) ?: null,
+                ];
+            })
+            ->filter(fn (array $row) => collect($row)->filter(fn ($value) => $value !== null && $value !== '')->isNotEmpty())
+            ->values()
+            ->all();
     }
 
     private function syncInclusions(Package $package, Request $request): void
@@ -965,6 +1319,13 @@ class PackageController extends Controller
 
     private function syncPrices(Package $package, Request $request): void
     {
+        // Duration/season/cabin pricing for Nile Cruises is stored in the
+        // Nile-specific relations. Keep legacy generic rows untouched so old
+        // cruises still have a safe fallback if advanced data is removed.
+        if ($package->package_type === 'nile_cruise' && $request?->boolean('nile_cruise._present')) {
+            return;
+        }
+
         $package->prices()->delete();
 
         foreach ((array) $request->input('prices', []) as $price) {
@@ -1013,14 +1374,31 @@ class PackageController extends Controller
                 continue;
             }
 
+            $mealsInput = [];
+            if (isset($day['meals']) && is_array($day['meals'])) {
+                $mealsInput = array_values(array_filter($day['meals']));
+            }
+
+            $hasBreakfast = in_array('breakfast', $mealsInput, true) || !empty($day['meals_breakfast']);
+            $hasLunch = in_array('lunch', $mealsInput, true) || !empty($day['meals_lunch']);
+            $hasDinner = in_array('dinner', $mealsInput, true) || !empty($day['meals_dinner']);
+
+            $normalizedMeals = array_values(array_unique(array_filter(array_merge(
+                $mealsInput,
+                $hasBreakfast ? ['breakfast'] : [],
+                $hasLunch ? ['lunch'] : [],
+                $hasDinner ? ['dinner'] : []
+            ))));
+
             $package->itineraries()->create([
                 'duration' => $day['duration'] ?? null,
                 'day_number' => $position + 1,
                 'title' => $day['title'] ?? null,
                 'description' => $day['description'] ?? null,
-                'meals_breakfast' => !empty($day['meals_breakfast']),
-                'meals_lunch' => !empty($day['meals_lunch']),
-                'meals_dinner' => !empty($day['meals_dinner']),
+                'meals' => $normalizedMeals,
+                'meals_breakfast' => $hasBreakfast,
+                'meals_lunch' => $hasLunch,
+                'meals_dinner' => $hasDinner,
                 'sort_order' => $position,
             ]);
 

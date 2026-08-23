@@ -19,17 +19,28 @@
         $rawCanonical = trim($__env->yieldContent('canonical'));
         $rawRobots = trim($__env->yieldContent('robots'));
         $rawOgType = trim($__env->yieldContent('og_type'));
+        $rawImage = trim($__env->yieldContent('image'));
+        $rawOgTitle = trim($__env->yieldContent('og_title'));
+        $rawOgDescription = trim(preg_replace('/\s+/', ' ', strip_tags($__env->yieldContent('og_description'))));
         $rawTwitterCard = trim($__env->yieldContent('twitter_card'));
+        $rawTwitterTitle = trim($__env->yieldContent('twitter_title'));
+        $rawTwitterDescription = trim(preg_replace('/\s+/', ' ', strip_tags($__env->yieldContent('twitter_description'))));
+        $rawTwitterImage = trim($__env->yieldContent('twitter_image'));
         $pageTitle = $rawTitle !== '' ? $rawTitle : $defaultTitle;
         $pageDescription =
             $rawDescription !== '' ? \Illuminate\Support\Str::limit($rawDescription, 170, '...') : $defaultDescription;
         $pageKeywords = $rawKeywords !== '' ? $rawKeywords : $defaultKeywords;
         $pageCanonical = $rawCanonical !== '' ? $rawCanonical : url()->current();
-        $pageImage = $logoUrl;
+        $pageImage = $rawImage !== '' ? $rawImage : $logoUrl;
+        $pageOgTitle = $rawOgTitle !== '' ? $rawOgTitle : $pageTitle;
+        $pageOgDescription = $rawOgDescription !== '' ? \Illuminate\Support\Str::limit($rawOgDescription, 200, '...') : $pageDescription;
         $pageRobots = $rawRobots !== '' ? $rawRobots : 'index, follow, max-image-preview:large';
         $pageOgType =
             $rawOgType !== '' ? $rawOgType : (request()->routeIs('website.blogs.show*') ? 'article' : 'website');
         $twitterCard = $rawTwitterCard !== '' ? $rawTwitterCard : 'summary_large_image';
+        $twitterTitle = $rawTwitterTitle !== '' ? $rawTwitterTitle : $pageOgTitle;
+        $twitterDescription = $rawTwitterDescription !== '' ? \Illuminate\Support\Str::limit($rawTwitterDescription, 200, '...') : $pageOgDescription;
+        $twitterImage = $rawTwitterImage !== '' ? $rawTwitterImage : $pageImage;
         $ogLocale = app()->getLocale() === 'ar' ? 'ar_AR' : 'en_US';
         $alternateLocale = app()->getLocale() === 'ar' ? 'en_US' : 'ar_AR';
         $preferredThemeValue = trim($__env->yieldContent('preferred_theme', 'dark'));
@@ -78,15 +89,15 @@
     <meta property="og:site_name" content="{{ $siteName }}">
     <meta property="og:locale" content="{{ $ogLocale }}">
     <meta property="og:locale:alternate" content="{{ $alternateLocale }}">
-    <meta property="og:title" content="{{ $pageTitle }}">
-    <meta property="og:description" content="{{ $pageDescription }}">
+    <meta property="og:title" content="{{ $pageOgTitle }}">
+    <meta property="og:description" content="{{ $pageOgDescription }}">
     <meta property="og:image" content="{{ $pageImage }}">
     <meta property="og:image:alt" content="{{ $pageTitle }}">
     <meta property="og:url" content="{{ $pageCanonical }}">
     <meta name="twitter:card" content="{{ $twitterCard }}">
-    <meta name="twitter:title" content="{{ $pageTitle }}">
-    <meta name="twitter:description" content="{{ $pageDescription }}">
-    <meta name="twitter:image" content="{{ $pageImage }}">
+    <meta name="twitter:title" content="{{ $twitterTitle }}">
+    <meta name="twitter:description" content="{{ $twitterDescription }}">
+    <meta name="twitter:image" content="{{ $twitterImage }}">
     @hasSection('published_time')
         <meta property="article:published_time" content="@yield('published_time')">
     @endif

@@ -1,21 +1,54 @@
 @extends('website.layouts.master')
 
+@php
+    $ncSeoDetail = $package->package_type === 'nile_cruise' ? $package->nileCruiseDetail : null;
+    $sharedSocialPath = $package->og_image_path ?: ($ncSeoDetail?->social_image_path ?? null);
+    $socialImage = $sharedSocialPath
+        ? asset('storage/' . ltrim($sharedSocialPath, '/'))
+        : $heroImage;
+    $metaKeywordList = collect((array) ($package->meta_keywords ?: ($ncSeoDetail?->meta_keywords ?? [])))
+        ->push($package->focus_keyword ?: ($ncSeoDetail?->focus_keyword ?? null))
+        ->filter()
+        ->unique()
+        ->values();
+    $robotsIndex = $package->robots_index;
+    $robotsFollow = $package->robots_follow;
+    if ($package->package_type === 'nile_cruise' && $ncSeoDetail) {
+        $robotsIndex = $package->robots_index ?? $ncSeoDetail->robots_index;
+        $robotsFollow = $package->robots_follow ?? $ncSeoDetail->robots_follow;
+    }
+    $pageRobotsOverride = ($robotsIndex === false ? 'noindex' : 'index') . ', ' . ($robotsFollow === false ? 'nofollow' : 'follow') . ', max-image-preview:large';
+    $pageOgTitle = $package->og_title ?: ($ncSeoDetail?->og_title ?? null);
+    $pageOgDescription = $package->og_description ?: ($ncSeoDetail?->og_description ?? null);
+    $pageTwitterCard = $package->twitter_card ?: ($ncSeoDetail?->twitter_card ?? null);
+    $pageTwitterTitle = $package->twitter_title ?: ($ncSeoDetail?->twitter_title ?? null);
+    $pageTwitterDescription = $package->twitter_description ?: ($ncSeoDetail?->twitter_description ?? null);
+@endphp
+
 @section('title', $package->getTranslation('seo_title') ?: $title . ' - Etro Tours')
 @section('description', $package->getTranslation('seo_description') ?: $shortDescription)
 @section('body_class', 'package-show-template')
 @section('keywords',
-    trim(
-    collect([
-    $title,
-    $tourTypeText ?? null,
-    $package->primaryCountry?->display_name ?? null,
-    'Etro
-    Tours',
-    ])->filter()->implode(', '),
-    ', ',
-    ))
-@section('image', $heroImage)
+    $metaKeywordList->isNotEmpty()
+        ? $metaKeywordList->implode(', ')
+        : trim(
+            collect([
+                $title,
+                $tourTypeText ?? null,
+                $package->primaryCountry?->display_name ?? null,
+                'Etro Tours',
+            ])->filter()->implode(', '),
+            ', ',
+        ))
+@section('image', $socialImage)
 @section('canonical', $canonicalUrl)
+@section('robots', $pageRobotsOverride)
+@if($pageOgTitle) @section('og_title', $pageOgTitle) @endif
+@if($pageOgDescription) @section('og_description', $pageOgDescription) @endif
+@if($pageTwitterCard) @section('twitter_card', $pageTwitterCard) @endif
+@if($pageTwitterTitle) @section('twitter_title', $pageTwitterTitle) @endif
+@if($pageTwitterDescription) @section('twitter_description', $pageTwitterDescription) @endif
+@section('twitter_image', $socialImage)
 
 @section('css')
     <style>
@@ -1953,6 +1986,9 @@
 
             <div class="row">
                 <div class="col-lg-8">
+                    @php
+                        $isExtendedNileCruise = $package->package_type === 'nile_cruise' && $package->nileCruiseDurations->isNotEmpty();
+                    @endphp
                     <section id="about" class="content-section">
                         <h2 class="section-header">{{ __('About') }} {{ $title }}</h2>
                         @if ($shortDescription)
@@ -1966,6 +2002,7 @@
                                 <p class="empty-state">{{ __('No description added for this package yet.') }}</p>
                             @endif
 
+                            @if(!in_array($package->package_type, ['day_tour', 'travel_package', 'nile_cruise'], true))
                             <div class="cruise-details">
                                 @if ($durationText)
                                     <div class="detail-item"><i class="la la-calendar"></i>
@@ -2113,8 +2150,13 @@
                                     </div>
                                 @endif --}}
                             </div>
+                            @endif
                         </div>
                     </section>
+
+                    @include('website.pages.packages.partials.day_trip_details')
+                    @include('website.pages.packages.partials.tour_package_details')
+                    @include('website.pages.packages.partials.nile_cruise_details')
 
                     @if ($highlights->count())
                         <section class="content-section">
@@ -2141,92 +2183,95 @@
 
                     @php
                         $isNileCruisePackage = $package->package_type === 'nile_cruise';
-                        $cruiseFacilityList = [
-                            'Large panoramic / ultra violet windows',
-                            'Private bath with bath tub, hair dryer',
-                            'All cabins are air-conditioned with individual controls.',
-                            'Internet access',
-                            'Non smoking cabins',
-                            'Doctor on calls on board.',
-                            'Colored TV within house music and video channels',
-                            'Dedicated movie channel showing 3 films daily',
-                            'Mini Bar & Room service',
-                            'Telephone system with international calls',
-                            'Swimming Pool and sundeck',
-                            'Safe box in each cabin',
-                            'Gymnasium',
-                            'Laundry service & housekeeping',
-                            'All major credit cards accepted',
-                        ];
-                        $cruiseAmenityCards = [
-                            ['label' => 'WiFi', 'icon' => 'wifi'],
-                            ['label' => 'Pool', 'icon' => 'pool'],
-                            ['label' => 'Air condition', 'icon' => 'snowflake'],
-                            ['label' => 'Private bath with Shower', 'icon' => 'bath'],
-                            ['label' => 'TV', 'icon' => 'tv'],
-                            ['label' => 'Mini Bar', 'icon' => 'glass'],
-                            ['label' => 'Doctor available 24 hours', 'icon' => 'medical'],
-                            ['label' => 'Gift Shop', 'icon' => 'gift'],
-                        ];
+                        $nileDetailForFacilities = $package->nileCruiseDetail;
+                        $nileCabinTotal = $package->nileCruiseCabins?->sum(fn($cabin) => (int) ($cabin->quantity ?? 0)) ?? 0;
+                        $nileFacilityStats = collect([
+                            $nileDetailForFacilities?->decks ? ['label' => $nileDetailForFacilities->decks . ' ' . __('Decks'), 'icon' => 'deck'] : null,
+                            $nileCabinTotal > 0 ? ['label' => $nileCabinTotal . ' ' . __('Cabins / Suites'), 'icon' => 'cabin'] : null,
+                            $nileDetailForFacilities?->sun_beds ? ['label' => $nileDetailForFacilities->sun_beds . ' ' . __('Sun Beds'), 'icon' => 'sun'] : null,
+                            $nileDetailForFacilities?->sun_deck_pergolas ? ['label' => $nileDetailForFacilities->sun_deck_pergolas . ' ' . __('Sun Deck Private Pergolas'), 'icon' => 'sun'] : null,
+                        ])->filter()->values();
+                        $nileFacilityIcon = function (string $title): string {
+                            $normalized = strtolower(trim($title));
+                            return match (true) {
+                                str_contains($normalized, 'wifi'), str_contains($normalized, 'internet') => 'wifi',
+                                str_contains($normalized, 'pool') => 'pool',
+                                str_contains($normalized, 'air condition') => 'snowflake',
+                                str_contains($normalized, 'bath') || str_contains($normalized, 'shower') => 'bath',
+                                $normalized === 'tv' || str_contains($normalized, 'television') => 'tv',
+                                str_contains($normalized, 'bar') => 'glass',
+                                str_contains($normalized, 'doctor') || str_contains($normalized, 'medical') => 'medical',
+                                str_contains($normalized, 'gift') => 'gift',
+                                str_contains($normalized, 'gym') => 'gym',
+                                str_contains($normalized, 'sun') => 'sun',
+                                default => 'check',
+                            };
+                        };
+                        $hasDynamicNileFacilities = $isNileCruisePackage && ($facilities->isNotEmpty() || $nileFacilityStats->isNotEmpty());
                     @endphp
-                    @if ($isNileCruisePackage || $facilities->count())
+                    @if (($isNileCruisePackage && $hasDynamicNileFacilities) || (!$isNileCruisePackage && $facilities->count()))
                         <section class="content-section">
                             <h2 class="section-header">
                                 {{ $isNileCruisePackage ? __('Cruise Facilities') : __('Trip Facilities') }}
                             </h2>
-                            @if ($isNileCruisePackage)
-                                <ul class="cruise-facility-list">
-                                    @foreach ($cruiseFacilityList as $facilityText)
-                                        <li>{{ __($facilityText) }}</li>
-                                    @endforeach
-                                </ul>
-                            @endif
                             <div class="facilities-grid">
-                                @foreach (($isNileCruisePackage ? $cruiseAmenityCards : $facilities) as $facility)
+                                @if($isNileCruisePackage)
+                                    @foreach($nileFacilityStats as $facilityStat)
+                                        <div class="facility-card">
+                                            <span class="facility-icon" aria-hidden="true">
+                                                @if($facilityStat['icon'] === 'sun')
+                                                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
+                                                @elseif($facilityStat['icon'] === 'cabin')
+                                                    <svg viewBox="0 0 24 24"><path d="M4 20V7l8-4 8 4v13"></path><path d="M8 20v-6h8v6"></path><path d="M9 9h.01M15 9h.01"></path></svg>
+                                                @else
+                                                    <svg viewBox="0 0 24 24"><path d="M4 20V8h16v12"></path><path d="M7 8V4h10v4"></path><path d="M8 12h8M8 16h8"></path></svg>
+                                                @endif
+                                            </span>
+                                            <span>{{ $facilityStat['label'] }}</span>
+                                        </div>
+                                    @endforeach
+                                @endif
+
+                                @foreach ($facilities as $facility)
+                                    @php $facilityIconName = $isNileCruisePackage ? $nileFacilityIcon($facility->display_title) : 'check'; @endphp
                                     <div class="facility-card">
-                                        @if ($isNileCruisePackage)
-                                            <span class="facility-icon" aria-hidden="true">
-                                                @switch($facility['icon'])
-                                                    @case('wifi')
-                                                        <svg viewBox="0 0 24 24"><path d="M5 13a10 10 0 0 1 14 0"></path><path d="M8.5 16.5a5 5 0 0 1 7 0"></path><path d="M12 20h.01"></path></svg>
-                                                        @break
-
-                                                    @case('pool')
-                                                        <svg viewBox="0 0 24 24"><path d="M4 18c2 0 2-1 4-1s2 1 4 1 2-1 4-1 2 1 4 1"></path><path d="M4 21c2 0 2-1 4-1s2 1 4 1 2-1 4-1 2 1 4 1"></path><path d="M8 17V5a3 3 0 0 1 6 0"></path><path d="M8 9h8"></path></svg>
-                                                        @break
-
-                                                    @case('snowflake')
-                                                        <svg viewBox="0 0 24 24"><path d="M12 2v20"></path><path d="m17 5-5 5-5-5"></path><path d="m17 19-5-5-5 5"></path><path d="M2 12h20"></path><path d="m5 7 5 5-5 5"></path><path d="m19 7-5 5 5 5"></path></svg>
-                                                        @break
-
-                                                    @case('bath')
-                                                        <svg viewBox="0 0 24 24"><path d="M4 12h16v4a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-4Z"></path><path d="M7 12V6a3 3 0 0 1 5.1-2.1"></path><path d="M14 5l2 2"></path><path d="M7 20l-1 2"></path><path d="M17 20l1 2"></path></svg>
-                                                        @break
-
-                                                    @case('tv')
-                                                        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2"></rect><path d="M8 21h8"></path><path d="M12 17v4"></path></svg>
-                                                        @break
-
-                                                    @case('glass')
-                                                        <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 8a3 3 0 0 1-6 0L8 3Z"></path><path d="M12 14v7"></path><path d="M9 21h6"></path><path d="M9 8h6"></path></svg>
-                                                        @break
-
-                                                    @case('medical')
-                                                        <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path><path d="M12 11v5"></path><path d="M9.5 13.5h5"></path></svg>
-                                                        @break
-
-                                                    @case('gift')
-                                                        <svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M12 8v13"></path><path d="M3 12h18"></path><path d="M12 8H8.5a2.5 2.5 0 1 1 2.1-3.9L12 8Z"></path><path d="M12 8h3.5a2.5 2.5 0 1 0-2.1-3.9L12 8Z"></path></svg>
-                                                        @break
-                                                @endswitch
-                                            </span>
-                                            <span>{{ __($facility['label']) }}</span>
-                                        @else
-                                            <span class="facility-icon" aria-hidden="true">
-                                                <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg>
-                                            </span>
-                                            <span>{{ $facility->display_title }}</span>
-                                        @endif
+                                        <span class="facility-icon" aria-hidden="true">
+                                            @switch($facilityIconName)
+                                                @case('wifi')
+                                                    <svg viewBox="0 0 24 24"><path d="M5 13a10 10 0 0 1 14 0"></path><path d="M8.5 16.5a5 5 0 0 1 7 0"></path><path d="M12 20h.01"></path></svg>
+                                                    @break
+                                                @case('pool')
+                                                    <svg viewBox="0 0 24 24"><path d="M4 18c2 0 2-1 4-1s2 1 4 1 2-1 4-1 2 1 4 1"></path><path d="M4 21c2 0 2-1 4-1s2 1 4 1 2-1 4-1 2 1 4 1"></path><path d="M8 17V5a3 3 0 0 1 6 0"></path><path d="M8 9h8"></path></svg>
+                                                    @break
+                                                @case('snowflake')
+                                                    <svg viewBox="0 0 24 24"><path d="M12 2v20"></path><path d="m17 5-5 5-5-5"></path><path d="m17 19-5-5-5 5"></path><path d="M2 12h20"></path></svg>
+                                                    @break
+                                                @case('bath')
+                                                    <svg viewBox="0 0 24 24"><path d="M4 12h16v4a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-4Z"></path><path d="M7 12V6a3 3 0 0 1 5.1-2.1"></path></svg>
+                                                    @break
+                                                @case('tv')
+                                                    <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2"></rect><path d="M8 21h8"></path><path d="M12 17v4"></path></svg>
+                                                    @break
+                                                @case('glass')
+                                                    <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 8a3 3 0 0 1-6 0L8 3Z"></path><path d="M12 14v7"></path><path d="M9 21h6"></path></svg>
+                                                    @break
+                                                @case('medical')
+                                                    <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M12 10v7M8.5 13.5h7"></path></svg>
+                                                    @break
+                                                @case('gift')
+                                                    <svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M12 8v13M3 12h18"></path></svg>
+                                                    @break
+                                                @case('gym')
+                                                    <svg viewBox="0 0 24 24"><path d="M6 9v6M18 9v6M3 10v4M21 10v4M6 12h12"></path></svg>
+                                                    @break
+                                                @case('sun')
+                                                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2"></path></svg>
+                                                    @break
+                                                @default
+                                                    <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg>
+                                            @endswitch
+                                        </span>
+                                        <span>{{ $facility->display_title }}</span>
                                     </div>
                                 @endforeach
                             </div>
@@ -2291,11 +2336,11 @@
                         </section>
                     @endif
 
-                    @if ($itineraries->count())
+                    @if (!$isExtendedNileCruise && $itineraries->count())
                         @php
-                            $isDayTourActive = !empty($isDayTour) || ($package->duration_type === 'hours' || (int) $package->duration_days <= 1 || $package->tour_type === 'day_tour');
-                            $sectionHeadingText = $isDayTourActive ? __('Trip Steps') : __('Itinerary');
-                            $stepUnitText = $isDayTourActive ? __('Step') : ($itineraryUnit ?? __('Day'));
+                            $isDayTourActive = !empty($isDayTour);
+                            $sectionHeadingText = $isDayTourActive ? __('Activity Timeline') : __('Itinerary');
+                            $stepUnitText = $isDayTourActive ? __('Stop') : ($itineraryUnit ?? __('Day'));
                         @endphp
                         <section id="itinerary" class="content-section">
                             <h2 class="section-header">{{ $title }} {{ $sectionHeadingText }}</h2>
@@ -2314,7 +2359,14 @@
                                                         : {{ $day->display_title }}
                                                     @endif
                                                 </h3>
-                                                @if ($day->duration && !$isDayTourActive)
+                                                @if ($isDayTourActive && ($day->start_time || $day->end_time))
+                                                    <small>
+                                                        <i class="la la-clock"></i>
+                                                        {{ $day->start_time ? substr((string) $day->start_time, 0, 5) : '' }}
+                                                        @if($day->start_time && $day->end_time) – @endif
+                                                        {{ $day->end_time ? substr((string) $day->end_time, 0, 5) : '' }}
+                                                    </small>
+                                                @elseif ($day->duration && !$isDayTourActive)
                                                     <small>
                                                         <i class="la la-clock"></i>
                                                         {{ $day->duration }}
@@ -2326,12 +2378,36 @@
                                         <div class="collapsible-content {{ $loop->first ? 'open active' : '' }}"
                                             id="day-{{ $day->id }}">
                                             <div class="day-content">
-                                                {!! nl2br(e($day->display_description ?: __('No itinerary description added yet.'))) !!}
-                                                @if ($day->display_overnight && !$isDayTourActive)
-                                                    <p><strong>{{ __('Overnight:') }}</strong>
-                                                        {{ $day->display_overnight }}</p>
+                                                @if($day->display_description)
+                                                    {!! nl2br(e($day->display_description)) !!}
                                                 @endif
-                                                @if ($day->meals_breakfast || $day->meals_lunch || $day->meals_dinner)
+
+                                                @if($package->package_type === 'travel_package' && ($day->display_activities ?? collect())->isNotEmpty() && ($package->itinerary_mode ?? 'simple') === 'advanced')
+                                                    <div class="mt-3">
+                                                        @foreach($day->display_activities as $activity)
+                                                            <div class="nc-activity">
+                                                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                                                    @if($activity['time'])<span class="meal-badge"><i class="la la-clock"></i> {{ substr($activity['time'], 0, 5) }}</span>@endif
+                                                                    @if($activity['title'])<strong>{{ $activity['title'] }}</strong>@endif
+                                                                    @if($activity['location'])<span class="price-meta"><i class="la la-map-marker"></i> {{ $activity['location'] }}</span>@endif
+                                                                    @if($activity['duration'])<span class="price-meta">{{ $activity['duration'] }}</span>@endif
+                                                                </div>
+                                                                @if($activity['description'])<div class="mt-1">{!! nl2br(e($activity['description'])) !!}</div>@endif
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                @endif
+
+                                                @if ($day->display_overnight && !$isDayTourActive)
+                                                    <p class="mt-2"><strong>{{ __('Overnight:') }}</strong> {{ $day->display_overnight }}</p>
+                                                @endif
+                                                @if ($package->package_type === 'travel_package' && $day->display_accommodation)
+                                                    <p><strong>{{ __('Accommodation:') }}</strong> {{ $day->display_accommodation }}</p>
+                                                @endif
+                                                @if ($package->package_type === 'travel_package' && $day->display_transport_notes)
+                                                    <p><strong>{{ __('Transport:') }}</strong> {{ $day->display_transport_notes }}</p>
+                                                @endif
+                                                @if (!$isDayTourActive && ($day->meals_breakfast || $day->meals_lunch || $day->meals_dinner))
                                                     <div class="meals-row">
                                                         @if ($day->meals_breakfast)
                                                             <span class="meal-badge">{{ __('Breakfast') }}</span>
@@ -2388,40 +2464,44 @@
                         </section>
                     @endif
 
-                    @if ($prices->count() || $hasCategoryPricing || $pricingInformation || true)
+                    @include('website.pages.packages.partials.common_experience_details')
+
+                    @php
+                        $groupTiersForDisplay = collect((array) ($package->group_pricing_tiers ?? []))
+                            ->filter(fn($tier) => is_array($tier) && (($tier['price_per_person'] ?? null) !== null));
+                        $hasAnyStandardPricing = $prices->count() || $hasCategoryPricing || $pricingInformation || $priceFrom > 0 || $priceTo > 0 || $groupTiersForDisplay->isNotEmpty();
+                    @endphp
+                    @if (!$isExtendedNileCruise && $hasAnyStandardPricing)
                         <section class="content-section pricing-showcase" id="pricing-section">
                             <h2 class="section-header">{{ __('Pricing & Packages') }}</h2>
                             <p class="group-pricing-subtitle">
-                                {{ __('Choose your preferred group size. Prices are quoted in US Dollars per person.') }}
+                                {{ __('Choose the pricing option that suits your trip. Prices use :currency.', ['currency' => $package->currency?->code ?: 'USD']) }}
                             </p>
 
-                            @php
-                                $groupTiers = $package->group_pricing_tiers;
-                            @endphp
-
-                            <div class="group-pricing-grid">
-                                @foreach ($groupTiers as $tier)
-                                    <div class="group-tier-card">
-                                        @if ($tier['badge'])
-                                            <div class="group-tier-badge">{{ $tier['badge'] }}</div>
-                                        @endif
-
-                                        <div class="group-tier-header">
-                                            <div>
-                                                <h3 class="group-tier-title">{{ $tier['title'] }}</h3>
-                                                <span class="group-tier-pax-tag">{{ $tier['persons_label'] }}</span>
+                            @if($groupTiersForDisplay->isNotEmpty())
+                                <div class="group-pricing-grid">
+                                    @foreach ($groupTiersForDisplay as $tier)
+                                        @php
+                                            $tierMin = $tier['min'] ?? null;
+                                            $tierMax = $tier['max'] ?? null;
+                                            $tierLabel = trim((string) ($tier['label'] ?? ''));
+                                            $personsLabel = $tierMin && $tierMax
+                                                ? ($tierMin == $tierMax ? $tierMin . ' ' . __('Pax') : $tierMin . '–' . $tierMax . ' ' . __('Pax'))
+                                                : ($tierMin ? $tierMin . '+ ' . __('Pax') : ($tierMax ? __('Up to') . ' ' . $tierMax . ' ' . __('Pax') : __('Group')));
+                                        @endphp
+                                        <div class="group-tier-card">
+                                            <div class="group-tier-header"><div>
+                                                <h3 class="group-tier-title">{{ $tierLabel ?: __('Group Price') }}</h3>
+                                                <span class="group-tier-pax-tag">{{ $personsLabel }}</span>
+                                            </div></div>
+                                            <div class="group-tier-price-wrap">
+                                                <div class="group-tier-price">{{ $currencySymbol }}{{ number_format((float) ($tier['price_per_person'] ?? 0), 0) }}</div>
+                                                <div class="group-tier-sub">{{ __('per person') }}</div>
                                             </div>
                                         </div>
-
-                                        <div class="group-tier-price-wrap">
-                                            <div class="group-tier-price">
-                                                {{ $currencySymbol }}{{ number_format($tier['price_per_person'], 0) }}
-                                            </div>
-                                            <div class="group-tier-sub">{{ __('per person') }}</div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
+                                    @endforeach
+                                </div>
+                            @endif
 
                             @if ($prices->count())
                                 <div class="price-box pricing-options">
