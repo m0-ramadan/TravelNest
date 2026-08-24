@@ -245,6 +245,11 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
             Route::post('ai-translate', [PackageController::class, 'translateWithAI'])->name('ai-translate');
         });
 
+        Route::prefix('ai-translations')->name('ai-translations.')->group(function () {
+            Route::post('translate-missing', [TranslationController::class, 'translateMissing'])->name('translate-missing');
+            Route::post('translate-field', [TranslationController::class, 'translateField'])->name('translate-field');
+        });
+
         Route::prefix('package-prices')->name('package-prices.')->group(function () {
             Route::get('by-package/{package}', [PackagePriceController::class, 'byPackage'])->name('by-package');
             Route::post('bulk-action', [PackagePriceController::class, 'bulkAction'])->name('bulk-action');

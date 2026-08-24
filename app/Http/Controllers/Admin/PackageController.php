@@ -942,6 +942,20 @@ class PackageController extends Controller
         $data['price_to'] = $priceTo;
         $data['start_from_price'] = $priceFrom;
 
+        $data['adult_price'] = isset($data['adult_price']) && $data['adult_price'] !== '' && (float) $data['adult_price'] > 0
+            ? (float) $data['adult_price']
+            : ($priceFrom > 0 ? $priceFrom : 0);
+        $data['child_price'] = isset($data['child_price']) && $data['child_price'] !== ''
+            ? (float) $data['child_price']
+            : 0;
+        $data['infant_price'] = isset($data['infant_price']) && $data['infant_price'] !== ''
+            ? (float) $data['infant_price']
+            : 0;
+
+        $data['tour_type'] = !empty($data['tour_type']) ? $data['tour_type'] : ($package?->tour_type ?? 'private');
+        $data['booking_mode'] = !empty($data['booking_mode']) ? $data['booking_mode'] : ($package?->booking_mode ?? 'request');
+        $data['difficulty_level'] = !empty($data['difficulty_level']) ? $data['difficulty_level'] : $package?->difficulty_level;
+
         if ($request->hasFile('featured_image')) {
             $data['featured_image'] = $this->uploadFile($request->file('featured_image'), 'packages');
         } elseif ($package) {

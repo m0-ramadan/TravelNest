@@ -1602,6 +1602,13 @@
                     </div>
 
                     <div class="wizard-top-actions">
+                        <button type="button" class="btn btn-warning text-dark fw-bold js-ai-translate-missing-btn" data-package-id="{{ $package->id }}">
+                            <span class="btn-icon-text">
+                                <i class="ti ti-language"></i>
+                                {{ admin_t('ترجمة المحتوى المفقود (AI)') }}
+                            </span>
+                        </button>
+
                         @if (Route::has('admin.packages.edit-with-ai'))
                             <a href="{{ route('admin.packages.edit-with-ai') }}" class="btn btn-light">
                                 <span class="btn-icon-text">
@@ -4634,6 +4641,82 @@
 
             document.getElementById('saveQuickAttractionBtn')?.addEventListener('click', handleQuickAddAttraction);
             document.getElementById('quickAddAttractionForm')?.addEventListener('submit', handleQuickAddAttraction);
+
+            // AI Translation button click handler
+            document.querySelectorAll('.js-ai-translate-missing-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const packageId = this.dataset.packageId;
+                    if (!packageId) return;
+
+                    const swalConfig = {
+                        title: '{{ admin_t("جاري الترجمة بالذكاء الاصطناعي...") }}',
+                        text: '{{ admin_t("يتم الآن توليد الترجمة المفقودة باستخدام Gemini 2.5 Flash / DeepSeek...") }}',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            if (window.Swal && window.Swal.showLoading) {
+                                window.Swal.showLoading();
+                            }
+                        }
+                    };
+
+                    if (window.Swal) {
+                        window.Swal.fire(swalConfig);
+                    }
+
+                    fetch("{{ route('admin.ai-translations.translate-missing') }}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                            "Accept": "application/json"
+                        },
+                        body: JSON.stringify({
+                            package_id: packageId,
+                            async: false
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            const s = data.summary;
+                            const msg = `{{ admin_t("تم ترجمة") }} <b>${s.success_count}</b> {{ admin_t("عنصر بنجاح.") }}<br>` +
+                                (s.fallback_count > 0 ? `<small class="text-warning">{{ admin_t("تم استخدام DeepSeek لـ") }} ${s.fallback_count} {{ admin_t("عنصر.") }}</small><br>` : '') +
+                                (s.cached_count > 0 ? `<small class="text-info">${s.cached_count} {{ admin_t("عنصر مأخوذ من الكاش.") }}</small><br>` : '') +
+                                (s.failed_count > 0 ? `<small class="text-danger">{{ admin_t("فشل") }} ${s.failed_count} {{ admin_t("عنصر.") }}</small>` : '');
+
+                            if (window.Swal) {
+                                window.Swal.fire({
+                                    icon: 'success',
+                                    title: '{{ admin_t("تمت الترجمة بنجاح!") }}',
+                                    html: msg,
+                                    confirmButtonText: '{{ admin_t("إعادة تحميل الصفحة") }}',
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                alert('{{ admin_t("تمت الترجمة بنجاح!") }}');
+                                window.location.reload();
+                            }
+                        } else {
+                            if (window.Swal) {
+                                window.Swal.fire('{{ admin_t("خطأ") }}', data.message || '{{ admin_t("حدث خطأ أثناء الترجمة") }}', 'error');
+                            } else {
+                                alert(data.message || '{{ admin_t("حدث خطأ أثناء الترجمة") }}');
+                            }
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Translation error:', err);
+                        if (window.Swal) {
+                            window.Swal.fire('{{ admin_t("خطأ") }}', '{{ admin_t("تعذر الاتصال بخادم الترجمة") }}', 'error');
+                        } else {
+                            alert('{{ admin_t("تعذر الاتصال بخادم الترجمة") }}');
+                        }
+                    });
+                });
+            });
         });
     </script>
 

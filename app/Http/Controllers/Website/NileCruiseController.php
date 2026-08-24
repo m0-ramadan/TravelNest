@@ -112,9 +112,27 @@ class NileCruiseController extends BaseWebsiteController
                   ->orWhere(function ($sub) use ($type) {
                       $sub->where('package_type', 'nile_cruise');
                       if ($type->slug === 'dahabiya-nile-cruise') {
-                          $sub->where(fn($w) => $w->where('title', 'like', '%dahabiya%')->orWhere('slug', 'like', '%dahabiya%'));
+                          $sub->where(function ($w) {
+                              $w->where('title', 'like', '%dahabiya%')
+                                ->orWhere('title', 'like', '%dahabeya%')
+                                ->orWhere('title', 'like', '%دهبية%')
+                                ->orWhere('title', 'like', '%دهبيه%')
+                                ->orWhere('title', 'like', '%داهابيا%')
+                                ->orWhere('slug', 'like', '%dahabiya%')
+                                ->orWhere('slug', 'like', '%dahabeya%');
+                          });
                       } elseif ($type->slug === 'lake-nasser-cruise') {
-                          $sub->where(fn($w) => $w->where('title', 'like', '%lake nasser%')->orWhere('slug', 'like', '%nasser%'));
+                          $sub->where(function ($w) {
+                              $w->where('title', 'like', '%lake nasser%')
+                                ->orWhere('title', 'like', '%nasser%')
+                                ->orWhere('title', 'like', '%ناصر%')
+                                ->orWhere('title', 'like', '%بحيرة ناصر%')
+                                ->orWhere('title', 'like', '%abu simbel%')
+                                ->orWhere('title', 'like', '%أبو سمبل%')
+                                ->orWhere('slug', 'like', '%nasser%')
+                                ->orWhere('slug', 'like', '%lake-nasser%')
+                                ->orWhere('slug', 'like', '%abu-simbel%');
+                          });
                       }
                   });
             })
@@ -136,7 +154,21 @@ class NileCruiseController extends BaseWebsiteController
         $stats = [
             'count' => $paginated->total(),
             'categories' => 1,
-            'featured' => Package::where('is_active', true)->where('nile_cruise_type_id', $type->id)->where('is_featured', true)->count(),
+            'featured' => Package::query()
+                ->where('is_active', true)
+                ->where(function ($q) use ($type) {
+                    $q->where('nile_cruise_type_id', $type->id)
+                      ->orWhere(function ($sub) use ($type) {
+                          $sub->where('package_type', 'nile_cruise');
+                          if ($type->slug === 'dahabiya-nile-cruise') {
+                              $sub->where(fn($w) => $w->where('title', 'like', '%dahabiya%')->orWhere('title', 'like', '%دهبية%')->orWhere('slug', 'like', '%dahabiya%'));
+                          } elseif ($type->slug === 'lake-nasser-cruise') {
+                              $sub->where(fn($w) => $w->where('title', 'like', '%lake nasser%')->orWhere('title', 'like', '%ناصر%')->orWhere('slug', 'like', '%nasser%'));
+                          }
+                      });
+                })
+                ->where('is_featured', true)
+                ->count(),
         ];
 
         $pageContent = [
@@ -180,8 +212,11 @@ class NileCruiseController extends BaseWebsiteController
         $query = Package::query()
             ->with(['currency', 'category', 'primaryCountry', 'nileCruiseType'])
             ->where('is_active', true)
-            ->where('nile_cruise_type_id', $type->id)
             ->where('nile_cruise_category_id', $category->id)
+            ->where(function ($q) use ($type) {
+                $q->where('nile_cruise_type_id', $type->id)
+                  ->orWhereNull('nile_cruise_type_id');
+            })
             ->when($search !== '', function ($q) use ($search) {
                 $term = '%' . $search . '%';
                 $q->where(function ($sub) use ($term) {

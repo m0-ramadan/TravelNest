@@ -1,88 +1,93 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http/Controllers\Admin;
 
-use App\Models\Translation;
-use Illuminate\Http\RedirectResponse;
+use App\Http\Controllers\Controller;
+use App\Jobs\TranslateContentUnitJob;
+use App\Models\Package;
+use App\Services\Translation\AiTranslationService;
+use App\Services\Translation\DTOs\TranslationOptions;
+use App\Services\Translation\DTOs\TranslationUnit;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 
 class TranslationController extends Controller
 {
-    public function index(Request $request): View
-    {
-        $translations = Translation::query()
-            ->when($request->filled('q'), function ($query) use ($request) {
-                $search = '%' . $request->string('q') . '%';
-                $query->where('locale', 'like', $search)
-                    ->orWhere('field', 'like', $search)
-                    ->orWhere('value', 'like', $search)
-                    ->orWhere('translatable_type', 'like', $search);
-            })
-            ->latest()
-            ->paginate($this->perPage($request));
+    public function __construct(protected AiTranslationService $translationService) {}
 
-        return $this->view('admin.translations.index', compact('translations'));
-    }
-
-    public function store(Request $request): RedirectResponse
+    /**
+     * Handle AJAX request to translate all missing content for a package.
+     */
+    public function translateMissing(Request $request): JsonResponse
     {
-        $data = $request->validate([
-            'translatable_type' => ['required', 'string', 'max:255'],
-            'translatable_id' => ['required', 'integer'],
-            'locale' => ['required', 'string', 'max:10'],
-            'field' => ['required', 'string', 'max:100'],
-            'value' => ['nullable', 'string'],
+        $request->validate([
+            'package_id' => 'required|exists:packages,id',
+            'source_lang' => 'nullable|string|max:10',
+            'async' => 'nullable|boolean',
         ]);
 
-        Translation::create($data);
+        $packageId = (int) $request->input('package_id');
+        $sourceLang = $request->input('source_lang');
+        $async = $request->boolean('async', false);
 
-        return back()->with('success', 'Translation created.');
-    }
+        $package = Package::findOrFail($packageId);
 
-    public function update(Request $request, Translation $translation): RedirectResponse
-    {
-        $data = $request->validate([
-            'locale' => ['required', 'string', 'max:10'],
-            'field' => ['required', 'string', 'max:100'],
-            'value' => ['nullable', 'string'],
-        ]);
-
-        $translation->update($data);
-
-        return back()->with('success', 'Translation updated.');
-    }
-
-    public function destroy(Translation $translation): RedirectResponse
-    {
-        $translation->delete();
-
-        return back()->with('success', 'Translation deleted.');
-    }
-
-    public function byModel(string $type, int $id): View
-    {
-        $translations = Translation::query()
-            ->where('translatable_type', $type)
-            ->where('translatable_id', $id)
-            ->latest()
-            ->paginate(50);
-
-        return $this->view('admin.translations.by-model', compact('translations', 'type', 'id'));
-    }
-
-    public function bulkUpdate(Request $request): RedirectResponse
-    {
-        foreach ((array) $request->input('translations', []) as $row) {
-            if (! empty($row['id'])) {
-                Translation::where('id', $row['id'])->update([
-                    'locale' => $row['locale'] ?? null,
-                    'field' => $row['field'] ?? null,
-                    'value' => $row['value'] ?? null,
-                ]);
-            }
+        if ($async) {
+            TranslateContentUnitJob::dispatch($packageId, $sourceLang, true);
+            return response()->json([
+                'success' => true,
+                'message' => __('Translation job queued successfully in background.'),
+                'async' => true,
+            ]);
         }
 
-        return back()->with('success', 'Translations updated.');
+        $summary = $this->translationService->translatePackage($package, $sourceLang, true);
+
+        return response()->json([
+            'success' => true,
+            'message' => __('Missing content translated successfully.'),
+            'summary' => $summary,
+            'package' => $package->fresh(),
+        ]);
+    }
+
+    /**
+     * Handle single field translation request.
+     */
+    public function translateField(Request $request): JsonResponse
+    {
+        $request->validate([
+            'source_text' => 'required|string',
+            'source_lang' => 'required|string|max:10',
+            'target_lang' => 'required|string|max:10',
+            'structured_type' => 'nullable|string|in:text,html,json_array,faq_json',
+        ]);
+
+        $unit = new TranslationUnit(
+            entityType: 'adhoc_field',
+            entityId: null,
+            field: 'field',
+            sourceLanguage: $request->input('source_lang'),
+            targetLanguage: $request->input('target_lang'),
+            sourceText: $request->input('source_text'),
+            structuredType: $request->input('structured_type', 'text')
+        );
+
+        $options = new TranslationOptions(structuredType: $unit->structuredType);
+        $result = $this->translationService->translateUnit($unit, $options);
+
+        if (!$result->isSuccess) {
+            return response()->json([
+                'success' => false,
+                'message' => $result->errorMessage ?: __('Translation failed.'),
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'translated_text' => $result->translatedText,
+            'provider' => $result->provider,
+            'model' => $result->model,
+        ]);
     }
 }

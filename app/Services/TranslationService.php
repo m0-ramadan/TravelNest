@@ -3,11 +3,12 @@
 namespace App\Services;
 
 use App\Models\Language;
+use App\Services\Translation\AiTranslationService;
 
 class TranslationService
 {
     public function __construct(
-        protected DeepSeekService $deepSeekService
+        protected AiTranslationService $aiTranslationService
     ) {}
 
     public function translateTextToAllLanguages(string|array|null $value): array
@@ -34,16 +35,12 @@ class TranslationService
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->pluck('code')
+            ->map(fn($c) => strtolower(trim((string) $c)))
             ->filter()
             ->values()
             ->all();
 
-        if (empty($languages)) {
-            return [
-                'en' => $value,
-                'ar' => $value,
-            ];
-        }
+        $languages = array_values(array_unique(array_merge($languages, ['en', 'ar'])));
 
         $translated = $this->translateUsingAi($value, $languages);
 
@@ -67,37 +64,47 @@ class TranslationService
         return $data;
     }
 
-    protected function translateUsingAi(string $text, array $languages): ?array
+    public function translateTextToLanguages(string $text, array $languageCodes): array
     {
-        $languageCodes = implode(', ', $languages);
+        $text = trim($text);
 
-        $prompt = <<<PROMPT
-Detect the source language of the following text, then translate it to all these language codes: {$languageCodes}.
-
-Text:
-{$text}
-
-Return ONLY valid JSON in this exact format:
-{
-  "translations": {
-    "en": "translated text",
-    "ar": "translated text"
-  }
-}
-PROMPT;
-
-        $result = $this->deepSeekService->askJson(
-            prompt: $prompt,
-            systemPrompt: 'You are a multilingual translation assistant. Detect the language and return only valid JSON.',
-            temperature: 0.1,
-            maxTokens: 2000
-        );
-
-        if (!is_array($result)) {
-            return null;
+        if ($text === '') {
+            return [];
         }
 
-        return $result['translations'] ?? null;
+        $translated = $this->translateUsingAi($text, $languageCodes);
+
+        if (!$translated) {
+            return $this->fallbackTranslations($text, $languageCodes);
+        }
+
+        return $this->normalizeTranslations($translated, $text, $languageCodes);
+    }
+
+    protected function translateUsingAi(string $text, array $languages): ?array
+    {
+        $sourceLang = $this->detectSourceLanguage($text);
+        $result = [];
+
+        foreach ($languages as $lang) {
+            $langCode = strtolower(trim((string) $lang));
+            if ($langCode === $sourceLang) {
+                $result[$langCode] = $text;
+            } else {
+                $result[$langCode] = $this->aiTranslationService->translateString($text, $langCode, $sourceLang);
+            }
+        }
+
+        return $result;
+    }
+
+    protected function detectSourceLanguage(string $text): string
+    {
+        if (preg_match('/\p{Arabic}/u', $text)) {
+            return 'ar';
+        }
+
+        return 'en';
     }
 
     protected function normalizeTranslations(array $translations, ?string $original = null, array $languages = []): array
@@ -113,7 +120,7 @@ PROMPT;
         }
 
         foreach ($languages as $lang) {
-            if (!array_key_exists($lang, $clean)) {
+            if (!array_key_exists($lang, $clean) || $clean[$lang] === '') {
                 $clean[$lang] = $original ?? '';
             }
         }
@@ -137,25 +144,5 @@ PROMPT;
         $value = trim($value);
 
         return str_starts_with($value, '{') && str_ends_with($value, '}');
-    }
-
-
-
-
-    public function translateTextToLanguages(string $text, array $languageCodes): array
-    {
-        $text = trim($text);
-
-        if ($text === '') {
-            return [];
-        }
-
-        $translated = $this->translateUsingAi($text, $languageCodes);
-
-        if (!$translated) {
-            return $this->fallbackTranslations($text, $languageCodes);
-        }
-
-        return $this->normalizeTranslations($translated, $text, $languageCodes);
     }
 }

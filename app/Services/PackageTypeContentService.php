@@ -158,18 +158,47 @@ class PackageTypeContentService
         }
 
         foreach ((array) $items as $index => $row) {
-            $text = trim((string) (is_array($row) ? ($row['title'] ?? $row['description'] ?? '') : $row));
-            if ($text === '') {
+            $titleData = null;
+            $descData = null;
+
+            if (is_array($row)) {
+                $rawTitle = $row['title'] ?? $row['text'] ?? $row['description'] ?? null;
+                $rawDesc = $row['description'] ?? $row['title'] ?? $row['text'] ?? null;
+
+                if (is_array($rawTitle)) {
+                    $titleData = $rawTitle;
+                } elseif (is_string($rawTitle) && trim($rawTitle) !== '') {
+                    $t = trim($rawTitle);
+                    $titleData = ['en' => $t, 'ar' => $t];
+                }
+
+                if (is_array($rawDesc)) {
+                    $descData = $rawDesc;
+                } elseif (is_string($rawDesc) && trim($rawDesc) !== '') {
+                    $d = trim($rawDesc);
+                    $descData = ['en' => $d, 'ar' => $d];
+                }
+            } elseif (is_string($row) && trim($row) !== '') {
+                $t = trim($row);
+                $titleData = ['en' => $t, 'ar' => $t];
+                $descData = ['en' => $t, 'ar' => $t];
+            }
+
+            if (empty($titleData) && empty($descData)) {
                 continue;
             }
 
+            $titleData = $titleData ?: ($descData ?: ['en' => '', 'ar' => '']);
+            $descData = $descData ?: $titleData;
+
             $package->highlights()->create([
-                'title' => ['en' => $text, 'ar' => $text],
-                'description' => ['en' => $text, 'ar' => $text],
+                'title' => $titleData,
+                'description' => $descData,
                 'sort_order' => $index,
             ]);
         }
     }
+
 
     private function syncTags(Package $package, mixed $raw): void
     {
