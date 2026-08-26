@@ -665,19 +665,21 @@ class NileCruisePackageService
     {
         return [
             'WiFi',
+            'Swimming Pool',
             'Air Conditioning',
             'Private Bathroom with Shower',
-            'TV',
+            'TV / Satellite Channels',
             'Mini Bar',
             'Doctor Available 24 Hours',
             'Gift Shop',
-            'Lounge',
-            'Dining Room',
-            'Bar',
-            'Sun Deck',
-            'Open Air GYM',
+            'Lounge & Sun Bar',
+            'Dining Room / Restaurant',
+            'Sun Deck & Pergolas',
             'Sun Beds',
-            'Sun Deck Private Pergolas',
+            'Gymnasium / Fitness Center',
+            'Panoramic Windows',
+            'Laundry Service & Housekeeping',
+            'Safety Deposit Box',
         ];
     }
 

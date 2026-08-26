@@ -15,7 +15,34 @@
         $ncCruise = $package->cruise;
         $ncDurations = $package->nileCruiseDurations?->where('is_active', true)->values() ?? collect();
         $ncRoute = $package->cities?->sortBy(fn($city) => $city->pivot?->stop_order ?? 0)->values() ?? collect();
-        $hasNcExtendedData = $ncDetail || $ncCruise || $ncSchedules->isNotEmpty() || $ncCabins->isNotEmpty() || $ncAddons->isNotEmpty() || $ncDurations->isNotEmpty();
+
+        $hasNcDetailData = $ncDetail && (
+            !empty(trim($ncDetail->route_summary ?? '')) ||
+            !is_null($ncDetail->all_inclusive) ||
+            !empty(trim($ncDetail->tour_style ?? '')) ||
+            !empty($ncDetail->decks) ||
+            !empty($ncDetail->sun_beds) ||
+            !empty($ncDetail->sun_deck_pergolas) ||
+            !empty($ncDetail->pickup_notes) ||
+            !empty($ncDetail->dropoff_notes) ||
+            !empty($ncDetail->fact_sheet_path) ||
+            !empty($ncDetail->timezone) ||
+            collect((array)$ncDetail->operating_days)->filter(fn($d) => !empty(trim((string)$d)))->isNotEmpty() ||
+            collect((array)$ncDetail->on_tour_languages)->filter(fn($l) => !empty(trim((string)$l)))->isNotEmpty() ||
+            collect((array)$ncDetail->what_to_bring)->filter(fn($w) => !empty(trim((string)$w)))->isNotEmpty() ||
+            collect((array)$ncDetail->promotional_videos)->filter(fn($v) => !empty(trim((string)$v)))->isNotEmpty()
+        );
+
+        $hasNcCruiseData = $ncCruise && (
+            !empty(trim($ncCruise->ship_name ?? '')) ||
+            !empty(trim($ncCruise->cruise_class ?? '')) ||
+            (!empty($ncCruise->star_rating) && $ncCruise->star_rating > 0)
+        );
+
+        $hasInclusionsExclusions = (!empty($inclusions) && count($inclusions) > 0) || (!empty($exclusions) && count($exclusions) > 0);
+        $hasPoliciesData = !empty($package->getTranslation('children_policy')) || !empty($package->getTranslation('cancellation_policy')) || !empty($package->getTranslation('terms_conditions')) || !empty($package->getTranslation('pickup_policy'));
+
+        $hasNcExtendedData = $hasNcDetailData || $hasNcCruiseData || $ncSchedules->isNotEmpty() || $ncCabins->isNotEmpty() || $ncAddons->isNotEmpty() || $ncDurations->isNotEmpty() || $hasInclusionsExclusions || $hasPoliciesData;
     @endphp
 
     @if($hasNcExtendedData)

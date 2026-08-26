@@ -1930,7 +1930,7 @@
 
         .nile-cruise-page #nile-cruise-details .detail-item i {
             background: rgba(197,149,91,.12);
-            color: #c5955b !important;
+            /* color: #c5955b !important; */
             width: 34px;
             height: 34px;
             min-width: 34px;
@@ -2541,16 +2541,16 @@
                         $nileFacilityIcon = function (string $title): string {
                             $normalized = strtolower(trim($title));
                             return match (true) {
-                                str_contains($normalized, 'wifi'), str_contains($normalized, 'internet') => 'wifi',
-                                str_contains($normalized, 'pool') => 'pool',
-                                str_contains($normalized, 'air condition') => 'snowflake',
+                                str_contains($normalized, 'wifi') || str_contains($normalized, 'internet') => 'wifi',
+                                str_contains($normalized, 'pool') || str_contains($normalized, 'swim') => 'pool',
+                                str_contains($normalized, 'air') || str_contains($normalized, 'ac') => 'snowflake',
                                 str_contains($normalized, 'bath') || str_contains($normalized, 'shower') => 'bath',
-                                $normalized === 'tv' || str_contains($normalized, 'television') => 'tv',
-                                str_contains($normalized, 'bar') => 'glass',
+                                str_contains($normalized, 'tv') || str_contains($normalized, 'screen') || str_contains($normalized, 'satellite') => 'tv',
+                                str_contains($normalized, 'bar') || str_contains($normalized, 'lounge') || str_contains($normalized, 'drink') || str_contains($normalized, 'dining') || str_contains($normalized, 'restaurant') => 'glass',
                                 str_contains($normalized, 'doctor') || str_contains($normalized, 'medical') => 'medical',
-                                str_contains($normalized, 'gift') => 'gift',
-                                str_contains($normalized, 'gym') => 'gym',
-                                str_contains($normalized, 'sun') => 'sun',
+                                str_contains($normalized, 'gift') || str_contains($normalized, 'shop') => 'gift',
+                                str_contains($normalized, 'gym') || str_contains($normalized, 'fitness') => 'gym',
+                                str_contains($normalized, 'sun') || str_contains($normalized, 'deck') || str_contains($normalized, 'bed') || str_contains($normalized, 'pergola') => 'sun',
                                 default => 'check',
                             };
                         };
@@ -2562,25 +2562,8 @@
                                 {{ __('Trip Facilities') }}
                             </h2>
                             <div class="facilities-grid">
-                                @if($isNileCruisePackage)
-                                    @foreach($nileFacilityStats as $facilityStat)
-                                        <div class="facility-card">
-                                            <span class="facility-icon" aria-hidden="true">
-                                                @if($facilityStat['icon'] === 'sun')
-                                                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
-                                                @elseif($facilityStat['icon'] === 'cabin')
-                                                    <svg viewBox="0 0 24 24"><path d="M4 20V7l8-4 8 4v13"></path><path d="M8 20v-6h8v6"></path><path d="M9 9h.01M15 9h.01"></path></svg>
-                                                @else
-                                                    <svg viewBox="0 0 24 24"><path d="M4 20V8h16v12"></path><path d="M7 8V4h10v4"></path><path d="M8 12h8M8 16h8"></path></svg>
-                                                @endif
-                                            </span>
-                                            <span>{{ $facilityStat['label'] }}</span>
-                                        </div>
-                                    @endforeach
-                                @endif
-
                                 @foreach ($facilities as $facility)
-                                    @php $facilityIconName = $isNileCruisePackage ? $nileFacilityIcon($facility->display_title) : 'check'; @endphp
+                                    @php $facilityIconName = $nileFacilityIcon($facility->display_title); @endphp
                                     <div class="facility-card">
                                         <span class="facility-icon" aria-hidden="true">
                                             @switch($facilityIconName)

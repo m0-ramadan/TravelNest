@@ -2,11 +2,11 @@
     <div class="card mb-4 border-light bg-light p-3 w-100">
         <div class="d-flex align-items-center justify-content-between mb-3">
             <div>
-                <h6 class="fw-bold mb-1 text-primary"><i class="la la-hotel me-1"></i> {{ __('تسعير الفنادق والمواسم (Accommodation & Season Pricing)') }}</h6>
-                <small class="text-muted">{{ __('قم بإضافة فئات الإقامة (Standard, Deluxe, Luxury) وأسعار المواسم وتوزيع الفنادق حسب المدن') }}</small>
+                <h6 class="fw-bold mb-1 text-primary"><i class="la la-hotel me-1"></i> {{ __('Accommodation & Season Pricing') }}</h6>
+                <small class="text-muted">{{ __('Add accommodation categories (Standard, Deluxe, Luxury), season prices, and hotel assignments by city.') }}</small>
             </div>
             <button type="button" class="btn btn-sm btn-outline-primary" id="btnAddAccommodation">
-                <i class="ti ti-plus"></i> {{ __('إضافة مستوى إقامة جديد') }}
+                <i class="ti ti-plus"></i> {{ __('Add New Accommodation Tier') }}
             </button>
         </div>
 
@@ -28,22 +28,22 @@
                     @endif
                     <div class="d-flex align-items-center justify-content-between pb-2 mb-3 border-bottom">
                         <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-secondary"><i class="ti ti-building me-1"></i>{{ __('مستوى إقامة') }} #<span class="acc-number">{{ $accIndex + 1 }}</span></span>
+                            <span class="badge bg-secondary"><i class="ti ti-building me-1"></i>{{ __('Accommodation Tier') }} #<span class="acc-number">{{ $accIndex + 1 }}</span></span>
                             <input type="text" name="tour_package_accommodations[{{ $accIndex }}][name]" class="form-control form-control-sm fw-bold" value="{{ $accName }}" placeholder="e.g. 5-Star Standard Accommodations" style="min-width: 280px;">
                         </div>
-                        <button type="button" class="btn btn-sm btn-outline-danger js-remove-accommodation"><i class="ti ti-trash"></i> {{ __('حذف هذا المستوى') }}</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger js-remove-accommodation"><i class="ti ti-trash"></i> {{ __('Delete Tier') }}</button>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">{{ __('وصف المستوى (اختياري)') }}</label>
+                        <label class="form-label small fw-bold">{{ __('Tier Description (Optional)') }}</label>
                         <input type="text" name="tour_package_accommodations[{{ $accIndex }}][description]" class="form-control form-control-sm" value="{{ $accDesc }}" placeholder="e.g. Includes breakfast and transfers">
                     </div>
 
                     <!-- Seasons & Occupancy Pricing -->
                     <div class="p-3 mb-3 bg-light rounded border">
                         <div class="d-flex align-items-center justify-content-between mb-2">
-                            <h7 class="fw-bold text-dark"><i class="ti ti-calendar me-1"></i> {{ __('أسعار المواسم والغرف (Seasons & Occupancy Prices)') }}</h7>
-                            <button type="button" class="btn btn-xs btn-outline-primary js-add-acc-season" data-acc-index="{{ $accIndex }}">+ {{ __('إضافة موسم جديد') }}</button>
+                            <h7 class="fw-bold text-dark"><i class="ti ti-calendar me-1"></i> {{ __('Seasons & Occupancy Prices') }}</h7>
+                            <button type="button" class="btn btn-xs btn-outline-primary js-add-acc-season" data-acc-index="{{ $accIndex }}">+ {{ __('Add New Season') }}</button>
                         </div>
 
                         <div class="acc-seasons-wrapper stack-list">
@@ -78,9 +78,9 @@
                                     <div class="row g-2 mt-2">
                                         @php
                                             $occupancies = [
-                                                'triple' => __('غرفة ثلاثية (Per Person in Triple Room)'),
-                                                'double' => __('غرفة مزدوجة (Per Person in Double Room)'),
-                                                'single' => __('غرفة مفردة (Single Room Supplement)'),
+                                                'triple' => __('Per Person in Triple Room'),
+                                                'double' => __('Per Person in Double Room'),
+                                                'single' => __('Single Room Supplement'),
                                             ];
                                             $itemPrices = [];
                                             foreach ((array)$items as $item) {
@@ -109,8 +109,8 @@
                     <!-- Assigned Hotels per City -->
                     <div class="p-3 bg-light rounded border">
                         <div class="d-flex align-items-center justify-content-between mb-2">
-                            <h7 class="fw-bold text-dark"><i class="ti ti-map-pin me-1"></i> {{ __('الفنادق المقترحة حسب المدن (Assigned Hotels per City)') }}</h7>
-                            <button type="button" class="btn btn-xs btn-outline-primary js-add-acc-hotel" data-acc-index="{{ $accIndex }}">+ {{ __('إضافة فندق جديد') }}</button>
+                            <h7 class="fw-bold text-dark"><i class="ti ti-map-pin me-1"></i> {{ __('Assigned Hotels per City') }}</h7>
+                            <button type="button" class="btn btn-xs btn-outline-primary js-add-acc-hotel" data-acc-index="{{ $accIndex }}">+ {{ __('Add New Hotel') }}</button>
                         </div>
 
                         <div class="acc-hotels-wrapper stack-list">
@@ -147,7 +147,7 @@
             @empty
                 <div class="text-center py-4 text-muted bg-white border rounded" id="emptyAccommodationsNotice">
                     <i class="ti ti-building fs-2 d-block mb-1"></i>
-                    <p class="mb-0">{{ __('لم يتم إضافة أي مستوى إقامة حتى الآن. اضغط على "إضافة مستوى إقامة جديد" للبدء.') }}</p>
+                    <p class="mb-0">{{ __('No accommodation tier added yet. Click "Add New Accommodation Tier" to get started.') }}</p>
                 </div>
             @endforelse
         </div>

@@ -5,9 +5,9 @@
                 <i class="la la-ship fs-3"></i>
             </div>
             <div>
-                <h6 class="fw-bold mb-1 text-primary">{{ __('تسعير الرحلات النيلية (Nile Cruise Pricing Engine)') }}</h6>
+                <h6 class="fw-bold mb-1 text-primary">{{ __('Nile Cruise Pricing Engine') }}</h6>
                 <p class="text-muted small mb-0">
-                    {{ __('يتم إدارة أسعار الرحلات النيلية ديناميكيًا بناءً على المدد (Durations)، الكبائن (Cabins)، والمواسم المقترنة بكل مدة في الخطوة السابقة (Itinerary & Nile Cruise Details).') }}
+                    {{ __('Nile Cruise pricing is managed dynamically based on durations, cabins, and seasonal pricing configured in the Itinerary & Nile Cruise Details step.') }}
                 </p>
             </div>
         </div>
@@ -19,7 +19,7 @@
                         <div class="col-md-4">
                             <div class="p-2 border rounded bg-white">
                                 <strong class="d-block text-dark">{{ $dur->title }}</strong>
-                                <small class="text-muted">{{ __('يبدأ من:') }} <strong>${{ number_format((float)$dur->start_from_price, 0) }}</strong></small>
+                                <small class="text-muted">{{ __('Starting from:') }} <strong>${{ number_format((float)$dur->start_from_price, 0) }}</strong></small>
                             </div>
                         </div>
                     @endforeach

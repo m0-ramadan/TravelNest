@@ -2288,12 +2288,12 @@
                     <div class="wizard-panel" data-step-panel="4">
                         <div class="wizard-panel-header">
                             <div>
-                                <h2 class="wizard-panel-title">{{ admin_t('الأسعار والسياسات') }}</h2>
+                                <h2 class="wizard-panel-title">{{ admin_t('Pricing & Policies') }}</h2>
                                 <p class="wizard-panel-copy">
-                                    {{ admin_t('حدد أسعار الرحلة وما هو مشمول وسياسات الحجز.') }}</p>
+                                    {{ admin_t('Set package pricing, included items, and booking policies.') }}</p>
                             </div>
                             <div class="wizard-panel-pill">
-                                {{ admin_t('الخطوة :current من :total', ['current' => 4, 'total' => count($steps)]) }}
+                                {{ admin_t('Step :current of :total', ['current' => 4, 'total' => count($steps)]) }}
                             </div>
                         </div>
 
@@ -2304,8 +2304,8 @@
                                 <div class="section-header">
                                     <div class="section-icon"><i class="ti ti-cash"></i></div>
                                     <div>
-                                        <h3>{{ admin_t('الأسعار والباقات') }}</h3>
-                                        <p>{{ admin_t('أضف أسعارًا مرنة حسب حجم المجموعة والعدد أو نوع الغرفة.') }}
+                                        <h3>{{ admin_t('Pricing & Packages') }}</h3>
+                                        <p>{{ admin_t('Add flexible pricing based on group size, counts, or room types.') }}
                                         </p>
                                     </div>
                                 </div>
@@ -2317,7 +2317,7 @@
 
                                     <div class="fields-grid">
                                         <div>
-                                            <label class="form-label" for="adult_price">{{ admin_t('سعر البالغ (افتراضي)') }}</label>
+                                            <label class="form-label" for="adult_price">{{ admin_t('Adult Price (Default)') }}</label>
                                             <input id="adult_price" type="number" step="0.01" min="0"
                                                 name="adult_price" class="form-control"
                                                 value="{{ old('adult_price', '') }}">
@@ -2327,7 +2327,7 @@
                                         </div>
 
                                         <div>
-                                            <label class="form-label" for="child_price">{{ admin_t('سعر الطفل') }}</label>
+                                            <label class="form-label" for="child_price">{{ admin_t('Child Price') }}</label>
                                             <input id="child_price" type="number" step="0.01" min="0"
                                                 name="child_price" class="form-control"
                                                 value="{{ old('child_price', '') }}">
@@ -2337,7 +2337,7 @@
                                         </div>
 
                                         <div>
-                                            <label class="form-label" for="infant_price">{{ admin_t('سعر الرضيع') }}</label>
+                                            <label class="form-label" for="infant_price">{{ admin_t('Infant Price') }}</label>
                                             <input id="infant_price" type="number" step="0.01" min="0"
                                                 name="infant_price" class="form-control"
                                                 value="{{ old('infant_price', '') }}">
@@ -2348,7 +2348,7 @@
 
                                         <div>
                                             <label class="form-label"
-                                                for="compare_price">{{ admin_t('سعر المقارنة') }}</label>
+                                                for="compare_price">{{ admin_t('Compare Price') }}</label>
                                             <input id="compare_price" type="number" step="0.01" name="compare_price"
                                                 class="form-control" value="{{ old('compare_price') }}">
                                         </div>
@@ -2360,7 +2360,7 @@
                                         </div>
                                         <div class="fields-grid">
                                             <div>
-                                                <label class="form-label" for="adult_min_age">{{ admin_t('سن البالغ يبدأ من') }}</label>
+                                                <label class="form-label" for="adult_min_age">{{ admin_t('Adult Min Age') }}</label>
                                                 <input id="adult_min_age" type="number" min="0" name="adult_min_age"
                                                     class="form-control" value="{{ $adultMinAge }}">
                                                 @error('adult_min_age')
@@ -2368,7 +2368,7 @@
                                                 @enderror
                                             </div>
                                             <div>
-                                                <label class="form-label" for="child_min_age">{{ admin_t('سن الطفل من') }}</label>
+                                                <label class="form-label" for="child_min_age">{{ admin_t('Child Min Age') }}</label>
                                                 <input id="child_min_age" type="number" min="0" name="child_min_age"
                                                     class="form-control" value="{{ $childMinAge }}">
                                                 @error('child_min_age')
@@ -2376,7 +2376,7 @@
                                                 @enderror
                                             </div>
                                             <div>
-                                                <label class="form-label" for="child_max_age">{{ admin_t('سن الطفل إلى') }}</label>
+                                                <label class="form-label" for="child_max_age">{{ admin_t('Child Max Age') }}</label>
                                                 <input id="child_max_age" type="number" min="0" name="child_max_age"
                                                     class="form-control" value="{{ $childMaxAge }}">
                                                 @error('child_max_age')
@@ -2384,7 +2384,7 @@
                                                 @enderror
                                             </div>
                                             <div>
-                                                <label class="form-label" for="infant_min_age">{{ admin_t('سن الرضيع من') }}</label>
+                                                <label class="form-label" for="infant_min_age">{{ admin_t('Infant Min Age') }}</label>
                                                 <input id="infant_min_age" type="number" min="0" name="infant_min_age"
                                                     class="form-control" value="{{ $infantMinAge }}">
                                                 @error('infant_min_age')
@@ -2392,7 +2392,7 @@
                                                 @enderror
                                             </div>
                                             <div>
-                                                <label class="form-label" for="infant_max_age">{{ admin_t('سن الرضيع إلى') }}</label>
+                                                <label class="form-label" for="infant_max_age">{{ admin_t('Infant Max Age') }}</label>
                                                 <input id="infant_max_age" type="number" min="0" name="infant_max_age"
                                                     class="form-control" value="{{ $infantMaxAge }}">
                                                 @error('infant_max_age')
@@ -2412,37 +2412,37 @@
                                                         </span>
                                                         <input type="text" name="prices[{{ $i }}][label]"
                                                             class="form-control" value="{{ $price['label'] ?? '' }}"
-                                                            placeholder="{{ admin_t('عنوان السعر أو الباقة') }}">
+                                                            placeholder="{{ admin_t('Price or package title') }}">
                                                     </div>
                                                     <button type="button"
                                                         class="btn btn-outline-danger js-remove icon-remove-btn"
-                                                        aria-label="{{ admin_t('حذف') }}">
+                                                        aria-label="{{ admin_t('Delete') }}">
                                                         <i class="ti ti-trash"></i>
                                                     </button>
                                                 </div>
                                                 <div class="editor-card-body">
                                                     <div class="fields-grid">
                                                         <div>
-                                                            <label class="form-label">{{ admin_t('الموسم') }}</label>
+                                                            <label class="form-label">{{ admin_t('Season') }}</label>
                                                             <input type="text" name="prices[{{ $i }}][season_name]"
                                                                 class="form-control"
                                                                 value="{{ $price['season_name'] ?? '' }}"
-                                                                placeholder="{{ admin_t('مثال: موسم الصيف') }}">
+                                                                placeholder="{{ admin_t('e.g. Summer Season') }}">
                                                         </div>
 
                                                         <div>
-                                                            <label class="form-label">{{ admin_t('المبلغ') }}</label>
+                                                            <label class="form-label">{{ admin_t('Amount') }}</label>
                                                             <input type="number" step="0.01"
                                                                 name="prices[{{ $i }}][amount]"
                                                                 class="form-control" value="{{ $price['amount'] ?? '' }}"
-                                                                placeholder="{{ admin_t('المبلغ') }}">
+                                                                placeholder="{{ admin_t('Amount') }}">
                                                         </div>
 
                                                         <div>
-                                                            <label class="form-label">{{ admin_t('العملة') }}</label>
+                                                            <label class="form-label">{{ admin_t('Currency') }}</label>
                                                             <select name="prices[{{ $i }}][currency_id]"
                                                                 class="form-select">
-                                                                <option value="">{{ admin_t('العملة') }}</option>
+                                                                <option value="">{{ admin_t('Currency') }}</option>
                                                                 @foreach ($currencies ?? collect() as $currency)
                                                                     <option value="{{ $currency->id }}"
                                                                         {{ ($price['currency_id'] ?? old('currency_id')) == $currency->id ? 'selected' : '' }}>
@@ -2455,56 +2455,56 @@
 
                                                     <div class="fields-grid">
                                                         <div>
-                                                            <label class="form-label">{{ admin_t('نوع السعر') }}</label>
+                                                            <label class="form-label">{{ admin_t('Price Type') }}</label>
                                                             <select name="prices[{{ $i }}][price_type]"
                                                                 class="form-select">
                                                                 <option value="from"
                                                                     {{ ($price['price_type'] ?? '') === 'from' ? 'selected' : '' }}>
-                                                                    {{ admin_t('يبدأ من') }}</option>
+                                                                    {{ admin_t('Starts From') }}</option>
                                                                 <option value="fixed"
                                                                     {{ ($price['price_type'] ?? '') === 'fixed' ? 'selected' : '' }}>
-                                                                    {{ admin_t('ثابت') }}</option>
+                                                                    {{ admin_t('Fixed') }}</option>
                                                                 <option value="seasonal"
                                                                     {{ ($price['price_type'] ?? '') === 'seasonal' ? 'selected' : '' }}>
-                                                                    {{ admin_t('موسمي') }}</option>
+                                                                    {{ admin_t('Seasonal') }}</option>
                                                             </select>
                                                         </div>
 
                                                         <div>
-                                                            <label class="form-label">{{ admin_t('نوع الغرفة') }}</label>
+                                                            <label class="form-label">{{ admin_t('Room Type') }}</label>
                                                             <input type="text"
                                                                 name="prices[{{ $i }}][room_type]"
                                                                 class="form-control"
                                                                 value="{{ $price['room_type'] ?? '' }}"
-                                                                placeholder="{{ admin_t('مثال: غرفة مزدوجة') }}">
+                                                                placeholder="{{ admin_t('e.g. Double Room') }}">
                                                         </div>
 
                                                         <div>
-                                                            <label class="form-label">{{ admin_t('عدد الأفراد من') }}</label>
+                                                            <label class="form-label">{{ admin_t('Min Pax') }}</label>
                                                             <input type="number" min="1"
                                                                 name="prices[{{ $i }}][pax_min]"
                                                                 class="form-control"
                                                                 value="{{ $price['pax_min'] ?? '' }}"
-                                                                placeholder="{{ admin_t('مثال: 1') }}">
+                                                                placeholder="{{ admin_t('e.g. 1') }}">
                                                             @error("prices.$i.pax_min")
                                                                 <div class="text-danger small mt-1">{{ $message }}</div>
                                                             @enderror
                                                         </div>
 
                                                         <div>
-                                                            <label class="form-label">{{ admin_t('عدد الأفراد إلى') }}</label>
+                                                            <label class="form-label">{{ admin_t('Max Pax') }}</label>
                                                             <input type="number" min="1"
                                                                 name="prices[{{ $i }}][pax_max]"
                                                                 class="form-control"
                                                                 value="{{ $price['pax_max'] ?? '' }}"
-                                                                placeholder="{{ admin_t('مثال: 4') }}">
+                                                                placeholder="{{ admin_t('e.g. 4') }}">
                                                             @error("prices.$i.pax_max")
                                                                 <div class="text-danger small mt-1">{{ $message }}</div>
                                                             @enderror
                                                         </div>
 
                                                         <div>
-                                                            <label class="form-label">{{ admin_t('من تاريخ') }}</label>
+                                                            <label class="form-label">{{ admin_t('Valid From') }}</label>
                                                             <input type="date"
                                                                 name="prices[{{ $i }}][valid_from]"
                                                                 class="form-control"
@@ -2514,7 +2514,7 @@
 
                                                     <div class="fields-grid two-up">
                                                         <div>
-                                                            <label class="form-label">{{ admin_t('إلى تاريخ') }}</label>
+                                                            <label class="form-label">{{ admin_t('Valid To') }}</label>
                                                             <input type="date"
                                                                 name="prices[{{ $i }}][valid_to]"
                                                                 class="form-control"
@@ -2522,78 +2522,79 @@
                                                         </div>
 
                                                         <div>
-                                                            <label class="form-label">{{ admin_t('ملاحظات') }}</label>
+                                                            <label class="form-label">{{ admin_t('Notes') }}</label>
                                                             <textarea name="prices[{{ $i }}][notes]" rows="3" class="form-control"
-                                                                placeholder="{{ admin_t('أضف أي توضيح متعلق بهذا السعر') }}">{{ $price['notes'] ?? '' }}</textarea>
+                                                                placeholder="{{ admin_t('Add notes or clarifications for this price') }}">{{ $price['notes'] ?? '' }}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         @empty
                                             <div class="empty-state" id="pricesEmptyState">
-                                                {{ admin_t('لا توجد أسعار مضافة حتى الآن.') }}</div>
+                                                {{ admin_t('No prices added yet.') }}</div>
                                         @endforelse
                                     </div>
 
                                     <button type="button" class="btn btn-wizard-outline mt-2" id="addPriceBtn">
                                         <span class="btn-icon-text">
                                             <i class="ti ti-plus"></i>
-                                            {{ admin_t('+ إضافة سعر') }}
+                                            {{ admin_t('+ Add Price') }}
                                         </span>
                                     </button>
 
                                     <div class="mt-4">
                                         <label class="form-label"
-                                            for="pricing_information">{{ admin_t('ملاحظات الأسعار') }}</label>
+                                            for="pricing_information">{{ admin_t('Pricing Notes') }}</label>
                                         <textarea id="pricing_information" name="pricing_information" rows="4" class="form-control">{{ old('pricing_information') }}</textarea>
                                     </div>
                                 </div>
                             </div>
 
                             @php
-                                $facilityPresets = [
-                                    'WiFi',
-                                    'Pool',
-                                    'Air condition',
-                                    'Private bath with Shower',
-                                    'TV',
-                                    'Mini Bar',
-                                    'Doctor available 24 hours',
-                                    'Gift Shop',
-                                    'Large panoramic / ultra violet windows',
-                                    'Laundry service & housekeeping',
-                                    'Safe box in each cabin',
-                                    'Gymnasium',
-                                ];
+                                $facilityPresets = \App\Services\NileCruisePackageService::facilityPresets();
                                 $oldFacilityTitles = collect(old('facilities', []))
                                     ->pluck('title')
                                     ->filter()
                                     ->map(fn ($title) => trim((string) $title))
                                     ->all();
+                                $normalizeFacility = function (string $str): string {
+                                    $c = strtolower(trim($str));
+                                    $c = str_replace(['conditioning', 'condition'], 'ac', $c);
+                                    $c = str_replace(['swimming pool', 'pool'], 'pool', $c);
+                                    $c = str_replace(['bathroom', 'bath'], 'bath', $c);
+                                    $c = str_replace(['gymnasium', 'gym'], 'gym', $c);
+                                    $c = str_replace(['satellite', 'tv'], 'tv', $c);
+                                    return preg_replace('/[^a-z0-9]/', '', $c);
+                                };
+                                $normalizedOld = array_map($normalizeFacility, $oldFacilityTitles);
                             @endphp
                             <div class="form-section-card">
                                 <div class="section-header">
                                     <div class="section-icon"><i class="ti ti-layout-grid-add"></i></div>
                                     <div>
-                                        <h3>{{ admin_t('مرافق الرحلة / Cruise Facilities') }}</h3>
-                                        <p>{{ admin_t('اختر المرافق والخدمات التي تظهر في صفحة الرحلة أو الكروز.') }}</p>
+                                        <h3>{{ admin_t('Trip & Cruise Facilities') }}</h3>
+                                        <p>{{ admin_t('Select the facilities and amenities that appear on the trip or cruise page.') }}</p>
                                     </div>
                                 </div>
 
                                 <div class="section-body">
                                     <div class="attractions-picker-grid">
                                         @foreach ($facilityPresets as $facilityIndex => $facilityTitle)
+                                            @php
+                                                $isChecked = in_array($facilityTitle, $oldFacilityTitles, true)
+                                                    || in_array($normalizeFacility($facilityTitle), $normalizedOld, true);
+                                            @endphp
                                             <label class="attraction-choice">
                                                 <input type="checkbox"
                                                     name="facilities[{{ $facilityIndex }}][title]"
                                                     value="{{ $facilityTitle }}"
-                                                    {{ in_array($facilityTitle, $oldFacilityTitles, true) ? 'checked' : '' }}>
+                                                    {{ $isChecked ? 'checked' : '' }}>
                                                 <input type="hidden" name="facilities[{{ $facilityIndex }}][sort_order]"
                                                     value="{{ $facilityIndex }}">
                                                 <span class="attraction-choice-icon"><i class="ti ti-check"></i></span>
                                                 <span class="attraction-choice-copy">
-                                                    <strong>{{ $facilityTitle }}</strong>
-                                                    <small>{{ admin_t('سيظهر ضمن مرافق الرحلة') }}</small>
+                                                    <strong>{{ admin_t($facilityTitle) }}</strong>
+                                                    <small>{{ admin_t('Will appear in trip facilities') }}</small>
                                                 </span>
                                             </label>
                                         @endforeach

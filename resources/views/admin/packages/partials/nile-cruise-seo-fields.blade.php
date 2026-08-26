@@ -10,7 +10,7 @@
     <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-3">
         <div>
             <h5 class="mb-1"><i class="ti ti-ship me-1"></i>{{ admin_t('Nile Cruise SEO & Social') }}</h5>
-            <p class="text-muted small mb-0">{{ admin_t('اختياري — يخصص ظهور رحلة النايل كروز في البحث والمشاركة الاجتماعية، ويترك حقول SEO العامة كما هي.') }}</p>
+            <p class="text-muted small mb-0">{{ admin_t('Optional — customizes Nile Cruise display in search and social sharing, leaving general SEO fields as default.') }}</p>
         </div>
         <span class="badge bg-info-subtle text-info">{{ admin_t('Nile Cruise only') }}</span>
     </div>
@@ -27,7 +27,7 @@
             <input type="text" class="form-control" name="nile_cruise[meta_keywords]"
                 value="{{ $ncMetaKeywords }}"
                 placeholder="Dahabiya, Nile cruise, Luxor, Aswan">
-            <div class="form-text">{{ admin_t('افصل الكلمات بفواصل.') }}</div>
+            <div class="form-text">{{ admin_t('Separate keywords with commas.') }}</div>
         </div>
 
         <div class="col-md-6">
@@ -59,11 +59,11 @@
                 <input type="hidden" name="nile_cruise[remove_social_image]" value="0">
                 <label class="form-check mb-2">
                     <input class="form-check-input" type="checkbox" name="nile_cruise[remove_social_image]" value="1">
-                    <span class="form-check-label">{{ admin_t('حذف صورة المشاركة الحالية') }}</span>
+                    <span class="form-check-label">{{ admin_t('Remove current social share image') }}</span>
                 </label>
             @endif
             <input type="file" class="form-control" name="nile_cruise[social_image]" accept="image/jpeg,image/png,image/webp">
-            <div class="form-text">{{ admin_t('إذا تركتها فارغة سيستخدم الموقع صورة الرحلة الرئيسية.') }}</div>
+            <div class="form-text">{{ admin_t('If left empty, the main trip image will be used.') }}</div>
         </div>
         <div class="col-md-6">
             <label class="form-label">{{ admin_t('Twitter Card') }}</label>
