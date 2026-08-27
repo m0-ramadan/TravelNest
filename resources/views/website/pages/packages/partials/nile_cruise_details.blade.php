@@ -42,7 +42,8 @@
         $hasInclusionsExclusions = (!empty($inclusions) && count($inclusions) > 0) || (!empty($exclusions) && count($exclusions) > 0);
         $hasPoliciesData = !empty($package->getTranslation('children_policy')) || !empty($package->getTranslation('cancellation_policy')) || !empty($package->getTranslation('terms_conditions')) || !empty($package->getTranslation('pickup_policy'));
 
-        $hasNcExtendedData = $hasNcDetailData || $hasNcCruiseData || $ncSchedules->isNotEmpty() || $ncCabins->isNotEmpty() || $ncAddons->isNotEmpty() || $ncDurations->isNotEmpty() || $hasInclusionsExclusions || $hasPoliciesData;
+        $hasFacilitiesData = !empty($facilities) && $facilities->isNotEmpty();
+        $hasNcExtendedData = $hasNcDetailData || $hasNcCruiseData || $ncSchedules->isNotEmpty() || $ncCabins->isNotEmpty() || $ncAddons->isNotEmpty() || $ncDurations->isNotEmpty() || $hasInclusionsExclusions || $hasPoliciesData || $hasFacilitiesData;
     @endphp
 
     @if($hasNcExtendedData)

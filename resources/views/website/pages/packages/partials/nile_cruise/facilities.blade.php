@@ -1,5 +1,15 @@
 @php
-    $hasDynamicNileFacilities = isset($facilities) && isset($nileFacilityStats) && ($facilities->isNotEmpty() || $nileFacilityStats->isNotEmpty());
+    if (!isset($nileFacilityStats)) {
+        $nileDetailForFacilities = $package->nileCruiseDetail;
+        $nileCabinTotal = $package->nileCruiseCabins?->sum(fn($cabin) => (int) ($cabin->quantity ?? 0)) ?? 0;
+        $nileFacilityStats = collect([
+            $nileDetailForFacilities?->decks ? ['label' => $nileDetailForFacilities->decks . ' ' . __('Decks'), 'icon' => 'deck'] : null,
+            $nileCabinTotal > 0 ? ['label' => $nileCabinTotal . ' ' . __('Cabins / Suites'), 'icon' => 'cabin'] : null,
+            $nileDetailForFacilities?->sun_beds ? ['label' => $nileDetailForFacilities->sun_beds . ' ' . __('Sun Beds'), 'icon' => 'sun'] : null,
+            $nileDetailForFacilities?->sun_deck_pergolas ? ['label' => $nileDetailForFacilities->sun_deck_pergolas . ' ' . __('Sun Deck Private Pergolas'), 'icon' => 'sun'] : null,
+        ])->filter()->values();
+    }
+    $hasDynamicNileFacilities = (isset($facilities) && $facilities->isNotEmpty()) || (isset($nileFacilityStats) && $nileFacilityStats->isNotEmpty());
 @endphp
 
 @if($hasDynamicNileFacilities)
