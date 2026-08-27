@@ -28,7 +28,6 @@ class NileCruisePackageService
         // present in the submitted form. This protects old cruises and partial forms.
         if (!empty($payload['_present'])) {
             $payload += [
-                'facility_titles' => [],
                 'route_city_ids' => [],
                 'schedules' => [],
                 'cabins' => [],
@@ -127,7 +126,7 @@ class NileCruisePackageService
 
     private function syncCruiseFacilities(Package $package, array $payload): void
     {
-        if (!array_key_exists('facility_titles', $payload)) {
+        if (!isset($payload['facility_titles']) || !is_array($payload['facility_titles'])) {
             return;
         }
 
