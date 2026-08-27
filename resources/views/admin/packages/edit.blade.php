@@ -1827,7 +1827,7 @@
                                             @enderror
                                         </div>
 
-                                        <div>
+                                        <div class="tour-type-conditional" data-tour-type-section="travel_package,day_tour,shore_excursion,custom" style="display: {{ old('package_type', $package->package_type) == 'nile_cruise' ? 'none' : 'block' }};">
                                             <label class="form-label" for="destination_selector">
                                                 {{ admin_t('المدينة') }}
                                                 <span class="required-mark">*</span>
@@ -3522,6 +3522,7 @@
 
                 if (step === 1) {
                     if (packageType === 'nile_cruise') {
+                        requiredFields = requiredFields.filter(field => field !== 'destination_id');
                         requiredFields.push('nile_cruise_type_id');
                     }
                 } else if (step === 3) {

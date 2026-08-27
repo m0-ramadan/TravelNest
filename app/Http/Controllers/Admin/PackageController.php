@@ -896,8 +896,11 @@ class PackageController extends Controller
             ? $this->resolveDestinationAttractionFromCityId((int) $selectedCity->id)
             : null;
 
-        $data['destination_id'] = $selectedAttraction?->id;
         $data['package_type'] = $this->normalizePackageType($data['package_type'] ?? null);
+        if ($data['package_type'] === 'nile_cruise') {
+            $data['destination_id'] = null;
+        }
+
         $data['duration_type'] = match ($data['package_type']) {
             'day_tour' => 'hours',
             'travel_package' => 'days',
@@ -1167,7 +1170,8 @@ class PackageController extends Controller
     private function syncPackageCities(Package $package, ?Request $request = null): void
     {
         // Advanced Nile Cruise route order is managed by NileCruisePackageService.
-        if ($package->package_type === 'nile_cruise' && $request?->boolean('nile_cruise._present')) {
+        if ($package->package_type === 'nile_cruise') {
+            $package->cities()->detach();
             return;
         }
 

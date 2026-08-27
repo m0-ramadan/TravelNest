@@ -271,7 +271,7 @@
                                 value="{{ old('duration_nights', 4) }}">
                         </div>
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-4 mb-3" id="ai_destination_wrapper">
                             <label class="form-label">المدينة</label>
                             <select id="destination_selector" name="destination_id" class="form-select">
                                 <option value="">اختر المدينة</option>
@@ -457,6 +457,22 @@
                 const selected = destinationSelector.options[destinationSelector.selectedIndex];
                 const countryId = selected ? selected.getAttribute('data-country-id') : '';
                 primaryCountryInput.value = countryId || '';
+            }
+
+            const packageTypeSelect = document.querySelector('select[name="package_type"]');
+            const aiDestinationWrapper = document.getElementById('ai_destination_wrapper');
+
+            function syncAiDestinationVisibility() {
+                if (!packageTypeSelect || !aiDestinationWrapper) return;
+                if (packageTypeSelect.value === 'nile_cruise') {
+                    aiDestinationWrapper.style.display = 'none';
+                } else {
+                    aiDestinationWrapper.style.display = '';
+                }
+            }
+            if (packageTypeSelect) {
+                packageTypeSelect.addEventListener('change', syncAiDestinationVisibility);
+                syncAiDestinationVisibility();
             }
 
             if (destinationSelector) {
