@@ -39,7 +39,7 @@
             (!empty($ncCruise->star_rating) && $ncCruise->star_rating > 0)
         );
 
-        $hasInclusionsExclusions = (!empty($inclusions) && count($inclusions) > 0) || (!empty($exclusions) && count($exclusions) > 0);
+        $hasInclusionsExclusions = (!empty($included) && $included->isNotEmpty()) || (!empty($excluded) && $excluded->isNotEmpty()) || (!empty($inclusions) && count($inclusions) > 0) || (!empty($exclusions) && count($exclusions) > 0);
         $hasPoliciesData = !empty($package->getTranslation('children_policy')) || !empty($package->getTranslation('cancellation_policy')) || !empty($package->getTranslation('terms_conditions')) || !empty($package->getTranslation('pickup_policy'));
 
         $hasFacilitiesData = !empty($facilities) && $facilities->isNotEmpty();

@@ -1,8 +1,17 @@
 @php
     $ncDetail = $package->nileCruiseDetail;
     $ncWhatToBring = isset($whatToBring) && $whatToBring->isNotEmpty() ? $whatToBring : collect((array) ($ncDetail?->what_to_bring ?? []));
-    $hasInclusions = !empty($inclusions) && count($inclusions) > 0;
-    $hasExclusions = !empty($exclusions) && count($exclusions) > 0;
+
+    $incList = (isset($included) && $included->isNotEmpty())
+        ? $included
+        : ((isset($inclusions) && !empty($inclusions)) ? collect($inclusions) : collect());
+
+    $excList = (isset($excluded) && $excluded->isNotEmpty())
+        ? $excluded
+        : ((isset($exclusions) && !empty($exclusions)) ? collect($exclusions) : collect());
+
+    $hasInclusions = $incList->isNotEmpty();
+    $hasExclusions = $excList->isNotEmpty();
 @endphp
 
 @if($hasInclusions || $hasExclusions || $ncWhatToBring->isNotEmpty())
@@ -15,8 +24,8 @@
                         <h4 class="box-title">{{ __('Included in Your Journey') }}</h4>
                         <div class="styled-list">
                             <ul>
-                                @foreach($inclusions as $inc)
-                                    <li>{{ is_array($inc) ? ($inc['title'] ?? '') : (is_object($inc) ? ($inc->display_content ?? $inc->title ?? '') : $inc) }}</li>
+                                @foreach($incList as $inc)
+                                    <li>{{ is_object($inc) ? ($inc->display_content ?? $inc->title ?? '') : (is_array($inc) ? ($inc['title'] ?? '') : $inc) }}</li>
                                 @endforeach
                             </ul>
                         </div>
@@ -30,8 +39,8 @@
                         <h4 class="box-title">{{ __('Not Included') }}</h4>
                         <div class="styled-list">
                             <ul>
-                                @foreach($exclusions as $exc)
-                                    <li>{{ is_array($exc) ? ($exc['title'] ?? '') : (is_object($exc) ? ($exc->display_content ?? $exc->title ?? '') : $exc) }}</li>
+                                @foreach($excList as $exc)
+                                    <li>{{ is_object($exc) ? ($exc->display_content ?? $exc->title ?? '') : (is_array($exc) ? ($exc['title'] ?? '') : $exc) }}</li>
                                 @endforeach
                             </ul>
                         </div>
