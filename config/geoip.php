@@ -36,7 +36,7 @@ return [
     |
     */
 
-    'service' => null,
+    'service' => env('GEOIP_SERVICE', 'ipapi'),
 
     /*
     |--------------------------------------------------------------------------
@@ -48,6 +48,14 @@ return [
     */
 
     'services' => [
+
+        'ipapi' => [
+            'class' => \Torann\GeoIP\Services\IPApi::class,
+            'secure' => true,
+            'key' => env('IPAPI_KEY'),
+            'continent_path' => storage_path('app/continents.json'),
+            'lang' => 'en',
+        ],
 
         'maxmind_database' => [
             'class' => \Torann\GeoIP\Services\MaxMindDatabase::class,
@@ -114,7 +122,7 @@ return [
     |
     */
 
-    'cache_tags' => ['torann-geoip-location'],
+    'cache_tags' => env('GEOIP_CACHE_TAGS') ? explode(',', env('GEOIP_CACHE_TAGS')) : null,
 
     /*
     |--------------------------------------------------------------------------

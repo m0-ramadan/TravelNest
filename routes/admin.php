@@ -84,8 +84,10 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
         Route::get('/admin', [AdminAuthController::class, 'home'])->name('index');
         Route::post('logout', [AdminAuthController::class, 'logout'])->name('logout');
 
+        Route::get('visitors', [VisitorController::class, 'index'])->name('visitors.index');
         Route::get('visitors/chart', [VisitorController::class, 'chartData'])->name('visitors.chart');
         Route::get('dashboard/quick-stats', [VisitorController::class, 'quickStats'])->name('dashboard.quick-stats');
+        Route::get('bookings/stats/{year?}', [BookingController::class, 'yearlyStats'])->name('bookings.yearly-stats');
 
         /*
         |--------------------------------------------------------------------------

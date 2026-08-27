@@ -41,6 +41,14 @@
             </a>
         </li>
 
+        {{-- Visitors Analytics --}}
+        <li class="menu-item {{ request()->routeIs('admin.visitors.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.visitors.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-chart-bar"></i>
+                <div>{{ admin_t('Visitor Analytics') }}</div>
+            </a>
+        </li>
+
         {{-- Travel content --}}
         @php
             $travelContentOpen = request()->routeIs(

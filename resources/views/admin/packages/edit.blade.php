@@ -1840,7 +1840,7 @@
                                                     <option value="{{ $destination->id }}"
                                                         data-country-id="{{ $destination->country_id }}"
                                                         data-destination-name="{{ adminTrans($destination->name) }}"
-                                                        {{ old('destination_id', $package->destination_id) == $destination->id ? 'selected' : '' }}>
+                                                        {{ old('destination_id', $package->destination?->city_id ?? $package->cities->first()?->id ?? $package->destination_id) == $destination->id ? 'selected' : '' }}>
                                                         {{ adminTrans($destination->name) }}
                                                     </option>
                                                 @endforeach
@@ -1862,19 +1862,19 @@
                                                 class="form-select @error('tour_type') is-invalid @enderror">
                                                 <option value="">{{ admin_t('اختر نوع الجولة') }}</option>
                                                 <option value="private"
-                                                    {{ old('tour_type') == 'private' ? 'selected' : '' }}>
+                                                    {{ old('tour_type', $package->tour_type ?? 'private') == 'private' ? 'selected' : '' }}>
                                                     {{ admin_t('خاصة') }}
                                                 </option>
                                                 <option value="group"
-                                                    {{ old('tour_type') == 'group' ? 'selected' : '' }}>
+                                                    {{ old('tour_type', $package->tour_type) == 'group' ? 'selected' : '' }}>
                                                     {{ admin_t('مجموعة صغيرة') }}
                                                 </option>
                                                 <option value="shared"
-                                                    {{ old('tour_type') == 'shared' ? 'selected' : '' }}>
+                                                    {{ old('tour_type', $package->tour_type) == 'shared' ? 'selected' : '' }}>
                                                     {{ admin_t('مشتركة') }}
                                                 </option>
                                                 <option value="custom"
-                                                    {{ old('tour_type') == 'custom' ? 'selected' : '' }}>
+                                                    {{ old('tour_type', $package->tour_type) == 'custom' ? 'selected' : '' }}>
                                                     {{ admin_t('مخصصة') }}
                                                 </option>
                                             </select>
@@ -1907,11 +1907,11 @@
                                                 class="form-select @error('booking_mode') is-invalid @enderror">
                                                 <option value="">{{ admin_t('اختر نظام الحجز') }}</option>
                                                 <option value="request"
-                                                    {{ old('booking_mode') == 'request' ? 'selected' : '' }}>
+                                                    {{ old('booking_mode', $package->booking_mode ?? 'request') == 'request' ? 'selected' : '' }}>
                                                     {{ admin_t('طلب') }}
                                                 </option>
                                                 <option value="instant"
-                                                    {{ old('booking_mode') == 'instant' ? 'selected' : '' }}>
+                                                    {{ old('booking_mode', $package->booking_mode) == 'instant' ? 'selected' : '' }}>
                                                     {{ admin_t('فوري') }}
                                                 </option>
                                             </select>
@@ -1927,15 +1927,15 @@
                                                 class="form-select @error('difficulty_level') is-invalid @enderror">
                                                 <option value="">{{ admin_t('اختر المستوى') }}</option>
                                                 <option value="easy"
-                                                    {{ old('difficulty_level') == 'easy' ? 'selected' : '' }}>
+                                                    {{ old('difficulty_level', $package->difficulty_level) == 'easy' ? 'selected' : '' }}>
                                                     {{ admin_t('سهل') }}
                                                 </option>
                                                 <option value="moderate"
-                                                    {{ old('difficulty_level') == 'moderate' ? 'selected' : '' }}>
+                                                    {{ old('difficulty_level', $package->difficulty_level) == 'moderate' ? 'selected' : '' }}>
                                                     {{ admin_t('متوسط') }}
                                                 </option>
                                                 <option value="hard"
-                                                    {{ old('difficulty_level') == 'hard' ? 'selected' : '' }}>
+                                                    {{ old('difficulty_level', $package->difficulty_level) == 'hard' ? 'selected' : '' }}>
                                                     {{ admin_t('صعب') }}
                                                 </option>
                                             </select>
@@ -2127,7 +2127,7 @@
                                             <label class="form-label"
                                                 for="duration_text">{{ admin_t('نص المدة المعروض') }}</label>
                                             <input id="duration_text" type="text" name="duration_text"
-                                                class="form-control" value="{{ old('duration_text') }}"
+                                                class="form-control" value="{{ old('duration_text', adminTrans($package->duration_text)) }}"
                                                 placeholder="{{ admin_t('مثال: 5 أيام / 4 ليالٍ') }}">
                                         </div>
 
@@ -2408,7 +2408,7 @@
                                             <label class="form-label" for="adult_price">{{ admin_t('Adult Price (Default)') }}</label>
                                             <input id="adult_price" type="number" step="0.01" min="0"
                                                 name="adult_price" class="form-control"
-                                                value="{{ old('adult_price', '') }}">
+                                                value="{{ old('adult_price', $package->adult_price) }}">
                                             @error('adult_price')
                                                 <div class="text-danger small mt-1">{{ $message }}</div>
                                             @enderror
@@ -2418,7 +2418,7 @@
                                             <label class="form-label" for="child_price">{{ admin_t('Child Price') }}</label>
                                             <input id="child_price" type="number" step="0.01" min="0"
                                                 name="child_price" class="form-control"
-                                                value="{{ old('child_price', '') }}">
+                                                value="{{ old('child_price', $package->child_price) }}">
                                             @error('child_price')
                                                 <div class="text-danger small mt-1">{{ $message }}</div>
                                             @enderror
@@ -2428,7 +2428,7 @@
                                             <label class="form-label" for="infant_price">{{ admin_t('Infant Price') }}</label>
                                             <input id="infant_price" type="number" step="0.01" min="0"
                                                 name="infant_price" class="form-control"
-                                                value="{{ old('infant_price', '') }}">
+                                                value="{{ old('infant_price', $package->infant_price) }}">
                                             @error('infant_price')
                                                 <div class="text-danger small mt-1">{{ $message }}</div>
                                             @enderror
@@ -2959,42 +2959,42 @@
                                                 <label class="form-label"
                                                     for="min_participants">{{ admin_t('الحد الأدنى للمشاركين') }}</label>
                                                 <input id="min_participants" type="number" name="min_participants"
-                                                    class="form-control" value="{{ old('min_participants') }}">
+                                                    class="form-control" value="{{ old('min_participants', $package->min_participants) }}">
                                             </div>
 
                                             <div>
                                                 <label class="form-label"
                                                     for="max_participants">{{ admin_t('الحد الأقصى للمشاركين') }}</label>
                                                 <input id="max_participants" type="number" name="max_participants"
-                                                    class="form-control" value="{{ old('max_participants') }}">
+                                                    class="form-control" value="{{ old('max_participants', $package->max_participants) }}">
                                             </div>
 
                                             <div>
                                                 <label class="form-label"
                                                     for="booking_lead_days">{{ admin_t('أيام الحجز المسبق') }}</label>
                                                 <input id="booking_lead_days" type="number" name="booking_lead_days"
-                                                    class="form-control" value="{{ old('booking_lead_days') }}">
+                                                    class="form-control" value="{{ old('booking_lead_days', $package->booking_lead_days) }}">
                                             </div>
 
                                             <div>
                                                 <label class="form-label"
                                                     for="rating_avg">{{ admin_t('التقييم') }}</label>
                                                 <input id="rating_avg" type="number" step="0.01" name="rating_avg"
-                                                    class="form-control" value="{{ old('rating_avg') }}">
+                                                    class="form-control" value="{{ old('rating_avg', $package->rating_avg) }}">
                                             </div>
 
                                             <div>
                                                 <label class="form-label"
                                                     for="reviews_count">{{ admin_t('عدد المراجعات') }}</label>
                                                 <input id="reviews_count" type="number" name="reviews_count"
-                                                    class="form-control" value="{{ old('reviews_count') }}">
+                                                    class="form-control" value="{{ old('reviews_count', $package->reviews_count) }}">
                                             </div>
 
                                             <div class="field-span-2">
                                                 <label class="form-label"
                                                     for="video_url">{{ admin_t('رابط الفيديو') }}</label>
                                                 <input id="video_url" type="text" name="video_url"
-                                                    class="form-control" value="{{ old('video_url') }}">
+                                                    class="form-control" value="{{ old('video_url', $package->video_url) }}">
                                             </div>
                                         </div>
                                     </div>
@@ -3015,36 +3015,36 @@
                                                 <label class="form-label"
                                                     for="published_at">{{ admin_t('تاريخ النشر') }}</label>
                                                 <input id="published_at" type="date" name="published_at"
-                                                    class="form-control" value="{{ old('published_at') }}">
+                                                    class="form-control" value="{{ old('published_at', $package->published_at?->format('Y-m-d')) }}">
                                             </div>
 
                                             <div>
                                                 <label class="form-label"
                                                     for="sort_order">{{ admin_t('الترتيب') }}</label>
                                                 <input id="sort_order" type="number" name="sort_order"
-                                                    class="form-control" value="{{ old('sort_order') }}">
+                                                    class="form-control" value="{{ old('sort_order', $package->sort_order ?? 0) }}">
                                             </div>
                                         </div>
 
                                         <div class="choice-row mt-3">
                                             <label class="choice-pill">
                                                 <input type="checkbox" name="is_active" value="1"
-                                                    {{ old('is_active', true) ? 'checked' : '' }}>
+                                                    {{ old('is_active', $package->is_active) ? 'checked' : '' }}>
                                                 <span>{{ admin_t('مفعلة') }}</span>
                                             </label>
                                             <label class="choice-pill">
                                                 <input type="checkbox" name="is_featured" value="1"
-                                                    {{ old('is_featured') ? 'checked' : '' }}>
+                                                    {{ old('is_featured', $package->is_featured) ? 'checked' : '' }}>
                                                 <span>{{ admin_t('مميزة') }}</span>
                                             </label>
                                             <label class="choice-pill">
                                                 <input type="checkbox" name="is_best_seller" value="1"
-                                                    {{ old('is_best_seller') ? 'checked' : '' }}>
+                                                    {{ old('is_best_seller', $package->is_best_seller) ? 'checked' : '' }}>
                                                 <span>{{ admin_t('الأكثر مبيعًا') }}</span>
                                             </label>
                                             <label class="choice-pill">
                                                 <input type="checkbox" name="is_ultra_luxury" value="1"
-                                                    {{ old('is_ultra_luxury') ? 'checked' : '' }}>
+                                                    {{ old('is_ultra_luxury', $package->is_ultra_luxury) ? 'checked' : '' }}>
                                                 <span>{{ admin_t('فاخرة جدًا') }}</span>
                                             </label>
                                         </div>
@@ -3066,7 +3066,7 @@
                                         <div class="field-span-2">
                                             <label class="form-label" for="seo_title">{{ admin_t('عنوان SEO') }}</label>
                                             <input id="seo_title" type="text" name="seo_title" class="form-control"
-                                                value="{{ old('seo_title') }}" data-counter-max="60">
+                                                value="{{ old('seo_title', adminTrans($package->seo_title)) }}" data-counter-max="60">
                                             <div class="counter-line"><span data-counter-for="seo_title">0 / 60</span>
                                             </div>
                                         </div>
@@ -3075,13 +3075,13 @@
                                             <label class="form-label"
                                                 for="breadcrumb_title">{{ admin_t('عنوان مسار التنقل') }}</label>
                                             <input id="breadcrumb_title" type="text" name="breadcrumb_title"
-                                                class="form-control" value="{{ old('breadcrumb_title') }}">
+                                                class="form-control" value="{{ old('breadcrumb_title', adminTrans($package->breadcrumb_title)) }}">
                                         </div>
 
                                         <div class="field-span-2">
                                             <label class="form-label"
                                                 for="seo_description">{{ admin_t('وصف SEO') }}</label>
-                                            <textarea id="seo_description" name="seo_description" rows="4" class="form-control" data-counter-max="160">{{ old('seo_description') }}</textarea>
+                                            <textarea id="seo_description" name="seo_description" rows="4" class="form-control" data-counter-max="160">{{ old('seo_description', adminTrans($package->seo_description)) }}</textarea>
                                             <div class="counter-line"><span data-counter-for="seo_description">0 /
                                                     160</span></div>
                                         </div>
@@ -3090,7 +3090,7 @@
                                             <label class="form-label"
                                                 for="canonical_url">{{ admin_t('Canonical URL') }}</label>
                                             <input id="canonical_url" type="text" name="canonical_url"
-                                                class="form-control" value="{{ old('canonical_url') }}">
+                                                class="form-control" value="{{ old('canonical_url', $package->canonical_url) }}">
                                         </div>
                                     </div>
                                 </div>

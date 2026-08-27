@@ -100,6 +100,27 @@ class BookingController extends Controller
         ]);
     }
 
+    public function yearlyStats(Request $request, $year = null)
+    {
+        $targetYear = $year ?: $request->input('year', date('Y'));
+
+        $monthsData = [];
+        $monthKeys = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        for ($m = 1; $m <= 12; $m++) {
+            $count = Booking::whereYear('created_at', $targetYear)
+                ->whereMonth('created_at', $m)
+                ->count();
+
+            $monthsData[] = [
+                'month' => admin_t($monthKeys[$m - 1]),
+                'total' => $count
+            ];
+        }
+
+        return response()->json($monthsData);
+    }
+
     public function updateStatus(Request $request, Booking $booking): RedirectResponse
     {
         $request->validate(['status' => ['required', 'string']]);

@@ -625,7 +625,7 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             function loadBookingsChart(year) {
-                fetch(`/bookings/stats/${year}`)
+                fetch(`{{ url('admin/bookings/stats') }}/${year}`)
                     .then(res => res.json())
                     .then(data => {
                         let months = data.map(i => i.month);
@@ -653,7 +653,7 @@
             }
 
             function loadGeneralStatsChart(year) {
-                fetch(`/bookings/stats/${year}`)
+                fetch(`{{ url('admin/bookings/stats') }}/${year}`)
                     .then(res => res.json())
                     .then(data => {
                         let months = data.map(i => i.month);
