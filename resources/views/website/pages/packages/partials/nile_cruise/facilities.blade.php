@@ -74,7 +74,7 @@
                                     <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
                             @endswitch
                         </span>
-                        <span>{{ $facility->display_title }}</span>
+                        <span>{{ __($facility->display_title) }}</span>
                     </div>
                 @endforeach
             @endif

@@ -2601,7 +2601,7 @@
                                                     <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg>
                                             @endswitch
                                         </span>
-                                        <span>{{ $facility->display_title }}</span>
+                                        <span>{{ __($facility->display_title) }}</span>
                                     </div>
                                 @endforeach
                             </div>
