@@ -43,7 +43,8 @@ class Language extends Model
 
     protected function normalizedCode(): string
     {
-        return strtolower(trim((string) $this->code));
+        $code = strtolower(trim((string) $this->code));
+        return $code === 'english' ? 'en' : $code;
     }
 
     protected function languageLabels(): array

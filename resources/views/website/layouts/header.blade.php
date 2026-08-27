@@ -131,7 +131,10 @@
                  </a>
                  <div class="dropdown language-dropdown">
                      @php
-                         $currentLocale = app()->getLocale();
+                         $currentLocale = strtolower(trim(app()->getLocale()));
+                        if ($currentLocale === 'english') {
+                            $currentLocale = 'en';
+                        }
                          $activeLanguages = \Illuminate\Support\Facades\Cache::remember(
                              'active_languages',
                              3600,
@@ -148,8 +151,8 @@
                      <ul class="dropdown-menu dropdown-menu-end language-menu" id="desktopLanguageMenu">
                          @foreach ($activeLanguages as $lang)
                              <li>
-                                 <a class="dropdown-item {{ strtolower($currentLocale) === strtolower($lang->code) ? 'active' : '' }}"
-                                     href="{{ route('website.lang.switch', $lang->code) }}">
+                                 <a class="dropdown-item {{ $currentLocale === (strtolower(trim($lang->code)) === 'english' ? 'en' : strtolower(trim($lang->code))) ? 'active' : '' }}"
+                                     href="{{ route('website.lang.switch', strtolower(trim($lang->code)) === 'english' ? 'en' : $lang->code) }}">
                                      <img src="{{ asset('website/flags/4x3/' . $lang->display_flag_code . '.webp') }}"
                                          alt="" width="22" height="17" loading="lazy" decoding="async" aria-hidden="true">
                                      {{ $lang->display_name }}
@@ -268,8 +271,8 @@
              <div class="mobile-language-submenu" id="mobileLanguageSubmenu">
                  @foreach ($activeLanguages as $lang)
                      <div class="mobile-language-item">
-                         <a href="{{ route('website.lang.switch', $lang->code) }}"
-                             class="mobile-language-link {{ strtolower($currentLocale) === strtolower($lang->code) ? 'active' : '' }}">
+                         <a href="{{ route('website.lang.switch', strtolower(trim($lang->code)) === 'english' ? 'en' : $lang->code) }}"
+                             class="mobile-language-link {{ $currentLocale === (strtolower(trim($lang->code)) === 'english' ? 'en' : strtolower(trim($lang->code))) ? 'active' : '' }}">
                              <img src="{{ asset('website/flags/4x3/' . $lang->display_flag_code . '.webp') }}"
                                  alt="" width="22" height="17" loading="lazy" decoding="async" aria-hidden="true">
                              {{ $lang->display_name }}

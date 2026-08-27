@@ -33,6 +33,10 @@ class SetLocale
         }
 
         $locale = strtolower(trim($locale));
+        if ($locale === 'english') {
+            $locale = 'en';
+            $request->session()->put('locale', 'en');
+        }
 
         $supportedLocales = \Illuminate\Support\Facades\Cache::remember('supported_locales', 3600, function () {
             return \App\Models\Language::where('is_active', true)->pluck('code')->toArray();
