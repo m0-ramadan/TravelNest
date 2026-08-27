@@ -275,13 +275,36 @@
                             <div class="col-md-3"><strong>العملة:</strong> {{ $booking->currency_code ?? '-' }}</div>
                         </div>
 
-                        <div class="row mb-3">
+                        <div class="row mb-3 align-items-center">
                             <div class="col-md-3"><strong>تاريخ السفر:</strong>
                                 {{ optional($booking->travel_date)->translatedFormat('d M Y') ?? '-' }}</div>
                             <div class="col-md-3"><strong>تاريخ الحجز:</strong>
                                 {{ optional($booking->created_at)->translatedFormat('d M Y') ?? '-' }}</div>
-                            <div class="col-md-3"><strong>الهاتف:</strong> {{ $booking->phone ?? '-' }}</div>
-                            <div class="col-md-3"><strong>البريد:</strong> {{ $booking->email ?? '-' }}</div>
+                            <div class="col-md-3">
+                                <strong>الهاتف:</strong>
+                                @if(!empty($booking->phone))
+                                    @php($cleanBPhone = preg_replace('/[^0-9]/', '', $booking->phone))
+                                    <span class="dir-ltr d-inline-block font-monospace mx-1">{{ $booking->phone }}</span>
+                                    <a href="https://wa.me/{{ $cleanBPhone }}" target="_blank" class="btn btn-sm btn-success rounded-circle px-2 py-1 me-1" title="مراسلة عبر واتساب">
+                                        <i class="fab fa-whatsapp fs-6"></i>
+                                    </a>
+                                    <a href="tel:{{ $booking->phone }}" class="btn btn-sm btn-info rounded-circle px-2 py-1" title="اتصال هاتفي">
+                                        <i class="fas fa-phone-alt fs-6"></i>
+                                    </a>
+                                @else
+                                    -
+                                @endif
+                            </div>
+                            <div class="col-md-3">
+                                <strong>البريد:</strong>
+                                @if(!empty($booking->email))
+                                    <a href="mailto:{{ $booking->email }}" class="text-info text-decoration-none" title="مراسلة عبر البريد الإلكتروني">
+                                        <i class="fas fa-envelope text-primary me-1"></i>{{ $booking->email }}
+                                    </a>
+                                @else
+                                    -
+                                @endif
+                            </div>
                         </div>
 
                         <div class="d-flex gap-2 flex-wrap">

@@ -72,7 +72,7 @@ class TailorMadeController extends BaseWebsiteController
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
-            'nationality' => ['required', 'string', 'max:120'],
+            'nationality' => ['nullable', 'string', 'max:120'],
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'days' => ['nullable', 'integer', 'min:1', 'max:60'],

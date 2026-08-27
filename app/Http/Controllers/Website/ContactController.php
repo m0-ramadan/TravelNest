@@ -103,7 +103,7 @@ class ContactController extends BaseWebsiteController
             'last_name' => ['required', 'string', 'max:100'],
             'email' => ['required', 'email', 'max:150'],
             'phone' => ['nullable', 'string', 'max:50'],
-            'country' => ['required', 'string', 'max:150'],
+            'country' => ['nullable', 'string', 'max:150'],
             'inquiry_type' => ['nullable', 'string', 'max:50'],
             'subject' => ['required', 'string', 'max:255'],
             'message' => ['required', 'string', 'max:5000'],

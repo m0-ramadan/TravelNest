@@ -225,12 +225,22 @@
 
             <div class="p-4">
                 @forelse($contacts as $contact)
+                    @php
+                        $phoneNum = $contact->phone ?? null;
+                        $cleanPhone = $phoneNum ? preg_replace('/[^0-9]/', '', $phoneNum) : null;
+                    @endphp
                     <div class="item-card">
                         <div class="d-flex justify-content-between align-items-start flex-wrap mb-3">
                             <div>
                                 <h6 class="mb-1">{{ $contact->subject ?? 'بدون عنوان' }}</h6>
-                                <small class="text-light opacity-75">{{ $contact->name ?? '-' }} -
-                                    {{ $contact->email ?? '-' }}</small>
+                                <small class="text-light opacity-75">
+                                    {{ $contact->name ?? '-' }}
+                                    @if(!empty($contact->email))
+                                        - <a href="mailto:{{ $contact->email }}" class="text-info text-decoration-none" title="مراسلة عبر البريد الإلكتروني">
+                                            <i class="fas fa-envelope text-primary me-1"></i>{{ $contact->email }}
+                                        </a>
+                                    @endif
+                                </small>
                             </div>
 
                             <span class="badge-status status-{{ $contact->status ?? 'new' }}">
@@ -238,11 +248,24 @@
                             </span>
                         </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-4"><strong>الهاتف:</strong> {{ $contact->phone ?? '-' }}</div>
+                        <div class="row mb-3 align-items-center">
+                            <div class="col-md-5">
+                                <strong>الهاتف:</strong>
+                                @if($phoneNum)
+                                    <span class="dir-ltr d-inline-block font-monospace mx-1">{{ $phoneNum }}</span>
+                                    <a href="https://wa.me/{{ $cleanPhone }}" target="_blank" class="btn btn-sm btn-success rounded-circle px-2 py-1 me-1" title="مراسلة عبر واتساب">
+                                        <i class="fab fa-whatsapp fs-6"></i>
+                                    </a>
+                                    <a href="tel:{{ $phoneNum }}" class="btn btn-sm btn-info rounded-circle px-2 py-1" title="اتصال هاتفي">
+                                        <i class="fas fa-phone-alt fs-6"></i>
+                                    </a>
+                                @else
+                                    -
+                                @endif
+                            </div>
                             <div class="col-md-4"><strong>التاريخ:</strong>
                                 {{ optional($contact->created_at)->translatedFormat('d M Y - h:i A') ?? '-' }}</div>
-                            <div class="col-md-4"><strong>رقم السجل:</strong> #{{ $contact->id }}</div>
+                            <div class="col-md-3"><strong>رقم السجل:</strong> #{{ $contact->id }}</div>
                         </div>
 
                         <div class="mb-3">

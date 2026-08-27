@@ -710,30 +710,16 @@
 
                             <div>
                                 <label class="form-label" for="phone">{{ __('Phone Number') }}</label>
-                                <input id="phone" type="text" name="phone"
+                                <input id="phone" type="tel" name="phone"
                                     class="form-control @error('phone') error @enderror"
                                     value="{{ old('phone') }}"
-                                    placeholder="{{ __('Include country code if available') }}">
+                                    placeholder="{{ __('Phone Number') }}">
                                 @error('phone')
                                     <div class="field-error">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            <div>
-                                <label class="form-label" for="country">{{ __('Country') }} *</label>
-                                <select id="country" name="country"
-                                    class="form-select @error('country') error @enderror" required>
-                                    <option value="">{{ __('Select your country') }}</option>
-                                    @foreach ($countries as $country)
-                                        <option value="{{ $country }}" @selected(old('country') === $country)>
-                                            {{ $country }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('country')
-                                    <div class="field-error">{{ $message }}</div>
-                                @enderror
-                            </div>
+
 
                             <div>
                                 <label class="form-label" for="inquiry_type">{{ __('Inquiry Type') }}</label>

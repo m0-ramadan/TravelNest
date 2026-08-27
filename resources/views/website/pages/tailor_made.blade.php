@@ -822,15 +822,7 @@
                                             @enderror
                                         </div>
 
-                                        <div class="form-group">
-                                            <label class="form-label">{{ __('Country of Residence *') }}</label>
-                                            <input type="text" class="form-control @error('nationality') error @enderror"
-                                                name="nationality" value="{{ old('nationality') }}"
-                                                placeholder="{{ __('Enter your country of residence') }}" required>
-                                            @error('nationality')
-                                                <div class="field-error">{{ $message }}</div>
-                                            @enderror
-                                        </div>
+
                                     </div>
                                 </div>
 

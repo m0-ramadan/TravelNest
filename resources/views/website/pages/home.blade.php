@@ -580,13 +580,10 @@
                                 </div>
 
                                 <div class="col-md-6">
-                                    <input class="form-control" name="phone"
+                                    <input class="form-control" type="tel" name="phone"
                                         placeholder="{{ __('Phone / WhatsApp') }}">
                                 </div>
 
-                                <div class="col-md-6">
-                                    <input class="form-control" name="country_name" placeholder="{{ __('Country') }}">
-                                </div>
 
                                 <div class="col-md-4">
                                     <input class="form-control" type="date" name="travel_date">

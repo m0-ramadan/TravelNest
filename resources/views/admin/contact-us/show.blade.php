@@ -92,14 +92,38 @@
                     <div class="col-md-4">
                         <div class="info-box">
                             <div class="info-label">البريد الإلكتروني</div>
-                            <div class="info-value">{{ $contactUs->email ?? '-' }}</div>
+                            <div class="info-value">
+                                @if(!empty($contactUs->email))
+                                    <a href="mailto:{{ $contactUs->email }}" class="text-white text-decoration-none me-2">
+                                        {{ $contactUs->email }}
+                                    </a>
+                                    <a href="mailto:{{ $contactUs->email }}" class="btn btn-sm btn-primary rounded-circle px-2 py-1" title="مراسلة عبر البريد">
+                                        <i class="fas fa-envelope"></i>
+                                    </a>
+                                @else
+                                    -
+                                @endif
+                            </div>
                         </div>
                     </div>
 
                     <div class="col-md-4">
                         <div class="info-box">
                             <div class="info-label">الهاتف</div>
-                            <div class="info-value">{{ $contactUs->phone ?? '-' }}</div>
+                            <div class="info-value">
+                                @if(!empty($contactUs->phone))
+                                    @php($cleanCPhone = preg_replace('/[^0-9]/', '', $contactUs->phone))
+                                    <span class="dir-ltr d-inline-block font-monospace me-2">{{ $contactUs->phone }}</span>
+                                    <a href="https://wa.me/{{ $cleanCPhone }}" target="_blank" class="btn btn-sm btn-success rounded-circle px-2 py-1 me-1" title="مراسلة عبر واتساب">
+                                        <i class="fab fa-whatsapp fs-6"></i>
+                                    </a>
+                                    <a href="tel:{{ $contactUs->phone }}" class="btn btn-sm btn-info rounded-circle px-2 py-1" title="اتصال هاتفي">
+                                        <i class="fas fa-phone-alt fs-6"></i>
+                                    </a>
+                                @else
+                                    -
+                                @endif
+                            </div>
                         </div>
                     </div>
 

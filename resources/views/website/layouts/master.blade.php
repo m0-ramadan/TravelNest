@@ -163,7 +163,97 @@
     @if (app()->getLocale() === 'ar')
         @vite('resources/css/website-rtl.css')
     @endif
-    @vite('resources/css/website-header.css')
+    <link rel="stylesheet" href="{{ asset('website/vendor/intl-tel-input/css/intlTelInput.min.css') }}">
+    <style>
+        /* Custom styled searchable country code flag picker */
+        .iti {
+            width: 100%;
+            display: block;
+        }
+        .iti__country-container {
+            z-index: 5;
+        }
+        .iti__selected-country {
+            padding: 0 12px !important;
+            border-radius: 14px 0 0 14px !important;
+            background: transparent !important;
+        }
+        html[dir="rtl"] .iti__selected-country {
+            border-radius: 0 14px 14px 0 !important;
+        }
+        .iti__selected-dial-code {
+            font-weight: 700;
+            color: #1c325c;
+            font-size: 0.95rem;
+            margin-left: 6px;
+        }
+        html[dir="rtl"] .iti__selected-dial-code {
+            margin-left: 0;
+            margin-right: 6px;
+        }
+        .iti__dropdown-content {
+            background-color: #ffffff !important;
+            border-radius: 18px !important;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.22) !important;
+            border: 1px solid rgba(26, 54, 93, 0.12) !important;
+            padding: 8px !important;
+            z-index: 99999 !important;
+        }
+        .iti__search-input {
+            width: 100% !important;
+            padding: 10px 14px !important;
+            border-radius: 12px !important;
+            border: 1px solid rgba(26, 54, 93, 0.15) !important;
+            font-size: 0.9rem !important;
+            outline: none !important;
+            margin-bottom: 8px !important;
+            background: #f8fbff !important;
+            color: #1c325c !important;
+        }
+        .iti__country-list {
+            border-top: 1px solid rgba(26, 54, 93, 0.08) !important;
+            border-radius: 0 0 14px 14px !important;
+            max-height: 240px !important;
+        }
+        .iti__country {
+            padding: 10px 12px !important;
+            border-radius: 10px !important;
+            font-size: 0.92rem !important;
+            color: #1c325c !important;
+            transition: background-color 0.15s ease;
+        }
+        .iti__country:hover,
+        .iti__country.iti__highlight {
+            background-color: rgba(197, 149, 91, 0.14) !important;
+        }
+        .iti input.form-control,
+        .iti input.iti__tel-input {
+            width: 100% !important;
+            min-height: 58px !important;
+            border-radius: 18px !important;
+        }
+        /* Dark theme support */
+        html[data-theme='dark'] .iti__selected-dial-code {
+            color: #f8fafc !important;
+        }
+        html[data-theme='dark'] .iti__dropdown-content {
+            background-color: #111827 !important;
+            border-color: rgba(148, 163, 184, 0.2) !important;
+            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45) !important;
+        }
+        html[data-theme='dark'] .iti__search-input {
+            background-color: #0f172a !important;
+            color: #ffffff !important;
+            border-color: rgba(148, 163, 184, 0.24) !important;
+        }
+        html[data-theme='dark'] .iti__country {
+            color: #e2e8f0 !important;
+        }
+        html[data-theme='dark'] .iti__country:hover,
+        html[data-theme='dark'] .iti__country.iti__highlight {
+            background-color: rgba(197, 149, 91, 0.22) !important;
+        }
+    </style>
     <meta name="google-site-verification" content="OKwZFMPi1pE0RpnHtt6lJnyE_qPXCNqW8E7-U4BHPRw" />
 </head>
 
@@ -378,6 +468,61 @@
 
     @include('website.layouts.footer')
 
+
+    <script src="{{ asset('website/vendor/intl-tel-input/js/intlTelInput.min.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof window.intlTelInput === 'function') {
+                const locale = @json(app()->getLocale());
+                const searchPlaceholder = locale === 'ar' ? 'ابحث عن الدولة أو الكود...' : 'Search country or code...';
+                const phoneInputs = document.querySelectorAll('input[type="tel"], input[name="phone"], #phone');
+
+                phoneInputs.forEach(function(input) {
+                    if (input.dataset.itiInitialized) return;
+                    input.dataset.itiInitialized = 'true';
+
+                    const iti = window.intlTelInput(input, {
+                        initialCountry: "auto",
+                        geoIpLookup: function(callback) {
+                            var cached = sessionStorage.getItem('user_country_code');
+                            if (cached) {
+                                callback(cached);
+                                return;
+                            }
+                            fetch('https://ipapi.co/json/')
+                                .then(function(res) { return res.json(); })
+                                .then(function(data) {
+                                    var countryCode = (data && data.country_code) ? data.country_code.toLowerCase() : 'eg';
+                                    sessionStorage.setItem('user_country_code', countryCode);
+                                    callback(countryCode);
+                                })
+                                .catch(function() {
+                                    callback('eg');
+                                });
+                        },
+                        separateDialCode: true,
+                        allowDropdown: true,
+                        autoPlaceholder: "polite",
+                        preferredCountries: ["eg", "sa", "ae", "kw", "qa", "om", "us", "gb", "de", "fr"],
+                        utilsScript: "{{ asset('website/vendor/intl-tel-input/js/utils.js') }}",
+                        i18n: {
+                            searchPlaceholder: searchPlaceholder
+                        }
+                    });
+
+                    const form = input.closest('form');
+                    if (form) {
+                        form.addEventListener('submit', function() {
+                            const fullNumber = iti.getNumber();
+                            if (fullNumber && fullNumber.trim() !== '') {
+                                input.value = fullNumber;
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    </script>
 
     @yield('js')
     @vite('resources/js/website.js')

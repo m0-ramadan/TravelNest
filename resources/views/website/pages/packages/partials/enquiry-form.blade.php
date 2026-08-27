@@ -57,8 +57,7 @@
     <div class="input-box">
         <label class="label-text">{{ __('Phone Number') }}</label>
         <div class="form-group">
-            <span class="la la-phone form-icon"></span>
-            <input class="form-control" type="text" name="phone" placeholder="{{ __('Phone Number') }}"
+            <input class="form-control" type="tel" name="phone" placeholder="{{ __('Phone Number') }}"
                 value="{{ old('phone') }}">
         </div>
         @error('phone')
