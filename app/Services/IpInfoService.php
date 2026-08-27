@@ -21,7 +21,10 @@ class IpInfoService
                 return [];
             }
 
-            $countryName = $ipData['country'];
+            $countryName = $ipData['country'] ?? null;
+            if (!$countryName) {
+                return [];
+            }
 
             // Country API
             $countryApiUrl = "https://restcountries.com/v3.1/name/{$countryName}?fullText=true";

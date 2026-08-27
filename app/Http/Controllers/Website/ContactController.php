@@ -133,14 +133,14 @@ class ContactController extends BaseWebsiteController
         $message = $this->buildMessage($validated, $request);
 
         $data = [
-            'inquiry_type' => 'contact_us',
+            'inquiry_type' => 'contact',
             'full_name' => $fullName,
             'first_name' => $validated['first_name'],
             'last_name' => $validated['last_name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
-            'country' => $validated['country'],
-            'country_name' => $validated['country'],
+            'country' => $validated['country'] ?? null,
+            'country_name' => $validated['country'] ?? null,
             'subject' => $validated['subject'],
             'source' => $request->fullUrl(),
             'message' => $message,
@@ -159,11 +159,11 @@ class ContactController extends BaseWebsiteController
             DB::table('inquiries')->insert($data);
         } else {
             Inquiry::create([
-                'inquiry_type' => 'contact_us',
+                'inquiry_type' => 'contact',
                 'full_name' => $fullName,
                 'email' => $validated['email'],
                 'phone' => $validated['phone'] ?? null,
-                'country_name' => $validated['country'],
+                'country_name' => $validated['country'] ?? null,
                 'message' => $message,
                 'status' => 'new',
             ]);
@@ -210,7 +210,7 @@ class ContactController extends BaseWebsiteController
             __('Name:') . ' ' . trim($validated['first_name'] . ' ' . $validated['last_name']),
             __('Email:') . ' ' . $validated['email'],
             __('Phone:') . ' ' . ($validated['phone'] ?? '-'),
-            __('Country:') . ' ' . $validated['country'],
+            __('Country:') . ' ' . ($validated['country'] ?? '-'),
             __('Inquiry type:') . ' ' . $this->inquiryTypeLabel($validated['inquiry_type'] ?? null),
             __('Subject:') . ' ' . $validated['subject'],
             __('Source:') . ' ' . $request->fullUrl(),

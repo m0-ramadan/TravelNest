@@ -22,7 +22,7 @@ class InfoIpController extends Controller
             $ipResponse = $client->get($ipApiUrl);
             $ipData = json_decode($ipResponse->getBody(), true);
 
-            if ($ipData['status'] !== 'success') {
+            if (($ipData['status'] ?? null) !== 'success' || empty($ipData['country'])) {
                 return response()->json(['error' => 'Unable to detect country from IP'], 400);
             }
 
