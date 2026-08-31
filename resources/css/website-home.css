@@ -621,6 +621,15 @@
             height: 100%;
         }
 
+        .clickable-deal-card {
+            cursor: pointer;
+        }
+
+        .clickable-deal-card:focus-visible {
+            outline: 3px solid rgba(56, 189, 248, .45);
+            outline-offset: 4px;
+        }
+
         .card-image {
             position: relative;
             height: 255px;

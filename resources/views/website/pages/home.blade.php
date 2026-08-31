@@ -268,7 +268,8 @@
 
                 <div class="cards-grid">
                     @forelse ($featuredPackages as $package)
-                        <div class="deal-card reveal-up">
+                        <div class="deal-card reveal-up clickable-deal-card" data-card-url="{{ $package['url'] }}"
+                            role="link" tabindex="0">
                             <div class="card-image">
                                 @if ($package['is_ultra_luxury'])
                                     <div class="badge-top">{{ __('Ultra Luxury') }}</div>
@@ -650,6 +651,21 @@
                     item.classList.add('is-visible');
                 });
             }
+
+            document.querySelectorAll('.clickable-deal-card[data-card-url]').forEach(function(card) {
+                card.addEventListener('click', function(event) {
+                    window.location.href = card.dataset.cardUrl;
+                });
+
+                card.addEventListener('keydown', function(event) {
+                    if (event.key !== 'Enter' && event.key !== ' ') {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    window.location.href = card.dataset.cardUrl;
+                });
+            });
 
         });
     </script>

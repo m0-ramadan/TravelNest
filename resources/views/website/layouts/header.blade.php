@@ -72,7 +72,7 @@
                          {{ __('Home') }}
                      </a>
                  </li>
-                 <li class="nav-item dropdown">
+                 <li class="nav-item dropdown destinations-dropdown">
                      <button type="button" class="nav-link dropdown-toggle{{ $isDestinationsPage ? ' is-active' : '' }}"
                          data-bs-toggle="dropdown" data-navbar-dropdown-toggle aria-expanded="false"
                          aria-controls="desktopDestinationsMenu">
@@ -483,6 +483,27 @@
              });
          });
       });
+
+     document.querySelectorAll('.navbar .destinations-dropdown').forEach(function(dropdown) {
+         const toggle = dropdown.querySelector('[data-navbar-dropdown-toggle]');
+         const menu = dropdown.querySelector('.dropdown-menu');
+
+         if (!toggle || !menu) {
+             return;
+         }
+
+         dropdown.addEventListener('mouseenter', function() {
+             dropdown.classList.add('show');
+             menu.classList.add('show');
+             toggle.setAttribute('aria-expanded', 'true');
+         });
+
+         dropdown.addEventListener('mouseleave', function() {
+             dropdown.classList.remove('show');
+             menu.classList.remove('show');
+             toggle.setAttribute('aria-expanded', 'false');
+         });
+     });
   </script>
 
   <style>
