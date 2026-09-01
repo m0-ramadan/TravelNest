@@ -2,12 +2,15 @@
 
 namespace App\Traits;
 
+use App\Support\LocaleNormalizer;
+
 trait HasTranslatableAttributes
 {
     protected function translatedValue(string $field, ?string $locale = null, ?string $fallback = null): string
     {
-        $locale = $locale ?: app()->getLocale();
-        $fallback = $fallback ?: $this->defaultTranslationLocale();
+        $normalizer = app(LocaleNormalizer::class);
+        $locale = $normalizer->normalize($locale ?: app()->getLocale());
+        $fallback = $normalizer->normalize($fallback ?: $this->defaultTranslationLocale());
 
         $value = $this->getAttribute($field);
 
@@ -21,6 +24,8 @@ trait HasTranslatableAttributes
         if (!is_array($value)) {
             return (string) ($value ?? '');
         }
+
+        $value = $this->normalizeTranslationKeys($value);
 
         return (string) (
             $value[$locale]
@@ -41,13 +46,13 @@ trait HasTranslatableAttributes
         $value = $this->getAttribute($field);
 
         if (is_array($value)) {
-            return $value;
+            return $this->normalizeTranslationKeys($value);
         }
 
         if (is_string($value)) {
             $decoded = json_decode($value, true);
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                return $decoded;
+                return $this->normalizeTranslationKeys($decoded);
             }
         }
 
@@ -57,7 +62,7 @@ trait HasTranslatableAttributes
     public function setTranslation(string $field, string $locale, mixed $value): static
     {
         $translations = $this->getTranslations($field);
-        $translations[$locale] = $value;
+        $translations[app(LocaleNormalizer::class)->normalize($locale)] = $value;
         $this->setAttribute($field, $translations);
 
         return $this;
@@ -76,5 +81,24 @@ trait HasTranslatableAttributes
         }
 
         return config('app.fallback_locale', 'en');
+    }
+
+    private function normalizeTranslationKeys(array $translations): array
+    {
+        $normalizer = app(LocaleNormalizer::class);
+        $normalized = [];
+
+        foreach ($translations as $locale => $value) {
+            if (!is_string($locale)) {
+                continue;
+            }
+
+            $code = $normalizer->normalize($locale);
+            if (!array_key_exists($code, $normalized) || blank($normalized[$code])) {
+                $normalized[$code] = $value;
+            }
+        }
+
+        return $normalized;
     }
 }

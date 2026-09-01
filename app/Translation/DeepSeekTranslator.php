@@ -19,7 +19,7 @@ class DeepSeekTranslator extends BaseTranslator
     public function get($key, array $replace = [], $locale = null, $fallback = true)
     {
         $result = parent::get($key, $replace, $locale, $fallback);
-        $autoTranslateMissing = (bool) config('services.deepseek.auto_translate_missing', false);
+        $autoTranslateMissing = (bool) config('translation.runtime_auto_translate', false);
 
         // If the translation was not found, the translator returns the original key.
         // We only trigger DeepSeek if:

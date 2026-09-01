@@ -12,11 +12,42 @@ use App\Services\Translation\Providers\DeepSeekTranslationProvider;
 use App\Services\Translation\TranslationValidator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class AiTranslationServiceTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_multiple_strings_are_sent_in_one_batch_request(): void
+    {
+        Cache::flush();
+        config([
+            'translation.ai_enabled' => true,
+            'translation.provider' => 'gemini',
+            'translation.fallback_provider' => 'deepseek',
+            'translation.batch_size' => 30,
+            'translation_ai.google.api_key' => 'test-key',
+        ]);
+
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'candidates' => [[
+                    'content' => ['parts' => [['text' => '["إضافة","الاسم","الحالة"]']]],
+                    'finishReason' => 'STOP',
+                ]],
+            ], 200),
+        ]);
+
+        $translated = app(AiTranslationService::class)->translateBatch([
+            'add' => 'Add batch-only label',
+            'name' => 'Name batch-only label',
+            'status' => 'Status batch-only label',
+        ], 'ar', 'en');
+
+        $this->assertSame(['add' => 'إضافة', 'name' => 'الاسم', 'status' => 'الحالة'], $translated);
+        Http::assertSentCount(1);
+    }
 
     public function test_active_languages_resolution()
     {

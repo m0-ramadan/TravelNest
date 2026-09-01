@@ -1,20 +1,20 @@
 @extends('website.layouts.master')
 
 @section('title', __('Home - Etro Tours'))
-@section('description', __('Luxury Egypt tours, Nile cruises, private day trips, and tailor-made travel experiences
+@section('description',
+    __('Luxury Egypt tours, Nile cruises, private day trips, and tailor-made travel experiences
     curated by Etro Tours across Cairo, Luxor, Aswan, and beyond.'))
-@section('keywords', 'Etro Tours, luxury Egypt tours, Nile cruises, Egypt holidays, Cairo tours, Luxor tours, Aswan
+@section('keywords',
+    'Etro Tours, luxury Egypt tours, Nile cruises, Egypt holidays, Cairo tours, Luxor tours, Aswan
     tours, tailor made travel')
 @section('image', asset('website/logo/logo-lat.png'))
 @section('preferred_theme', 'light')
 @section('body_class', 'home-reference-page')
 
 @section('lcp_preload')
-    <link rel="preload" as="image" type="image/avif"
-        href="{{ asset('website/photos/optimized/hero-mobile-744.avif') }}"
+    <link rel="preload" as="image" type="image/avif" href="{{ asset('website/photos/optimized/hero-mobile-744.avif') }}"
         media="(max-width: 767px)" fetchpriority="high">
-    <link rel="preload" as="image" type="image/avif"
-        href="{{ asset('website/photos/optimized/hero-desktop-1280.avif') }}"
+    <link rel="preload" as="image" type="image/avif" href="{{ asset('website/photos/optimized/hero-desktop-1280.avif') }}"
         imagesrcset="{{ asset('website/photos/optimized/hero-desktop-1280.avif') }} 1280w, {{ asset('website/photos/optimized/hero-desktop-1672.avif') }} 1672w"
         imagesizes="100vw" media="(min-width: 768px)" fetchpriority="high">
 @endsection
@@ -40,8 +40,8 @@
                 <source type="image/webp"
                     srcset="{{ asset('website/photos/optimized/hero-desktop-1280.webp') }} 1280w, {{ asset('website/photos/optimized/hero-desktop-1672.webp') }} 1672w"
                     sizes="100vw">
-                <img src="{{ asset('website/photos/optimized/hero-desktop-1280.webp') }}"
-                    alt="" width="1672" height="941" fetchpriority="high" loading="eager" decoding="async">
+                <img src="{{ asset('website/photos/optimized/hero-desktop-1280.webp') }}" alt="" width="1672"
+                    height="941" fetchpriority="high" loading="eager" decoding="async">
             </picture>
             <div class="container">
                 <div class="hero-grid">
@@ -196,7 +196,8 @@
                                     srcset="{{ asset('website/photos/optimized/' . pathinfo($award, PATHINFO_FILENAME) . '.avif') }}">
                                 <img loading="lazy" decoding="async"
                                     src="{{ asset('website/photos/optimized/' . pathinfo($award, PATHINFO_FILENAME) . '.webp') }}"
-                                    alt="{{ __('TripAdvisor Award') }}" class="certificate-img" width="176" height="176">
+                                    alt="{{ __('TripAdvisor Award') }}" class="certificate-img" width="176"
+                                    height="176">
                             </picture>
                         </div>
                     @endforeach
@@ -268,8 +269,7 @@
 
                 <div class="cards-grid">
                     @forelse ($featuredPackages as $package)
-                        <div class="deal-card reveal-up clickable-deal-card" data-card-url="{{ $package['url'] }}"
-                            role="link" tabindex="0">
+                        <div class="deal-card reveal-up">
                             <div class="card-image">
                                 @if ($package['is_ultra_luxury'])
                                     <div class="badge-top">{{ __('Ultra Luxury') }}</div>
@@ -280,8 +280,8 @@
                                 <div class="deal-price">{{ $package['price'] }}</div>
 
                                 <a href="{{ $package['url'] }}">
-                                    <img src="{{ $package['image'] }}" alt="{{ $package['title'] }}" width="800" height="500"
-                                        loading="lazy" decoding="async">
+                                    <img src="{{ $package['image'] }}" alt="{{ $package['title'] }}" width="800"
+                                        height="500" loading="lazy" decoding="async">
                                 </a>
                             </div>
 
@@ -377,8 +377,8 @@
                             <div class="card-image">
                                 <div class="badge-top">{{ $destination['country'] ?: __('Destination') }}</div>
                                 <a href="{{ $destination['url'] }}">
-                                    <img src="{{ $destination['image'] }}" alt="{{ $destination['title'] }}" width="800"
-                                        height="500" loading="lazy" decoding="async">
+                                    <img src="{{ $destination['image'] }}" alt="{{ $destination['title'] }}"
+                                        width="800" height="500" loading="lazy" decoding="async">
                                 </a>
                             </div>
 
@@ -433,8 +433,8 @@
                         <div class="article-card reveal-up">
                             <div class="card-image">
                                 <a href="{{ $article['url'] }}">
-                                    <img src="{{ $article['image'] }}" alt="{{ $article['title'] }}" width="800" height="500"
-                                        loading="lazy" decoding="async">
+                                    <img src="{{ $article['image'] }}" alt="{{ $article['title'] }}" width="800"
+                                        height="500" loading="lazy" decoding="async">
                                 </a>
                             </div>
 
@@ -495,8 +495,8 @@
                             <div class="author-section">
                                 <div class="author-avatar">
                                     @if ($testimonial['avatar'])
-                                        <img src="{{ $testimonial['avatar'] }}" alt="{{ $testimonial['name'] }}" width="80"
-                                            height="80" loading="lazy" decoding="async">
+                                        <img src="{{ $testimonial['avatar'] }}" alt="{{ $testimonial['name'] }}"
+                                            width="80" height="80" loading="lazy" decoding="async">
                                     @else
                                         {{ $testimonial['initials'] }}
                                     @endif
@@ -519,7 +519,7 @@
                 </div>
 
                 <div class="text-center mt-5 reveal-up">
-                    <a href="https://www.tripadvisor.com/Attraction_Review-g294205-d12148903-Reviews-Luxor_and_Aswan_Travel-Luxor_Nile_River_Valley.html"
+                    <a href="https://www.tripadvisor.com/Attraction_Review-g294205-d19981172-Reviews-Etro_tours-Luxor_Nile_River_Valley.html"
                         target="_blank" class="gold-btn">
                         <i class="la la-external-link"></i>
                         {{ __('Read All Reviews on TripAdvisor') }}
@@ -651,21 +651,6 @@
                     item.classList.add('is-visible');
                 });
             }
-
-            document.querySelectorAll('.clickable-deal-card[data-card-url]').forEach(function(card) {
-                card.addEventListener('click', function(event) {
-                    window.location.href = card.dataset.cardUrl;
-                });
-
-                card.addEventListener('keydown', function(event) {
-                    if (event.key !== 'Enter' && event.key !== ' ') {
-                        return;
-                    }
-
-                    event.preventDefault();
-                    window.location.href = card.dataset.cardUrl;
-                });
-            });
 
         });
     </script>

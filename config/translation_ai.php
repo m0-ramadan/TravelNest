@@ -45,10 +45,10 @@ return [
 
     'max_chars_per_request' => (int) env('TRANSLATION_MAX_CHARS_PER_REQUEST', 2500),
 
-    'max_items_per_batch' => (int) env('TRANSLATION_MAX_ITEMS_PER_BATCH', 10),
+    'max_items_per_batch' => (int) env('TRANSLATION_BATCH_SIZE', 30),
 
     'retry_count' => (int) env('TRANSLATION_RETRY_COUNT', 1),
 
-    'circuit_breaker_cooldown' => (int) env('TRANSLATION_CIRCUIT_BREAKER_COOLDOWN', 300),
+    'circuit_breaker_cooldown' => (int) env('TRANSLATION_FAILURE_COOLDOWN', env('DEEPSEEK_FAILURE_COOLDOWN', 3600)),
 
 ];

@@ -49,7 +49,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(function () {
     Route::get('lang/{locale}', function (Request $request, string $locale) {
-        app(\App\Services\JsonTranslationFileService::class)->ensureLocaleFile('en');
         $request->session()->put('admin_locale', 'en');
 
         return redirect()->back();

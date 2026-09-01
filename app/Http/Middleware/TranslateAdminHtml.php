@@ -42,6 +42,11 @@ class TranslateAdminHtml
 
     protected function shouldTranslate(Request $request, SymfonyResponse $response): bool
     {
+        if (!(bool) config('translation.legacy_admin_html_enabled', true)
+            || app()->getLocale() === config('translation.source_locale', 'en')) {
+            return false;
+        }
+
         if (!str_starts_with($request->path(), 'admin')) {
             return false;
         }

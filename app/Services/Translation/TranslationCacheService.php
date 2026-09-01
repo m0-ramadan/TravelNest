@@ -5,6 +5,7 @@ namespace App\Services\Translation;
 use App\Services\Translation\DTOs\TranslationResult;
 use App\Services\Translation\DTOs\TranslationUnit;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class TranslationCacheService
@@ -14,11 +15,34 @@ class TranslationCacheService
      */
     public function getCached(TranslationUnit $unit): ?string
     {
-        $cached = DB::table('ai_translation_caches')
-            ->where('source_hash', $unit->contentHash)
-            ->where('source_language', strtolower($unit->sourceLanguage))
-            ->where('target_language', strtolower($unit->targetLanguage))
-            ->value('translated_text');
+        $key = $this->cacheKey($unit);
+
+        try {
+            $cached = Cache::get($key);
+            if (is_string($cached) && trim($cached) !== '') {
+                return $cached;
+            }
+        } catch (\Throwable) {
+            // Continue to the durable cache.
+        }
+
+        try {
+            $cached = DB::table('ai_translation_caches')
+                ->where('source_hash', $unit->contentHash)
+                ->where('source_language', strtolower($unit->sourceLanguage))
+                ->where('target_language', strtolower($unit->targetLanguage))
+                ->value('translated_text');
+        } catch (\Throwable) {
+            return null;
+        }
+
+        if (is_string($cached) && trim($cached) !== '') {
+            try {
+                Cache::put($key, $cached, (int) config('translation.cache_ttl', 2592000));
+            } catch (\Throwable) {
+                // The database value remains usable.
+            }
+        }
 
         return $cached ?: null;
     }
@@ -30,6 +54,16 @@ class TranslationCacheService
     {
         if (!$result->isSuccess || empty($result->translatedText)) {
             return;
+        }
+
+        try {
+            Cache::put(
+                $this->cacheKey($unit),
+                $result->translatedText,
+                (int) config('translation.cache_ttl', 2592000)
+            );
+        } catch (\Throwable) {
+            // Continue with durable storage.
         }
 
         try {
@@ -49,7 +83,7 @@ class TranslationCacheService
                 ]
             );
         } catch (\Throwable $e) {
-            Log::error("Failed to store AI translation cache: " . $e->getMessage());
+            Log::warning('Failed to store the durable AI translation cache.', ['exception' => $e::class]);
         }
     }
 
@@ -76,7 +110,17 @@ class TranslationCacheService
                 'updated_at' => now(),
             ]);
         } catch (\Throwable $e) {
-            Log::error("Failed to log AI translation usage: " . $e->getMessage());
+            Log::debug('Failed to store AI translation usage metadata.', ['exception' => $e::class]);
         }
+    }
+
+    private function cacheKey(TranslationUnit $unit): string
+    {
+        return sprintf(
+            'translation:%s:%s:%s',
+            strtolower($unit->sourceLanguage),
+            strtolower($unit->targetLanguage),
+            $unit->contentHash
+        );
     }
 }

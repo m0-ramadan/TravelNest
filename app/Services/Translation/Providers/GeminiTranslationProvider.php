@@ -5,8 +5,9 @@ namespace App\Services\Translation\Providers;
 use App\Contracts\TranslationProviderInterface;
 use App\Services\Translation\DTOs\TranslationOptions;
 use App\Services\Translation\DTOs\TranslationResult;
+use App\Services\Translation\TranslationCircuitBreaker;
+use App\Support\RateLimitedLogger;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class GeminiTranslationProvider implements TranslationProviderInterface
 {
@@ -15,7 +16,10 @@ class GeminiTranslationProvider implements TranslationProviderInterface
     protected int $timeout;
     protected string $endpoint;
 
-    public function __construct()
+    public function __construct(
+        protected TranslationCircuitBreaker $circuitBreaker,
+        protected RateLimitedLogger $logger
+    )
     {
         $this->apiKey = (string) config('translation_ai.google.api_key');
         $this->model = (string) config('translation_ai.google.model', 'gemini-2.5-flash');
@@ -42,7 +46,19 @@ class GeminiTranslationProvider implements TranslationProviderInterface
         $startTime = microtime(true);
         $options = $options ?? new TranslationOptions();
 
+        if ($this->circuitBreaker->isOpen($this->getName())) {
+            return TranslationResult::failure(
+                $this->getName(),
+                $this->getModel(),
+                'Gemini circuit breaker is open.'
+            );
+        }
+
         if (empty(trim($this->apiKey))) {
+            $this->logger->warning(
+                'gemini-missing-api-key',
+                'Gemini translation is unavailable because its API key is not configured.'
+            );
             return TranslationResult::failure(
                 $this->getName(),
                 $this->getModel(),
@@ -84,14 +100,14 @@ class GeminiTranslationProvider implements TranslationProviderInterface
 
             if (!$response->successful()) {
                 $status = $response->status();
-                $body = $response->body();
-                Log::warning("Gemini translation HTTP failure ({$status}): {$body}");
+                $this->circuitBreaker->recordFailure($this->getName(), $status, $response->json('message'));
 
                 return TranslationResult::failure(
                     $this->getName(),
                     $this->getModel(),
-                    "HTTP {$status}: " . substr($body, 0, 200),
-                    $durationMs
+                    "Gemini HTTP {$status}",
+                    $durationMs,
+                    $status
                 );
             }
 
@@ -100,7 +116,10 @@ class GeminiTranslationProvider implements TranslationProviderInterface
             $finishReason = $data['candidates'][0]['finishReason'] ?? null;
 
             if ($finishReason === 'MAX_TOKENS') {
-                Log::warning("Gemini translation truncated due to max tokens limit.");
+                $this->logger->warning(
+                    'gemini-max-tokens',
+                    'Gemini translation was truncated by its output token limit.'
+                );
             }
 
             $usage = $data['usageMetadata'] ?? [];
@@ -108,12 +127,23 @@ class GeminiTranslationProvider implements TranslationProviderInterface
             $outputTokens = $usage['candidatesTokenCount'] ?? null;
             $totalTokens = $usage['totalTokenCount'] ?? null;
 
+            if (empty(trim($translatedText))) {
+                return TranslationResult::failure(
+                    $this->getName(),
+                    $this->getModel(),
+                    'Empty response from Gemini',
+                    $durationMs
+                );
+            }
+
+            $this->circuitBreaker->recordSuccess($this->getName());
+
             return new TranslationResult(
                 translatedText: trim($translatedText),
                 provider: $this->getName(),
                 model: $this->getModel(),
-                isSuccess: !empty(trim($translatedText)),
-                errorMessage: empty(trim($translatedText)) ? 'Empty response from Gemini' : null,
+                isSuccess: true,
+                errorMessage: null,
                 promptTokens: $promptTokens,
                 outputTokens: $outputTokens,
                 totalTokens: $totalTokens,
@@ -121,12 +151,17 @@ class GeminiTranslationProvider implements TranslationProviderInterface
             );
         } catch (\Throwable $e) {
             $durationMs = (int) (round(microtime(true) - $startTime, 3) * 1000);
-            Log::error("Gemini Translation Provider Exception: " . $e->getMessage());
+            $this->circuitBreaker->recordFailure($this->getName(), null, $e->getMessage());
+            $this->logger->warning(
+                'gemini-provider-exception',
+                'Gemini translation request failed.',
+                ['exception' => $e::class]
+            );
 
             return TranslationResult::failure(
                 $this->getName(),
                 $this->getModel(),
-                $e->getMessage(),
+                'Gemini request failed.',
                 $durationMs
             );
         }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Language;
 use App\Services\JsonTranslationFileService;
 use App\Services\TranslatableContentSyncService;
+use App\Support\LocaleNormalizer;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -37,8 +39,10 @@ class LanguageController extends Controller
     public function store(
         Request $request,
         TranslatableContentSyncService $translatableContentSyncService,
-        JsonTranslationFileService $jsonTranslationFileService
+        JsonTranslationFileService $jsonTranslationFileService,
+        LocaleNormalizer $localeNormalizer
     ): RedirectResponse {
+        $request->merge(['code' => $localeNormalizer->normalize((string) $request->input('code'))]);
         $data = $request->validate([
             'code' => ['required', 'string', 'max:10', 'unique:languages,code'],
             'name' => ['required', 'string', 'max:255'],
@@ -58,6 +62,7 @@ class LanguageController extends Controller
         }
 
         $language = Language::create($data);
+        Cache::forget('supported_locales');
 
         if ($language->is_active) {
             $translatableContentSyncService->syncNewLanguage($language);
@@ -81,10 +86,12 @@ class LanguageController extends Controller
         Request $request,
         Language $language,
         TranslatableContentSyncService $translatableContentSyncService,
-        JsonTranslationFileService $jsonTranslationFileService
+        JsonTranslationFileService $jsonTranslationFileService,
+        LocaleNormalizer $localeNormalizer
     ): RedirectResponse
     {
-        $oldCode = $language->code;
+        $oldCode = $localeNormalizer->normalize($language->code);
+        $request->merge(['code' => $localeNormalizer->normalize((string) $request->input('code'))]);
 
         $data = $request->validate([
             'code' => ['required', 'string', 'max:10', 'unique:languages,code,' . $language->id],
@@ -108,6 +115,7 @@ class LanguageController extends Controller
         }
 
         $language->update($data);
+        Cache::forget('supported_locales');
 
         if ($oldCode !== $language->code) {
             $jsonTranslationFileService->renameLocaleFile($oldCode, $language->code);
@@ -134,6 +142,7 @@ class LanguageController extends Controller
         $jsonTranslationFileService->removeLocaleFile($language->code);
 
         $language->delete();
+        Cache::forget('supported_locales');
 
         return $this->success('admin.languages.index', 'Language deleted.');
     }
@@ -154,6 +163,7 @@ class LanguageController extends Controller
         $language->update([
             'is_active' => !(bool) $language->is_active
         ]);
+        Cache::forget('supported_locales');
 
         if ($language->is_active) {
             $translatableContentSyncService->syncNewLanguage($language);
@@ -174,6 +184,7 @@ class LanguageController extends Controller
             'is_default' => true,
             'is_active' => true
         ]);
+        Cache::forget('supported_locales');
 
         $jsonTranslationFileService->ensureLocaleFile($language->code);
 
@@ -195,6 +206,7 @@ class LanguageController extends Controller
         Language::query()
             ->where('is_default', true)
             ->update(['is_active' => true]);
+        Cache::forget('supported_locales');
 
         if ($status) {
             Language::query()

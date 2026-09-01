@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Services\JsonTranslationFileService;
+use App\Support\LocaleNormalizer;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 class SetLocale
 {
     public function __construct(
-        protected JsonTranslationFileService $jsonTranslationFileService
+        protected LocaleNormalizer $localeNormalizer
     ) {}
 
     public function handle(Request $request, Closure $next): Response
@@ -19,40 +19,49 @@ class SetLocale
         $isAdminRequest = $request->is('admin') || $request->is('admin/*');
 
         if ($isAdminRequest) {
-            $request->session()->put('admin_locale', 'en');
+            if ($request->hasSession()) {
+                $request->session()->put('admin_locale', 'en');
+            }
             app()->setLocale('en');
-            $this->jsonTranslationFileService->ensureLocaleFile('en');
 
             return $next($request);
         }
 
-        if ($request->session()->has('locale')) {
+        if ($request->hasSession() && $request->session()->has('locale')) {
             $locale = (string) $request->session()->get('locale');
+        } elseif ($request->headers->has('Accept-Language')) {
+            $locale = $this->localeNormalizer->fromAcceptLanguage(
+                $request->header('Accept-Language'),
+                $defaultLocale
+            );
         } else {
             $locale = $defaultLocale;
         }
 
-        $locale = strtolower(trim($locale));
-        if ($locale === 'english') {
-            $locale = 'en';
-            $request->session()->put('locale', 'en');
+        $locale = $this->localeNormalizer->normalize($locale, $defaultLocale);
+
+        try {
+            $supportedLocales = \Illuminate\Support\Facades\Cache::remember('supported_locales', 3600, function () {
+                return \App\Models\Language::where('is_active', true)->pluck('code')->toArray();
+            });
+        } catch (\Throwable) {
+            $supportedLocales = (array) config('translation.supported_locales', ['en', 'ar']);
         }
 
-        $supportedLocales = \Illuminate\Support\Facades\Cache::remember('supported_locales', 3600, function () {
-            return \App\Models\Language::where('is_active', true)->pluck('code')->toArray();
-        });
-
-        $supportedLocales = array_values(array_unique(array_map(
-            static fn ($code) => strtolower(trim((string) $code)),
-            $supportedLocales
-        )));
+        $supportedLocales = $this->localeNormalizer->normalizeList(array_merge(
+            $supportedLocales,
+            (array) config('translation.supported_locales', ['en', 'ar'])
+        ));
 
         if (!in_array($locale, $supportedLocales, true)) {
-            $locale = strtolower((string) config('app.fallback_locale', 'en'));
+            $locale = $this->localeNormalizer->normalize((string) config('app.fallback_locale', 'en'));
+        }
+
+        if ($request->hasSession()) {
+            $request->session()->put('locale', $locale);
         }
 
         app()->setLocale($locale);
-        $this->jsonTranslationFileService->ensureLocaleFile($locale);
 
         return $next($request);
     }

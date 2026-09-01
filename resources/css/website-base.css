@@ -25,3 +25,12 @@
     font-display: swap;
     src: url("/website/fonts/website/la-solid-subset.woff2") format("woff2");
 }
+/* Cards that inherit navigation from their primary link. */
+.is-navigation-card {
+    cursor: pointer;
+}
+
+.is-navigation-card:focus-visible {
+    outline: 3px solid var(--rich-gold, #c9974c);
+    outline-offset: 4px;
+}

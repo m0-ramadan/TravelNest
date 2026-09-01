@@ -1,7 +1,4 @@
 {
-    "' . __('No itinerary description added yet.') . '": "' . __('Описание маршрута пока не добавлено.') . '",
-    "'desktop', ])": "'desktop', ])",
-    "'mobile'])": "'mobile'])",
     "5.0 Rating": "Рейтинг 5.0",
     "10 to 20 Days": "10–20 дней",
     "20+ Days": "20+ дней",
@@ -33,7 +30,6 @@
     "Adults": "Взрослые",
     "Adults (12+ years)": "Взрослые (12+ лет)",
     "African Safari": "Африканское сафари",
-    "all() as $error)": "all() as $error)",
     "All Durations": "Все продолжительности",
     "All our specialists have traveled extensively or lived in their specialist regions, We're with you every step of the way": "Все наши специалисты много путешествовали или жили в своих регионах специализации. Мы с вами на каждом этапе пути",
     "All Prices": "Все цены",

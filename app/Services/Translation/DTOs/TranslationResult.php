@@ -13,10 +13,17 @@ class TranslationResult
         public ?int $promptTokens = null,
         public ?int $outputTokens = null,
         public ?int $totalTokens = null,
-        public int $durationMs = 0
+        public int $durationMs = 0,
+        public ?int $httpStatus = null
     ) {}
 
-    public static function failure(string $provider, string $model, string $errorMessage, int $durationMs = 0): self
+    public static function failure(
+        string $provider,
+        string $model,
+        string $errorMessage,
+        int $durationMs = 0,
+        ?int $httpStatus = null
+    ): self
     {
         return new self(
             translatedText: '',
@@ -24,7 +31,8 @@ class TranslationResult
             model: $model,
             isSuccess: false,
             errorMessage: $errorMessage,
-            durationMs: $durationMs
+            durationMs: $durationMs,
+            httpStatus: $httpStatus
         );
     }
 }

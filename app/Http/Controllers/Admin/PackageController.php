@@ -482,9 +482,9 @@ class PackageController extends Controller
             'package_type' => ['nullable', 'string', 'in:' . implode(',', self::PACKAGE_TYPES)],
             'nile_cruise_type_id' => ['nullable', 'integer', 'exists:nile_cruise_types,id'],
             'nile_cruise_category_id' => ['nullable', 'integer', 'exists:nile_cruise_categories,id'],
-            'slug' => ['nullable', 'string'],
-            'title' => ['nullable', 'string'],
-            'subtitle' => ['nullable', 'string'],
+            'slug' => ['nullable', 'string', 'max:220'],
+            'title' => ['nullable', 'string', 'max:255'],
+            'subtitle' => ['nullable', 'string', 'max:255'],
             'short_description' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
 
@@ -863,6 +863,10 @@ class PackageController extends Controller
                         'الحد الأقصى لعدد الأفراد يجب أن يساوي أو يزيد عن الحد الأدنى.'
                     );
                 }
+            }
+
+            foreach (app(\App\Services\PackageTagNormalizer::class)->validationErrors($request->input('tags')) as $message) {
+                $validator->errors()->add('tags', $message);
             }
         });
 

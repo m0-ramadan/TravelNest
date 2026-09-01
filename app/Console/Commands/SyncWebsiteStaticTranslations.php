@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Translation\TranslationKeyValidator;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
@@ -185,7 +186,7 @@ class SyncWebsiteStaticTranslations extends Command
             return false;
         }
 
-        return (bool) preg_match('/[\p{L}]/u', html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        return (new TranslationKeyValidator())->isValid($text);
     }
 
     protected function looksLikeNonTranslatableAttribute(string $value): bool
@@ -218,8 +219,16 @@ class SyncWebsiteStaticTranslations extends Command
 
             $content = File::get($file->getPathname());
 
-            preg_match_all("/__\\(\\s*'((?:\\\\'|[^'])*)'\\s*[\\),]/s", $content, $singleQuoted);
-            preg_match_all('/__\\(\\s*"((?:\\\\"|[^"])*)"\\s*[\\),]/s', $content, $doubleQuoted);
+            preg_match_all(
+                "/__\\(\\s*'((?:\\\\.|[^'\\\\])*)'\\s*(?:,\\s*\\[(?:[^\\]']|'(?:\\\\.|[^'\\\\])*')*\\])?\\s*\\)/s",
+                $content,
+                $singleQuoted
+            );
+            preg_match_all(
+                '/__\\(\\s*"((?:\\\\.|[^"\\\\])*)"\\s*(?:,\\s*\\[(?:[^\\]"]|"(?:\\\\.|[^"\\\\])*")*\\])?\\s*\\)/s',
+                $content,
+                $doubleQuoted
+            );
 
             foreach (array_merge($singleQuoted[1] ?? [], $doubleQuoted[1] ?? []) as $match) {
                 $key = stripcslashes($match);

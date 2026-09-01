@@ -32,6 +32,10 @@ class TranslationValidator
             return false;
         }
 
+        if (!$this->validateSafeOutput($sourceText, $translatedText)) {
+            return false;
+        }
+
         // 1. Placeholder Preservation Check
         if (!$this->validatePlaceholders($sourceText, $translatedText)) {
             return false;
@@ -75,6 +79,28 @@ class TranslationValidator
     }
 
     /**
+     * Reject executable Blade/PHP returned by a provider unless the exact token
+     * was already present in the source content.
+     */
+    public function validateSafeOutput(string $source, string $translated): bool
+    {
+        $dangerousTokens = ['<?php', '<?=', '@php', '@endphp', '{!!', '!!}'];
+
+        foreach ($dangerousTokens as $token) {
+            if (str_contains($translated, $token) && !str_contains($source, $token)) {
+                return false;
+            }
+        }
+
+        if (preg_match('/\{\{\s*[$]|\}\}\s*;|@(?:include|extends|inject|eval)\b/i', $translated) === 1
+            && preg_match('/\{\{\s*[$]|\}\}\s*;|@(?:include|extends|inject|eval)\b/i', $source) !== 1) {
+            return false;
+        }
+
+        return mb_check_encoding($translated, 'UTF-8');
+    }
+
+    /**
      * Validate JSON Array structure and length.
      */
     public function validateJsonArray(string $sourceJson, string $translatedJson): bool
@@ -86,8 +112,14 @@ class TranslationValidator
             return false;
         }
 
-        if (count($srcDecoded) !== count($tgtDecoded)) {
+        if (count($srcDecoded) !== count($tgtDecoded) || array_keys($srcDecoded) !== array_keys($tgtDecoded)) {
             return false;
+        }
+
+        foreach ($tgtDecoded as $value) {
+            if (!is_string($value)) {
+                return false;
+            }
         }
 
         return true;
@@ -109,8 +141,10 @@ class TranslationValidator
             return false;
         }
 
-        foreach ($tgtDecoded as $item) {
-            if (!is_array($item) || (!isset($item['q']) && !isset($item['a']))) {
+        foreach ($tgtDecoded as $index => $item) {
+            $sourceItem = $srcDecoded[$index] ?? null;
+
+            if (!is_array($sourceItem) || !is_array($item) || array_keys($sourceItem) !== array_keys($item)) {
                 return false;
             }
         }

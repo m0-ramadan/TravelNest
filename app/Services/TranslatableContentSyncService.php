@@ -99,9 +99,9 @@ class TranslatableContentSyncService
 
         foreach ($this->translatableMap as $modelClass => $fields) {
             $modelClass::query()->chunk(100, function ($items) use ($fields, $language, $defaultLanguage) {
-                foreach ($items as $item) {
-                    $dirty = false;
+                $pending = [];
 
+                foreach ($items as $item) {
                     foreach ($fields as $field) {
                         $value = $item->{$field};
 
@@ -114,22 +114,26 @@ class TranslatableContentSyncService
                         }
 
                         $sourceText = $this->resolveSourceText($value, $defaultLanguage?->code);
+                        $pending[$item->getKey() . ':' . $field] = $sourceText;
+                    }
+                }
 
-                        if ($sourceText === '') {
-                            $value[$language->code] = '';
-                        } else {
-                            $translated = $this->translateSingleLanguage(
-                                text: $sourceText,
-                                targetLanguageCode: $language->code
-                            );
+                $translated = $this->translationService->translateTextsToLanguage($pending, $language->code);
 
-                            $value[$language->code] = $translated ?: $sourceText;
+                foreach ($items as $item) {
+                    $dirty = false;
+
+                    foreach ($fields as $field) {
+                        $key = $item->getKey() . ':' . $field;
+                        if (!array_key_exists($key, $pending)) {
+                            continue;
                         }
 
+                        $value = $item->{$field};
+                        $value[$language->code] = $translated[$key] ?? $pending[$key];
                         $item->{$field} = $value;
                         $dirty = true;
                     }
-
                     if ($dirty) {
                         $item->save();
                     }
@@ -193,14 +197,4 @@ class TranslatableContentSyncService
         return '';
     }
 
-    protected function translateSingleLanguage(string $text, string $targetLanguageCode): ?string
-    {
-        $translated = $this->translationService->translateTextToLanguages($text, [$targetLanguageCode]);
-
-        if (!is_array($translated)) {
-            return null;
-        }
-
-        return $translated[$targetLanguageCode] ?? null;
-    }
 }

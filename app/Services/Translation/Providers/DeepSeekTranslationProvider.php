@@ -5,8 +5,9 @@ namespace App\Services\Translation\Providers;
 use App\Contracts\TranslationProviderInterface;
 use App\Services\Translation\DTOs\TranslationOptions;
 use App\Services\Translation\DTOs\TranslationResult;
+use App\Services\Translation\TranslationCircuitBreaker;
+use App\Support\RateLimitedLogger;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class DeepSeekTranslationProvider implements TranslationProviderInterface
 {
@@ -15,7 +16,10 @@ class DeepSeekTranslationProvider implements TranslationProviderInterface
     protected string $model;
     protected int $timeout;
 
-    public function __construct()
+    public function __construct(
+        protected TranslationCircuitBreaker $circuitBreaker,
+        protected RateLimitedLogger $logger
+    )
     {
         $this->apiKey = (string) config('translation_ai.deepseek.api_key');
         $this->apiUrl = (string) config('translation_ai.deepseek.api_url', 'https://api.deepseek.com/chat/completions');
@@ -42,7 +46,19 @@ class DeepSeekTranslationProvider implements TranslationProviderInterface
         $startTime = microtime(true);
         $options = $options ?? new TranslationOptions();
 
+        if ($this->circuitBreaker->isOpen($this->getName())) {
+            return TranslationResult::failure(
+                $this->getName(),
+                $this->getModel(),
+                'DeepSeek circuit breaker is open.'
+            );
+        }
+
         if (empty(trim($this->apiKey))) {
+            $this->logger->warning(
+                'deepseek-missing-api-key',
+                'DeepSeek translation is unavailable because its API key is not configured.'
+            );
             return TranslationResult::failure(
                 $this->getName(),
                 $this->getModel(),
@@ -74,14 +90,14 @@ class DeepSeekTranslationProvider implements TranslationProviderInterface
 
             if (!$response->successful()) {
                 $status = $response->status();
-                $body = $response->body();
-                Log::warning("DeepSeek translation HTTP failure ({$status}): {$body}");
+                $this->circuitBreaker->recordFailure($this->getName(), $status, $response->json('message'));
 
                 return TranslationResult::failure(
                     $this->getName(),
                     $this->getModel(),
-                    "HTTP {$status}: " . substr($body, 0, 200),
-                    $durationMs
+                    "DeepSeek HTTP {$status}",
+                    $durationMs,
+                    $status
                 );
             }
 
@@ -93,12 +109,23 @@ class DeepSeekTranslationProvider implements TranslationProviderInterface
             $outputTokens = $usage['completion_tokens'] ?? null;
             $totalTokens = $usage['total_tokens'] ?? null;
 
+            if (empty(trim($translatedText))) {
+                return TranslationResult::failure(
+                    $this->getName(),
+                    $this->getModel(),
+                    'Empty response from DeepSeek',
+                    $durationMs
+                );
+            }
+
+            $this->circuitBreaker->recordSuccess($this->getName());
+
             return new TranslationResult(
                 translatedText: trim($translatedText),
                 provider: $this->getName(),
                 model: $this->getModel(),
-                isSuccess: !empty(trim($translatedText)),
-                errorMessage: empty(trim($translatedText)) ? 'Empty response from DeepSeek' : null,
+                isSuccess: true,
+                errorMessage: null,
                 promptTokens: $promptTokens,
                 outputTokens: $outputTokens,
                 totalTokens: $totalTokens,
@@ -106,12 +133,17 @@ class DeepSeekTranslationProvider implements TranslationProviderInterface
             );
         } catch (\Throwable $e) {
             $durationMs = (int) (round(microtime(true) - $startTime, 3) * 1000);
-            Log::error("DeepSeek Translation Provider Exception: " . $e->getMessage());
+            $this->circuitBreaker->recordFailure($this->getName(), null, $e->getMessage());
+            $this->logger->warning(
+                'deepseek-provider-exception',
+                'DeepSeek translation request failed.',
+                ['exception' => $e::class]
+            );
 
             return TranslationResult::failure(
                 $this->getName(),
                 $this->getModel(),
-                $e->getMessage(),
+                'DeepSeek request failed.',
                 $durationMs
             );
         }

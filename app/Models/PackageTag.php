@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\LegacyTranslationArray;
 use App\Traits\HasTranslatableAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -16,7 +17,7 @@ class PackageTag extends Model
     ];
 
     protected $casts = [
-        'name' => 'array',
+        'name' => LegacyTranslationArray::class,
     ];
 
     public function packages(): BelongsToMany

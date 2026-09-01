@@ -7,10 +7,11 @@ use App\Models\PackageTag;
 use App\Models\TourPackageDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class PackageTypeContentService
 {
+    public function __construct(private readonly PackageTagNormalizer $tagNormalizer) {}
+
     /**
      * Save shared editor content for the three canonical tour types only.
      * Legacy package types stay untouched for backward compatibility.
@@ -202,14 +203,11 @@ class PackageTypeContentService
 
     private function syncTags(Package $package, mixed $raw): void
     {
-        $names = $this->stringList($raw);
+        $names = $this->tagNormalizer->normalizeList($raw);
         $ids = [];
 
         foreach ($names as $name) {
-            $slug = Str::slug($name);
-            if ($slug === '') {
-                continue;
-            }
+            $slug = $this->tagNormalizer->slug($name);
 
             $tag = PackageTag::firstOrCreate(
                 ['slug' => $slug],

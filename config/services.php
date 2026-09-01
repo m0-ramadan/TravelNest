@@ -45,8 +45,8 @@ return [
         'api_key' => env('DEEPSEEK_API_KEY'),
         'model' => env('DEEPSEEK_MODEL', 'deepseek-chat'),
         'base_url' => env('DEEPSEEK_BASE_URL', 'https://api.deepseek.com/v1/chat/completions'),
-        'timeout' => 60,
-        'auto_translate_missing' => env('DEEPSEEK_AUTO_TRANSLATE_MISSING', false),
+        'timeout' => (int) env('DEEPSEEK_TIMEOUT', 30),
+        'auto_translate_missing' => false,
     ],
 
     'savvyhost' => [
@@ -57,4 +57,3 @@ return [
         'token' => env('SAVVYHOST_API_TOKEN'),
     ],
 ];
-

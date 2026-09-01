@@ -1,7 +1,4 @@
 {
-    "' . __('No itinerary description added yet.') . '": "' . __('Nessuna descrizione dell'itinerario ancora aggiunta.') . '",
-    "'desktop', ])": "'desktop', ])",
-    "'mobile'])": "'mobile'])",
     "5.0 Rating": "Valutazione 5.0",
     "10 to 20 Days": "Da 10 a 20 Giorni",
     "15+ years experience": "Oltre 15 anni di esperienza",
@@ -35,7 +32,6 @@
     "Adults": "Adulti",
     "Adults (12+ years)": "Adulti (12+ anni)",
     "African Safari": "Safari africano",
-    "all() as $error)": "all() as $error)",
     "All Durations": "Tutte le durate",
     "All our specialists have traveled extensively or lived in their specialist regions, We're with you every step of the way": "Tutti i nostri specialisti hanno viaggiato molto o vissuto nelle loro regioni di competenza. Siamo con voi in ogni fase del percorso",
     "All Prices": "Tutti i prezzi",

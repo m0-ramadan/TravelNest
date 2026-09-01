@@ -16,7 +16,8 @@ use App\Services\Translation\DTOs\TranslationUnit;
 use App\Services\Translation\Providers\GeminiTranslationProvider;
 use App\Services\Translation\Providers\DeepSeekTranslationProvider;
 use App\Services\Translation\Schemas\PackageTranslationSchema;
-use Illuminate\Support\Facades\Cache;
+use App\Support\LocaleNormalizer;
+use App\Support\RateLimitedLogger;
 use Illuminate\Support\Facades\Log;
 
 class AiTranslationService
@@ -32,7 +33,9 @@ class AiTranslationService
         DeepSeekTranslationProvider $deepseekProvider,
         TranslationValidator $validator,
         TranslationCacheService $cacheService,
-        PackageTranslationSchema $packageSchema
+        PackageTranslationSchema $packageSchema,
+        protected LocaleNormalizer $localeNormalizer,
+        protected RateLimitedLogger $rateLimitedLogger
     ) {
         $this->geminiProvider = $geminiProvider;
         $this->deepseekProvider = $deepseekProvider;
@@ -50,7 +53,7 @@ class AiTranslationService
             $codes = Language::query()
                 ->where('is_active', true)
                 ->pluck('code')
-                ->map(fn($c) => strtolower(trim((string) $c)))
+                ->map(fn($c) => $this->localeNormalizer->normalize((string) $c))
                 ->toArray();
 
             if (!empty($codes)) {
@@ -66,7 +69,13 @@ class AiTranslationService
      */
     public function translateUnit(TranslationUnit $unit, ?TranslationOptions $options = null): TranslationResult
     {
-        // 1. Check Database Cache
+        $unit->sourceLanguage = $this->localeNormalizer->normalize($unit->sourceLanguage);
+        $unit->targetLanguage = $this->localeNormalizer->normalize($unit->targetLanguage);
+
+        if (!(bool) config('translation.ai_enabled', true)) {
+            return TranslationResult::failure('disabled', 'disabled', 'AI translation is disabled.');
+        }
+
         $cachedText = $this->cacheService->getCached($unit);
         if ($cachedText !== null && !empty(trim($cachedText))) {
             return new TranslationResult(
@@ -79,83 +88,200 @@ class AiTranslationService
         }
 
         $options = $options ?? new TranslationOptions(structuredType: $unit->structuredType);
+        $lastFailure = null;
 
-        // 2. Check if Google Gemini is temporarily marked as quota exhausted / Circuit open
-        $isGeminiBlocked = Cache::has('google_translation_quota_exhausted');
+        foreach ($this->providersInOrder() as $provider) {
+            $result = $provider->translate(
+                $unit->sourceText,
+                $unit->sourceLanguage,
+                $unit->targetLanguage,
+                $options
+            );
 
-        $result = null;
-
-        if (!$isGeminiBlocked) {
-            // Attempt Primary: Gemini 2.5 Flash
-            $result = $this->geminiProvider->translate($unit->sourceText, $unit->sourceLanguage, $unit->targetLanguage, $options);
-
-            // Validate Result
             if ($result->isSuccess) {
-                $isValid = $this->validator->validate(
+                if (!$this->validator->validate(
                     $unit->sourceText,
                     $result->translatedText,
                     $unit->sourceLanguage,
                     $unit->targetLanguage,
                     $unit->structuredType
+                )) {
+                    $lastFailure = TranslationResult::failure(
+                        $result->provider,
+                        $result->model,
+                        'Translation response validation failed.'
+                    );
+                    continue;
+                }
+
+                $result->translatedText = $this->validator->cleanMarkdownCodeBlocks($result->translatedText);
+                $this->cacheService->storeCache($unit, $result);
+                $this->cacheService->logUsage(
+                    $unit,
+                    $result,
+                    $result->provider === config('translation.provider') ? 'success' : 'fallback'
                 );
 
-                if (!$isValid) {
-                    Log::warning("Gemini returned invalid or untranslated response for unit {$unit->entityType}#{$unit->entityId}:{$unit->field}. Falling back to DeepSeek.");
-                    $result->isSuccess = false;
-                    $result->errorMessage = "Validation failed: output untranslated or malformed";
-                }
+                return $result;
+            }
+
+            $lastFailure = $result;
+        }
+
+        $lastFailure ??= TranslationResult::failure('unavailable', 'unavailable', 'No translation provider is available.');
+        $this->cacheService->logUsage($unit, $lastFailure, 'failed');
+
+        return $lastFailure;
+    }
+
+    /**
+     * Translate keyed strings in bounded JSON batches. Cached strings never
+     * reach a provider and a provider failure returns the original values.
+     *
+     * @param array<string, string> $items
+     * @return array<string, string>
+     */
+    public function translateBatch(array $items, string $targetLanguage, string $sourceLanguage = 'en'): array
+    {
+        $sourceLanguage = $this->localeNormalizer->normalize($sourceLanguage);
+        $targetLanguage = $this->localeNormalizer->normalize($targetLanguage);
+        $result = [];
+        $pending = [];
+
+        foreach ($items as $key => $text) {
+            $text = trim((string) $text);
+            $result[$key] = $text;
+
+            if ($text === '' || $sourceLanguage === $targetLanguage) {
+                continue;
+            }
+
+            $unit = new TranslationUnit('batch', 0, (string) $key, $sourceLanguage, $targetLanguage, $text);
+            $cached = $this->cacheService->getCached($unit);
+
+            if ($cached !== null) {
+                $result[$key] = $cached;
             } else {
-                // If 429 or quota limit hit, trigger circuit breaker
-                if (str_contains((string) $result->errorMessage, '429') || str_contains(strtolower((string) $result->errorMessage), 'quota')) {
-                    Cache::put('google_translation_quota_exhausted', true, config('translation_ai.circuit_breaker_cooldown', 300));
-                    Log::warning("Gemini quota exhausted. Marking Gemini circuit breaker open for 5 minutes.");
-                }
+                $pending[$key] = $unit;
             }
         }
 
-        // 3. Fallback: DeepSeek API (if Gemini was skipped or failed)
-        $isDeepseekBlocked = Cache::has('deepseek_translation_quota_exhausted');
-
-        if (($result === null || !$result->isSuccess) && !$isDeepseekBlocked) {
-            Log::info("Executing DeepSeek fallback translation for {$unit->entityType}#{$unit->entityId}:{$unit->field} ({$unit->sourceLanguage}->{$unit->targetLanguage})");
-
-            $fallbackResult = $this->deepseekProvider->translate($unit->sourceText, $unit->sourceLanguage, $unit->targetLanguage, $options);
-
-            if ($fallbackResult->isSuccess) {
-                $isValidFallback = $this->validator->validate(
-                    $unit->sourceText,
-                    $fallbackResult->translatedText,
-                    $unit->sourceLanguage,
-                    $unit->targetLanguage,
-                    $unit->structuredType
-                );
-
-                if ($isValidFallback) {
-                    $fallbackResult->translatedText = $this->validator->cleanMarkdownCodeBlocks($fallbackResult->translatedText);
-                    $this->cacheService->storeCache($unit, $fallbackResult);
-                    $this->cacheService->logUsage($unit, $fallbackResult, 'fallback');
-                    return $fallbackResult;
-                }
-            } else {
-                $err = strtolower((string) $fallbackResult->errorMessage);
-                if (str_contains($err, '402') || str_contains($err, '429') || str_contains($err, '401') || str_contains($err, 'balance') || str_contains($err, 'quota')) {
-                    Cache::put('deepseek_translation_quota_exhausted', true, config('translation_ai.circuit_breaker_cooldown', 300));
-                    Log::warning("DeepSeek quota or balance exhausted. Marking DeepSeek circuit breaker open for 5 minutes.");
-                }
-            }
-
-            // If DeepSeek also failed, log failure and return original result or failure DTO
-            $failedResult = $fallbackResult->isSuccess ? TranslationResult::failure('deepseek', 'deepseek-chat', 'DeepSeek validation failed') : $fallbackResult;
-            $this->cacheService->logUsage($unit, $failedResult, 'failed');
-            return $failedResult;
+        if (!(bool) config('translation.ai_enabled', true) || $pending === []) {
+            return $result;
         }
 
-        // Clean & Store Successful Gemini Result
-        $result->translatedText = $this->validator->cleanMarkdownCodeBlocks($result->translatedText);
-        $this->cacheService->storeCache($unit, $result);
-        $this->cacheService->logUsage($unit, $result, 'success');
+        foreach ($this->chunkUnits($pending) as $chunk) {
+            $chunkKeys = array_keys($chunk);
+            $sourceValues = array_values(array_map(fn (TranslationUnit $unit): string => $unit->sourceText, $chunk));
+            $sourceJson = json_encode($sourceValues, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+            if (!is_string($sourceJson)) {
+                continue;
+            }
+
+            $options = new TranslationOptions(structuredType: 'json_array', temperature: 0.1);
+            $batchResult = null;
+
+            foreach ($this->providersInOrder() as $provider) {
+                $candidate = $provider->translate($sourceJson, $sourceLanguage, $targetLanguage, $options);
+                if (!$candidate->isSuccess) {
+                    continue;
+                }
+
+                $clean = $this->validator->cleanMarkdownCodeBlocks($candidate->translatedText);
+                if (!$this->validator->validateJsonArray($sourceJson, $clean)) {
+                    continue;
+                }
+
+                $decoded = json_decode($clean, true);
+                if (!is_array($decoded)) {
+                    continue;
+                }
+
+                $batchResult = [$candidate, $decoded];
+                break;
+            }
+
+            if ($batchResult === null) {
+                continue;
+            }
+
+            [$providerResult, $translations] = $batchResult;
+
+            foreach ($chunkKeys as $index => $key) {
+                $unit = $chunk[$key];
+                $translated = $translations[$index] ?? null;
+                if (!is_string($translated)
+                    || !$this->validator->validate($unit->sourceText, $translated, $sourceLanguage, $targetLanguage)) {
+                    continue;
+                }
+
+                $translated = $this->validator->cleanMarkdownCodeBlocks($translated);
+                $itemResult = new TranslationResult(
+                    $translated,
+                    $providerResult->provider,
+                    $providerResult->model,
+                    true,
+                    null,
+                    durationMs: $providerResult->durationMs
+                );
+                $result[$key] = $translated;
+                $this->cacheService->storeCache($unit, $itemResult);
+            }
+        }
 
         return $result;
+    }
+
+    /** @return array<int, TranslationProviderInterface> */
+    private function providersInOrder(): array
+    {
+        $available = [
+            'gemini' => $this->geminiProvider,
+            'google' => $this->geminiProvider,
+            'deepseek' => $this->deepseekProvider,
+        ];
+
+        $names = array_unique([
+            strtolower((string) config('translation.provider', 'gemini')),
+            strtolower((string) config('translation.fallback_provider', 'deepseek')),
+        ]);
+
+        return array_values(array_filter(array_map(
+            static fn (string $name): ?TranslationProviderInterface => $available[$name] ?? null,
+            $names
+        )));
+    }
+
+    /**
+     * @param array<string, TranslationUnit> $units
+     * @return array<int, array<string, TranslationUnit>>
+     */
+    private function chunkUnits(array $units): array
+    {
+        $maxItems = (int) config('translation.batch_size', 30);
+        $maxChars = (int) config('translation.max_chars_per_request', 8000);
+        $chunks = [];
+        $chunk = [];
+        $chars = 0;
+
+        foreach ($units as $key => $unit) {
+            $length = mb_strlen($unit->sourceText);
+            if ($chunk !== [] && (count($chunk) >= $maxItems || $chars + $length > $maxChars)) {
+                $chunks[] = $chunk;
+                $chunk = [];
+                $chars = 0;
+            }
+
+            $chunk[$key] = $unit;
+            $chars += $length;
+        }
+
+        if ($chunk !== []) {
+            $chunks[] = $chunk;
+        }
+
+        return $chunks;
     }
 
     /**

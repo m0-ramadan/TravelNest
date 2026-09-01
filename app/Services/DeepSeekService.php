@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
+use App\Services\Translation\TranslationCircuitBreaker;
+use App\Support\RateLimitedLogger;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class DeepSeekService
 {
@@ -12,9 +13,12 @@ class DeepSeekService
     protected string $baseUrl;
     protected int $timeout;
 
-    public function __construct()
+    public function __construct(
+        protected TranslationCircuitBreaker $circuitBreaker,
+        protected RateLimitedLogger $logger
+    )
     {
-        $this->apiKey = (string) config('services.deepseek.api_key', 'sk-97536bc2a134431aa194412221882ca2');
+        $this->apiKey = (string) config('services.deepseek.api_key');
         $this->model = (string) config('services.deepseek.model', 'deepseek-chat');
         $this->baseUrl = (string) config('services.deepseek.base_url', 'https://api.deepseek.com/v1/chat/completions');
         $this->timeout = (int) config('services.deepseek.timeout', 60);
@@ -69,10 +73,11 @@ class DeepSeekService
         $decoded = json_decode($content, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            Log::error('DeepSeek JSON decode failed', [
-                'error' => json_last_error_msg(),
-                'content' => $content,
-            ]);
+            $this->logger->warning(
+                'deepseek-json-decode',
+                'DeepSeek returned malformed JSON.',
+                ['json_error' => json_last_error_msg()]
+            );
             return null;
         }
 
@@ -89,8 +94,15 @@ class DeepSeekService
         int $maxTokens = 2000,
         bool $jsonMode = false
     ): ?array {
+        if (!(bool) config('translation.ai_enabled', true) || $this->circuitBreaker->isOpen('deepseek')) {
+            return null;
+        }
+
         if (empty($this->apiKey)) {
-            Log::warning('DeepSeek API key is missing.');
+            $this->logger->warning(
+                'deepseek-missing-api-key',
+                'DeepSeek translation is unavailable because its API key is not configured.'
+            );
             return null;
         }
 
@@ -125,30 +137,34 @@ class DeepSeekService
                 ->post($this->baseUrl, $payload);
 
             if (!$response->successful()) {
-                Log::error('DeepSeek request failed', [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                ]);
+                $this->circuitBreaker->recordFailure(
+                    'deepseek',
+                    $response->status(),
+                    $response->json('message')
+                );
                 return null;
             }
 
             $content = $response->json('choices.0.message.content');
 
             if (!$content) {
-                Log::warning('DeepSeek returned empty content.', [
-                    'response' => $response->json(),
-                ]);
+                $this->logger->warning('deepseek-empty-content', 'DeepSeek returned empty content.');
                 return null;
             }
+
+            $this->circuitBreaker->recordSuccess('deepseek');
 
             return [
                 'content' => trim($content),
                 'raw' => $response->json(),
             ];
         } catch (\Throwable $e) {
-            Log::error('DeepSeek request exception', [
-                'message' => $e->getMessage(),
-            ]);
+            $this->circuitBreaker->recordFailure('deepseek', null, $e->getMessage());
+            $this->logger->warning(
+                'deepseek-request-exception',
+                'DeepSeek request failed.',
+                ['exception' => $e::class]
+            );
             return null;
         }
     }

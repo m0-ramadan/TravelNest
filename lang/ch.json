@@ -1,7 +1,4 @@
 {
-    "' . __('No itinerary description added yet.') . '": "' . __('暂无行程描述。') . '",
-    "'desktop', ])": "'desktop', ])",
-    "'mobile'])": "'mobile'])",
     "5.0 Rating": "5.0 评分",
     "10 to 20 Days": "10 到 20 天",
     "15+ years experience": "15年以上经验",
@@ -35,7 +32,6 @@
     "Adults": "成人",
     "Adults (12+ years)": "成人（12岁以上）",
     "African Safari": "非洲野生动物园",
-    "all() as $error)": "all() as $error)",
     "All Durations": "所有时长",
     "All our specialists have traveled extensively or lived in their specialist regions, We're with you every step of the way": "我们所有的专家都曾广泛旅行或居住在他们的专业区域，我们全程陪伴您",
     "All Prices": "所有价格",

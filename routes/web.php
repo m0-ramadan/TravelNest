@@ -30,20 +30,19 @@ use Illuminate\Support\Facades\Route;
 
 Route::name('website.')->group(function () {
     Route::get('/lang/{locale}', function (Illuminate\Http\Request $request, $locale) {
-        $locale = strtolower(trim($locale));
-        if ($locale === 'english') {
-            $locale = 'en';
-        }
+        $normalizer = app(\App\Support\LocaleNormalizer::class);
+        $locale = $normalizer->normalize((string) $locale);
 
         $supportedLocales = \Illuminate\Support\Facades\Cache::remember('supported_locales', 3600, function () {
-            return \App\Models\Language::where('is_active', true)->pluck('code')->map(function ($code) {
-                $code = strtolower(trim((string) $code));
-                return $code === 'english' ? 'en' : $code;
-            })->toArray();
+            return \App\Models\Language::where('is_active', true)->pluck('code')->toArray();
         });
 
+        $supportedLocales = $normalizer->normalizeList(array_merge(
+            $supportedLocales,
+            (array) config('translation.supported_locales', ['en', 'ar'])
+        ));
+
         if (in_array($locale, $supportedLocales, true)) {
-            app(\App\Services\JsonTranslationFileService::class)->ensureLocaleFile($locale);
             $request->session()->put('locale', $locale);
         }
 

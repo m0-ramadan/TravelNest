@@ -2,34 +2,32 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
 use App\Models\Visitor;
-use Jenssegers\Agent\Agent;
+use App\Support\RateLimitedLogger;
+use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Jenssegers\Agent\Agent;
 use Torann\GeoIP\Facades\GeoIP;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
 
 class LogVisitor
 {
+    public function __construct(private readonly RateLimitedLogger $logger) {}
+
     public function handle(Request $request, Closure $next)
     {
         $response = $next($request);
 
         try {
-            $ip = $this->getClientIp($request);
+            $ip = (string) ($request->ip() ?: '0.0.0.0');
             $agent = new Agent();
-            $agent->setUserAgent($request->userAgent());
-
-            // Get GeoIP information with fallback
-            $geo = $this->getGeoIpData($ip);
-            
-            // Get host safely
-            $host = $this->getHostByIp($ip);
+            $agent->setUserAgent((string) $request->userAgent());
+            $isBot = $agent->isRobot();
+            $geo = $this->getGeoIpData($ip, $isBot);
 
             Visitor::create([
                 'ip' => $ip,
-                'host' => $host,
+                'host' => $this->getHostByIp($ip),
                 'method' => $request->method(),
                 'path' => $request->path(),
                 'full_url' => $request->fullUrl(),
@@ -42,7 +40,7 @@ class LogVisitor
                 'is_mobile' => $agent->isMobile(),
                 'is_tablet' => $agent->isTablet(),
                 'is_desktop' => !$agent->isMobile() && !$agent->isTablet(),
-                'is_bot' => $agent->isRobot(),
+                'is_bot' => $isBot,
                 'country' => $geo['country'] ?? null,
                 'country_iso' => $geo['country_code'] ?? null,
                 'region' => $geo['region'] ?? null,
@@ -50,124 +48,109 @@ class LogVisitor
                 'latitude' => $geo['lat'] ?? null,
                 'longitude' => $geo['lon'] ?? null,
                 'timezone' => $geo['timezone'] ?? null,
-                'headers' => json_encode(collect($request->headers->all())
-                    ->map(fn($v) => count($v) === 1 ? $v[0] : $v)
-                    ->toArray()),
-                'query' => json_encode($request->query()),
-                'session_id' => session()->getId(),
+                'headers' => $this->safeHeaders($request),
+                'query' => $request->query(),
+                'session_id' => $request->hasSession() ? $request->session()->getId() : null,
             ]);
         } catch (\Throwable $e) {
-            Log::warning('Visitor logging failed: ' . $e->getMessage());
+            $this->logger->warning(
+                'visitor-logging-failed',
+                'Visitor analytics could not be recorded.',
+                ['exception' => $e::class],
+                (int) config('geoip.log_cooldown', 3600)
+            );
         }
 
         return $response;
     }
 
-    /**
-     * Get client IP address reliably
-     */
-    private function getClientIp(Request $request): string
+    private function getGeoIpData(string $ip, bool $isBot): array
     {
-        // Check for forwarded IP first (behind proxy/load balancer)
-        if ($request->header('X-Forwarded-For')) {
-            $ips = explode(',', $request->header('X-Forwarded-For'));
-            return trim($ips[0]);
-        }
-
-        if ($request->header('X-Real-IP')) {
-            return $request->header('X-Real-IP');
-        }
-
-        return $request->ip() ?? '0.0.0.0';
-    }
-
-    /**
-     * Get GeoIP data with multiple fallback methods
-     */
-    private function getGeoIpData(string $ip): array
-    {
-        if (empty($ip) || $ip === '0.0.0.0' || $ip === '127.0.0.1') {
+        if (!$this->isPublicIp($ip) || ($isBot && !(bool) config('geoip.lookup_bots', false))) {
             return [];
         }
 
-        // Method 1: Try Torann GeoIP first
-        if (class_exists(GeoIP::class)) {
-            try {
-                $location = GeoIP::getLocation($ip);
-                if ($location && $location->default === false) {
-                    return [
-                        'country' => $location->country,
-                        'country_code' => $location->iso_code,
-                        'region' => $location->state,
-                        'city' => $location->city,
-                        'lat' => $location->lat,
-                        'lon' => $location->lon,
-                        'timezone' => $location->timezone,
-                    ];
-                }
-            } catch (\Throwable $e) {
-                Log::debug("Torann GeoIP failed for IP {$ip}: " . $e->getMessage());
+        $cacheKey = 'visitor:geoip:' . hash('sha256', $ip);
+        try {
+            $cached = Cache::get($cacheKey);
+            if (is_array($cached)) {
+                return $cached;
             }
+        } catch (\Throwable) {
+            // GeoIP can still use its own cache or graceful fallback.
         }
 
-        // Method 2: Try ipapi.co API
         try {
-            $response = Http::timeout(3)->get("http://ipapi.co/{$ip}/json/");
-            if ($response->successful()) {
-                $data = $response->json();
-                if (!isset($data['error'])) {
-                    return [
-                        'country' => $data['country_name'] ?? null,
-                        'country_code' => $data['country_code'] ?? null,
-                        'region' => $data['region'] ?? null,
-                        'city' => $data['city'] ?? null,
-                        'lat' => $data['latitude'] ?? null,
-                        'lon' => $data['longitude'] ?? null,
-                        'timezone' => $data['timezone'] ?? null,
-                    ];
-                }
+            $location = GeoIP::getLocation($ip);
+            if ($location && $location->default === false) {
+                $geo = [
+                    'country' => $location->country,
+                    'country_code' => $location->iso_code,
+                    'region' => $location->state,
+                    'city' => $location->city,
+                    'lat' => $location->lat,
+                    'lon' => $location->lon,
+                    'timezone' => $location->timezone,
+                ];
+                $this->cacheGeoResult($cacheKey, $geo, (int) config('geoip.visitor_cache_ttl', 2592000));
+                return $geo;
             }
         } catch (\Throwable $e) {
-            Log::debug("ipapi.co failed for IP {$ip}: " . $e->getMessage());
+            $this->logger->warning(
+                'torann-geoip-unavailable',
+                'Torann GeoIP lookup is temporarily unavailable; visitor logging will use empty location data.',
+                ['exception' => $e::class],
+                (int) config('geoip.log_cooldown', 3600)
+            );
         }
 
-        // Method 3: Try ip-api.com API
-        try {
-            $response = Http::timeout(3)->get("http://ip-api.com/json/{$ip}");
-            if ($response->successful()) {
-                $data = $response->json();
-                if ($data['status'] === 'success') {
-                    return [
-                        'country' => $data['country'] ?? null,
-                        'country_code' => $data['countryCode'] ?? null,
-                        'region' => $data['regionName'] ?? null,
-                        'city' => $data['city'] ?? null,
-                        'lat' => $data['lat'] ?? null,
-                        'lon' => $data['lon'] ?? null,
-                        'timezone' => $data['timezone'] ?? null,
-                    ];
-                }
-            }
-        } catch (\Throwable $e) {
-            Log::debug("ip-api.com failed for IP {$ip}: " . $e->getMessage());
-        }
-
+        $this->cacheGeoResult($cacheKey, [], (int) config('geoip.failure_cache_ttl', 900));
         return [];
     }
 
-    /**
-     * Get host by IP safely
-     */
+    private function cacheGeoResult(string $key, array $value, int $ttl): void
+    {
+        try {
+            Cache::put($key, $value, max(60, $ttl));
+        } catch (\Throwable) {
+            // Analytics remains non-critical when cache storage is unavailable.
+        }
+    }
+
+    private function isPublicIp(string $ip): bool
+    {
+        return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false;
+    }
+
     private function getHostByIp(string $ip): ?string
     {
-        if (empty($ip) || $ip === '0.0.0.0' || $ip === '127.0.0.1') {
+        if (!(bool) config('geoip.reverse_dns', false) || !$this->isPublicIp($ip)) {
             return null;
         }
 
+        $key = 'visitor:host:' . hash('sha256', $ip);
         try {
-            return gethostbyaddr($ip);
-        } catch (\Throwable $e) {
+            return Cache::remember($key, 86400, static function () use ($ip): ?string {
+                $host = gethostbyaddr($ip);
+                return $host !== false && $host !== $ip ? $host : null;
+            });
+        } catch (\Throwable) {
             return null;
         }
+    }
+
+    private function safeHeaders(Request $request): array
+    {
+        $sensitive = ['authorization', 'cookie', 'x-api-key', 'x-csrf-token', 'x-xsrf-token'];
+
+        return collect($request->headers->all())
+            ->map(function (array $values, string $name) use ($sensitive): mixed {
+                if (in_array(strtolower($name), $sensitive, true)) {
+                    return '[redacted]';
+                }
+
+                return count($values) === 1 ? $values[0] : $values;
+            })
+            ->all();
     }
 }

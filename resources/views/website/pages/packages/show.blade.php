@@ -1709,10 +1709,31 @@
             background: rgba(255, 255, 255, 0.03);
         }
 
-        html[data-theme='dark'] .facility-card {
-            background: #1a233a;
-            border-color: rgba(255, 255, 255, 0.12);
-            color: #ffffff;
+        html[data-theme='dark'] .facility-card,
+        html[data-theme='dark'] .nile-cruise-page #cruise-facilities .facility-card {
+            background: #172033 !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+        }
+
+        html[data-theme='dark'] .facility-card:hover,
+        html[data-theme='dark'] .nile-cruise-page #cruise-facilities .facility-card:hover {
+            background: rgba(197, 149, 91, 0.18) !important;
+            border-color: rgba(197, 149, 91, 0.45) !important;
+        }
+
+        html[data-theme='dark'] .facility-card span,
+        html[data-theme='dark'] .nile-cruise-page #cruise-facilities .facility-card span {
+            color: #ffffff !important;
+        }
+
+        html[data-theme='dark'] .facility-icon {
+            color: #c5955b !important;
+        }
+
+        html[data-theme='dark'] .facility-icon svg {
+            stroke: #c5955b !important;
         }
 
         html[data-theme='dark'] .cruise-facility-list li {
@@ -2125,8 +2146,20 @@
         html[data-theme='dark'] .nile-cruise-page .main-container { background:#101827; }
         html[data-theme='dark'] .nile-cruise-page .content-section,
         html[data-theme='dark'] .nile-cruise-page .nc-list-card,
-        html[data-theme='dark'] .nile-cruise-page .nc-policy-card,
-        html[data-theme='dark'] .nile-cruise-page #nile-cruise-details .detail-item { background:#1a233a;color:#e2e8f0;border-color:rgba(255,255,255,.1); }
+        html[data-theme='dark'] .nile-cruise-page .nc-policy-card { background:#1a233a;color:#e2e8f0;border-color:rgba(255,255,255,.1); }
+        html[data-theme='dark'] .nile-cruise-page #nile-cruise-details .detail-item { background:#172033 !important; color:#e2e8f0 !important; border-color:rgba(255,255,255,.12) !important; }
+        html[data-theme='dark'] .nile-cruise-page #nile-cruise-details .detail-label { color:#ffffff !important; }
+        html[data-theme='dark'] .nile-cruise-page #nile-cruise-details .detail-value { color:#cbd5e1 !important; }
+        html[data-theme='dark'] .nile-cruise-page #cruise-facilities .facility-card { background:#172033 !important; color:#ffffff !important; border-color:rgba(255,255,255,.12) !important; box-shadow:0 4px 12px rgba(0,0,0,.25) !important; }
+        html[data-theme='dark'] .nile-cruise-page #cruise-facilities .facility-card span { color:#ffffff !important; }
+        html[data-theme='dark'] .nile-cruise-page #cruise-facilities .facility-card .facility-icon { color:#c5955b !important; }
+        html[data-theme='dark'] .nile-cruise-page #cruise-facilities .facility-card .facility-icon svg { stroke:#c5955b !important; }
+        html[data-theme='dark'] .nile-cruise-page .nc-day summary,
+        html[data-theme='dark'] .nile-cruise-page .faq-accordion .day-header { background:#172033 !important; color:#ffffff !important; border-color:rgba(255,255,255,.1) !important; }
+        html[data-theme='dark'] .nile-cruise-page .nc-day-body { color:#e2e8f0 !important; }
+        html[data-theme='dark'] .nile-cruise-page .nc-pill { background:rgba(255,255,255,.08) !important; color:#e2e8f0 !important; }
+        html[data-theme='dark'] .nile-cruise-page .nc-policy-card h4 { color:#ffffff !important; }
+        html[data-theme='dark'] .nile-cruise-page .nc-policy-card .policy-copy { color:#cbd5e1 !important; }
         html[data-theme='dark'] .nile-cruise-page .nc-price-duration { background:#1a233a;border-color:rgba(255,255,255,.1); }
         html[data-theme='dark'] .nile-cruise-page .nc-price-matrix td { color:#d7e0ec;border-color:rgba(255,255,255,.08); }
 

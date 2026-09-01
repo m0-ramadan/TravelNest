@@ -131,16 +131,18 @@ class NileCruisePackageService
         }
 
         $presetTitles = collect($this->facilityPresets());
+        $legacyTitles = collect(['Lounge', 'Dining Room', 'Sun Deck']);
+        $managedTitles = $presetTitles->merge($legacyTitles)->unique()->values();
 
         $selected = collect((array) $payload['facility_titles'])
             ->map(fn ($title) => trim((string) $title))
-            ->filter(fn ($title) => $presetTitles->containsStrict($title))
+            ->filter(fn ($title) => $managedTitles->containsStrict($title))
             ->unique()
             ->values();
 
         // Reuse package_facilities. Only our Nile presets are managed here so
         // manually added/general Package facilities remain untouched.
-        $package->facilities()->whereIn('title', $presetTitles->all())->delete();
+        $package->facilities()->whereIn('title', $managedTitles->all())->delete();
 
         $sortOrder = (int) ($package->facilities()->max('sort_order') ?? -1) + 1;
         foreach ($selected as $offset => $title) {

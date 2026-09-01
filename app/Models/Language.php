@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\LocaleNormalizer;
 use Illuminate\Database\Eloquent\Model;
 
 class Language extends Model
@@ -43,8 +44,7 @@ class Language extends Model
 
     protected function normalizedCode(): string
     {
-        $code = strtolower(trim((string) $this->code));
-        return $code === 'english' ? 'en' : $code;
+        return app(LocaleNormalizer::class)->normalize((string) $this->code);
     }
 
     protected function languageLabels(): array

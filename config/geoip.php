@@ -1,5 +1,9 @@
 <?php
 
+$cacheDriver = strtolower((string) env('CACHE_DRIVER', 'file'));
+$supportsTags = in_array($cacheDriver, ['redis', 'memcached'], true);
+$tagsEnabled = filter_var(env('GEOIP_CACHE_TAGS_ENABLED', true), FILTER_VALIDATE_BOOL);
+
 return [
 
     /*
@@ -12,7 +16,7 @@ return [
     |
     */
 
-    'log_failures' => true,
+    'log_failures' => false,
 
     /*
     |--------------------------------------------------------------------------
@@ -110,7 +114,7 @@ return [
     |
     */
 
-    'cache' => 'all',
+    'cache' => env('GEOIP_CACHE_MODE', 'all'),
 
     /*
     |--------------------------------------------------------------------------
@@ -122,7 +126,9 @@ return [
     |
     */
 
-    'cache_tags' => env('GEOIP_CACHE_TAGS') ? explode(',', env('GEOIP_CACHE_TAGS')) : null,
+    'cache_tags' => $supportsTags && $tagsEnabled
+        ? array_values(array_filter(array_map('trim', explode(',', (string) env('GEOIP_CACHE_TAGS', 'torann-geoip-location')))))
+        : null,
 
     /*
     |--------------------------------------------------------------------------
@@ -133,7 +139,13 @@ return [
     |
     */
 
-    'cache_expires' => 30,
+    'cache_expires' => (int) env('GEOIP_PACKAGE_CACHE_TTL', 86400),
+
+    'visitor_cache_ttl' => (int) env('GEOIP_CACHE_TTL', 2592000),
+    'failure_cache_ttl' => (int) env('GEOIP_FAILURE_CACHE_TTL', 900),
+    'log_cooldown' => (int) env('GEOIP_LOG_COOLDOWN', 3600),
+    'lookup_bots' => (bool) env('GEOIP_LOOKUP_BOTS', false),
+    'reverse_dns' => (bool) env('VISITOR_REVERSE_DNS', false),
 
     /*
     |--------------------------------------------------------------------------
