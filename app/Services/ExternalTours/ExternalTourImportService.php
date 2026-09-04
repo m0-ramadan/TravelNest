@@ -258,10 +258,17 @@ class ExternalTourImportService
             $packageType = 'nile_cruise';
             $data['package_type'] = 'nile_cruise';
         }
+        $breadcrumbs = $data['breadcrumbs'] ?? [];
 
         $category = $this->resolveCategory($packageType, $warnings, $title);
+        $category = $this->resolveCategory($packageType, $warnings, $title, $breadcrumbs);
         if (!$category) {
             $warnings[] = "No matching category found for package type [{$packageType}]. Setting category_id to null.";
+        } else {
+            if (!empty($category->category_type)) {
+                $packageType = $category->category_type;
+                $data['package_type'] = $packageType;
+            }
         }
 
         // 4. Cities
@@ -340,8 +347,16 @@ class ExternalTourImportService
 
     /**
      * Resolve PackageCategory based on package type and standard slugs.
+     * Resolve PackageCategory based on package type, standard slugs, and breadcrumbs.
+     *
+     * User Rule: Nile Cruise ONLY if it belongs to one of these three:
+     * - Lake Nasser Cruise
+     * - Dahabiya Nile Cruise
+     * - Luxor and Aswan Nile Cruises
+     * Otherwise, assign to its actual category (travel_package, day_tour, shore_excursion).
      */
     protected function resolveCategory(string $packageType, array &$warnings, ?string $title = null): ?PackageCategory
+    protected function resolveCategory(string $packageType, array &$warnings, ?string $title = null, array $breadcrumbs = []): ?PackageCategory
     {
         $hasCruiseInTitle = $title && (stripos($title, 'cruise') !== false);
 
@@ -355,10 +370,14 @@ class ExternalTourImportService
             }
         }
 
+        // 1. Resolve based on package_type (which was detected using strict category rules)
         $slugCandidates = match ($packageType) {
             'nile_cruise' => ['nile cruise', 'nile-cruises', 'nile-cruise', 'nile-trip'],
             'day_tour' => ['day-tours', 'day-tour', 'day_tour', 'excursions'],
             default => ['tour-packages', 'tour_packages', 'travel-packages', 'packages'],
+            'day_tour' => ['day_tour', 'day-tours', 'day-tour', 'excursions'],
+            'shore_excursion' => ['shore_excursions', 'shore-excursions', 'shore_excursion'],
+            default => ['tour_packages', 'tour-packages', 'travel-packages', 'packages'],
         };
 
         $category = PackageCategory::whereIn('slug', $slugCandidates)->first();
@@ -367,6 +386,60 @@ class ExternalTourImportService
         }
 
         return PackageCategory::where('category_type', $packageType)->first();
+        $category = PackageCategory::where('category_type', $packageType)->first();
+        if ($category) {
+            return $category;
+        }
+
+        // 2. Fallback: Check breadcrumbs if standard match did not resolve
+        foreach (array_reverse($breadcrumbs) as $crumb) {
+            $lowerCrumb = strtolower($crumb);
+
+            if (
+                str_contains($lowerCrumb, 'lake nasser') ||
+                str_contains($lowerCrumb, 'dahabiya') ||
+                (str_contains($lowerCrumb, 'luxor') && str_contains($lowerCrumb, 'aswan') && str_contains($lowerCrumb, 'cruise')) ||
+                str_contains($lowerCrumb, 'luxor and aswan nile cruise')
+            ) {
+                $found = PackageCategory::where('category_type', 'nile_cruise')
+                    ->orWhere('slug', 'nile cruise')
+                    ->orWhere('slug', 'like', '%cruise%')
+                    ->first();
+                if ($found) {
+                    return $found;
+                }
+            }
+
+            if (str_contains($lowerCrumb, 'day tour') || str_contains($lowerCrumb, 'excursions')) {
+                $found = PackageCategory::where('category_type', 'day_tour')
+                    ->orWhere('slug', 'day_tour')
+                    ->first();
+                if ($found) {
+                    return $found;
+                }
+            }
+
+            if (str_contains($lowerCrumb, 'shore excursion')) {
+                $found = PackageCategory::where('category_type', 'shore_excursion')
+                    ->orWhere('slug', 'shore_excursions')
+                    ->first();
+                if ($found) {
+                    return $found;
+                }
+            }
+
+            if (str_contains($lowerCrumb, 'vacation') || str_contains($lowerCrumb, 'tour package') || str_contains($lowerCrumb, 'travel package')) {
+                $found = PackageCategory::where('category_type', 'travel_package')
+                    ->orWhere('slug', 'tour_packages')
+                    ->orWhere('slug', 'tour-packages')
+                    ->first();
+                if ($found) {
+                    return $found;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -596,9 +669,17 @@ class ExternalTourImportService
         }
 
         // 3. Create Daily Itineraries
+        $seenDayNumbers = [];
         foreach ($data['itinerary'] ?? [] as $index => $day) {
+            $dayNumber = (int) ($day['day_number'] ?? ($index + 1));
+            if (in_array($dayNumber, $seenDayNumbers, true)) {
+                $dayNumber = count($seenDayNumbers) > 0 ? max($seenDayNumbers) + 1 : ($index + 1);
+            }
+            $seenDayNumbers[] = $dayNumber;
+
             $package->itineraries()->create([
                 'day_number' => $day['day_number'] ?? ($index + 1),
+                'day_number' => $dayNumber,
                 'title' => ['en' => $day['title'], 'ar' => ''],
                 'description' => ['en' => $day['description'], 'ar' => ''],
                 'meals' => $day['meals'] ?? [],
@@ -610,6 +691,7 @@ class ExternalTourImportService
                 'transport_notes' => ['en' => $day['transport_notes'] ?? '', 'ar' => ''],
                 'activities' => $day['activities'] ?? [],
                 'sort_order' => $day['day_number'] ?? ($index + 1),
+                'sort_order' => $dayNumber,
             ]);
         }
 

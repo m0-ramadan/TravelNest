@@ -575,6 +575,8 @@
                                                 @checked(old('pricing_option', request('pricing_option', $pricingOptions->first()['id'] ?? '')) === $option['id']) required>
                                             <input type="radio" name="pricing_option" value="{{ $option['id'] }}"
                                                 @checked(old('pricing_option', request('pricing_option', $pricingOptions->first()['id'] ?? '')) === $option['id']) required>
+                                            <input type="radio" name="pricing_option" value="{{ $option['id'] }}"
+                                                @checked(old('pricing_option', request('pricing_option', $pricingOptions->first()['id'] ?? '')) === $option['id']) required>
                                             <span class="price-option-body">
                                                 <span><span class="price-option-title">{{ $option['label'] }}</span><span
                                                         class="price-option-desc">{{ $option['description'] }}@if ($option['available_rooms'] !== null)

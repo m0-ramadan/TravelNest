@@ -47,12 +47,14 @@ class LuxorAndAswanTourPageParser
             'policies' => $policies,
         ]);
         $images = $this->extractImages($crawler, $sourceUrl, $jsonLd);
+        $breadcrumbs = $this->extractBreadcrumbs($crawler, $jsonLd);
 
         $facts = [
             'source_url' => $sourceUrl,
             'source_host' => $sourceHost,
             'source_slug' => $sourceSlug,
             'source_id' => $sourceId,
+            'breadcrumbs' => $breadcrumbs,
 
             'title' => $title,
             'subtitle' => $subtitle,
@@ -1190,25 +1192,222 @@ class LuxorAndAswanTourPageParser
     }
 
     /**
+     * Extract breadcrumb navigation items.
+     */
+    public function extractBreadcrumbs(Crawler $crawler, ?array $jsonLd = null): array
+    {
+        $breadcrumbs = [];
+
+        $selectors = [
+            'ol.breadcrumb li',
+            'ul.breadcrumb li',
+            '.breadcrumb li',
+            'nav[aria-label*="breadcrumb" i] li',
+            '.breadcrumbs li',
+            '.breadcrumb-item',
+        ];
+
+        foreach ($selectors as $selector) {
+            try {
+                $nodes = $crawler->filter($selector);
+                if ($nodes->count() > 0) {
+                    foreach ($nodes as $node) {
+                        $text = trim(preg_replace('/\s+/', ' ', $node->textContent));
+                        if ($text !== '' && !in_array($text, $breadcrumbs, true)) {
+                            $breadcrumbs[] = $text;
+                        }
+                    }
+                    if (!empty($breadcrumbs)) {
+                        break;
+                    }
+                }
+            } catch (\Throwable) {
+                // Ignore selector parsing issues
+            }
+        }
+
+        if (empty($breadcrumbs) && !empty($jsonLd)) {
+            if (($jsonLd['@type'] ?? '') === 'BreadcrumbList' && !empty($jsonLd['itemListElement'])) {
+                foreach ($jsonLd['itemListElement'] as $item) {
+                    $name = trim($item['name'] ?? $item['item']['name'] ?? '');
+                    if ($name !== '' && !in_array($name, $breadcrumbs, true)) {
+                        $breadcrumbs[] = $name;
+                    }
+                }
+            }
+        }
+
+        return $breadcrumbs;
+    }
+
+    /**
      * Detect Package Type.
      *
      * User Rule: Anything with "Nile Cruise" or "Cruise" in its name belongs to Nile Cruise.
+     * User Rule: A tour belongs to Nile Cruise ONLY if it belongs to one of these three:
+     * - Lake Nasser Cruise
+     * - Dahabiya Nile Cruise
+     * - Luxor and Aswan Nile Cruises
+     * Otherwise, assign to its actual category (travel_package, day_tour, shore_excursion).
      */
     public function detectPackageType(array $facts): string
     {
         $title = strtolower($facts['title'] ?? '');
+        $breadcrumbs = $facts['breadcrumbs'] ?? [];
+        $sourceUrl = $facts['source_url'] ?? '';
+        $title = $facts['title'] ?? '';
+        $durationDays = (int) ($facts['duration_days'] ?? 7);
 
         // User requirement: Anything with "Nile Cruise" or "Cruise" in its title/name is nile_cruise
         if (str_contains($title, 'cruise')) {
+        // 1. Nile Cruise check (strictly limited to the 3 categories)
+        if ($this->isNileCruiseCategory($breadcrumbs, $sourceUrl, $title)) {
             return 'nile_cruise';
         }
 
         $durationDays = (int) ($facts['duration_days'] ?? 7);
         if ($durationDays <= 1) {
+        // 2. Day Tour: duration <= 1 or explicitly day tour / excursion
+        if ($durationDays <= 1 || $this->isDayTour($breadcrumbs, $sourceUrl, $title)) {
             return 'day_tour';
         }
 
+        // 3. Shore Excursion
+        if ($this->isShoreExcursion($breadcrumbs, $sourceUrl, $title)) {
+            return 'shore_excursion';
+        }
+
+        // 4. Default to travel_package (multi-day tour packages)
         return 'travel_package';
+    }
+
+    /**
+     * Check if tour belongs strictly to one of the three Nile Cruise categories:
+     * 1. Lake Nasser Cruise
+     * 2. Dahabiya Nile Cruise
+     * 3. Luxor and Aswan Nile Cruises
+     */
+    protected function isNileCruiseCategory(array $breadcrumbs, string $sourceUrl, string $title): bool
+    {
+        $lowerUrl = strtolower($sourceUrl);
+        $lowerTitle = strtolower($title);
+
+        // Check breadcrumbs (highest authority for category assignment)
+        foreach ($breadcrumbs as $crumb) {
+            $lowerCrumb = strtolower($crumb);
+
+            // 1. Lake Nasser Cruise
+            if (str_contains($lowerCrumb, 'lake nasser')) {
+                return true;
+            }
+
+            // 2. Dahabiya Nile Cruise
+            if (str_contains($lowerCrumb, 'dahabiya')) {
+                return true;
+            }
+
+            // 3. Luxor and Aswan Nile Cruises
+            if (
+                (str_contains($lowerCrumb, 'luxor') && str_contains($lowerCrumb, 'aswan') && str_contains($lowerCrumb, 'cruise')) ||
+                str_contains($lowerCrumb, 'luxor and aswan nile cruise') ||
+                str_contains($lowerCrumb, 'luxor to aswan nile cruise') ||
+                str_contains($lowerCrumb, 'aswan to luxor nile cruise')
+            ) {
+                return true;
+            }
+        }
+
+        // Check URL path: if under /Egypt/cruise/ or /cruises/
+        if (str_contains($lowerUrl, '/egypt/cruise/') || str_contains($lowerUrl, '/cruises/')) {
+            if (str_contains($lowerUrl, 'lake-nasser') || str_contains($lowerUrl, 'dahabiya')) {
+                return true;
+            }
+            if (
+                str_contains($lowerUrl, 'luxor') ||
+                str_contains($lowerUrl, 'aswan') ||
+                str_contains($lowerUrl, 'nile-cruise') ||
+                str_contains($lowerUrl, 'cruise')
+            ) {
+                // Ensure it's not a land tour package like /package/...cairo...alexandria...
+                if (!str_contains($lowerUrl, 'cairo') && !str_contains($lowerUrl, 'alexandria')) {
+                    return true;
+                }
+            }
+        }
+
+        // Check Title ONLY for pure cruise titles matching the 3 categories
+        if (str_contains($lowerTitle, 'lake nasser')) {
+            return true;
+        }
+
+        if (str_contains($lowerTitle, 'dahabiya')) {
+            return true;
+        }
+
+        if (
+            str_contains($lowerTitle, 'cruise') &&
+            (str_contains($lowerTitle, 'luxor') || str_contains($lowerTitle, 'aswan')) &&
+            !str_contains($lowerTitle, 'cairo') &&
+            !str_contains($lowerTitle, 'alexandria') &&
+            !str_contains($lowerTitle, 'hurghada') &&
+            !str_contains($lowerTitle, 'sharm')
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if tour is a Day Tour.
+     */
+    protected function isDayTour(array $breadcrumbs, string $sourceUrl, string $title): bool
+    {
+        $lowerUrl = strtolower($sourceUrl);
+        $lowerTitle = strtolower($title);
+
+        foreach ($breadcrumbs as $crumb) {
+            $lowerCrumb = strtolower($crumb);
+            if (str_contains($lowerCrumb, 'day tour') || str_contains($lowerCrumb, 'excursions')) {
+                return true;
+            }
+        }
+
+        if (str_contains($lowerUrl, '/day-tour') || str_contains($lowerUrl, '/tour/')) {
+            return true;
+        }
+
+        if (str_contains($lowerTitle, 'day tour') || str_contains($lowerTitle, 'excursion')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if tour is a Shore Excursion.
+     */
+    protected function isShoreExcursion(array $breadcrumbs, string $sourceUrl, string $title): bool
+    {
+        $lowerUrl = strtolower($sourceUrl);
+        $lowerTitle = strtolower($title);
+
+        foreach ($breadcrumbs as $crumb) {
+            $lowerCrumb = strtolower($crumb);
+            if (str_contains($lowerCrumb, 'shore excursion')) {
+                return true;
+            }
+        }
+
+        if (str_contains($lowerUrl, '/shore-excursion')) {
+            return true;
+        }
+
+        if (str_contains($lowerTitle, 'shore excursion')) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

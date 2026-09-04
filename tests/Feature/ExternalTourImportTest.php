@@ -80,6 +80,15 @@ class ExternalTourImportTest extends TestCase
     <meta property="og:image" content="https://www.luxorandaswan.com/images/cairo-pyramids-main.jpg">
 </head>
 <body>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/Egypt">Egypt</a></li>
+            <li class="breadcrumb-item"><a href="/Egypt/packages">Best Egypt Vacation, Tours &amp; Travel Packages</a></li>
+            <li class="breadcrumb-item"><a href="/Egypt/packages/7-days">7 Days Egypt Tour Packages</a></li>
+            <li class="breadcrumb-item active">7 Day Cairo, Alexandria and Nile Cruise Tour Package by Flight</li>
+        </ol>
+    </nav>
     <section id="home" class="hero-section gx-lazy-bg" data-bg="https://www.luxorandaswan.com/images/hero-nile-cruise.jpg">
         <h1 class="tour-title">7 Day Cairo, Alexandria and Nile Cruise Tour Package by Flight</h1>
     </section>
@@ -290,6 +299,7 @@ HTML;
         Http::fake([
             'https://www.luxorandaswan.com/Egypt/package/*' => Http::response($html, 200, ['Content-Type' => 'text/html']),
             'https://www.luxorandaswan.com/images/*' => Http::response($dummyImage, 200, ['Content-Type' => 'image/png']),
+            'https://www.luxorandaswan.com/*' => Http::response($html, 200, ['Content-Type' => 'text/html']),
             'https://example.org/*' => Http::response('OK', 200),
             'http://127.0.0.1/*' => Http::response('Localhost', 200),
             'http://localhost/*' => Http::response('Localhost', 200),
@@ -297,6 +307,7 @@ HTML;
     }
 
     public function test_imports_tour_successfully_and_detects_nile_cruise_package_type(): void
+    public function test_imports_tour_successfully_and_detects_correct_package_types(): void
     {
         $this->fakeHttpResponses($this->getSampleTourHtml(3));
 
@@ -312,23 +323,58 @@ HTML;
         $this->assertInstanceOf(Package::class, $package);
         $this->assertSame('nile_cruise', $package->package_type);
         $this->assertSame('nile_cruise', $package->category?->category_type);
+        // Multi-city vacation with Nile cruise component is travel_package
+        $this->assertSame('travel_package', $package->package_type);
+        $this->assertSame('travel_package', $package->category?->category_type);
         $this->assertStringContainsString('Cairo', $package->getTranslation('title', 'en'));
 
         // Verify non-cruise package falls back to travel_package
         $nonCruiseHtml = str_replace(
             'Nile Cruise',
             'Discovery',
+        // Test the 3 allowed Nile Cruise categories:
+        // 1. Lake Nasser Cruise
+        $lakeNasserHtml = str_replace(
+            ['7 Days Egypt Tour Packages', '7 Day Cairo, Alexandria and Nile Cruise Tour Package by Flight'],
+            ['Lake Nasser Cruise', 'Movenpick Prince Abbas Lake Cruise'],
             $this->getSampleTourHtml(3)
         );
         $nonCruiseUrl = 'https://www.luxorandaswan.com/Egypt/package/4-Day-Cairo-and-Alexandria-Classic-Discovery-Tour';
         $this->fakeHttpResponses($nonCruiseHtml);
+        $lakeNasserUrl = 'https://www.luxorandaswan.com/Egypt/cruise/Movenpick-Prince-Abbas-Lake-Cruise-';
+        $this->fakeHttpResponses($lakeNasserHtml);
+        $lakeResult = $service->import($lakeNasserUrl, ['rewrite' => false, 'download_images' => false]);
+        $this->assertSame('nile_cruise', $lakeResult['package']->package_type);
+        $this->assertSame('nile_cruise', $lakeResult['package']->category?->category_type);
 
         $nonCruiseResult = $service->import($nonCruiseUrl, [
             'rewrite' => false,
             'download_images' => false,
         ]);
+        // 2. Dahabiya Nile Cruise
+        $dahabiyaHtml = str_replace(
+            ['7 Days Egypt Tour Packages', '7 Day Cairo, Alexandria and Nile Cruise Tour Package by Flight'],
+            ['Dahabiya Nile Cruise', 'Princess Farida Luxury Dahabiya Nile Cruise'],
+            $this->getSampleTourHtml(3)
+        );
+        $dahabiyaUrl = 'https://www.luxorandaswan.com/Egypt/cruise/princess-farida-luxury-dahabiya-nile-cruise';
+        $this->fakeHttpResponses($dahabiyaHtml);
+        $dahabiyaResult = $service->import($dahabiyaUrl, ['rewrite' => false, 'download_images' => false]);
+        $this->assertSame('nile_cruise', $dahabiyaResult['package']->package_type);
+        $this->assertSame('nile_cruise', $dahabiyaResult['package']->category?->category_type);
 
         $this->assertSame('travel_package', $nonCruiseResult['package']->package_type);
+        // 3. Luxor and Aswan Nile Cruises
+        $luxorAswanHtml = str_replace(
+            ['7 Days Egypt Tour Packages', '7 Day Cairo, Alexandria and Nile Cruise Tour Package by Flight'],
+            ['Luxor and Aswan Nile Cruises', 'MS Mayfair Nile Cruise'],
+            $this->getSampleTourHtml(3)
+        );
+        $luxorAswanUrl = 'https://www.luxorandaswan.com/Egypt/cruise/MS-Mayfair-Nile-Cruise';
+        $this->fakeHttpResponses($luxorAswanHtml);
+        $luxorResult = $service->import($luxorAswanUrl, ['rewrite' => false, 'download_images' => false]);
+        $this->assertSame('nile_cruise', $luxorResult['package']->package_type);
+        $this->assertSame('nile_cruise', $luxorResult['package']->category?->category_type);
     }
 
     public function test_extracts_and_persists_correct_duration(): void
