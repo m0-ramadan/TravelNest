@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Client;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ClientController extends Controller
@@ -12,7 +13,15 @@ class ClientController extends Controller
     public function index(Request $request): View
     {
         $clients = Client::query()
-            ->when($request->filled('q'), fn ($q) => $q->where('id', 'like', '%' . $request->string('q') . '%'))
+            ->when($request->filled('q') || $request->filled('search'), function ($query) use ($request) {
+                $search = '%' . ($request->input('q') ?: $request->input('search')) . '%';
+                $query->where(function ($q) use ($search) {
+                    $q->where('first_name', 'like', $search)
+                        ->orWhere('last_name', 'like', $search)
+                        ->orWhere('email', 'like', $search)
+                        ->orWhere('phone', 'like', $search);
+                });
+            })
             ->latest()
             ->paginate($this->perPage($request));
 
@@ -26,22 +35,8 @@ class ClientController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            'email' => ['nullable', 'email'],
-            'first_name' => ['nullable', 'string'],
-            'last_name' => ['nullable', 'string'],
-            'phone' => ['nullable', 'string'],
-            'country_id' => ['nullable', 'integer'],
-            'date_of_birth' => ['nullable', 'date'],
-            'passport_number' => ['nullable', 'string'],
-            'passport_expiry' => ['nullable', 'date'],
-            'nationality' => ['nullable', 'string'],
-            'newsletter_subscribed' => ['nullable', 'boolean'],
-            'total_bookings' => ['nullable', 'integer'],
-            'total_spent' => ['nullable', 'numeric'],
-            'last_activity' => ['nullable', 'date'],
-            'notes' => ['nullable', 'string'],
-        ]);
+        $data = $this->validated($request);
+        $data['last_activity'] = now();
 
         Client::create($data);
 
@@ -60,22 +55,8 @@ class ClientController extends Controller
 
     public function update(Request $request, Client $client): RedirectResponse
     {
-        $data = $request->validate([
-            'email' => ['nullable', 'email'],
-            'first_name' => ['nullable', 'string'],
-            'last_name' => ['nullable', 'string'],
-            'phone' => ['nullable', 'string'],
-            'country_id' => ['nullable', 'integer'],
-            'date_of_birth' => ['nullable', 'date'],
-            'passport_number' => ['nullable', 'string'],
-            'passport_expiry' => ['nullable', 'date'],
-            'nationality' => ['nullable', 'string'],
-            'newsletter_subscribed' => ['nullable', 'boolean'],
-            'total_bookings' => ['nullable', 'integer'],
-            'total_spent' => ['nullable', 'numeric'],
-            'last_activity' => ['nullable', 'date'],
-            'notes' => ['nullable', 'string'],
-        ]);
+        $data = $this->validated($request, $client);
+        $data['last_activity'] = now();
 
         $client->update($data);
 
@@ -84,7 +65,11 @@ class ClientController extends Controller
 
     public function destroy(Client $client): RedirectResponse
     {
-        $client->delete();
+        try {
+            $client->delete();
+        } catch (\LogicException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
 
         return $this->success('admin.clients.index', 'Client deleted.');
     }
@@ -115,4 +100,32 @@ class ClientController extends Controller
         return back()->with('success', 'Client status updated.');
     }
 
+    private function validated(Request $request, ?Client $client = null): array
+    {
+        if ($request->filled('date_of_birth') && ! $request->filled('birth_date')) {
+            $request->merge(['birth_date' => $request->input('date_of_birth')]);
+        }
+
+        $data = $request->validate([
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('clients', 'email')->ignore($client?->id),
+            ],
+            'first_name' => ['required', 'string', 'max:120'],
+            'last_name' => ['nullable', 'string', 'max:120'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'country_id' => ['nullable', 'integer', 'exists:countries,id'],
+            'birth_date' => ['nullable', 'date'],
+            'passport_number' => ['nullable', 'string', 'max:255'],
+            'passport_expiry' => ['nullable', 'date'],
+            'nationality' => ['nullable', 'string', 'max:120'],
+            'newsletter_subscribed' => ['nullable', 'boolean'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        $data['newsletter_subscribed'] = $request->boolean('newsletter_subscribed');
+
+        return $data;
+    }
 }

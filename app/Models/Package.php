@@ -403,6 +403,11 @@ class Package extends Model
         return $this->translatedValue('title');
     }
 
+    public function getNameAttribute(): string
+    {
+        return $this->display_title;
+    }
+
     public function getDisplaySubtitleAttribute(): string
     {
         return $this->translatedValue('subtitle');

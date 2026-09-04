@@ -256,3 +256,7 @@ Route::name('website.')->group(function () {
         ->where('slug', '[A-Za-z0-9\-]+')
         ->name('pages.show');
 });
+
+
+Route::get('/payment/paymob/return', [\App\Http\Controllers\Api\PaymobPaymentController::class, 'returnFromCheckout'])
+    ->name('paymob.return');

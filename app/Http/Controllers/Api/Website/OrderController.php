@@ -264,51 +264,7 @@ class OrderController extends Controller
 
     public function webhook(Request $request)
     {
-        $hmacSecret = config('services.paymob.hmac_secret');
-
-        $receivedHmac = $request->header('X-Paymob-Hmac-Signature')
-            ?? $request->input('hmac');
-
-        if (!$receivedHmac || empty($hmacSecret)) {
-            return response('Unauthorized', 401);
-        }
-
-        $obj = $request->input('obj');
-        $concatenated = collect($obj)->flatten()->implode('');
-        $calculatedHmac = hash_hmac('sha512', $concatenated, $hmacSecret);
-
-        if (!hash_equals($calculatedHmac, $receivedHmac)) {
-            \Illuminate\Support\Facades\Log::warning('PayMob Webhook HMAC Invalid', ['ip' => $request->ip()]);
-            return response('Invalid HMAC', 400);
-        }
-
-        if ($request->input('type') === 'TRANSACTION' && $obj['success'] && $obj['is_capture']) {
-            $orderNumber = $obj['merchant_reference'] ?? null;
-
-            if (!$orderNumber) return response('No reference', 400);
-
-            $order = Order::where('order_number', $orderNumber)->first();
-
-            if ($order && $order->status === 'pending') {
-                $order->update([
-                    'status'         => 'paid',
-                    'payment_method' => 'paymob',
-                    'transaction_id' => $obj['id'],
-                    'paid_at'        => now(),
-                ]);
-
-                // تفريغ السلة دلوقتي (آمن لأن الدفع تم)
-                $cart = Cart::where('user_id', $order->user_id)->orWhere('session_id', session()->getId())->first();
-                if ($cart) {
-                    $cart->items()->delete();
-                    $cart->update(['subtotal' => 0, 'total' => 0]);
-                }
-
-                \Illuminate\Support\Facades\Log::info("Order Paid via PayMob: {$orderNumber}");
-            }
-        }
-
-        return response('OK', 200);
+        return $this->handlePaymobWebhook($request);
     }
 
     public function paymentMethods(Request $request)
@@ -321,10 +277,11 @@ class OrderController extends Controller
             FILTER_NULL_ON_FAILURE
         );
 
-        $paymentMethods = PaymentMethod::query()
-            ->where('is_active', true)
-            ->where('is_payment', $isPayment)
-            ->get();
+        $paymentMethods = $isPayment === false
+            ? collect()
+            : PaymentMethod::query()
+                ->where('is_active', true)
+                ->get();
 
         return $this->successResponse(
             PaymentMethodResource::collection($paymentMethods),

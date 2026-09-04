@@ -8,20 +8,19 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 class Kernel extends ConsoleKernel
 {
     protected $commands = [
-        // ... الأوامر الأخرى
         \App\Console\Commands\CheckAdminPermissions::class,
+        \App\Console\Commands\ReconcilePaymobPayments::class,
     ];
-    /**
-     * Define the application's command schedule.
-     */
+
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        if (config('services.paymob.enabled')) {
+            $schedule->command('payments:reconcile-paymob --minutes=15 --limit=100')
+                ->everyFifteenMinutes()
+                ->withoutOverlapping(10);
+        }
     }
 
-    /**
-     * Register the commands for the application.
-     */
     protected function commands(): void
     {
         $this->load(__DIR__ . '/Commands');

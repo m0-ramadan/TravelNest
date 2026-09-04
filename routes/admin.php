@@ -276,16 +276,7 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
         | Booking / CRM
         |--------------------------------------------------------------------------
         */
-        Route::resource('clients', ClientController::class);
-        Route::resource('inquiries', InquiryController::class);
-        Route::resource('bookings', BookingController::class);
-        Route::resource('communications', CommunicationController::class)->only([
-            'index',
-            'show',
-            'store',
-            'destroy',
-        ]);
-
+        // Static CRM routes must be declared before resource wildcards.
         Route::prefix('clients')->name('clients.')->group(function () {
             Route::get('export', [ClientController::class, 'export'])->name('export');
             Route::get('{client}/bookings', [ClientController::class, 'bookings'])->name('bookings');
@@ -295,17 +286,27 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
 
         Route::prefix('inquiries')->name('inquiries.')->group(function () {
             Route::get('statistics', [InquiryController::class, 'statistics'])->name('statistics');
+            Route::post('bulk-action', [InquiryController::class, 'bulkAction'])->name('bulk-action');
             Route::post('{inquiry}/reply', [InquiryController::class, 'reply'])->name('reply');
             Route::post('{inquiry}/update-status', [InquiryController::class, 'updateStatus'])->name('update-status');
-            Route::post('bulk-action', [InquiryController::class, 'bulkAction'])->name('bulk-action');
         });
 
         Route::prefix('bookings')->name('bookings.')->group(function () {
             Route::get('statistics', [BookingController::class, 'statistics'])->name('statistics');
+            Route::post('bulk-action', [BookingController::class, 'bulkAction'])->name('bulk-action');
             Route::post('{booking}/update-status', [BookingController::class, 'updateStatus'])->name('update-status');
             Route::get('{booking}/print', [BookingController::class, 'print'])->name('print');
-            Route::post('bulk-action', [BookingController::class, 'bulkAction'])->name('bulk-action');
         });
+
+        Route::resource('clients', ClientController::class);
+        Route::resource('inquiries', InquiryController::class);
+        Route::resource('bookings', BookingController::class);
+        Route::resource('communications', CommunicationController::class)->only([
+            'index',
+            'show',
+            'store',
+            'destroy',
+        ]);
 
         Route::prefix('communications')->name('communications.')->group(function () {
             Route::get('client/{client}', [CommunicationController::class, 'clientCommunications'])->name('client');
@@ -319,18 +320,20 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
         | Payments
         |--------------------------------------------------------------------------
         */
-        Route::resource('payment-methods', PaymentMethodController::class);
-        Route::resource('payments', PaymentController::class);
-
+        // Static payment routes must be declared before resource wildcards.
         Route::patch('payment-methods/{paymentMethod}/toggle-status', [PaymentMethodController::class, 'toggleStatus'])
             ->name('payment-methods.toggle-status');
 
         Route::prefix('payments')->name('payments.')->group(function () {
             Route::get('statistics', [PaymentController::class, 'statistics'])->name('statistics');
+            Route::get('export', [PaymentController::class, 'export'])->name('export');
             Route::post('{payment}/update-status', [PaymentController::class, 'updateStatus'])->name('update-status');
             Route::post('{payment}/refund', [PaymentController::class, 'refund'])->name('refund');
-            Route::get('export', [PaymentController::class, 'export'])->name('export');
+            Route::post('{payment}/reconcile', [PaymentController::class, 'reconcile'])->name('reconcile');
         });
+
+        Route::resource('payment-methods', PaymentMethodController::class);
+        Route::resource('payments', PaymentController::class);
 
         /*
         |--------------------------------------------------------------------------
