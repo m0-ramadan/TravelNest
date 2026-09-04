@@ -297,7 +297,6 @@ HTML;
         $dummyImage = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
 
         Http::fake([
-            'https://www.luxorandaswan.com/Egypt/package/*' => Http::response($html, 200, ['Content-Type' => 'text/html']),
             'https://www.luxorandaswan.com/images/*' => Http::response($dummyImage, 200, ['Content-Type' => 'image/png']),
             'https://www.luxorandaswan.com/*' => Http::response($html, 200, ['Content-Type' => 'text/html']),
             'https://example.org/*' => Http::response('OK', 200),
@@ -306,7 +305,6 @@ HTML;
         ]);
     }
 
-    public function test_imports_tour_successfully_and_detects_nile_cruise_package_type(): void
     public function test_imports_tour_successfully_and_detects_correct_package_types(): void
     {
         $this->fakeHttpResponses($this->getSampleTourHtml(3));
@@ -321,17 +319,11 @@ HTML;
         $package = $result['package']->load('category');
 
         $this->assertInstanceOf(Package::class, $package);
-        $this->assertSame('nile_cruise', $package->package_type);
-        $this->assertSame('nile_cruise', $package->category?->category_type);
         // Multi-city vacation with Nile cruise component is travel_package
         $this->assertSame('travel_package', $package->package_type);
         $this->assertSame('travel_package', $package->category?->category_type);
         $this->assertStringContainsString('Cairo', $package->getTranslation('title', 'en'));
 
-        // Verify non-cruise package falls back to travel_package
-        $nonCruiseHtml = str_replace(
-            'Nile Cruise',
-            'Discovery',
         // Test the 3 allowed Nile Cruise categories:
         // 1. Lake Nasser Cruise
         $lakeNasserHtml = str_replace(
@@ -339,18 +331,12 @@ HTML;
             ['Lake Nasser Cruise', 'Movenpick Prince Abbas Lake Cruise'],
             $this->getSampleTourHtml(3)
         );
-        $nonCruiseUrl = 'https://www.luxorandaswan.com/Egypt/package/4-Day-Cairo-and-Alexandria-Classic-Discovery-Tour';
-        $this->fakeHttpResponses($nonCruiseHtml);
         $lakeNasserUrl = 'https://www.luxorandaswan.com/Egypt/cruise/Movenpick-Prince-Abbas-Lake-Cruise-';
         $this->fakeHttpResponses($lakeNasserHtml);
         $lakeResult = $service->import($lakeNasserUrl, ['rewrite' => false, 'download_images' => false]);
         $this->assertSame('nile_cruise', $lakeResult['package']->package_type);
         $this->assertSame('nile_cruise', $lakeResult['package']->category?->category_type);
 
-        $nonCruiseResult = $service->import($nonCruiseUrl, [
-            'rewrite' => false,
-            'download_images' => false,
-        ]);
         // 2. Dahabiya Nile Cruise
         $dahabiyaHtml = str_replace(
             ['7 Days Egypt Tour Packages', '7 Day Cairo, Alexandria and Nile Cruise Tour Package by Flight'],
@@ -363,7 +349,6 @@ HTML;
         $this->assertSame('nile_cruise', $dahabiyaResult['package']->package_type);
         $this->assertSame('nile_cruise', $dahabiyaResult['package']->category?->category_type);
 
-        $this->assertSame('travel_package', $nonCruiseResult['package']->package_type);
         // 3. Luxor and Aswan Nile Cruises
         $luxorAswanHtml = str_replace(
             ['7 Days Egypt Tour Packages', '7 Day Cairo, Alexandria and Nile Cruise Tour Package by Flight'],

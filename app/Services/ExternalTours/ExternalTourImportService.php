@@ -75,6 +75,7 @@ class ExternalTourImportService
                 'warnings' => $warnings,
                 'stats' => [
                     'tour_type' => $existingPackage->package_type,
+                    'cities' => implode(', ', $parsedData['cities'] ?? []),
                     'cities_count' => count($parsedData['cities'] ?? []),
                     'pricing_levels_count' => count($parsedData['pricing']['accommodations'] ?? []),
                     'images_discovered_count' => count($parsedData['images'] ?? []),
@@ -254,13 +255,8 @@ class ExternalTourImportService
         // 3. Category
         $title = $data['title'] ?? '';
         $packageType = $data['package_type'] ?? 'travel_package';
-        if (stripos($title, 'cruise') !== false) {
-            $packageType = 'nile_cruise';
-            $data['package_type'] = 'nile_cruise';
-        }
         $breadcrumbs = $data['breadcrumbs'] ?? [];
 
-        $category = $this->resolveCategory($packageType, $warnings, $title);
         $category = $this->resolveCategory($packageType, $warnings, $title, $breadcrumbs);
         if (!$category) {
             $warnings[] = "No matching category found for package type [{$packageType}]. Setting category_id to null.";
@@ -346,7 +342,6 @@ class ExternalTourImportService
     }
 
     /**
-     * Resolve PackageCategory based on package type and standard slugs.
      * Resolve PackageCategory based on package type, standard slugs, and breadcrumbs.
      *
      * User Rule: Nile Cruise ONLY if it belongs to one of these three:
@@ -355,26 +350,11 @@ class ExternalTourImportService
      * - Luxor and Aswan Nile Cruises
      * Otherwise, assign to its actual category (travel_package, day_tour, shore_excursion).
      */
-    protected function resolveCategory(string $packageType, array &$warnings, ?string $title = null): ?PackageCategory
     protected function resolveCategory(string $packageType, array &$warnings, ?string $title = null, array $breadcrumbs = []): ?PackageCategory
     {
-        $hasCruiseInTitle = $title && (stripos($title, 'cruise') !== false);
-
-        if ($hasCruiseInTitle || $packageType === 'nile_cruise') {
-            $category = PackageCategory::where('category_type', 'nile_cruise')
-                ->orWhere('slug', 'nile cruise')
-                ->orWhere('slug', 'like', '%cruise%')
-                ->first();
-            if ($category) {
-                return $category;
-            }
-        }
-
         // 1. Resolve based on package_type (which was detected using strict category rules)
         $slugCandidates = match ($packageType) {
             'nile_cruise' => ['nile cruise', 'nile-cruises', 'nile-cruise', 'nile-trip'],
-            'day_tour' => ['day-tours', 'day-tour', 'day_tour', 'excursions'],
-            default => ['tour-packages', 'tour_packages', 'travel-packages', 'packages'],
             'day_tour' => ['day_tour', 'day-tours', 'day-tour', 'excursions'],
             'shore_excursion' => ['shore_excursions', 'shore-excursions', 'shore_excursion'],
             default => ['tour_packages', 'tour-packages', 'travel-packages', 'packages'],
@@ -385,7 +365,6 @@ class ExternalTourImportService
             return $category;
         }
 
-        return PackageCategory::where('category_type', $packageType)->first();
         $category = PackageCategory::where('category_type', $packageType)->first();
         if ($category) {
             return $category;

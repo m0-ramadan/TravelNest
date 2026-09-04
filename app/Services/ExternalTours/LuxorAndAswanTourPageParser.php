@@ -1243,7 +1243,6 @@ class LuxorAndAswanTourPageParser
     /**
      * Detect Package Type.
      *
-     * User Rule: Anything with "Nile Cruise" or "Cruise" in its name belongs to Nile Cruise.
      * User Rule: A tour belongs to Nile Cruise ONLY if it belongs to one of these three:
      * - Lake Nasser Cruise
      * - Dahabiya Nile Cruise
@@ -1252,21 +1251,16 @@ class LuxorAndAswanTourPageParser
      */
     public function detectPackageType(array $facts): string
     {
-        $title = strtolower($facts['title'] ?? '');
         $breadcrumbs = $facts['breadcrumbs'] ?? [];
         $sourceUrl = $facts['source_url'] ?? '';
         $title = $facts['title'] ?? '';
         $durationDays = (int) ($facts['duration_days'] ?? 7);
 
-        // User requirement: Anything with "Nile Cruise" or "Cruise" in its title/name is nile_cruise
-        if (str_contains($title, 'cruise')) {
         // 1. Nile Cruise check (strictly limited to the 3 categories)
         if ($this->isNileCruiseCategory($breadcrumbs, $sourceUrl, $title)) {
             return 'nile_cruise';
         }
 
-        $durationDays = (int) ($facts['duration_days'] ?? 7);
-        if ($durationDays <= 1) {
         // 2. Day Tour: duration <= 1 or explicitly day tour / excursion
         if ($durationDays <= 1 || $this->isDayTour($breadcrumbs, $sourceUrl, $title)) {
             return 'day_tour';

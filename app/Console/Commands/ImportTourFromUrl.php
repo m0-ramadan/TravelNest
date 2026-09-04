@@ -51,10 +51,10 @@ class ImportTourFromUrl extends Command
 
             $this->line('Source downloaded.');
             $this->line('Page parsed.');
-            $this->line("Tour type: {$stats['tour_type']}");
-            $this->line("Cities: {$stats['cities']}");
-            $this->line("Pricing levels: {$stats['pricing_levels_count']}");
-            $this->line("Images discovered: {$stats['images_discovered_count']}");
+            $this->line("Tour type: " . ($stats['tour_type'] ?? 'travel_package'));
+            $this->line("Cities: " . ($stats['cities'] ?? ''));
+            $this->line("Pricing levels: " . ($stats['pricing_levels_count'] ?? 0));
+            $this->line("Images discovered: " . ($stats['images_discovered_count'] ?? 0));
 
             if ($result['is_update']) {
                 $this->info('Package updated successfully.');
