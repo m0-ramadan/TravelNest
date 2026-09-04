@@ -169,6 +169,38 @@
                             <div class="info-value">{{ $booking->notes ?: '-' }}</div>
                         </div>
                     </div>
+
+                    @if($booking->items->isNotEmpty())
+                        @foreach($booking->items as $item)
+                            <div class="col-md-6">
+                                <div class="info-box">
+                                    <div class="info-label">الإقامة / الكابينة</div>
+                                    <div class="info-value">{{ $item->option_label }}</div>
+                                    @if($item->occupancy_type)<small class="opacity-75">{{ $item->occupancy_type }}</small>@endif
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="info-box"><div class="info-label">عدد الغرف / الكابينات</div><div class="info-value">{{ $item->room_count }}</div></div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="info-box"><div class="info-label">سعر الاختيار</div><div class="info-value">{{ number_format((float)$item->total_amount, 2) }} {{ $booking->currency_code }}</div></div>
+                            </div>
+                        @endforeach
+                    @endif
+
+                    @if($booking->travelers->isNotEmpty())
+                        <div class="col-12">
+                            <div class="info-box">
+                                <div class="info-label mb-3">بيانات المسافرين</div>
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-striped mb-0">
+                                        <thead><tr><th>#</th><th>الفئة</th><th>اللقب</th><th>الاسم كما في جواز السفر</th></tr></thead>
+                                        <tbody>@foreach($booking->travelers as $traveler)<tr><td>{{ $loop->iteration }}</td><td>{{ $traveler->traveler_type }}</td><td>{{ $traveler->title }}</td><td>{{ $traveler->first_name }} {{ $traveler->last_name }}</td></tr>@endforeach</tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

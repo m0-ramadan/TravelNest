@@ -3,6 +3,7 @@
 namespace App\Services\Payments;
 
 use App\Models\Booking;
+use App\Models\Currency;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\PaymentRefund;
@@ -44,8 +45,7 @@ class PaymobService
 
     public function __construct(
         private readonly BookingPaymentSynchronizer $synchronizer,
-    ) {
-    }
+    ) {}
 
     public function enabled(): bool
     {
@@ -73,14 +73,28 @@ class PaymobService
         $amountMinor = $this->resolveAmountMinor($booking, $paymentType, $requestedAmount);
         $factor = $this->minorUnitFactor();
         $currency = strtoupper((string) ($booking->currency_code ?: config('services.paymob.currency', 'EGP')));
+        $bookingCurrency = strtoupper((string) ($booking->currency_code ?: 'USD'));
+        $gatewayCurrency = strtoupper((string) config('services.paymob.currency', $bookingCurrency));
         $method = $this->paymobPaymentMethod();
+
+        $bookingAmountDecimal = (float) Money::fromMinor($amountMinor, $factor);
+        if ($gatewayCurrency !== $bookingCurrency) {
+            $convertedDecimal = Currency::convert($bookingAmountDecimal, $bookingCurrency, $gatewayCurrency);
+            $paymobAmountMinor = Money::toMinor($convertedDecimal, $factor);
+            $currency = $gatewayCurrency;
+        } else {
+            $paymobAmountMinor = $amountMinor;
+            $currency = $bookingCurrency;
+        }
 
         $payment = DB::transaction(function () use (
             $booking,
             $paymentType,
             $amountMinor,
+            $paymobAmountMinor,
             $factor,
             $currency,
+            $bookingCurrency,
             $method,
         ): Payment {
             /** @var Booking $locked */
@@ -106,10 +120,15 @@ class PaymobService
                 ->where('status', Payment::STATUS_PENDING)
                 ->where('created_at', '>=', now()->subMinutes($holdMinutes))
                 ->lockForUpdate()
-                ->get(['amount']);
+                ->get(['amount', 'currency_code']);
 
             foreach ($pendingAttempts as $pendingAttempt) {
-                $pendingMinor += Money::toMinor((string) $pendingAttempt->amount, $factor);
+                $pCurrency = strtoupper((string) ($pendingAttempt->currency_code ?: $bookingCurrency));
+                $pAmount = (float) $pendingAttempt->amount;
+                if ($pCurrency !== $bookingCurrency) {
+                    $pAmount = Currency::convert($pAmount, $pCurrency, $bookingCurrency);
+                }
+                $pendingMinor += Money::toMinor((string) $pAmount, $factor);
             }
 
             $availableMinor = max(0, $outstandingMinor - $pendingMinor);
@@ -117,7 +136,7 @@ class PaymobService
             if ($amountMinor > $availableMinor) {
                 throw new RuntimeException(
                     'Another Paymob payment attempt is already pending for this booking. '
-                    . 'Wait for its status to settle or reconciliation to run before retrying.'
+                        . 'Wait for its status to settle or reconciliation to run before retrying.'
                 );
             }
 
@@ -128,6 +147,7 @@ class PaymobService
                 'payment_method_id' => $method->id,
                 'transaction_reference' => $reference,
                 'amount' => Money::fromMinor($amountMinor, $factor),
+                'amount' => Money::fromMinor($paymobAmountMinor, $factor),
                 'currency_code' => $currency,
                 'status' => Payment::STATUS_PENDING,
                 'payment_type' => $paymentType,
@@ -281,10 +301,12 @@ class PaymobService
             $paymentMinor = Money::toMinor((string) $locked->amount, $factor);
             $reservedMinor = 0;
 
-            foreach ($locked->refunds()
-                ->whereIn('status', [PaymentRefund::STATUS_PENDING, PaymentRefund::STATUS_SUCCEEDED])
-                ->lockForUpdate()
-                ->get() as $existing) {
+            foreach (
+                $locked->refunds()
+                    ->whereIn('status', [PaymentRefund::STATUS_PENDING, PaymentRefund::STATUS_SUCCEEDED])
+                    ->lockForUpdate()
+                    ->get() as $existing
+            ) {
                 $reservedMinor += Money::toMinor((string) $existing->amount, $factor);
             }
 
@@ -481,9 +503,11 @@ class PaymobService
 
             $succeededMinor = 0;
 
-            foreach ($locked->refunds()
-                ->where('status', PaymentRefund::STATUS_SUCCEEDED)
-                ->get() as $row) {
+            foreach (
+                $locked->refunds()
+                    ->where('status', PaymentRefund::STATUS_SUCCEEDED)
+                    ->get() as $row
+            ) {
                 $succeededMinor += Money::toMinor((string) $row->amount, $factor);
             }
 
@@ -515,10 +539,12 @@ class PaymobService
         }
 
         $knownSucceededMinor = 0;
-        foreach ($payment->refunds()
-            ->where('status', PaymentRefund::STATUS_SUCCEEDED)
-            ->lockForUpdate()
-            ->get() as $succeeded) {
+        foreach (
+            $payment->refunds()
+                ->where('status', PaymentRefund::STATUS_SUCCEEDED)
+                ->lockForUpdate()
+                ->get() as $succeeded
+        ) {
             $knownSucceededMinor += Money::toMinor((string) $succeeded->amount, $factor);
         }
 
@@ -527,11 +553,13 @@ class PaymobService
             return;
         }
 
-        foreach ($payment->refunds()
-            ->where('status', PaymentRefund::STATUS_PENDING)
-            ->oldest()
-            ->lockForUpdate()
-            ->get() as $pendingRefund) {
+        foreach (
+            $payment->refunds()
+                ->where('status', PaymentRefund::STATUS_PENDING)
+                ->oldest()
+                ->lockForUpdate()
+                ->get() as $pendingRefund
+        ) {
             $rowMinor = Money::toMinor((string) $pendingRefund->amount, $factor);
 
             if ($rowMinor <= 0 || $rowMinor > $unattributedMinor) {

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Website\AttractionController;
 use App\Http\Controllers\Website\BlogController;
+use App\Http\Controllers\Website\CheckoutController;
 use App\Http\Controllers\Website\ContactController;
 use App\Http\Controllers\Website\DestinationController;
 use App\Http\Controllers\Website\HomeController;
@@ -206,6 +207,20 @@ Route::name('website.')->group(function () {
     | Package Short URLs
     |--------------------------------------------------------------------------
     */
+    Route::get('/package/{slug}/checkout', [CheckoutController::class, 'show'])
+        ->name('checkout.show');
+
+    Route::post('/package/{slug}/checkout', [CheckoutController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('checkout.store');
+
+    Route::get('/checkout/paypal/capture', [CheckoutController::class, 'capturePayPal'])
+        ->name('checkout.paypal.capture');
+
+    Route::get('/checkout/payment/{paymentReference}', [CheckoutController::class, 'status'])
+        ->middleware('signed')
+        ->name('checkout.status');
+
     Route::get('/package/{slug}', [TripController::class, 'show'])
         ->name('packages.show.simple');
 

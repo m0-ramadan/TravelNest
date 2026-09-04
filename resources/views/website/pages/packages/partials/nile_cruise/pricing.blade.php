@@ -2,7 +2,9 @@
     $ncDurations = $package->nileCruiseDurations?->where('is_active', true)->values() ?? collect();
     $ncLegacyAddons = $package->nileCruiseAddons?->where('is_active', true) ?? collect();
     $ncAddons = isset($addons) && $addons->isNotEmpty() ? $addons : $ncLegacyAddons;
-    $hasSeasonPrices = $ncDurations->contains(fn($d) => $d->seasonPrices->where('is_active', true)->isNotEmpty());
+    $hasSeasonPrices = $ncDurations->contains(fn($d) => $d->seasonPrices
+        ->where('is_active', true)
+        ->contains(fn($season) => $season->items->contains(fn($item) => (float)$item->price > 0)));
 @endphp
 
 @if($hasSeasonPrices || $ncAddons->isNotEmpty())

@@ -40,4 +40,26 @@ class Currency extends Model
     {
         return $this->translatedValue('name');
     }
+
+    public static function convert(float $amount, string $fromCode, string $toCode): float
+    {
+        $fromCode = strtoupper(trim($fromCode));
+        $toCode = strtoupper(trim($toCode));
+
+        if ($fromCode === $toCode || $amount <= 0) {
+            return $amount;
+        }
+
+        $from = self::where('code', $fromCode)->first();
+        $to = self::where('code', $toCode)->first();
+
+        $fromRate = (float) ($from?->exchange_rate ?? $from?->rate_to_default ?? 1.0);
+        $toRate = (float) ($to?->exchange_rate ?? $to?->rate_to_default ?? 1.0);
+
+        if ($fromRate <= 0) {
+            $fromRate = 1.0;
+        }
+
+        return round(($amount / $fromRate) * $toRate, 2);
+    }
 }

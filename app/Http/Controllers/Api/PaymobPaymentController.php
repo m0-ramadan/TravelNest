@@ -9,6 +9,7 @@ use App\Services\Payments\PaymobService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 
 class PaymobPaymentController extends Controller
 {
@@ -137,10 +138,14 @@ class PaymobPaymentController extends Controller
         $reference = (string) $request->query('reference', '');
 
         // UX only. Never trust browser redirect to mark a payment paid.
-        return redirect()->route('website.home', array_filter([
-            'payment' => 'processing',
-            'reference' => $reference,
-        ]));
+        if ($reference !== '' && Payment::query()->where('transaction_reference', $reference)->exists()) {
+            return redirect(URL::temporarySignedRoute('website.checkout.status', now()->addHours(24), [
+                'paymentReference' => $reference,
+                'result' => 'processing',
+            ]));
+        }
+
+        return redirect()->route('website.home');
     }
 
     private function statusToken(string $reference): string

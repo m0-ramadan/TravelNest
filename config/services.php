@@ -50,6 +50,17 @@ return [
         'redirection_url' => env('PAYMOB_REDIRECTION_URL'),
     ],
 
+    'paypal' => [
+        'enabled' => filter_var(env('PAYPAL_ENABLED', false), FILTER_VALIDATE_BOOLEAN),
+        'mode' => env('PAYPAL_MODE', 'sandbox'),
+        'base_url' => env('PAYPAL_BASE_URL', env('PAYPAL_MODE', 'sandbox') === 'live'
+            ? 'https://api-m.paypal.com'
+            : 'https://api-m.sandbox.paypal.com'),
+        'client_id' => env('PAYPAL_CLIENT_ID'),
+        'secret' => env('PAYPAL_SECRET'),
+        'timeout' => (int) env('PAYPAL_TIMEOUT', 20),
+    ],
+
     'deepseek' => [
         'api_key' => env('DEEPSEEK_API_KEY'),
         'model' => env('DEEPSEEK_MODEL', 'deepseek-chat'),

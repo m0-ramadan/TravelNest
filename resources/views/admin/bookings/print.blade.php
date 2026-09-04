@@ -83,6 +83,25 @@
             {{ optional($booking->created_at)->translatedFormat('d M Y - h:i A') ?? '-' }}</div>
     </div>
 
+    @if($booking->items->isNotEmpty())
+        <div class="box">
+            @foreach($booking->items as $item)
+                <div class="row"><span class="label">الإقامة / الكابينة:</span> {{ $item->option_label }}</div>
+                <div class="row"><span class="label">نوع الإشغال:</span> {{ $item->occupancy_type ?: '-' }}</div>
+                <div class="row"><span class="label">عدد الغرف / الكابينات:</span> {{ $item->room_count }}</div>
+            @endforeach
+        </div>
+    @endif
+
+    @if($booking->travelers->isNotEmpty())
+        <div class="box">
+            <div class="row"><span class="label">المسافرون:</span></div>
+            @foreach($booking->travelers as $traveler)
+                <div class="row">{{ $loop->iteration }}. {{ $traveler->title }} {{ $traveler->first_name }} {{ $traveler->last_name }} ({{ $traveler->traveler_type }})</div>
+            @endforeach
+        </div>
+    @endif
+
     <div class="box">
         <div class="row"><span class="label">ملاحظات:</span></div>
         <div>{{ $booking->notes ?: 'لا توجد ملاحظات' }}</div>

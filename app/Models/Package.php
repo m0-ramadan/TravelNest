@@ -579,7 +579,9 @@ class Package extends Model
             }
         }
 
-        $priceFrom = (float) ($this->price_from ?: ($this->start_from_price ?: ($this->adult_price ?: 150)));
+        // Never invent a public price. Packages without configured pricing must
+        // remain enquiry-only instead of silently becoming bookable for $150.
+        $priceFrom = (float) ($this->price_from ?: ($this->start_from_price ?: ($this->adult_price ?: 0)));
 
         $p1 = $this->price_1_person !== null ? (float) $this->price_1_person : round($priceFrom * 1.3, 2);
         $p2 = $this->price_2_persons !== null ? (float) $this->price_2_persons : round($priceFrom, 2);

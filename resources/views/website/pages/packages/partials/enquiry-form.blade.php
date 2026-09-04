@@ -40,21 +40,6 @@
     </div>
 
     <div class="input-box">
-        <label class="label-text">{{ __('Country *') }}</label>
-        <div class="select-contain w-auto">
-            <select class="select-contain-select" required name="nationality">
-                <option value="">{{ __('Select your country') }}</option>
-                @foreach ($countries as $countryName)
-                    <option value="{{ $countryName }}" @selected(old('nationality') == $countryName)>{{ $countryName }}</option>
-                @endforeach
-            </select>
-        </div>
-        @error('nationality')
-            <small class="text-danger d-block mt-1">{{ $message }}</small>
-        @enderror
-    </div>
-
-    <div class="input-box">
         <label class="label-text">{{ __('Phone Number') }}</label>
         <div class="form-group">
             <input class="form-control" type="tel" name="phone" placeholder="{{ __('Phone Number') }}"
@@ -132,14 +117,16 @@
         </div>
     </div>
 
-    <div class="input-box">
-        <label class="label-text">{{ __('trips.total') }}</label>
-        <div class="form-group">
-            <span class="la la-calculator form-icon"></span>
-            <input class="form-control js-booking-total-display" type="text" id="booking_total_{{ $suffix }}"
-                value="{{ $currencySymbol }}0.00" readonly>
+    @if($hasBookablePrice ?? false)
+        <div class="input-box">
+            <label class="label-text">{{ __('Estimated total') }}</label>
+            <div class="form-group">
+                <span class="la la-calculator form-icon"></span>
+                <input class="form-control js-booking-total-display" type="text" id="booking_total_{{ $suffix }}"
+                    value="{{ $currencySymbol }}0.00" readonly>
+            </div>
         </div>
-    </div>
+    @endif
 
     <div class="input-box">
         <label class="label-text">{{ __('Message') }}</label>
@@ -176,14 +163,9 @@
             $groupTiers = $package->group_pricing_tiers;
         @endphp
 
-        const tierRates = {
-            1: @json((float) $groupTiers[0]['price_per_person']),
-            2: @json((float) $groupTiers[1]['price_per_person']),
-            3: @json((float) $groupTiers[2]['price_per_person']),
-            4: @json((float) $groupTiers[3]['price_per_person']),
-            5: @json((float) $groupTiers[4]['price_per_person']),
-            6: @json((float) $groupTiers[5]['price_per_person'])
-        };
+        const groupTiers = @json(collect($groupTiers)->values());
+        const tierRates = {};
+        groupTiers.forEach((tier, index) => tierRates[index + 1] = Number(tier.price_per_person || 0));
 
         const tierKeys = {
             1: '1_person',
@@ -205,7 +187,7 @@
             if (adultsCount === 3) return tierRates[3];
             if (adultsCount === 4) return tierRates[4];
             if (adultsCount === 5) return tierRates[5];
-            return tierRates[6];
+            return tierRates[6] || 0;
         }
 
         function getTierKey(adultsCount) {

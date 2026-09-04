@@ -53,6 +53,9 @@ class TripController extends BaseWebsiteController
                 'tags',
                 'addons.currency',
                 'tourPackageDetail',
+                'tourPackageAccommodations.hotels',
+                'tourPackageAccommodations.seasons.currency',
+                'tourPackageAccommodations.seasons.items',
                 'nileCruiseType',
                 'nileCruiseCategory',
                 'nileCruiseDetail',
@@ -265,6 +268,7 @@ class TripController extends BaseWebsiteController
 
                 return $price;
             })
+            ->filter(fn($price) => (float) $price->amount > 0)
             ->values();
 
         $faqs = collect($package->faq_json ?? [])
@@ -323,6 +327,9 @@ class TripController extends BaseWebsiteController
         $brochureUrl = $package->brochure_path ? asset('storage/' . ltrim((string) $package->brochure_path, '/')) : null;
         $sharedTimezone = trim((string) ($package->tour_timezone ?: ($legacyNileDetail?->timezone ?? '')));
         $sharedDepositPolicy = trim((string) ($package->deposit_policy ?: ($legacyNileDetail?->deposit_policy ?? '')));
+        $bookingService = app(\App\Services\PackageBookingService::class);
+        $bookingPricingOptions = $bookingService->pricingOptions($package);
+        $hasBookablePrice = $bookingPricingOptions->isNotEmpty();
 
         $countries = Country::query()
             ->orderBy('id')
@@ -418,7 +425,9 @@ class TripController extends BaseWebsiteController
             'sharedTimezone',
             'sharedDepositPolicy',
             'itineraryUnit',
-            'isDayTour'
+            'isDayTour',
+            'hasBookablePrice',
+            'bookingPricingOptions'
         ));
     }
 

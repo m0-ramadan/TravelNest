@@ -25,7 +25,9 @@ class Booking extends Model
         'adults',
         'children',
         'infants',
+        'pickup_location',
         'special_requests',
+        'checkout_details',
         'confirmed_at',
         'cancelled_at',
     ];
@@ -35,8 +37,12 @@ class Booking extends Model
         'paid_amount' => 'decimal:2',
         'booking_date' => 'date',
         'travel_date' => 'date',
+        'adults' => 'integer',
+        'children' => 'integer',
+        'infants' => 'integer',
         'confirmed_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'checkout_details' => 'array',
     ];
 
     protected static function booted(): void
@@ -51,6 +57,16 @@ class Booking extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function travelers(): HasMany
+    {
+        return $this->hasMany(BookingTraveler::class)->orderBy('sort_order');
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(BookingItem::class);
     }
 
     public function client(): BelongsTo

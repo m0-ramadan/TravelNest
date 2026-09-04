@@ -89,7 +89,7 @@ class BookingController extends Controller
 
     public function show(Booking $booking): View
     {
-        $booking->load(['client', 'package', 'payments']);
+        $booking->load(['client', 'package', 'payments', 'travelers', 'items.cabin']);
 
         return $this->view('admin.bookings.show', compact('booking'));
     }
@@ -210,7 +210,7 @@ class BookingController extends Controller
 
     public function print(Booking $booking): View
     {
-        $booking->load(['client', 'package']);
+        $booking->load(['client', 'package', 'travelers', 'items.cabin']);
 
         return $this->view('admin.bookings.print', compact('booking'));
     }
