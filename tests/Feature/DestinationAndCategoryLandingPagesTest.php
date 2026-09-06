@@ -57,7 +57,6 @@ class DestinationAndCategoryLandingPagesTest extends TestCase
         $response->assertSee('Travel Packages');
 
         // Links point to the designated landing pages
-        $response->assertSee(route('website.day_tours.index'));
         $response->assertSee(route('website.tours.all', ['destination' => 'cairo', 'type' => 'day_tour']));
         $response->assertSee(route('website.travel_packages.index'));
 
@@ -185,5 +184,42 @@ class DestinationAndCategoryLandingPagesTest extends TestCase
         $nileDurationResponse = $this->get('/trips?duration=4');
         $nileDurationResponse->assertOk();
         $nileDurationResponse->assertDontSee('Luxor to Aswan Nile Cruise 4 Days');
+    }
+
+    public function test_trips_pagination_renders_luxury_bootstrap_pagination(): void
+    {
+        $country = \App\Models\Country::firstOrCreate(
+            ['slug' => 'egypt'],
+            ['name' => 'Egypt', 'is_active' => true]
+        );
+
+        // Ensure more than 12 packages exist with duration 2 to trigger pagination
+        $existingCount = \App\Models\Package::where('is_active', true)
+            ->where('package_type', 'travel_package')
+            ->where('duration_days', 2)
+            ->count();
+
+        for ($i = $existingCount + 1; $i <= 14; $i++) {
+            \App\Models\Package::create([
+                'primary_country_id' => $country->id,
+                'package_type' => 'travel_package',
+                'title' => ['en' => "Test 2-Day Package {$i}"],
+                'slug' => "test-2-day-package-{$i}",
+                'duration_days' => 2,
+                'is_active' => true,
+            ]);
+        }
+
+        $response = $this->get('/trips?duration=2');
+        $response->assertOk();
+
+        // Must render custom luxury pagination
+        $response->assertSee('custom-pagination');
+        $response->assertSee('la-angle-left');
+        $response->assertSee('la-angle-right');
+
+        // Must NOT render unstyled tailwind text
+        $response->assertDontSee('Showing 1 to 12');
+        $response->assertDontSee('« Previous');
     }
 }

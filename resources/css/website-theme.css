@@ -1729,19 +1729,153 @@ body.website-theme-shell .meal-badge {
     border: 1px solid var(--website-shell-badge-border) !important;
 }
 
-body.website-theme-shell .pagination-wrapper .page-link,
+/* ==========================================================================
+   Luxury Pagination Component
+   ========================================================================== */
+body.website-theme-shell .custom-pagination-nav,
+body.website-theme-shell .listing-pagination nav,
+body.website-theme-shell .pagination-wrapper nav,
+body.website-theme-shell .offers-pagination nav,
+body.website-theme-shell .pagination-wrap nav,
+body.website-theme-shell .results-pagination nav {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin-top: 36px !important;
+    margin-bottom: 24px !important;
+}
+
+body.website-theme-shell .pagination.custom-pagination,
+body.website-theme-shell .listing-pagination .pagination,
+body.website-theme-shell .pagination-wrapper .pagination,
+body.website-theme-shell .offers-pagination .pagination,
+body.website-theme-shell .pagination-wrap .pagination,
+body.website-theme-shell .results-pagination .pagination {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    padding: 8px 14px !important;
+    background: var(
+        --website-shell-surface,
+        rgba(255, 255, 255, 0.95)
+    ) !important;
+    border: 1px solid var(--website-shell-border, rgba(8, 47, 73, 0.1)) !important;
+    border-radius: 999px !important;
+    box-shadow: 0 8px 24px rgba(8, 47, 73, 0.06) !important;
+    width: fit-content !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    list-style: none !important;
+}
+
+body.website-theme-shell .custom-pagination .page-item,
+body.website-theme-shell .listing-pagination .page-item,
+body.website-theme-shell .pagination-wrapper .page-item,
+body.website-theme-shell .offers-pagination .page-item,
+body.website-theme-shell .pagination-wrap .page-item,
+body.website-theme-shell .results-pagination .page-item {
+    margin: 0 !important;
+    list-style: none !important;
+}
+
+body.website-theme-shell .custom-pagination .page-link,
 body.website-theme-shell .listing-pagination .page-link,
+body.website-theme-shell .pagination-wrapper .page-link,
 body.website-theme-shell .offers-pagination .page-link,
 body.website-theme-shell .pagination-wrap .page-link,
 body.website-theme-shell .results-pagination .page-link {
-    background: var(--website-shell-surface) !important;
-    color: var(--website-shell-heading) !important;
-    border-color: var(--website-shell-border) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 42px !important;
+    height: 42px !important;
+    padding: 0 12px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    font-family: "Inter", sans-serif !important;
+    color: var(--website-shell-heading, #0d2748) !important;
+    background: var(
+        --website-shell-surface-soft,
+        rgba(255, 255, 255, 0.9)
+    ) !important;
+    border: 1px solid var(--website-shell-border, rgba(8, 47, 73, 0.1)) !important;
+    border-radius: 999px !important;
+    text-decoration: none !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer !important;
+    user-select: none !important;
     box-shadow: none !important;
 }
 
-body.website-theme-shell .pagination-wrapper .page-item.active .page-link,
+body.website-theme-shell .custom-pagination .page-link i,
+body.website-theme-shell .listing-pagination .page-link i,
+body.website-theme-shell .pagination-wrapper .page-link i,
+body.website-theme-shell .offers-pagination .page-link i,
+body.website-theme-shell .pagination-wrap .page-link i,
+body.website-theme-shell .results-pagination .page-link i {
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    transition: transform 0.25s ease !important;
+}
+
+/* Hover state */
+body.website-theme-shell
+    .custom-pagination
+    .page-item:not(.active):not(.disabled)
+    .page-link:hover,
+body.website-theme-shell
+    .listing-pagination
+    .page-item:not(.active):not(.disabled)
+    .page-link:hover,
+body.website-theme-shell
+    .pagination-wrapper
+    .page-item:not(.active):not(.disabled)
+    .page-link:hover,
+body.website-theme-shell
+    .offers-pagination
+    .page-item:not(.active):not(.disabled)
+    .page-link:hover,
+body.website-theme-shell
+    .pagination-wrap
+    .page-item:not(.active):not(.disabled)
+    .page-link:hover,
+body.website-theme-shell
+    .results-pagination
+    .page-item:not(.active):not(.disabled)
+    .page-link:hover {
+    color: var(--rich-gold, #c5955b) !important;
+    background: rgba(214, 163, 84, 0.12) !important;
+    border-color: var(
+        --website-shell-border-strong,
+        rgba(214, 163, 84, 0.35)
+    ) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(214, 163, 84, 0.18) !important;
+}
+
+body.website-theme-shell
+    .custom-pagination
+    .page-item:not(.active):not(.disabled)
+    .page-link:hover
+    .la-angle-left {
+    transform: translateX(-3px) !important;
+}
+
+body.website-theme-shell
+    .custom-pagination
+    .page-item:not(.active):not(.disabled)
+    .page-link:hover
+    .la-angle-right {
+    transform: translateX(3px) !important;
+}
+
+/* Active state (Luxury Gold Gradient) */
+body.website-theme-shell .custom-pagination .page-item.active .page-link,
 body.website-theme-shell .listing-pagination .page-item.active .page-link,
+body.website-theme-shell .pagination-wrapper .page-item.active .page-link,
 body.website-theme-shell .offers-pagination .page-item.active .page-link,
 body.website-theme-shell .pagination-wrap .page-item.active .page-link,
 body.website-theme-shell .results-pagination .page-item.active .page-link,
@@ -1749,17 +1883,213 @@ body.website-theme-shell .results-pagination .active > .page-link,
 body.website-theme-shell .results-pagination .page-link.active {
     background: linear-gradient(135deg, #e7b762 0%, #bd7f32 100%) !important;
     color: #ffffff !important;
-    border-color: rgba(255, 221, 173, 0.34) !important;
-    box-shadow: 0 14px 30px rgba(214, 163, 84, 0.28) !important;
+    border-color: rgba(255, 221, 173, 0.4) !important;
+    box-shadow: 0 10px 24px rgba(214, 163, 84, 0.35) !important;
+    font-weight: 700 !important;
+    transform: translateY(-1px) !important;
 }
 
-body.website-theme-shell .pagination-wrapper .page-link:hover,
-body.website-theme-shell .listing-pagination .page-link:hover,
-body.website-theme-shell .offers-pagination .page-link:hover,
-body.website-theme-shell .pagination-wrap .page-link:hover,
-body.website-theme-shell .results-pagination .page-link:hover {
-    color: var(--rich-gold) !important;
-    border-color: var(--website-shell-border-strong) !important;
+/* Disabled state */
+body.website-theme-shell .custom-pagination .page-item.disabled .page-link,
+body.website-theme-shell .listing-pagination .page-item.disabled .page-link,
+body.website-theme-shell .pagination-wrapper .page-item.disabled .page-link,
+body.website-theme-shell .offers-pagination .page-item.disabled .page-link,
+body.website-theme-shell .pagination-wrap .page-item.disabled .page-link,
+body.website-theme-shell .results-pagination .page-item.disabled .page-link {
+    color: var(--website-shell-muted, #94a3b8) !important;
+    opacity: 0.38 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Separator / Dots */
+body.website-theme-shell .custom-pagination .page-item.separator .page-link {
+    min-width: 32px !important;
+    padding: 0 4px !important;
+    opacity: 0.7 !important;
+    cursor: default !important;
+    background: transparent !important;
+    border-color: transparent !important;
+}
+
+/* Dark mode adjustments */
+html[data-theme="dark"] body.website-theme-shell .pagination.custom-pagination,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .listing-pagination
+    .pagination,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .pagination-wrapper
+    .pagination,
+html[data-theme="dark"] body.website-theme-shell .offers-pagination .pagination,
+html[data-theme="dark"] body.website-theme-shell .pagination-wrap .pagination,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .results-pagination
+    .pagination {
+    background: var(--dark-surface, #111827) !important;
+    border-color: var(--dark-border, rgba(148, 163, 184, 0.16)) !important;
+    box-shadow: var(--shadow-medium, 0 8px 32px rgba(0, 0, 0, 0.34)) !important;
+}
+
+html[data-theme="dark"] body.website-theme-shell .custom-pagination .page-link,
+html[data-theme="dark"] body.website-theme-shell .listing-pagination .page-link,
+html[data-theme="dark"] body.website-theme-shell .pagination-wrapper .page-link,
+html[data-theme="dark"] body.website-theme-shell .offers-pagination .page-link,
+html[data-theme="dark"] body.website-theme-shell .pagination-wrap .page-link,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .results-pagination
+    .page-link {
+    color: var(--charcoal-deep, #f8fafc) !important;
+    background: var(--dark-surface-soft, #172033) !important;
+    border-color: rgba(148, 163, 184, 0.16) !important;
+}
+
+html[data-theme="dark"]
+    body.website-theme-shell
+    .custom-pagination
+    .page-item:not(.active):not(.disabled)
+    .page-link:hover,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .listing-pagination
+    .page-item:not(.active):not(.disabled)
+    .page-link:hover,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .pagination-wrapper
+    .page-item:not(.active):not(.disabled)
+    .page-link:hover,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .offers-pagination
+    .page-item:not(.active):not(.disabled)
+    .page-link:hover,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .pagination-wrap
+    .page-item:not(.active):not(.disabled)
+    .page-link:hover,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .results-pagination
+    .page-item:not(.active):not(.disabled)
+    .page-link:hover {
+    background: rgba(244, 195, 106, 0.15) !important;
+    border-color: rgba(244, 195, 106, 0.3) !important;
+    color: var(--rich-gold, #f4c36a) !important;
+}
+
+html[data-theme="dark"]
+    body.website-theme-shell
+    .custom-pagination
+    .page-item.active
+    .page-link,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .listing-pagination
+    .page-item.active
+    .page-link,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .pagination-wrapper
+    .page-item.active
+    .page-link,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .offers-pagination
+    .page-item.active
+    .page-link,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .pagination-wrap
+    .page-item.active
+    .page-link,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .results-pagination
+    .page-item.active
+    .page-link {
+    background: linear-gradient(135deg, #f4c36a 0%, #bd7f32 100%) !important;
+    color: #0f172a !important;
+    font-weight: 800 !important;
+}
+
+html[data-theme="dark"]
+    body.website-theme-shell
+    .custom-pagination
+    .page-item.disabled
+    .page-link,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .listing-pagination
+    .page-item.disabled
+    .page-link,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .pagination-wrapper
+    .page-item.disabled
+    .page-link,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .offers-pagination
+    .page-item.disabled
+    .page-link,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .pagination-wrap
+    .page-item.disabled
+    .page-link,
+html[data-theme="dark"]
+    body.website-theme-shell
+    .results-pagination
+    .page-item.disabled
+    .page-link {
+    color: #64748b !important;
+    background: transparent !important;
+    border-color: transparent !important;
+}
+
+/* RTL Arrow Flipping */
+[dir="rtl"] .custom-pagination .la-angle-left,
+[dir="rtl"] .custom-pagination .la-angle-right,
+[dir="rtl"] .listing-pagination .la-angle-left,
+[dir="rtl"] .listing-pagination .la-angle-right,
+[dir="rtl"] .pagination-wrapper .la-angle-left,
+[dir="rtl"] .pagination-wrapper .la-angle-right,
+[dir="rtl"] .offers-pagination .la-angle-left,
+[dir="rtl"] .offers-pagination .la-angle-right,
+[dir="rtl"] .results-pagination .la-angle-left,
+[dir="rtl"] .results-pagination .la-angle-right {
+    transform: scaleX(-1);
+}
+
+@media (max-width: 576px) {
+    body.website-theme-shell .pagination.custom-pagination,
+    body.website-theme-shell .listing-pagination .pagination,
+    body.website-theme-shell .pagination-wrapper .pagination,
+    body.website-theme-shell .offers-pagination .pagination,
+    body.website-theme-shell .pagination-wrap .pagination,
+    body.website-theme-shell .results-pagination .pagination {
+        gap: 4px !important;
+        padding: 6px 10px !important;
+    }
+    body.website-theme-shell .custom-pagination .page-link,
+    body.website-theme-shell .listing-pagination .page-link,
+    body.website-theme-shell .pagination-wrapper .page-link,
+    body.website-theme-shell .offers-pagination .page-link,
+    body.website-theme-shell .pagination-wrap .page-link,
+    body.website-theme-shell .results-pagination .page-link {
+        min-width: 36px !important;
+        height: 36px !important;
+        padding: 0 8px !important;
+        font-size: 0.88rem !important;
+    }
 }
 
 @media (max-width: 991px) {
