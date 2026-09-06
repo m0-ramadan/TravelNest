@@ -33,6 +33,17 @@ class DestinationAndCategoryLandingPagesTest extends TestCase
             'is_featured' => true,
             'sort_order' => 1,
         ]);
+
+        City::create([
+            'country_id' => $country->id,
+            'name' => ['en' => 'Luxor', 'ar' => 'الأقصر'],
+            'slug' => 'luxor',
+            'short_description' => ['en' => 'The world’s greatest open-air museum.'],
+            'description' => ['en' => 'Explore Karnak Temple, Valley of the Kings, and ancient Thebes.'],
+            'is_active' => true,
+            'is_featured' => true,
+            'sort_order' => 2,
+        ]);
     }
 
     public function test_cairo_destination_page_shows_large_category_cards_without_nile_cruises_and_no_bottom_filters(): void
@@ -58,6 +69,16 @@ class DestinationAndCategoryLandingPagesTest extends TestCase
         $response->assertDontSee('id="destination-type"', false);
     }
 
+    public function test_luxor_destination_page_shows_large_category_cards_without_nile_cruises(): void
+    {
+        $response = $this->get('/destinations/luxor');
+
+        $response->assertOk();
+        $response->assertSee('Day Tours');
+        $response->assertSee('Travel Packages');
+        $response->assertDontSee(route('website.nile_cruises.index') . '">Discover Nile Cruises', false);
+    }
+
     public function test_day_tours_landing_page_renders_with_destinations_and_faqs(): void
     {
         $response = $this->get('/day-tours');
@@ -72,6 +93,15 @@ class DestinationAndCategoryLandingPagesTest extends TestCase
         $response->assertSee('Marsa Alam Day Tours');
         $response->assertSee('Dahab Day Tours');
         $response->assertSee('Egypt Day Tours FAQs');
+
+        // Destination boxes link to filtered tours by city and type=day_tour
+        $response->assertSee(route('website.tours.all', ['destination' => 'cairo', 'type' => 'day_tour']));
+        $response->assertSee(route('website.tours.all', ['destination' => 'luxor', 'type' => 'day_tour']));
+
+        // Visiting the filtered link renders Cairo day tours
+        $cairoToursResponse = $this->get(route('website.tours.all', ['destination' => 'cairo', 'type' => 'day_tour']));
+        $cairoToursResponse->assertOk();
+        $cairoToursResponse->assertSee('Cairo Day Tours');
 
         // Legacy / mirror route
         $this->get('/Egypt/day-tours')->assertOk();

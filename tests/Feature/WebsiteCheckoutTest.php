@@ -45,20 +45,23 @@ class WebsiteCheckoutTest extends TestCase
             ->assertSee('id="reserveEnquiryPanel"', false)
             ->assertSee('id="sidebarBookingForm"', false);
 
-        $this->get(route('website.checkout.show', [
+        $response = $this->get(route('website.checkout.show', [
             'slug' => $package->slug,
             'travel_date' => now()->addMonth()->toDateString(),
             'rooms' => 2,
             'adults' => 2,
             'children' => 1,
             'pricing_option' => 'category',
-        ]))
+        ]));
+
+        $response
             ->assertOk()
             ->assertSee('Secure Checkout')
             ->assertSee('Adult / Child Pricing')
             ->assertSee('value="2"', false)
-            ->assertSee('value="category" checked', false)
             ->assertDontSee('name="nationality"', false);
+
+        $this->assertMatchesRegularExpression('/value="category"\s+checked/', $response->getContent());
     }
 
     public function test_checkout_recalculates_total_and_creates_travelers_before_paymob_redirect(): void
@@ -138,7 +141,7 @@ class WebsiteCheckoutTest extends TestCase
         $this->expectException(ValidationException::class);
         app(PackageBookingService::class)->quote(
             $package,
-            'nile:'.$item->id,
+            'nile:' . $item->id,
             now()->addMonth(),
             2,
             0,
@@ -211,7 +214,7 @@ class WebsiteCheckoutTest extends TestCase
     private function package(array $overrides = []): Package
     {
         return Package::create(array_merge([
-            'slug' => 'checkout-'.uniqid(),
+            'slug' => 'checkout-' . uniqid(),
             'title' => ['en' => 'Egypt Adventure'],
             'package_type' => 'travel_package',
             'is_active' => true,

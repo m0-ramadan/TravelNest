@@ -224,6 +224,7 @@ class DestinationController extends BaseWebsiteController
             ->values();
 
         $nileCruiseCities = ['luxor', 'aswan', 'nile-cruises'];
+        $nileCruiseCities = ['aswan', 'nile-cruises'];
         $hasNileCruises = in_array($destination->slug, $nileCruiseCities, true);
 
         $primaryDestinationTypes = $hasNileCruises

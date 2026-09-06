@@ -174,7 +174,7 @@
 
         .filters-grid {
             display: grid;
-            grid-template-columns: 1.4fr 1fr 1fr auto auto;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 16px;
             align-items: end;
         }
@@ -649,6 +649,20 @@
                                 value="{{ $search }}" placeholder="{{ __('Search packages, cruises, tours...') }}">
                         </div>
 
+                        @if (!empty($destinations) && count($destinations) > 0)
+                            <div>
+                                <label for="listing-destination">{{ __('Destination') }}</label>
+                                <select id="listing-destination" name="destination" class="form-select">
+                                    <option value="">{{ __('All Destinations') }}</option>
+                                    @foreach ($destinations as $dest)
+                                        <option value="{{ $dest['slug'] }}" @selected(($selectedDestinationSlug ?? '') === $dest['slug'])>
+                                            {{ $dest['name'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+
                         @if (count($typeOptions) > 1)
                             <div>
                                 <label for="listing-type">{{ __('Type') }}</label>
@@ -667,17 +681,6 @@
                             <input type="hidden" name="duration" value="{{ request('duration') }}">
                         @endif
 
-                        <div>
-                            <label for="listing-category">{{ __('Categories') }}</label>
-                            <select id="listing-category" name="category" class="form-select">
-                                <option value="">{{ __('All Categories') }}</option>
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category['slug'] }}" @selected($selectedCategorySlug === $category['slug'])>
-                                        {{ $category['name'] }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
 
                         <button type="submit" class="filter-btn">
                             <i class="la la-search"></i>

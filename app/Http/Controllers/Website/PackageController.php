@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Website;
 
+use App\Models\City;
 use App\Models\Package;
 use App\Models\PackageCategory;
 use Illuminate\Http\Request;
@@ -35,17 +36,34 @@ class PackageController extends BaseWebsiteController
 
     public function tours(Request $request): View
     {
+        $destinationSlug = trim((string) ($request->input('destination') ?: $request->input('city', '')));
+        $destinationCity = $destinationSlug !== '' ? City::where('slug', $destinationSlug)->first() : null;
+
+        $cityName = $destinationCity
+            ? $this->translated($destinationCity->getRawOriginal('name') ?? $destinationCity->name)
+            : null;
+
+        $pageTitle = $destinationCity
+            ? __(':city Day Tours & Excursions', ['city' => $cityName])
+            : __('Egypt Day Tours & Shore Excursions');
+
+        $pageSubtitle = $destinationCity
+            ? __('Discover private day tours, sightseeing landmarks, and authentic excursions in :city.', ['city' => $cityName])
+            : __('Discover expertly planned day tours and shore excursions with seamless logistics and unforgettable highlights.');
+
         return $this->renderListingPage(
             $request,
             ['day_tour', 'shore_excursion'],
             [
-                'badge' => __('Browse Tours'),
-                'title' => __('Egypt Day Tours & Shore Excursions'),
-                'subtitle' => __('Discover expertly planned day tours and shore excursions with seamless logistics and unforgettable highlights.'),
-                'overview_title' => __('Choose a tour that fits your schedule'),
-                'overview_text' => __('From quick cultural discoveries to full-day private adventures, explore flexible experiences built around your pace.'),
-                'empty_title' => __('No tours found'),
-                'empty_text' => __('Try changing the search filters or browse our latest offers instead.'),
+                'badge' => $destinationCity ? __(':city Day Tours', ['city' => $cityName]) : __('Browse Tours'),
+                'title' => $pageTitle,
+                'subtitle' => $pageSubtitle,
+                'overview_title' => $destinationCity ? __('Day Tours & Excursions in :city', ['city' => $cityName]) : __('Choose a tour that fits your schedule'),
+                'overview_text' => $destinationCity
+                    ? __('Explore handpicked private day tours and guided excursions in :city with licensed English-speaking Egyptologists and private transfers.', ['city' => $cityName])
+                    : __('From quick cultural discoveries to full-day private adventures, explore flexible experiences built around your pace.'),
+                'empty_title' => $destinationCity ? __('No tours found in :city', ['city' => $cityName]) : __('No tours found'),
+                'empty_text' => __('Try changing the search filters or browse our other tours.'),
                 'button_text' => __('View Tour'),
             ]
         );
@@ -69,6 +87,7 @@ class PackageController extends BaseWebsiteController
 
         $search = trim((string) $request->input('q', ''));
         $selectedCategorySlug = trim((string) $request->input('category', ''));
+        $selectedDestinationSlug = trim((string) ($request->input('destination') ?: $request->input('city', '')));
         $duration = $request->input('duration') ?: $request->input('days');
         $luxury = $request->boolean('luxury');
 
@@ -83,12 +102,58 @@ class PackageController extends BaseWebsiteController
             ? $categories->firstWhere('slug', $selectedCategorySlug)
             : null;
 
+        $destinations = City::query()
+            ->where('is_active', true)
+            ->where(function ($q) use ($allowedTypes) {
+                $q->whereHas('packages', fn($sub) => $sub->where('is_active', true)->whereIn('package_type', $allowedTypes))
+                    ->orWhereHas('attractions.packageAttractions.package', fn($sub) => $sub->where('is_active', true)->whereIn('package_type', $allowedTypes));
+            })
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        if ($destinations->isEmpty()) {
+            $destinations = City::query()
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+        }
+
+        $selectedDestination = $selectedDestinationSlug !== ''
+            ? City::query()->where('slug', $selectedDestinationSlug)->first()
+            : null;
+
         $packages = Package::query()
-            ->with(['currency', 'primaryCountry', 'highlights', 'tags', 'cruise', 'category'])
+            ->with(['currency', 'primaryCountry', 'highlights', 'tags', 'cruise', 'category', 'cities'])
             ->where('is_active', true)
             ->whereIn('package_type', $allowedTypes)
             ->when($selectedType, fn($query) => $query->where('package_type', $selectedType))
             ->when($selectedCategory, fn($query) => $query->where('category_id', $selectedCategory->id))
+            ->when($selectedDestination, function ($query) use ($selectedDestination) {
+                $cityId = $selectedDestination->id;
+                $citySlug = $selectedDestination->slug;
+                $rawName = $selectedDestination->getRawOriginal('name');
+                $nameEn = is_array($rawName) ? ($rawName['en'] ?? '') : '';
+                $nameAr = is_array($rawName) ? ($rawName['ar'] ?? '') : '';
+
+                $query->where(function ($q) use ($cityId, $citySlug, $nameEn, $nameAr) {
+                    $q->whereHas('cities', fn($sub) => $sub->where('cities.id', $cityId))
+                        ->orWhereHas('destination', fn($sub) => $sub->where('city_id', $cityId))
+                        ->orWhereHas('packageAttractions.attraction', fn($sub) => $sub->where('city_id', $cityId))
+                        ->orWhere('destinations_text', 'like', "%{$citySlug}%");
+
+                    if ($nameEn !== '') {
+                        $q->orWhere('destinations_text', 'like', "%{$nameEn}%")
+                            ->orWhere('title', 'like', "%{$nameEn}%")
+                            ->orWhere('slug', 'like', "%{$citySlug}%");
+                    }
+                    if ($nameAr !== '') {
+                        $q->orWhere('destinations_text', 'like', "%{$nameAr}%")
+                            ->orWhere('title', 'like', "%{$nameAr}%");
+                    }
+                });
+            })
             ->when($duration, function ($query) use ($duration) {
                 $durationInt = (int) $duration;
                 $query->where(function ($q) use ($durationInt) {
@@ -137,6 +202,14 @@ class PackageController extends BaseWebsiteController
             'pageContent' => $pageContent,
             'selectedType' => $selectedType,
             'selectedCategorySlug' => $selectedCategorySlug,
+            'selectedDestinationSlug' => $selectedDestinationSlug,
+            'selectedDestinationName' => $selectedDestination
+                ? $this->translated($selectedDestination->getRawOriginal('name') ?? $selectedDestination->name)
+                : null,
+            'destinations' => $destinations->map(fn(City $city) => [
+                'slug' => $city->slug,
+                'name' => $this->translated($city->getRawOriginal('name') ?? $city->name),
+            ])->values(),
             'search' => $search,
             'categories' => $categories->map(fn(PackageCategory $category) => [
                 'slug' => $category->slug,
