@@ -268,6 +268,7 @@ class DestinationController extends BaseWebsiteController
                 'description' => __('Explore private day excursions, iconic sightseeing landmarks, and authentic experiences in :city and across Egypt.', ['city' => $destination->display_name]),
                 'btn_text' => __('Explore Day Tours'),
                 'url' => route('website.day_tours.index'),
+                'url' => route('website.tours.all', ['destination' => $destination->slug, 'type' => 'day_tour']),
                 'active' => false,
             ],
             [

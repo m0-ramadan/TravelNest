@@ -10,6 +10,9 @@
      $isMultiCountryPage = request()->routeIs('website.multi_country');
      $isTravelPackagesPage = request()->routeIs('website.trips') && request('type') === 'travel_package';
      $isDayToursPage = request()->routeIs('website.tours.all') && request('type') === 'day_tour';
+     $isDayToursPage =
+         request()->routeIs('website.day_tours.*') ||
+         (request()->routeIs('website.tours.all') && request('type') === 'day_tour');
      $isShoreExcursionsPage = request('type') === 'shore_excursion';
      $isOffersPage = request()->routeIs('website.offers');
      $isContactPage = request()->routeIs('website.contact.*');
@@ -97,6 +100,12 @@
                          href="{{ route('website.nile_cruises.index') }}">
                          <i class="la la-ship"></i>
                          {{ __('Egypt Nile Cruise') }}
+                     </a>
+                 </li>
+                 <li class="nav-item">
+                     <a class="nav-link{{ $isDayToursPage ? ' is-active' : '' }}" href="{{ $dayToursUrl }}">
+                         <i class="la la-sun"></i>
+                         {{ __('Day Tours') }}
                      </a>
                  </li>
                  <li class="nav-item">

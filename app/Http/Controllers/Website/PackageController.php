@@ -36,7 +36,15 @@ class PackageController extends BaseWebsiteController
 
     public function tours(Request $request): View
     {
+        $selectedType = $request->input('type');
         $destinationSlug = trim((string) ($request->input('destination') ?: $request->input('city', '')));
+        $search = trim((string) $request->input('q', ''));
+        $category = trim((string) $request->input('category', ''));
+
+        if ($selectedType === 'day_tour' && $destinationSlug === '' && $search === '' && $category === '') {
+            return app(DayTourController::class)->index($request);
+        }
+
         $destinationCity = $destinationSlug !== '' ? City::where('slug', $destinationSlug)->first() : null;
 
         $cityName = $destinationCity

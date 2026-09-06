@@ -58,6 +58,7 @@ class DestinationAndCategoryLandingPagesTest extends TestCase
 
         // Links point to the designated landing pages
         $response->assertSee(route('website.day_tours.index'));
+        $response->assertSee(route('website.tours.all', ['destination' => 'cairo', 'type' => 'day_tour']));
         $response->assertSee(route('website.travel_packages.index'));
 
         // Cairo category cards should NOT include Nile Cruises card
@@ -97,6 +98,12 @@ class DestinationAndCategoryLandingPagesTest extends TestCase
         // Destination boxes link to filtered tours by city and type=day_tour
         $response->assertSee(route('website.tours.all', ['destination' => 'cairo', 'type' => 'day_tour']));
         $response->assertSee(route('website.tours.all', ['destination' => 'luxor', 'type' => 'day_tour']));
+
+        // Visiting /tours?type=day_tour (header link) also renders the landing page layout
+        $headerResponse = $this->get(route('website.tours.all', ['type' => 'day_tour']));
+        $headerResponse->assertOk();
+        $headerResponse->assertSee('Egypt Excursions and Day Tours');
+        $headerResponse->assertSee('Cairo Day Tours');
 
         // Visiting the filtered link renders Cairo day tours
         $cairoToursResponse = $this->get(route('website.tours.all', ['destination' => 'cairo', 'type' => 'day_tour']));
