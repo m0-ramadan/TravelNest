@@ -11,18 +11,24 @@ class PackageController extends BaseWebsiteController
 {
     public function index(Request $request): View
     {
+        $duration = $request->input('duration') ?: $request->input('days');
+        $durationTitle = $duration ? __(':days Days Egypt Travel Packages', ['days' => $duration]) : __('Egypt Travel Packages');
+        $durationSubtitle = $duration
+            ? __('Browse our handpicked :days-day private Egypt vacation packages and itineraries.', ['days' => $duration])
+            : __('Browse a curated selection of private Egypt travel packages, vacations, and tailor-made journeys.');
+
         return $this->renderListingPage(
             $request,
-            ['travel_package', 'nile_cruise', 'deal', 'multi_country', 'custom'],
+            ['travel_package'],
             [
-                'badge' => __('Featured Journeys'),
-                'title' => __('Egypt Travel Packages & Nile Cruises'),
-                'subtitle' => __('Browse a curated selection of private tours, Nile cruises, multi-country journeys, and tailor-made travel experiences.'),
-                'overview_title' => __('Find the right journey for your travel style'),
-                'overview_text' => __('Explore flexible travel packages designed around comfort, discovery, and memorable experiences across Egypt and beyond.'),
-                'empty_title' => __('No packages found'),
-                'empty_text' => __('Try changing the search filters or browse our latest tours and offers.'),
-                'button_text' => __('View Journey'),
+                'badge' => __('Travel Packages'),
+                'title' => $durationTitle,
+                'subtitle' => $durationSubtitle,
+                'overview_title' => __('Find your ideal Egypt travel package'),
+                'overview_text' => __('Explore flexible multi-day travel packages designed around comfort, discovery, and memorable pharaonic experiences across Egypt.'),
+                'empty_title' => __('No travel packages found'),
+                'empty_text' => __('Try changing the search filters or browse our other travel packages.'),
+                'button_text' => __('View Package'),
             ]
         );
     }
@@ -63,6 +69,8 @@ class PackageController extends BaseWebsiteController
 
         $search = trim((string) $request->input('q', ''));
         $selectedCategorySlug = trim((string) $request->input('category', ''));
+        $duration = $request->input('duration') ?: $request->input('days');
+        $luxury = $request->boolean('luxury');
 
         $categories = PackageCategory::query()
             ->where('is_active', true)
@@ -79,8 +87,25 @@ class PackageController extends BaseWebsiteController
             ->with(['currency', 'primaryCountry', 'highlights', 'tags', 'cruise', 'category'])
             ->where('is_active', true)
             ->whereIn('package_type', $allowedTypes)
-            ->when($selectedType, fn ($query) => $query->where('package_type', $selectedType))
-            ->when($selectedCategory, fn ($query) => $query->where('category_id', $selectedCategory->id))
+            ->when($selectedType, fn($query) => $query->where('package_type', $selectedType))
+            ->when($selectedCategory, fn($query) => $query->where('category_id', $selectedCategory->id))
+            ->when($duration, function ($query) use ($duration) {
+                $durationInt = (int) $duration;
+                $query->where(function ($q) use ($durationInt) {
+                    $q->where('duration_days', $durationInt)
+                        ->orWhere('title', 'like', "{$durationInt} Day%")
+                        ->orWhere('title', 'like', "% {$durationInt} Day%")
+                        ->orWhere('slug', 'like', "{$durationInt}-day%")
+                        ->orWhere('slug', 'like', "%-{$durationInt}-day%");
+                });
+            })
+            ->when($luxury, function ($query) {
+                $query->where(function ($q) {
+                    $q->where('is_ultra_luxury', true)
+                        ->orWhere('title', 'like', '%luxury%')
+                        ->orWhere('slug', 'like', '%luxury%');
+                });
+            })
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('title', 'like', "%{$search}%")
@@ -99,10 +124,10 @@ class PackageController extends BaseWebsiteController
             ->withQueryString();
 
         $packages->getCollection()->transform(
-            fn (Package $package) => $this->packageListingCard($package, $pageContent['button_text'])
+            fn(Package $package) => $this->packageListingCard($package, $pageContent['button_text'])
         );
 
-        $typeOptions = collect($allowedTypes)->map(fn (string $type) => [
+        $typeOptions = collect($allowedTypes)->map(fn(string $type) => [
             'value' => $type,
             'label' => $this->typeLabel($type),
         ])->values()->all();
@@ -113,7 +138,7 @@ class PackageController extends BaseWebsiteController
             'selectedType' => $selectedType,
             'selectedCategorySlug' => $selectedCategorySlug,
             'search' => $search,
-            'categories' => $categories->map(fn (PackageCategory $category) => [
+            'categories' => $categories->map(fn(PackageCategory $category) => [
                 'slug' => $category->slug,
                 'name' => $this->translated($category->getRawOriginal('name') ?? $category->name),
             ])->values(),
@@ -132,5 +157,4 @@ class PackageController extends BaseWebsiteController
             ],
         ]);
     }
-
 }

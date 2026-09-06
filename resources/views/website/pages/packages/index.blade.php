@@ -4,12 +4,18 @@
     $isToursPage = request()->routeIs('website.tours.*');
     $indexRoute = $isToursPage ? route('website.tours.all') : route('website.trips');
     $firstPackage = $packages->first();
-    $heroImage = is_array($firstPackage) ? ($firstPackage['image'] ?? asset('website/photos/home2.webp')) : asset('website/photos/home2.webp');
+    $heroImage = is_array($firstPackage)
+        ? $firstPackage['image'] ?? asset('website/photos/home2.webp')
+        : asset('website/photos/home2.webp');
 @endphp
 
 @section('title', $pageContent['title'] . ' - Etro Tours')
 @section('description', $pageContent['description'] ?? $pageContent['overview_text'])
-@section('keywords', trim(collect([$pageContent['title'] ?? null, 'Etro Tours', 'Egypt tours', 'travel packages'])->filter()->implode(', '), ', '))
+@section('keywords',
+    trim(
+    collect([$pageContent['title'] ?? null, 'Etro Tours', 'Egypt tours', 'travel packages'])->filter()->implode(', '),
+    ', ',
+    ))
 @section('image', $heroImage)
 
 @section('css')
@@ -643,17 +649,23 @@
                                 value="{{ $search }}" placeholder="{{ __('Search packages, cruises, tours...') }}">
                         </div>
 
-                        <div>
-                            <label for="listing-type">{{ __('Type') }}</label>
-                            <select id="listing-type" name="type" class="form-select">
-                                <option value="">{{ __('All Types') }}</option>
-                                @foreach ($typeOptions as $option)
-                                    <option value="{{ $option['value'] }}" @selected($selectedType === $option['value'])>
-                                        {{ $option['label'] }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                        @if (count($typeOptions) > 1)
+                            <div>
+                                <label for="listing-type">{{ __('Type') }}</label>
+                                <select id="listing-type" name="type" class="form-select">
+                                    <option value="">{{ __('All Types') }}</option>
+                                    @foreach ($typeOptions as $option)
+                                        <option value="{{ $option['value'] }}" @selected($selectedType === $option['value'])>
+                                            {{ $option['label'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+
+                        @if (request()->filled('duration'))
+                            <input type="hidden" name="duration" value="{{ request('duration') }}">
+                        @endif
 
                         <div>
                             <label for="listing-category">{{ __('Categories') }}</label>

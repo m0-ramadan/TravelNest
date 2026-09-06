@@ -40,15 +40,15 @@
              <a href="mailto:{{ $contactEmail }}" aria-label="{{ __('Email Us') }}" class="mobile-action-btn">
                  <i class="la la-envelope"></i>
              </a>
-            <a href="tel:+201553383000" aria-label="{{ __('Call Us') }}" class="mobile-action-btn call-btn">
-                <i class="la la-phone"></i>
-            </a>
-             <a href="viber://chat?number=201553383000" target="_blank" rel="noopener noreferrer" aria-label="{{ __('Viber') }}"
-                 class="mobile-action-btn viber communication-btn">
+             <a href="tel:+201553383000" aria-label="{{ __('Call Us') }}" class="mobile-action-btn call-btn">
+                 <i class="la la-phone"></i>
+             </a>
+             <a href="viber://chat?number=201553383000" target="_blank" rel="noopener noreferrer"
+                 aria-label="{{ __('Viber') }}" class="mobile-action-btn viber communication-btn">
                  <i class="lab la-viber"></i>
              </a>
-             <a href="https://wa.me/201553383000" target="_blank" rel="noopener noreferrer" aria-label="{{ __('WhatsApp') }}"
-                 class="mobile-action-btn whatsapp communication-btn">
+             <a href="https://wa.me/201553383000" target="_blank" rel="noopener noreferrer"
+                 aria-label="{{ __('WhatsApp') }}" class="mobile-action-btn whatsapp communication-btn">
                  <i class="lab la-whatsapp"></i>
              </a>
          </div>
@@ -73,9 +73,9 @@
                      </a>
                  </li>
                  <li class="nav-item dropdown destinations-dropdown">
-                     <button type="button" class="nav-link dropdown-toggle{{ $isDestinationsPage ? ' is-active' : '' }}"
-                         data-bs-toggle="dropdown" data-navbar-dropdown-toggle aria-expanded="false"
-                         aria-controls="desktopDestinationsMenu">
+                     <button type="button"
+                         class="nav-link dropdown-toggle{{ $isDestinationsPage ? ' is-active' : '' }}"
+                         data-navbar-dropdown-toggle aria-expanded="false" aria-controls="desktopDestinationsMenu">
                          <i class="la la-globe"></i>
                          {{-- <i class="la la-map-marker"></i> --}}
                          {{ __('Destinations') }}
@@ -141,8 +141,8 @@
                              },
                          );
                      @endphp
-                     <button type="button" class="language-toggle" data-bs-toggle="dropdown"
-                         data-navbar-dropdown-toggle aria-expanded="false" aria-controls="desktopLanguageMenu">
+                     <button type="button" class="language-toggle" data-navbar-dropdown-toggle aria-expanded="false"
+                         aria-controls="desktopLanguageMenu">
                          <i class="la la-language"></i>
                          <span>{{ strtoupper($currentLocale) }}</span>
                      </button>
@@ -152,7 +152,8 @@
                                  <a class="dropdown-item {{ $currentLocale === $lang->normalized_code ? 'active' : '' }}"
                                      href="{{ route('website.lang.switch', $lang->normalized_code) }}">
                                      <img src="{{ asset('website/flags/4x3/' . $lang->display_flag_code . '.webp') }}"
-                                         alt="" width="22" height="17" loading="lazy" decoding="async" aria-hidden="true">
+                                         alt="" width="22" height="17" loading="lazy"
+                                         decoding="async" aria-hidden="true">
                                      {{ $lang->display_name }}
                                  </a>
                              </li>
@@ -170,7 +171,8 @@
              <img src="{{ asset('website/logo/logo-lat.png') }}" alt="{{ __('Etro Tours') }}" width="132"
                  height="42">
          </div>
-         <button type="button" class="mobile-close-btn" data-mobile-menu-toggle aria-label="{{ __('Close Menu') }}">
+         <button type="button" class="mobile-close-btn" data-mobile-menu-toggle
+             aria-label="{{ __('Close Menu') }}">
              <i class="la la-times"></i>
          </button>
      </div>
@@ -258,8 +260,8 @@
 
          <!-- Language Submenu -->
          <div class="mobile-nav-item">
-             <button type="button" class="mobile-language-toggle" data-mobile-language-toggle
-                 aria-expanded="false" aria-controls="mobileLanguageSubmenu">
+             <button type="button" class="mobile-language-toggle" data-mobile-language-toggle aria-expanded="false"
+                 aria-controls="mobileLanguageSubmenu">
                  <div style="display: flex; align-items: center;">
                      <i class="la la-language" style="margin-right: 12px;"></i>
                      {{ __('Language') }}
@@ -272,7 +274,8 @@
                          <a href="{{ route('website.lang.switch', $lang->normalized_code) }}"
                              class="mobile-language-link {{ $currentLocale === $lang->normalized_code ? 'active' : '' }}">
                              <img src="{{ asset('website/flags/4x3/' . $lang->display_flag_code . '.webp') }}"
-                                 alt="" width="22" height="17" loading="lazy" decoding="async" aria-hidden="true">
+                                 alt="" width="22" height="17" loading="lazy" decoding="async"
+                                 aria-hidden="true">
                              {{ $lang->display_name }}
                          </a>
                      </div>
@@ -403,7 +406,9 @@
              navbar.classList.toggle('scrolled', window.scrollY > 50);
              navbarScrollFrame = null;
          });
-     }, { passive: true });
+     }, {
+         passive: true
+     });
 
      // Close menu on ESC key
      document.addEventListener('keydown', function(e) {
@@ -412,6 +417,14 @@
              if (mobileMenu?.classList.contains('active')) {
                  toggleMobileMenu();
              }
+
+             document.querySelectorAll('.navbar .dropdown').forEach(function(dropdown) {
+                 dropdown.classList.remove('show');
+                 const menu = dropdown.querySelector('.dropdown-menu');
+                 if (menu) menu.classList.remove('show');
+                 const toggle = dropdown.querySelector('[data-navbar-dropdown-toggle]');
+                 if (toggle) toggle.setAttribute('aria-expanded', 'false');
+             });
          }
      });
 
@@ -480,51 +493,86 @@
                  behavior: 'smooth'
              });
          });
-      });
-
-     document.querySelectorAll('.navbar .destinations-dropdown').forEach(function(dropdown) {
-         const toggle = dropdown.querySelector('[data-navbar-dropdown-toggle]');
-         const menu = dropdown.querySelector('.dropdown-menu');
-
-         if (!toggle || !menu) {
-             return;
-         }
-
-         dropdown.addEventListener('mouseenter', function() {
-             dropdown.classList.add('show');
-             menu.classList.add('show');
-             toggle.setAttribute('aria-expanded', 'true');
-         });
-
-         dropdown.addEventListener('mouseleave', function() {
-             dropdown.classList.remove('show');
-             menu.classList.remove('show');
-             toggle.setAttribute('aria-expanded', 'false');
-         });
      });
-  </script>
+ </script>
 
-  <style>
-      .dropdown-submenu {
-          position: relative;
-      }
-      .dropdown-submenu > .dropdown-submenu-menu {
-          top: 0;
-          left: 100%;
-          margin-top: -6px;
-          display: none;
-          position: absolute;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-          border-radius: 8px;
-          border: none;
-          min-width: 220px;
-          background: #ffffff;
-      }
-      [dir="rtl"] .dropdown-submenu > .dropdown-submenu-menu {
-          left: auto;
-          right: 100%;
-      }
-      .dropdown-submenu:hover > .dropdown-submenu-menu {
-          display: block;
-      }
-  </style>
+ <style>
+     /* Strict click-only behavior for Destinations dropdown: never open on hover or mouse approach */
+     .navbar .destinations-dropdown:not(.show)>.dropdown-menu,
+     .navbar .destinations-dropdown>.dropdown-menu:not(.show),
+     .navbar .destinations-dropdown:hover:not(.show)>.dropdown-menu,
+     .navbar .destinations-dropdown:hover>.dropdown-menu:not(.show),
+     .navbar .dropdown:hover>.dropdown-menu#desktopDestinationsMenu:not(.show),
+     .navbar .dropdown-menu#desktopDestinationsMenu:not(.show) {
+         display: none !important;
+         opacity: 0 !important;
+         visibility: hidden !important;
+         pointer-events: none !important;
+         transform: none !important;
+     }
+
+     .navbar .destinations-dropdown.show>.dropdown-menu,
+     .navbar .destinations-dropdown>.dropdown-menu.show,
+     .navbar .dropdown.show>.dropdown-menu#desktopDestinationsMenu,
+     .navbar .dropdown-menu#desktopDestinationsMenu.show {
+         display: block !important;
+         opacity: 1 !important;
+         visibility: visible !important;
+         pointer-events: auto !important;
+         transform: none !important;
+     }
+
+     /* Prevent any jitter/shaking: no transforms, no animations, clean opacity transition */
+     .navbar .destinations-dropdown>.dropdown-menu,
+     .navbar .dropdown-menu#desktopDestinationsMenu {
+         transform: none !important;
+         animation: none !important;
+         transition: opacity 0.15s ease-out, visibility 0.15s ease-out !important;
+         backface-visibility: hidden;
+         -webkit-backface-visibility: hidden;
+     }
+
+     /* Disable hover-bridge pseudo-element that steals pointer events and causes hover flickering */
+     body.website-theme-shell .navbar .destinations-dropdown>.dropdown-menu::before,
+     body.website-theme-shell .navbar .dropdown-menu#desktopDestinationsMenu::before {
+         display: none !important;
+         content: none !important;
+     }
+
+     /* Keep the toggle button completely stable (no 1px jumping up/down on hover or when active) */
+     body.website-theme-shell .navbar .destinations-dropdown .dropdown-toggle,
+     body.website-theme-shell .navbar .destinations-dropdown.show .dropdown-toggle,
+     body.website-theme-shell .navbar .destinations-dropdown .dropdown-toggle:hover,
+     body.website-theme-shell .navbar .destinations-dropdown .dropdown-toggle:focus,
+     body.website-theme-shell .navbar .destinations-dropdown .dropdown-toggle i,
+     body.website-theme-shell .navbar .destinations-dropdown.show .dropdown-toggle i,
+     body.website-theme-shell .navbar .destinations-dropdown .dropdown-toggle:hover i {
+         transform: none !important;
+     }
+
+     .dropdown-submenu {
+         position: relative;
+     }
+
+     .dropdown-submenu>.dropdown-submenu-menu {
+         top: 0;
+         left: 100%;
+         margin-top: -6px;
+         display: none;
+         position: absolute;
+         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+         border-radius: 8px;
+         border: none;
+         min-width: 220px;
+         background: #ffffff;
+     }
+
+     [dir="rtl"] .dropdown-submenu>.dropdown-submenu-menu {
+         left: auto;
+         right: 100%;
+     }
+
+     .dropdown-submenu:hover>.dropdown-submenu-menu {
+         display: block;
+     }
+ </style>
