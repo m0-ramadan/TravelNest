@@ -9,6 +9,9 @@ use App\Models\NileCruiseSeasonPrice;
 use App\Models\NileCruiseSeasonPriceItem;
 use App\Models\Package;
 use App\Models\PaymentMethod;
+use App\Models\TourPackageAccommodation;
+use App\Models\TourPackagePriceItem;
+use App\Models\TourPackageSeason;
 use App\Services\PackageBookingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
@@ -36,6 +39,7 @@ class WebsiteCheckoutTest extends TestCase
     public function test_priced_package_shows_booking_and_enquiry_actions(): void
     {
         $package = $this->package(['adult_price' => 100, 'child_price' => 50]);
+        $package = $this->package(['package_type' => 'day_tour', 'adult_price' => 100, 'child_price' => 50]);
 
         $this->get(route('website.packages.show.simple', $package->slug))
             ->assertOk()
@@ -68,6 +72,7 @@ class WebsiteCheckoutTest extends TestCase
     {
         $this->configurePaymob();
         $package = $this->package(['adult_price' => 100, 'child_price' => 50]);
+        $package = $this->package(['package_type' => 'day_tour', 'adult_price' => 100, 'child_price' => 50]);
 
         Http::fake([
             'https://accept.paymob.com/v1/intention/' => Http::response([
@@ -209,6 +214,168 @@ class WebsiteCheckoutTest extends TestCase
 
         $this->assertSame('paid', $payment->fresh()->status);
         $this->assertSame('paid', $payment->booking->fresh()->payment_status);
+    }
+
+    public function test_travel_package_room_based_booking_and_checkout(): void
+    {
+        $this->configurePaymob();
+
+        $package = $this->package([
+            'title' => ['en' => 'Cairo & Luxor Tour Package'],
+            'package_type' => 'travel_package',
+        ]);
+
+        $accommodation = TourPackageAccommodation::create([
+            'package_id' => $package->id,
+            'name' => 'Standard',
+            'is_active' => true,
+        ]);
+
+        $season = TourPackageSeason::create([
+            'package_id' => $package->id,
+            'accommodation_id' => $accommodation->id,
+            'name' => ['en' => 'Winter (October to April)'],
+            'date_from' => '2026-10-01',
+            'date_to' => '2027-04-30',
+            'is_active' => true,
+        ]);
+
+        TourPackagePriceItem::create([
+            'season_id' => $season->id,
+            'occupancy_type' => 'single',
+            'price' => 1500,
+            'is_active' => true,
+        ]);
+        TourPackagePriceItem::create([
+            'season_id' => $season->id,
+            'occupancy_type' => 'double',
+            'price' => 1000,
+            'is_active' => true,
+        ]);
+        TourPackagePriceItem::create([
+            'season_id' => $season->id,
+            'occupancy_type' => 'triple',
+            'price' => 800,
+            'is_active' => true,
+        ]);
+
+        // 1. Details page shows the travel package room booking form
+        $this->get(route('website.packages.show.simple', $package->slug))
+            ->assertOk()
+            ->assertSee('id="sidebarTravelPackageForm"', false)
+            ->assertSee('id="tp_rooms"', false)
+            ->assertSee('Standard');
+
+        // 2. Checkout GET page with 2 rooms: Room 1 (2 adults, 1 child) = $2,500; Room 2 (1 adult) = $1,500
+        $checkoutGet = $this->get(route('website.checkout.show', [
+            'slug' => $package->slug,
+            'travel_date' => '2026-11-15',
+            'accommodation' => 'Standard',
+            'rooms' => 2,
+            'room_1_adults' => 2,
+            'room_1_children' => 1,
+            'room_2_adults' => 1,
+            'room_2_children' => 0,
+        ]));
+
+        $checkoutGet
+            ->assertOk()
+            ->assertSee('Standard')
+            ->assertSee('Room 1')
+            ->assertSee('Room 2')
+            ->assertSee(__('Room') . ' 1')
+            ->assertSee(__('Room') . ' 2')
+            ->assertSee('2,500')
+            ->assertSee('1,500')
+            ->assertSee('4,000')
+            ->assertSee('2,000'); // 50% deposit
+
+        // 3. Checkout POST submission
+        Http::fake([
+            'https://accept.paymob.com/v1/intention/' => Http::response([
+                'id' => 'intention-tp-1',
+                'intention_order_id' => 'order-tp-1',
+                'client_secret' => 'safe-tp-client-secret',
+            ], 201),
+        ]);
+
+        $response = $this->post(route('website.checkout.store', $package->slug), [
+            'pricing_option' => 'travel_package',
+            'accommodation' => 'Standard',
+            'travel_date' => '2026-11-15',
+            'rooms' => 2,
+            'adults' => 3,
+            'children' => 1,
+            'infants' => 0,
+            'room_1_adults' => 2,
+            'room_1_children' => 1,
+            'room_2_adults' => 1,
+            'room_2_children' => 0,
+            'lead_title' => 'Mr',
+            'lead_first_name' => 'John',
+            'lead_last_name' => 'Doe',
+            'traveler_2_title' => 'Mrs',
+            'traveler_2_first_name' => 'Jane',
+            'traveler_2_last_name' => 'Doe',
+            'traveler_3_title' => 'Miss',
+            'traveler_3_first_name' => 'Alice',
+            'traveler_3_last_name' => 'Doe',
+            'traveler_4_title' => 'Mr',
+            'traveler_4_first_name' => 'Robert',
+            'traveler_4_last_name' => 'Smith',
+            'email' => 'johndoe@example.test',
+            'phone' => '+201012345678',
+            'country' => 'United States',
+            'pickup_location' => 'Cairo International Airport Terminal 3',
+            'special_requests' => 'Quiet rooms on high floor please.',
+            'payment_method' => 'paymob',
+            'terms' => 1,
+        ]);
+
+        $response->assertRedirectContains('accept.paymob.com/unifiedcheckout');
+
+        $booking = Booking::query()->where('package_id', $package->id)->sole();
+        $this->assertSame('4000.00', (string) $booking->total_amount);
+        $this->assertSame(4, $booking->travelers()->count());
+        $this->assertSame('Cairo International Airport Terminal 3', $booking->pickup_location);
+        $this->assertSame('4000.00', (string) $booking->items()->sole()->total_amount);
+        $this->assertSame(2000.0, (float) $booking->checkout_details['deposit_amount']);
+        $this->assertSame(2000.0, (float) $booking->checkout_details['remaining_balance']);
+        $this->assertCount(2, $booking->checkout_details['room_breakdown']);
+    }
+
+    public function test_travel_package_without_seeded_accommodations_uses_fallback_tiers_and_books_successfully(): void
+    {
+        $package = $this->package([
+            'title' => ['en' => 'Coptic Cairo 2 Days'],
+            'package_type' => 'travel_package',
+            'adult_price' => 500,
+        ]);
+
+        // Details page shows room booking form with fallback tiers
+        $this->get(route('website.packages.show.simple', $package->slug))
+            ->assertOk()
+            ->assertSee('id="sidebarTravelPackageForm"', false)
+            ->assertSee('id="tp_rooms"', false)
+            ->assertSee('Standard')
+            ->assertSee('Deluxe')
+            ->assertSee('Luxury');
+
+        // Checkout page works with fallback tier
+        $checkoutGet = $this->get(route('website.checkout.show', [
+            'slug' => $package->slug,
+            'pricing_option' => 'travel_package',
+            'travel_date' => '2026-11-15',
+            'rooms' => 1,
+            'room_1_accommodation' => 'Standard',
+            'room_1_adults' => 2,
+            'room_1_children' => 0,
+        ]));
+
+        $checkoutGet
+            ->assertOk()
+            ->assertSee('Standard')
+            ->assertSee(__('Room') . ' 1');
     }
 
     private function package(array $overrides = []): Package

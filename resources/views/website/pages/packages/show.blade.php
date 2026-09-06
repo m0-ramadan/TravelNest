@@ -2017,8 +2017,8 @@
 
 
         /* =========================================================
-                   Nile Cruise body redesign — body only, shared header/footer untouched
-                   ========================================================= */
+                           Nile Cruise body redesign — body only, shared header/footer untouched
+                           ========================================================= */
         .nile-cruise-page .main-container {
             background:
                 radial-gradient(circle at 8% 8%, rgba(215, 239, 250, .58), transparent 34%),
@@ -2779,6 +2779,127 @@
             .attraction-highlight-name {
                 font-size: 1rem;
             }
+        }
+
+        .room-capacity-notice {
+            margin: 12px 0;
+            padding: 10px 14px;
+            border: 1px solid rgba(197, 149, 91, 0.35);
+            border-radius: 8px;
+            background: rgba(197, 149, 91, 0.08);
+            color: #1c325c;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.45;
+        }
+
+        .room-group-container {
+            background: #fdfbf7;
+            border: 1px solid rgba(28, 50, 92, 0.1);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+        }
+
+        .room-header {
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px dashed rgba(28, 50, 92, 0.12);
+        }
+
+        .room-title {
+            margin: 0;
+            font-family: 'Playfair Display', serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1c325c;
+        }
+
+        .room-inline-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .room-inline-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 4px;
+        }
+
+        .age-info {
+            font-size: 11px;
+            color: #8c7355;
+            font-weight: 400;
+        }
+
+        .select-inline {
+            width: 100%;
+            padding: 7px 10px;
+            border: 1px solid #dce2e8;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fff;
+            color: #1c325c;
+        }
+
+        .room-price-badge {
+            background: rgba(197, 149, 91, 0.15);
+            color: #a87940;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 3px 9px;
+            border-radius: 6px;
+            letter-spacing: 0.2px;
+        }
+
+        .tp-price-summary-box {
+            background: #fff;
+            border: 1px solid rgba(197, 149, 91, 0.35);
+            border-radius: 14px;
+            padding: 16px;
+            margin-top: 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 15px rgba(28, 50, 92, 0.05);
+        }
+
+        .tp-price-summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed rgba(28, 50, 92, 0.14);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: #1c325c;
+            font-size: 14.5px;
+        }
+
+        .tp-price-total {
+            font-size: 19px;
+            color: #c5955b;
+            font-family: 'Playfair Display', serif;
+            font-weight: 800;
+        }
+
+        .tp-price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #4b5563;
+            margin-bottom: 5px;
+        }
+
+        .tp-price-row strong {
+            color: #1c325c;
+        }
+
+        .text-gold {
+            color: #c5955b !important;
+            font-weight: 700;
         }
     </style>
 @endsection
@@ -4037,55 +4158,145 @@
                                         class="la la-envelope"></i>{{ __('Enquiry Form') }}</button>
                             </div>
                             <div class="sidebar-content reserve-tab-panel" id="reserveBookingPanel" role="tabpanel">
-                                <h4 class="booking-request-title">{{ __('Select Your Booking') }}</h4>
-                                <p class="booking-request-copy">
-                                    {{ __('Choose your travel details and an available price, then continue to checkout.') }}
-                                </p>
-                                <form method="get" action="{{ route('website.checkout.show', $package->slug) }}"
-                                    id="sidebarBookingForm">
-                                    <div class="sidebar-booking-grid">
-                                        <div class="input-box"><label class="label-text"
-                                                for="sidebar_travel_date">{{ __('Travel Date') }}</label><input
-                                                class="form-control" id="sidebar_travel_date" type="date"
-                                                name="travel_date" min="{{ today()->toDateString() }}" required></div>
-                                        <div class="input-box"><label class="label-text"
-                                                for="sidebar_rooms">{{ $package->package_type === 'nile_cruise' ? __('Cabins') : __('Rooms') }}</label><input
-                                                class="form-control" id="sidebar_rooms" type="number" name="rooms"
-                                                min="1" max="20" value="1" required></div>
-                                        <div class="input-box"><label class="label-text"
-                                                for="sidebar_adults">{{ __('Adults') }}</label><input
-                                                class="form-control" id="sidebar_adults" type="number" name="adults"
-                                                min="1" max="40" value="1" required></div>
-                                        <div class="input-box"><label class="label-text"
-                                                for="sidebar_children">{{ __('Children') }}</label><input
-                                                class="form-control" id="sidebar_children" type="number"
-                                                name="children" min="0" max="40" value="0" required>
+                                @if ($package->package_type === 'travel_package')
+                                    <form method="get"
+                                        action="{{ route('website.checkout.show', $package->slug) }}"
+                                        id="sidebarTravelPackageForm">
+                                        <input type="hidden" name="pricing_option" value="travel_package">
+                                        <input type="hidden" name="totalAdults" id="tp_totalAdults" value="2">
+                                        <input type="hidden" name="totalChildren" id="tp_totalChildren" value="0">
+                                        <input type="hidden" name="adults" id="tp_form_adults" value="2">
+                                        <input type="hidden" name="children" id="tp_form_children" value="0">
+                                        <input type="hidden" name="infants" value="0">
+
+                                        <!-- Date Field -->
+                                        <div class="input-box mb-3">
+                                            <label class="label-text" for="tp_travel_date"
+                                                style="font-weight: 600; color: #1c325c; font-size: 13px; margin-bottom: 6px; display: block;">{{ __('Date') }} *</label>
+                                            <div class="form-group position-relative">
+                                                <span class="la la-calendar form-icon"
+                                                    style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 18px; color: #c5955b; z-index: 2;"></span>
+                                                <input id="tp_travel_date" name="travel_date"
+                                                    class="form-control" type="date"
+                                                    value="{{ today()->toDateString() }}"
+                                                    min="{{ today()->toDateString() }}" required
+                                                    style="padding-left: 42px; border-radius: 10px; height: 46px; border: 1px solid #dce2e8; font-size: 14px;">
+                                            </div>
                                         </div>
-                                    </div>
-                                    <input type="hidden" name="infants" value="0">
-                                    <div class="sidebar-price-options">
-                                        @foreach ($bookingPricingOptions as $option)
-                                            <label class="sidebar-price-option">
-                                                <input type="radio" name="pricing_option" value="{{ $option['id'] }}"
-                                                    data-valid-from="{{ $option['valid_from'] }}"
-                                                    data-valid-to="{{ $option['valid_to'] }}"
-                                                    data-pax-min="{{ $option['pax_min'] ?? '' }}"
-                                                    data-pax-max="{{ $option['pax_max'] ?? '' }}" required>
-                                                <span class="sidebar-price-option-card">
-                                                    <span><span
-                                                            class="sidebar-option-name">{{ $option['label'] }}</span><span
-                                                            class="sidebar-option-desc">{{ $option['description'] }}</span></span>
-                                                    <span
-                                                        class="sidebar-option-price">{{ $option['currency_symbol'] }}{{ number_format($option['amount'], 2) }}</span>
-                                                </span>
-                                            </label>
-                                        @endforeach
-                                    </div>
-                                    <div class="alert-danger mt-3" id="sidebarNoPrices" style="display:none">
-                                        {{ __('No booking price is available for these details.') }}</div>
-                                    <button type="submit" class="sidebar-checkout-btn"><i
-                                            class="la la-arrow-right"></i>{{ __('Continue to Checkout') }}</button>
-                                </form>
+
+                                        <!-- Rooms Field -->
+                                        <div class="input-box mb-3">
+                                            <label class="label-text" for="tp_rooms"
+                                                style="font-weight: 600; color: #1c325c; font-size: 13px; margin-bottom: 6px; display: block;">{{ __('Rooms') }} *</label>
+                                            <div class="form-group">
+                                                <div class="select-contain w-auto">
+                                                    <select id="tp_rooms" name="rooms"
+                                                        class="form-select select-contain-select" required
+                                                        style="border-radius: 10px; height: 46px; border: 1px solid #dce2e8; font-size: 14px;">
+                                                        <option value="" disabled>{{ __('Select Rooms') }}</option>
+                                                        @for ($r = 1; $r <= 10; $r++)
+                                                            <option value="{{ $r }}" {{ $r === 1 ? 'selected' : '' }}>{{ $r }}</option>
+                                                        @endfor
+                                                    </select>
+                                                </div>
+                                                <div id="tp_roomError" style="color:red; display:none; font-size: 13px; margin-top: 4px;">
+                                                    {{ __('Please select the number of rooms.') }}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div id="tp_capacityNotice" class="room-capacity-notice mb-2" style="display:none;"></div>
+
+                                        <!-- Dynamic Room Cards with Accommodations Type, Adults, Children -->
+                                        <div id="tp_roomFields" class="tp-room-fields mb-2"></div>
+
+                                        <!-- Live Estimated Price Summary Box -->
+                                        <div id="tp_priceSummaryBox" class="tp-price-summary-box mb-3" style="display: none;">
+                                            <div class="tp-price-summary-header">
+                                                <span>{{ __('Estimated Price') }}</span>
+                                                <span class="tp-price-total" id="tp_displayTotal">$0.00</span>
+                                            </div>
+                                            <div class="tp-price-summary-details">
+                                                <div class="tp-price-row">
+                                                    <span>{{ __('Pay Today (50% Deposit)') }}:</span>
+                                                    <strong id="tp_displayDeposit" class="text-gold">$0.00</strong>
+                                                </div>
+                                                <div class="tp-price-row">
+                                                    <span>{{ __('Remaining Balance') }}:</span>
+                                                    <span id="tp_displayBalance">$0.00</span>
+                                                </div>
+                                                <small class="text-muted d-block mt-2" style="font-size: 11.5px; line-height: 1.35;">
+                                                    💡 {{ __('Remaining balance due 30 days prior to departure.') }}
+                                                </small>
+                                            </div>
+                                        </div>
+
+                                        <div class="btn-box mt-3">
+                                            <button type="submit" id="tp_bookButton"
+                                                class="submit-btn w-100"
+                                                style="background: linear-gradient(135deg, #c5955b 0%, #a87940 100%); color: #fff; font-weight: 700; border-radius: 10px; padding: 14px; font-size: 16px; border: none; box-shadow: 0 4px 15px rgba(197, 149, 91, 0.35); cursor: pointer; transition: all 0.2s;">
+                                                <i class="la la-calendar-check me-1"></i>
+                                                {{ __('Book Now') }}
+                                            </button>
+                                        </div>
+                                    </form>
+                                @else
+                                        <h4 class="booking-request-title">{{ __('Select Your Booking') }}</h4>
+                                        <p class="booking-request-copy">
+                                            {{ __('Choose your travel details and an available price, then continue to checkout.') }}
+                                        </p>
+                                        <form method="get"
+                                            action="{{ route('website.checkout.show', $package->slug) }}"
+                                            id="sidebarBookingForm">
+                                            <div class="sidebar-booking-grid">
+                                                <div class="input-box"><label class="label-text"
+                                                        for="sidebar_travel_date">{{ __('Travel Date') }}</label><input
+                                                        class="form-control" id="sidebar_travel_date" type="date"
+                                                        name="travel_date" min="{{ today()->toDateString() }}" required>
+                                                </div>
+                                                <div class="input-box"><label class="label-text"
+                                                        for="sidebar_rooms">{{ $package->package_type === 'nile_cruise' ? __('Cabins') : __('Rooms') }}</label><input
+                                                        class="form-control" id="sidebar_rooms" type="number"
+                                                        name="rooms" min="1" max="20" value="1"
+                                                        required></div>
+                                                <div class="input-box"><label class="label-text"
+                                                        for="sidebar_adults">{{ __('Adults') }}</label><input
+                                                        class="form-control" id="sidebar_adults" type="number"
+                                                        name="adults" min="1" max="40" value="1"
+                                                        required></div>
+                                                <div class="input-box"><label class="label-text"
+                                                        for="sidebar_children">{{ __('Children') }}</label><input
+                                                        class="form-control" id="sidebar_children" type="number"
+                                                        name="children" min="0" max="40" value="0"
+                                                        required>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" name="infants" value="0">
+                                            <div class="sidebar-price-options">
+                                                @foreach ($bookingPricingOptions as $option)
+                                                    <label class="sidebar-price-option">
+                                                        <input type="radio" name="pricing_option"
+                                                            value="{{ $option['id'] }}"
+                                                            data-valid-from="{{ $option['valid_from'] }}"
+                                                            data-valid-to="{{ $option['valid_to'] }}"
+                                                            data-pax-min="{{ $option['pax_min'] ?? '' }}"
+                                                            data-pax-max="{{ $option['pax_max'] ?? '' }}" required>
+                                                        <span class="sidebar-price-option-card">
+                                                            <span><span
+                                                                    class="sidebar-option-name">{{ $option['label'] }}</span><span
+                                                                    class="sidebar-option-desc">{{ $option['description'] }}</span></span>
+                                                            <span
+                                                                class="sidebar-option-price">{{ $option['currency_symbol'] }}{{ number_format($option['amount'], 2) }}</span>
+                                                        </span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                            <div class="alert-danger mt-3" id="sidebarNoPrices" style="display:none">
+                                                {{ __('No booking price is available for these details.') }}</div>
+                                            <button type="submit" class="sidebar-checkout-btn"><i
+                                                    class="la la-arrow-right"></i>{{ __('Continue to Checkout') }}</button>
+                                        </form>
+                                    @endif
                             </div>
                             <div class="sidebar-content reserve-tab-panel" id="reserveEnquiryPanel" role="tabpanel"
                                 hidden>
@@ -4170,250 +4381,501 @@
         };
 
         document.addEventListener('DOMContentLoaded', function() {
-            const reserveTabs = document.querySelectorAll('[data-reserve-tab]');
-            const reserveBookingPanel = document.getElementById('reserveBookingPanel');
-            const reserveEnquiryPanel = document.getElementById('reserveEnquiryPanel');
+                    const reserveTabs = document.querySelectorAll('[data-reserve-tab]');
+                    const reserveBookingPanel = document.getElementById('reserveBookingPanel');
+                    const reserveEnquiryPanel = document.getElementById('reserveEnquiryPanel');
 
-            const activateReserveTab = (tabName) => {
-                if (!reserveBookingPanel || !reserveEnquiryPanel) return;
+                    const activateReserveTab = (tabName) => {
+                        if (!reserveBookingPanel || !reserveEnquiryPanel) return;
 
-                reserveBookingPanel.hidden = tabName !== 'booking';
-                reserveEnquiryPanel.hidden = tabName !== 'enquiry';
-                reserveTabs.forEach((button) => {
-                    const active = button.dataset.reserveTab === tabName;
-                    button.classList.toggle('is-active', active);
-                    button.setAttribute('aria-selected', active ? 'true' : 'false');
-                });
+                        reserveBookingPanel.hidden = tabName !== 'booking';
+                        reserveEnquiryPanel.hidden = tabName !== 'enquiry';
+                        reserveTabs.forEach((button) => {
+                            const active = button.dataset.reserveTab === tabName;
+                            button.classList.toggle('is-active', active);
+                            button.setAttribute('aria-selected', active ? 'true' : 'false');
+                        });
 
-                if (tabName === 'enquiry') {
-                    history.replaceState(null, '', '#enquiryFormDesktop');
-                } else if (location.hash === '#enquiryFormDesktop') {
-                    history.replaceState(null, '', location.pathname + location.search);
-                }
-            };
-
-            reserveTabs.forEach((button) => button.addEventListener('click', () => {
-                activateReserveTab(button.dataset.reserveTab);
-            }));
-
-            if (reserveTabs.length) {
-                activateReserveTab(location.hash === '#enquiryFormDesktop' ? 'enquiry' : 'booking');
-            }
-
-            const sidebarBookingForm = document.getElementById('sidebarBookingForm');
-            if (sidebarBookingForm) {
-                const travelDate = document.getElementById('sidebar_travel_date');
-                const adults = document.getElementById('sidebar_adults');
-                const children = document.getElementById('sidebar_children');
-                const noPrices = document.getElementById('sidebarNoPrices');
-
-                const refreshSidebarPrices = () => {
-                    const selectedDate = travelDate.value;
-                    const guests = Math.max(1, Number(adults.value || 1) + Number(children.value || 0));
-                    let firstAvailable = null;
-
-                    sidebarBookingForm.querySelectorAll('.sidebar-price-option').forEach((label) => {
-                        const input = label.querySelector('input[type="radio"]');
-                        const min = Number(input.dataset.paxMin || 0);
-                        const max = Number(input.dataset.paxMax || 0);
-                        const dateMatches = !selectedDate ||
-                            ((!input.dataset.validFrom || selectedDate >= input.dataset.validFrom) &&
-                                (!input.dataset.validTo || selectedDate <= input.dataset.validTo));
-                        const guestsMatch = (!min || guests >= min) && (!max || guests <= max);
-                        const available = dateMatches && guestsMatch;
-
-                        label.style.display = available ? '' : 'none';
-                        input.disabled = !available;
-                        if (available && !firstAvailable) firstAvailable = input;
-                    });
-
-                    const selected = sidebarBookingForm.querySelector(
-                        'input[name="pricing_option"]:checked:not(:disabled)');
-                    if (!selected && firstAvailable) firstAvailable.checked = true;
-                    noPrices.style.display = firstAvailable ? 'none' : 'block';
-                };
-
-                [travelDate, adults, children].forEach((input) => input.addEventListener('change',
-                    refreshSidebarPrices));
-                sidebarBookingForm.addEventListener('submit', (event) => {
-                    if (!sidebarBookingForm.querySelector(
-                            'input[name="pricing_option"]:checked:not(:disabled)')) {
-                        event.preventDefault();
-                        noPrices.style.display = 'block';
-                    }
-                });
-                refreshSidebarPrices();
-            }
-
-            const collapseTriggers = document.querySelectorAll('[data-collapse-target]');
-
-            const setCollapseState = (trigger, content, isOpen) => {
-                content.classList.toggle('open', isOpen);
-                content.classList.toggle('active', isOpen);
-                content.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
-                trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-                content.style.maxHeight = isOpen ? `${content.scrollHeight}px` : '0px';
-            };
-
-            collapseTriggers.forEach((trigger) => {
-                const content = document.getElementById(trigger.dataset.collapseTarget);
-
-                if (!content) {
-                    return;
-                }
-
-                setCollapseState(
-                    trigger,
-                    content,
-                    content.classList.contains('open') || content.classList.contains('active')
-                );
-
-                trigger.addEventListener('click', function() {
-                    setCollapseState(this, content, this.getAttribute('aria-expanded') !== 'true');
-                });
-            });
-
-            window.addEventListener('resize', function() {
-                document.querySelectorAll('.collapsible-content.open').forEach((content) => {
-                    content.style.maxHeight = `${content.scrollHeight}px`;
-                });
-            });
-
-            const mobileFixedButton = document.querySelector('.fixed-mobile-btn');
-            const footer = document.querySelector('.footer');
-
-            if (mobileFixedButton && footer) {
-                if ('IntersectionObserver' in window) {
-                    const footerObserver = new IntersectionObserver((entries) => {
-                        mobileFixedButton.classList.toggle(
-                            'is-footer-visible',
-                            entries.some((entry) => entry.isIntersecting)
-                        );
-                    }, {
-                        rootMargin: '0px 0px -24px 0px',
-                        threshold: 0
-                    });
-
-                    footerObserver.observe(footer);
-                } else {
-                    const syncMobileButtonWithFooter = () => {
-                        const footerTop = footer.getBoundingClientRect().top;
-                        mobileFixedButton.classList.toggle(
-                            'is-footer-visible',
-                            footerTop < window.innerHeight - 24
-                        );
+                        if (tabName === 'enquiry') {
+                            history.replaceState(null, '', '#enquiryFormDesktop');
+                        } else if (location.hash === '#enquiryFormDesktop') {
+                            history.replaceState(null, '', location.pathname + location.search);
+                        }
                     };
 
-                    window.addEventListener('scroll', syncMobileButtonWithFooter, {
-                        passive: true
-                    });
-                    window.addEventListener('resize', syncMobileButtonWithFooter);
-                    syncMobileButtonWithFooter();
-                }
-            }
+                    reserveTabs.forEach((button) => button.addEventListener('click', () => {
+                        activateReserveTab(button.dataset.reserveTab);
+                    }));
 
-            document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-                anchor.addEventListener('click', function(e) {
-                    const href = this.getAttribute('href');
-
-                    if (!href || href === '#' || this.hasAttribute('data-bs-toggle')) {
-                        return;
+                    if (reserveTabs.length) {
+                        activateReserveTab(location.hash === '#enquiryFormDesktop' ? 'enquiry' : 'booking');
                     }
 
-                    let target = null;
+                    const sidebarBookingForm = document.getElementById('sidebarBookingForm');
+                    if (sidebarBookingForm) {
+                        const travelDate = document.getElementById('sidebar_travel_date');
+                        const adults = document.getElementById('sidebar_adults');
+                        const children = document.getElementById('sidebar_children');
+                        const noPrices = document.getElementById('sidebarNoPrices');
 
-                    try {
-                        target = document.querySelector(href);
-                    } catch (error) {
-                        return;
+                        const refreshSidebarPrices = () => {
+                            const selectedDate = travelDate.value;
+                            const guests = Math.max(1, Number(adults.value || 1) + Number(children.value || 0));
+                            let firstAvailable = null;
+
+                            sidebarBookingForm.querySelectorAll('.sidebar-price-option').forEach((label) => {
+                                const input = label.querySelector('input[type="radio"]');
+                                const min = Number(input.dataset.paxMin || 0);
+                                const max = Number(input.dataset.paxMax || 0);
+                                const dateMatches = !selectedDate ||
+                                    ((!input.dataset.validFrom || selectedDate >= input.dataset.validFrom) &&
+                                        (!input.dataset.validTo || selectedDate <= input.dataset.validTo));
+                                const guestsMatch = (!min || guests >= min) && (!max || guests <= max);
+                                const available = dateMatches && guestsMatch;
+
+                                label.style.display = available ? '' : 'none';
+                                input.disabled = !available;
+                                if (available && !firstAvailable) firstAvailable = input;
+                            });
+
+                            const selected = sidebarBookingForm.querySelector(
+                                'input[name="pricing_option"]:checked:not(:disabled)');
+                            if (!selected && firstAvailable) firstAvailable.checked = true;
+                            noPrices.style.display = firstAvailable ? 'none' : 'block';
+                        };
+
+                        [travelDate, adults, children].forEach((input) => input.addEventListener('change',
+                            refreshSidebarPrices));
+                        sidebarBookingForm.addEventListener('submit', (event) => {
+                            if (!sidebarBookingForm.querySelector(
+                                    'input[name="pricing_option"]:checked:not(:disabled)')) {
+                                event.preventDefault();
+                                noPrices.style.display = 'block';
+                            }
+                        });
+                        refreshSidebarPrices();
                     }
 
-                    if (!target) return;
+                    const tpForm = document.getElementById('sidebarTravelPackageForm');
+                    if (tpForm) {
+                        const matrixData = @json($travelPackageMatrix['matrix'] ?? []);
+                        const accommodationsList = @json($travelPackageMatrix['accommodations'] ?? []);
+                        const currencySymbol = @json($currencySymbol ?? '$');
+                        const travelDateInput = document.getElementById('tp_travel_date');
+                        const roomsSelect = document.getElementById('tp_rooms');
+                        const roomFields = document.getElementById('tp_roomFields');
+                        const totalAdultsInput = document.getElementById('tp_totalAdults');
+                        const totalChildrenInput = document.getElementById('tp_totalChildren');
+                        const formAdultsInput = document.getElementById('tp_form_adults');
+                        const formChildrenInput = document.getElementById('tp_form_children');
+                        const priceSummaryBox = document.getElementById('tp_priceSummaryBox');
+                        const displayTotal = document.getElementById('tp_displayTotal');
+                        const displayDeposit = document.getElementById('tp_displayDeposit');
+                        const displayBalance = document.getElementById('tp_displayBalance');
 
-                    e.preventDefault();
-                    window.scrollTo({
-                        top: target.offsetTop - 90,
-                        behavior: 'smooth'
-                    });
-                });
-            });
+                        function getSelectedSeason() {
+                            const val = travelDateInput ? travelDateInput.value : '';
+                            if (!val) return 'winter';
+                            const date = new Date(val);
+                            if (isNaN(date.getTime())) return 'winter';
+                            const month = date.getMonth() + 1;
+                            return (month >= 5 && month <= 8) ? 'summer' : 'winter';
+                        }
 
-            const galleryImages = @json(array_values($gallery ?? []));
-            const lightbox = document.getElementById('galleryLightbox');
+                        function getRoomRates(accName) {
+                            const season = getSelectedSeason();
+                            if (!accName && accommodationsList.length > 0) {
+                                accName = accommodationsList[0].name;
+                            }
+                            if (accName && matrixData[accName] && matrixData[accName][season]) {
+                                return matrixData[accName][season];
+                            }
+                            if (accName) {
+                                const lower = accName.toLowerCase();
+                                for (const key of Object.keys(matrixData)) {
+                                    if (key.toLowerCase() === lower && matrixData[key][season]) {
+                                        return matrixData[key][season];
+                                    }
+                                }
+                            }
+                            const firstKey = Object.keys(matrixData)[0];
+                            if (firstKey && matrixData[firstKey][season]) {
+                                return matrixData[firstKey][season];
+                            }
+                            return { single: 0, double: 0, triple: 0 };
+                        }
 
-            if (!lightbox || !galleryImages.length) {
-                return;
-            }
+                        function calculateRoomPrice(rates, adults, children) {
+                            const single = Number(rates.single || 0);
+                            const double = Number(rates.double || 0);
+                            const triple = Number(rates.triple || 0);
 
-            const lightboxImage = document.getElementById('galleryLightboxImage');
-            const lightboxCounter = document.getElementById('galleryLightboxCounter');
-            const closeButton = document.getElementById('galleryLightboxClose');
-            const prevButton = document.getElementById('galleryLightboxPrev');
-            const nextButton = document.getElementById('galleryLightboxNext');
-            const triggers = document.querySelectorAll('.js-gallery-trigger');
-            let currentIndex = 0;
+                            if (adults === 1 && children === 0) {
+                                return single;
+                            }
+                            if (adults === 1 && (children === 1 || children === 2)) {
+                                return double * 2;
+                            }
+                            if (adults === 2) {
+                                const base = double * 2;
+                                const childRate = double * 0.50;
+                                return base + (children * childRate);
+                            }
+                            if (adults === 3) {
+                                return triple * 3;
+                            }
+                            if (triple > 0) {
+                                return (triple * adults) + (children * triple * 0.50);
+                            }
+                            return (double * adults) + (children * double * 0.50);
+                        }
 
-            const updateLightbox = () => {
-                lightboxImage.src = galleryImages[currentIndex];
-                lightboxCounter.textContent = `${currentIndex + 1} / ${galleryImages.length}`;
-                prevButton.style.display = galleryImages.length > 1 ? 'inline-flex' : 'none';
-                nextButton.style.display = galleryImages.length > 1 ? 'inline-flex' : 'none';
-            };
+                        function generateRooms() {
+                            const numRooms = parseInt(roomsSelect ? roomsSelect.value : 1, 10) || 1;
+                            const existingData = [];
+                            roomFields.querySelectorAll('.room-group-container').forEach((roomEl) => {
+                                const accEl = roomEl.querySelector('.tp-room-acc-select');
+                                const adultEl = roomEl.querySelector('.tp-adult-select');
+                                const childEl = roomEl.querySelector('.tp-child-select');
+                                if (accEl) {
+                                    existingData.push({
+                                        acc: accEl.value,
+                                        adults: parseInt(adultEl.value, 10) || 2,
+                                        children: parseInt(childEl.value, 10) || 0,
+                                    });
+                                }
+                            });
 
-            const openLightbox = (index) => {
-                currentIndex = index;
-                updateLightbox();
-                lightbox.classList.add('open');
-                lightbox.setAttribute('aria-hidden', 'false');
-                document.body.style.overflow = 'hidden';
-            };
+                            roomFields.innerHTML = '';
 
-            const closeLightbox = () => {
-                lightbox.classList.remove('open');
-                lightbox.setAttribute('aria-hidden', 'true');
-                document.body.style.overflow = '';
-            };
+                            for (let i = 1; i <= numRooms; i++) {
+                                const prev = existingData[i - 1] || {};
+                                const selectedAcc = prev.acc || (accommodationsList[0]?.name || 'Standard');
+                                const selectedAdults = prev.adults !== undefined ? prev.adults : (i === 1 ? 2 : 1);
+                                const selectedChildren = prev.children !== undefined ? prev.children : 0;
 
-            const showNext = () => {
-                currentIndex = (currentIndex + 1) % galleryImages.length;
-                updateLightbox();
-            };
+                                let accOptions = '';
+                                accommodationsList.forEach((a) => {
+                                    const isSel = a.name === selectedAcc ? 'selected' : '';
+                                    accOptions += `<option value="${a.name}" ${isSel}>${a.name}</option>`;
+                                });
 
-            const showPrev = () => {
-                currentIndex = (currentIndex - 1 + galleryImages.length) % galleryImages.length;
-                updateLightbox();
-            };
+                                const roomHtml = `
+                                    <div class="room-group-container mb-2 p-3 rounded" style="background: #fff; border: 1px solid rgba(28, 50, 92, 0.12); box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                                        <div class="room-header d-flex justify-content-between align-items-center mb-2" style="border-bottom: 1px dashed rgba(28, 50, 92, 0.1); padding-bottom: 6px;">
+                                            <h6 class="room-title mb-0" style="font-weight: 700; color: #1c325c; font-size: 14.5px;">{{ __('Room') }} ${i}</h6>
+                                            <span class="room-price-badge" id="tp_room_${i}_priceTag">$0.00</span>
+                                        </div>
+                                        <div class="input-box mb-2">
+                                            <label class="room-inline-label" style="font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block;">{{ __('Accommodations Type') }} *</label>
+                                            <select name="room_${i}_accommodation" class="form-select select-inline tp-room-acc-select" required style="border-radius: 8px; font-size: 13px; height: 38px;">
+                                                ${accOptions}
+                                            </select>
+                                        </div>
+                                        <div class="room-inline-row d-flex gap-2">
+                                            <div class="room-inline-option flex-fill">
+                                                <label class="room-inline-label" style="font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block;">{{ __('Adults') }} <span class="age-info">(+12)</span></label>
+                                                <select name="room_${i}_adults" class="form-select select-inline tp-adult-select" autocomplete="off" style="border-radius: 8px; font-size: 13px; height: 38px;">
+                                                    <option value="1" ${selectedAdults === 1 ? 'selected' : ''}>1</option>
+                                                    <option value="2" ${selectedAdults === 2 ? 'selected' : ''}>2</option>
+                                                    <option value="3" ${selectedAdults === 3 ? 'selected' : ''}>3</option>
+                                                </select>
+                                            </div>
+                                            <div class="room-inline-option flex-fill">
+                                                <label class="room-inline-label" style="font-size: 12px; font-weight: 600; color: #4b5563; margin-bottom: 4px; display: block;">{{ __('Children') }} <span class="age-info">(2-11)</span></label>
+                                                <select name="room_${i}_children" class="form-select select-inline tp-child-select" autocomplete="off" style="border-radius: 8px; font-size: 13px; height: 38px;">
+                                                    <option value="0" ${selectedChildren === 0 ? 'selected' : ''}>0</option>
+                                                    <option value="1" ${selectedChildren === 1 ? 'selected' : ''}>1</option>
+                                                    <option value="2" ${selectedChildren === 2 ? 'selected' : ''}>2</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                                roomFields.insertAdjacentHTML('beforeend', roomHtml);
+                            }
 
-            triggers.forEach((trigger) => {
-                trigger.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    openLightbox(Number(this.dataset.galleryIndex || 0));
-                });
-            });
+                            recalculateAllPrices();
+                        }
 
-            closeButton.addEventListener('click', closeLightbox);
-            nextButton.addEventListener('click', showNext);
-            prevButton.addEventListener('click', showPrev);
+                        function recalculateAllPrices() {
+                            let totalPkgPrice = 0;
+                            let totalA = 0;
+                            let totalC = 0;
 
-            lightbox.addEventListener('click', function(e) {
-                if (e.target === lightbox) {
-                    closeLightbox();
-                }
-            });
+                            roomFields.querySelectorAll('.room-group-container').forEach((roomEl, idx) => {
+                                const i = idx + 1;
+                                const accSel = roomEl.querySelector('.tp-room-acc-select');
+                                const adultSel = roomEl.querySelector('.tp-adult-select');
+                                const childSel = roomEl.querySelector('.tp-child-select');
+                                const priceTag = roomEl.querySelector(`#tp_room_${i}_priceTag`);
+                                if (!accSel || !adultSel || !childSel) return;
 
-            document.addEventListener('keydown', function(e) {
-                if (!lightbox.classList.contains('open')) {
-                    return;
-                }
+                                const accName = accSel.value;
+                                const rates = getRoomRates(accName);
+                                const maxGuests = Number(rates.triple || 0) > 0 ? 3 : 2;
 
-                if (e.key === 'Escape') {
-                    closeLightbox();
-                } else if (e.key === 'ArrowRight') {
-                    showNext();
-                } else if (e.key === 'ArrowLeft') {
-                    showPrev();
-                }
-            });
-        });
+                                let a = parseInt(adultSel.value, 10) || 1;
+                                let c = parseInt(childSel.value, 10) || 0;
+
+                                if (a + c > maxGuests) {
+                                    c = Math.max(0, maxGuests - a);
+                                    childSel.value = c;
+                                }
+
+                                const rPrice = calculateRoomPrice(rates, a, c);
+                                if (priceTag) {
+                                    priceTag.textContent = `${currencySymbol}${rPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+                                }
+
+                                totalPkgPrice += rPrice;
+                                totalA += a;
+                                totalC += c;
+                            });
+
+                            if (totalAdultsInput) totalAdultsInput.value = totalA;
+                            if (totalChildrenInput) totalChildrenInput.value = totalC;
+                            if (formAdultsInput) formAdultsInput.value = totalA;
+                            if (formChildrenInput) formChildrenInput.value = totalC;
+
+                            if (totalPkgPrice > 0) {
+                                const deposit = totalPkgPrice * 0.5;
+                                const balance = totalPkgPrice - deposit;
+
+                                if (displayTotal) {
+                                    displayTotal.textContent = `${currencySymbol}${totalPkgPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+                                }
+                                if (displayDeposit) {
+                                    displayDeposit.textContent = `${currencySymbol}${deposit.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+                                }
+                                if (displayBalance) {
+                                    displayBalance.textContent = `${currencySymbol}${balance.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+                                }
+                                if (priceSummaryBox) {
+                                    priceSummaryBox.style.display = 'block';
+                                }
+                            } else if (priceSummaryBox) {
+                                priceSummaryBox.style.display = 'none';
+                            }
+                        }
+
+                        if (travelDateInput) {
+                            travelDateInput.addEventListener('change', recalculateAllPrices);
+                        }
+                        if (roomsSelect) {
+                            roomsSelect.addEventListener('change', generateRooms);
+                        }
+
+                        roomFields.addEventListener('change', (e) => {
+                            if (e.target.matches('.tp-room-acc-select, .tp-adult-select, .tp-child-select')) {
+                                recalculateAllPrices();
+                            }
+                        });
+
+                        tpForm.addEventListener('submit', (e) => {
+                            if (travelDateInput && !travelDateInput.value) {
+                                e.preventDefault();
+                                travelDateInput.focus();
+                                return;
+                            }
+                            if (roomsSelect && !roomsSelect.value) {
+                                e.preventDefault();
+                                const roomErr = document.getElementById('tp_roomError');
+                                if (roomErr) roomErr.style.display = 'block';
+                                roomsSelect.focus();
+                                return;
+                            }
+                            recalculateAllPrices();
+                        });
+
+                        generateRooms();
+                    }
+
+                    const collapseTriggers = document.querySelectorAll(
+                                                    '[data-collapse-target]');
+
+                                                const setCollapseState = (trigger, content, isOpen) => {
+                                                    content.classList.toggle('open', isOpen);
+                                                    content.classList.toggle('active', isOpen);
+                                                    content.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+                                                    trigger.setAttribute('aria-expanded', isOpen ? 'true' :
+                                                    'false');
+                                                    content.style.maxHeight = isOpen ? `${content.scrollHeight}px` :
+                                                        '0px';
+                                                };
+
+                                                collapseTriggers.forEach((trigger) => {
+                                                    const content = document.getElementById(trigger.dataset
+                                                        .collapseTarget);
+
+                                                    if (!content) {
+                                                        return;
+                                                    }
+
+                                                    setCollapseState(
+                                                        trigger,
+                                                        content,
+                                                        content.classList.contains('open') || content.classList
+                                                        .contains('active')
+                                                    );
+
+                                                    trigger.addEventListener('click', function() {
+                                                        setCollapseState(this, content, this.getAttribute(
+                                                            'aria-expanded') !== 'true');
+                                                    });
+                                                });
+
+                                                window.addEventListener('resize', function() {
+                                                    document.querySelectorAll('.collapsible-content.open').forEach((
+                                                        content) => {
+                                                        content.style.maxHeight =
+                                                            `${content.scrollHeight}px`;
+                                                    });
+                                                });
+
+                                                const mobileFixedButton = document.querySelector('.fixed-mobile-btn');
+                                                const footer = document.querySelector('.footer');
+
+                                                if (mobileFixedButton && footer) {
+                                                    if ('IntersectionObserver' in window) {
+                                                        const footerObserver = new IntersectionObserver((entries) => {
+                                                            mobileFixedButton.classList.toggle(
+                                                                'is-footer-visible',
+                                                                entries.some((entry) => entry
+                                                                    .isIntersecting)
+                                                            );
+                                                        }, {
+                                                            rootMargin: '0px 0px -24px 0px',
+                                                            threshold: 0
+                                                        });
+
+                                                        footerObserver.observe(footer);
+                                                    } else {
+                                                        const syncMobileButtonWithFooter = () => {
+                                                            const footerTop = footer.getBoundingClientRect().top;
+                                                            mobileFixedButton.classList.toggle(
+                                                                'is-footer-visible',
+                                                                footerTop < window.innerHeight - 24
+                                                            );
+                                                        };
+
+                                                        window.addEventListener('scroll', syncMobileButtonWithFooter, {
+                                                            passive: true
+                                                        });
+                                                        window.addEventListener('resize', syncMobileButtonWithFooter);
+                                                        syncMobileButtonWithFooter();
+                                                    }
+                                                }
+
+                                                document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+                                                    anchor.addEventListener('click', function(e) {
+                                                        const href = this.getAttribute('href');
+
+                                                        if (!href || href === '#' || this.hasAttribute(
+                                                                'data-bs-toggle')) {
+                                                            return;
+                                                        }
+
+                                                        let target = null;
+
+                                                        try {
+                                                            target = document.querySelector(href);
+                                                        } catch (error) {
+                                                            return;
+                                                        }
+
+                                                        if (!target) return;
+
+                                                        e.preventDefault();
+                                                        window.scrollTo({
+                                                            top: target.offsetTop - 90,
+                                                            behavior: 'smooth'
+                                                        });
+                                                    });
+                                                });
+
+                                                const galleryImages = @json(array_values($gallery ?? []));
+                                                const lightbox = document.getElementById('galleryLightbox');
+
+                                                if (!lightbox || !galleryImages.length) {
+                                                    return;
+                                                }
+
+                                                const lightboxImage = document.getElementById('galleryLightboxImage');
+                                                const lightboxCounter = document.getElementById(
+                                                    'galleryLightboxCounter');
+                                                const closeButton = document.getElementById('galleryLightboxClose');
+                                                const prevButton = document.getElementById('galleryLightboxPrev');
+                                                const nextButton = document.getElementById('galleryLightboxNext');
+                                                const triggers = document.querySelectorAll('.js-gallery-trigger');
+                                                let currentIndex = 0;
+
+                                                const updateLightbox = () => {
+                                                    lightboxImage.src = galleryImages[currentIndex];
+                                                    lightboxCounter.textContent =
+                                                        `${currentIndex + 1} / ${galleryImages.length}`;
+                                                    prevButton.style.display = galleryImages.length > 1 ?
+                                                        'inline-flex' : 'none';
+                                                    nextButton.style.display = galleryImages.length > 1 ?
+                                                        'inline-flex' : 'none';
+                                                };
+
+                                                const openLightbox = (index) => {
+                                                    currentIndex = index;
+                                                    updateLightbox();
+                                                    lightbox.classList.add('open');
+                                                    lightbox.setAttribute('aria-hidden', 'false');
+                                                    document.body.style.overflow = 'hidden';
+                                                };
+
+                                                const closeLightbox = () => {
+                                                    lightbox.classList.remove('open');
+                                                    lightbox.setAttribute('aria-hidden', 'true');
+                                                    document.body.style.overflow = '';
+                                                };
+
+                                                const showNext = () => {
+                                                    currentIndex = (currentIndex + 1) % galleryImages.length;
+                                                    updateLightbox();
+                                                };
+
+                                                const showPrev = () => {
+                                                    currentIndex = (currentIndex - 1 + galleryImages.length) %
+                                                        galleryImages.length;
+                                                    updateLightbox();
+                                                };
+
+                                                triggers.forEach((trigger) => {
+                                                    trigger.addEventListener('click', function(e) {
+                                                        e.preventDefault();
+                                                        openLightbox(Number(this.dataset.galleryIndex ||
+                                                        0));
+                                                    });
+                                                });
+
+                                                closeButton.addEventListener('click', closeLightbox); nextButton
+                                                .addEventListener('click', showNext); prevButton.addEventListener(
+                                                    'click', showPrev);
+
+                                                lightbox.addEventListener('click', function(e) {
+                                                    if (e.target === lightbox) {
+                                                        closeLightbox();
+                                                    }
+                                                });
+
+                                                document.addEventListener('keydown', function(e) {
+                                                    if (!lightbox.classList.contains('open')) {
+                                                        return;
+                                                    }
+
+                                                    if (e.key === 'Escape') {
+                                                        closeLightbox();
+                                                    } else if (e.key === 'ArrowRight') {
+                                                        showNext();
+                                                    } else if (e.key === 'ArrowLeft') {
+                                                        showPrev();
+                                                    }
+                                                });
+                                            });
     </script>
 @endsection
