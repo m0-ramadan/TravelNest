@@ -4,8 +4,13 @@
 @section('description', $overviewText ?? $heroSubtitle)
 @section('keywords',
     trim(
-    collect([$pageTitle ?? __('Destinations'), 'Etro Tours', 'Egypt destinations', 'travel
-    experiences'])->filter()->implode(', '),
+    collect([
+    $pageTitle ?? __('Destinations'),
+    'Etro Tours',
+    'Egypt destinations',
+    'travel
+    experiences',
+    ])->filter()->implode(', '),
     ', ',
     ))
 @section('image', $heroImage)
@@ -744,124 +749,7 @@
             border-bottom: none;
         }
 
-        /* CTA Section - Matching Homepage */
-        .luxury-cta-section {
-            background: var(--gradient-hero);
-            padding: 70px 0;
-            position: relative;
-            overflow: hidden;
-            border-top: 1px solid rgba(197, 149, 91, 0.3);
-        }
 
-        .luxury-cta-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20" fill="none"><path d="M0 10L10 0L20 10L30 0L40 10L50 0L60 10L70 0L80 10L90 0L100 10V20H0V10Z" fill="rgba(197,149,91,0.1)"/></svg>') repeat-x;
-            opacity: 0.3;
-        }
-
-        .luxury-cta-content {
-            position: relative;
-            z-index: 2;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            border-radius: 25px;
-            padding: 50px;
-            border: 1px solid rgba(197, 149, 91, 0.3);
-            box-shadow: var(--shadow-dramatic);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 30px;
-        }
-
-        .cta-icon-container {
-            width: 80px;
-            height: 80px;
-            background: var(--gradient-gold);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.2rem;
-            color: var(--primary-navy);
-            box-shadow: var(--shadow-gold);
-            flex-shrink: 0;
-        }
-
-        .cta-content-wrapper {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 30px;
-        }
-
-        .cta-text-content {
-            flex: 1;
-            min-width: 300px;
-        }
-
-        .cta-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 15px;
-        }
-
-        .cta-subtitle {
-            font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 20px;
-        }
-
-        .trust-features {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .trust-feature {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: white;
-            font-size: 0.95rem;
-        }
-
-        .trust-feature i {
-            color: var(--rich-gold);
-            font-size: 1.1rem;
-        }
-
-        .luxury-cta-btn {
-            background: var(--gradient-gold);
-            color: var(--primary-navy);
-            padding: 16px 35px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1.1rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow-gold);
-            white-space: nowrap;
-        }
-
-        .luxury-cta-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(197, 149, 91, 0.4);
-            color: var(--primary-navy);
-        }
 
         /* Mobile WhatsApp Button */
         .fixed-mobile-btn {
@@ -919,54 +807,6 @@
         .pagination-wrap svg {
             width: 18px;
             height: 18px;
-        }
-
-        @media (max-width: 768px) {
-            .luxury-cta-content {
-                padding: 40px;
-            }
-
-            .cta-title {
-                font-size: 1.8rem;
-            }
-
-            .cta-content-wrapper {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .trust-features {
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .luxury-cta-section {
-                padding: 50px 0;
-            }
-
-            .luxury-cta-content {
-                padding: 30px;
-            }
-
-            .cta-title {
-                font-size: 1.6rem;
-            }
-
-            .cta-subtitle {
-                font-size: 1rem;
-            }
-
-            .trust-feature {
-                font-size: 0.9rem;
-            }
-
-            .luxury-cta-btn {
-                padding: 14px 25px;
-                font-size: 1rem;
-                width: 100%;
-                justify-content: center;
-            }
         }
     </style>
 @endsection

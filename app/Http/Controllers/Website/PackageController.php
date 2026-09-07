@@ -12,7 +12,16 @@ class PackageController extends BaseWebsiteController
 {
     public function index(Request $request): View
     {
+        $selectedType = $request->input('type');
         $duration = $request->input('duration') ?: $request->input('days');
+        $destinationSlug = trim((string) ($request->input('destination') ?: $request->input('city', '')));
+        $search = trim((string) $request->input('q', ''));
+        $category = trim((string) $request->input('category', ''));
+
+        if ($selectedType === 'travel_package' && !$duration && $destinationSlug === '' && $search === '' && $category === '') {
+            return app(TravelPackageController::class)->index($request);
+        }
+
         $durationTitle = $duration ? __(':days Days Egypt Travel Packages', ['days' => $duration]) : __('Egypt Travel Packages');
         $durationSubtitle = $duration
             ? __('Browse our handpicked :days-day private Egypt vacation packages and itineraries.', ['days' => $duration])
