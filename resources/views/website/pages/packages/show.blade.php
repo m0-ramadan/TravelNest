@@ -1277,6 +1277,110 @@
             padding: 7px
         }
 
+        .day-tour-booking-form .day-tour-date-wrap {
+            position: relative
+        }
+
+        .day-tour-booking-form .day-tour-date-display {
+            cursor: pointer;
+            padding-left: 44px
+        }
+
+        .day-tour-calendar {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            z-index: 30;
+            width: min(310px, 100%);
+            padding: 14px;
+            border: 1px solid #e5bd72;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 14px 35px rgba(28, 50, 92, .18)
+        }
+
+        .day-tour-calendar[hidden] {
+            display: none
+        }
+
+        .day-tour-calendar-header {
+            display: grid;
+            grid-template-columns: 34px 1fr 34px;
+            align-items: center;
+            margin-bottom: 10px
+        }
+
+        .day-tour-calendar-title {
+            color: #34445a;
+            font-size: .86rem;
+            font-weight: 800;
+            text-align: center
+        }
+
+        .day-tour-calendar-nav {
+            border: 0;
+            background: transparent;
+            color: #1c325c;
+            font-size: 1.25rem;
+            cursor: pointer
+        }
+
+        .day-tour-calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
+            text-align: center
+        }
+
+        .day-tour-calendar-weekday {
+            padding: 5px 0;
+            color: #34445a;
+            font-size: .72rem;
+            font-weight: 800
+        }
+
+        .day-tour-calendar-day {
+            width: 34px;
+            height: 34px;
+            margin: auto;
+            border: 0;
+            border-radius: 5px;
+            background: transparent;
+            color: #34445a;
+            font-size: .78rem;
+            cursor: pointer
+        }
+
+        .day-tour-calendar-day:hover,
+        .day-tour-calendar-day.is-selected {
+            background: #3b86bd;
+            color: #fff
+        }
+
+        .day-tour-calendar-day:disabled,
+        .day-tour-calendar-day.is-outside {
+            color: #aaa;
+            cursor: not-allowed;
+            text-decoration: line-through;
+            background: transparent
+        }
+
+        .day-tour-quantity-list {
+            margin-top: 14px
+        }
+
+        .day-tour-quantity-list .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px
+        }
+
+        .day-tour-quantity-list .quantity-control label,
+        .day-tour-quantity-list .qty-buttons {
+            margin: 0
+        }
+
         .trust-indicators {
             display: grid;
             grid-template-columns: 1fr;
@@ -4240,6 +4344,79 @@
                                             </button>
                                         </div>
                                     </form>
+                                @elseif ($package->package_type === 'day_tour')
+                                    <h4 class="booking-request-title">{{ __('Select Your Booking') }}</h4>
+                                    <form method="get"
+                                        action="{{ route('website.checkout.show', $package->slug) }}"
+                                        id="sidebarBookingForm" class="day-tour-booking-form"
+                                        data-operating-days='@json($operatingDays->values())'
+                                        data-min-date="{{ today()->toDateString() }}">
+                                        <div class="input-box">
+                                            <label class="label-text" for="day_tour_date_display">{{ __('Date') }} *</label>
+                                            <div class="form-group day-tour-date-wrap">
+                                                <span class="la la-calendar form-icon"></span>
+                                                <input id="day_tour_date_display" class="form-control day-tour-date-display"
+                                                    type="text" autocomplete="off" placeholder="{{ __('Travel Date') }}"
+                                                    readonly required aria-haspopup="dialog" aria-expanded="false">
+                                                <input id="sidebar_travel_date" type="hidden" name="travel_date">
+                                                <div class="day-tour-calendar" id="dayTourCalendar" role="dialog"
+                                                    aria-label="{{ __('Choose an available travel date') }}" hidden>
+                                                    <div class="day-tour-calendar-header">
+                                                        <button type="button" class="day-tour-calendar-nav" data-calendar-prev
+                                                            aria-label="{{ __('Previous month') }}">‹</button>
+                                                        <div class="day-tour-calendar-title" aria-live="polite"></div>
+                                                        <button type="button" class="day-tour-calendar-nav" data-calendar-next
+                                                            aria-label="{{ __('Next month') }}">›</button>
+                                                    </div>
+                                                    <div class="day-tour-calendar-grid"></div>
+                                                </div>
+                                            </div>
+                                            <small class="text-danger d-none" id="dayTourDateError">
+                                                {{ __('Please choose an available travel date.') }}
+                                            </small>
+                                        </div>
+
+                                        <div class="day-tour-quantity-list">
+                                            <div class="quantity-control">
+                                                <label for="sidebar_adults">{{ __('Adults (12+ years)') }}</label>
+                                                <div class="qty-buttons">
+                                                    <button type="button" class="qty-btn" onclick="changeQty('sidebar_adults', -1)" aria-label="{{ __('Decrease adults') }}">−</button>
+                                                    <input type="number" id="sidebar_adults" name="adults" class="qty-input" value="2" min="1" max="40" readonly>
+                                                    <button type="button" class="qty-btn" onclick="changeQty('sidebar_adults', 1)" aria-label="{{ __('Increase adults') }}">+</button>
+                                                </div>
+                                            </div>
+                                            <div class="quantity-control">
+                                                <label for="sidebar_children">{{ __('Children (2–11 years)') }}</label>
+                                                <div class="qty-buttons">
+                                                    <button type="button" class="qty-btn" onclick="changeQty('sidebar_children', -1)" aria-label="{{ __('Decrease children') }}">−</button>
+                                                    <input type="number" id="sidebar_children" name="children" class="qty-input" value="0" min="0" max="40" readonly>
+                                                    <button type="button" class="qty-btn" onclick="changeQty('sidebar_children', 1)" aria-label="{{ __('Increase children') }}">+</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <input type="hidden" name="rooms" value="1">
+                                        <input type="hidden" name="infants" value="0">
+                                        <div class="sidebar-price-options">
+                                            @foreach ($bookingPricingOptions as $option)
+                                                <label class="sidebar-price-option">
+                                                    <input type="radio" name="pricing_option" value="{{ $option['id'] }}"
+                                                        data-valid-from="{{ $option['valid_from'] }}"
+                                                        data-valid-to="{{ $option['valid_to'] }}"
+                                                        data-pax-min="{{ $option['pax_min'] ?? '' }}"
+                                                        data-pax-max="{{ $option['pax_max'] ?? '' }}" required>
+                                                    <span class="sidebar-price-option-card">
+                                                        <span><span class="sidebar-option-name">{{ $option['label'] }}</span><span class="sidebar-option-desc">{{ $option['description'] }}</span></span>
+                                                        <span class="sidebar-option-price">{{ $option['currency_symbol'] }}{{ number_format($option['amount'], 2) }}</span>
+                                                    </span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                        <div class="alert-danger mt-3" id="sidebarNoPrices" style="display:none">
+                                            {{ __('No booking price is available for these details.') }}
+                                        </div>
+                                        <button type="submit" class="sidebar-checkout-btn"><i class="la la-calendar-check"></i>{{ __('Book Now') }}</button>
+                                    </form>
                                 @else
                                         <h4 class="booking-request-title">{{ __('Select Your Booking') }}</h4>
                                         <p class="booking-request-copy">
@@ -4377,7 +4554,9 @@
             if (!input) return;
             const min = parseInt(input.getAttribute('min') || '0');
             const current = parseInt(input.value || min);
-            input.value = Math.max(min, current + amount);
+            const max = parseInt(input.getAttribute('max') || '999');
+            input.value = Math.min(max, Math.max(min, current + amount));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
         };
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -4418,6 +4597,84 @@
                         const children = document.getElementById('sidebar_children');
                         const noPrices = document.getElementById('sidebarNoPrices');
 
+                        const calendar = document.getElementById('dayTourCalendar');
+                        if (calendar) {
+                            const displayInput = document.getElementById('day_tour_date_display');
+                            const dateError = document.getElementById('dayTourDateError');
+                            const minDateParts = sidebarBookingForm.dataset.minDate.split('-').map(Number);
+                            const minDate = new Date(minDateParts[0], minDateParts[1] - 1, minDateParts[2]);
+                            const selectedDays = JSON.parse(sidebarBookingForm.dataset.operatingDays || '[]')
+                                .map(day => String(day).trim().toLowerCase()).filter(Boolean);
+                            const daily = !selectedDays.length || selectedDays.some(day => ['daily', 'everyday', 'every day', 'all'].includes(day));
+                            const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                            const allowedIndexes = selectedDays.map(day => weekdays.findIndex(name => name === day || name.slice(0, 3) === day.slice(0, 3))).filter(index => index >= 0);
+                            const title = calendar.querySelector('.day-tour-calendar-title');
+                            const grid = calendar.querySelector('.day-tour-calendar-grid');
+                            let viewedMonth = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+
+                            const toIso = date => [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
+                            const isAvailable = date => date >= minDate && (daily || allowedIndexes.includes(date.getDay()));
+                            const renderCalendar = () => {
+                                const locale = document.documentElement.lang || 'en';
+                                title.textContent = viewedMonth.toLocaleDateString(locale, { month: 'short', year: 'numeric' });
+                                grid.innerHTML = '';
+                                weekdays.forEach((day, index) => {
+                                    const label = document.createElement('div');
+                                    label.className = 'day-tour-calendar-weekday';
+                                    const sample = new Date(2026, 7, 2 + index);
+                                    label.textContent = sample.toLocaleDateString(locale, { weekday: 'short' }).slice(0, 2);
+                                    grid.appendChild(label);
+                                });
+
+                                const first = new Date(viewedMonth.getFullYear(), viewedMonth.getMonth(), 1);
+                                const start = new Date(first);
+                                start.setDate(1 - first.getDay());
+                                for (let offset = 0; offset < 42; offset++) {
+                                    const date = new Date(start);
+                                    date.setDate(start.getDate() + offset);
+                                    const button = document.createElement('button');
+                                    button.type = 'button';
+                                    button.className = 'day-tour-calendar-day';
+                                    button.textContent = date.getDate();
+                                    button.dataset.date = toIso(date);
+                                    if (date.getMonth() !== viewedMonth.getMonth()) button.classList.add('is-outside');
+                                    if (!isAvailable(date) || date.getMonth() !== viewedMonth.getMonth()) button.disabled = true;
+                                    if (travelDate.value === button.dataset.date) button.classList.add('is-selected');
+                                    button.addEventListener('click', () => {
+                                        travelDate.value = button.dataset.date;
+                                        displayInput.value = date.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
+                                        displayInput.setAttribute('aria-expanded', 'false');
+                                        calendar.hidden = true;
+                                        dateError?.classList.add('d-none');
+                                        travelDate.dispatchEvent(new Event('change', { bubbles: true }));
+                                    });
+                                    grid.appendChild(button);
+                                }
+                            };
+
+                            displayInput.addEventListener('click', () => {
+                                calendar.hidden = !calendar.hidden;
+                                displayInput.setAttribute('aria-expanded', calendar.hidden ? 'false' : 'true');
+                                if (!calendar.hidden) renderCalendar();
+                            });
+                            calendar.querySelector('[data-calendar-prev]').addEventListener('click', () => {
+                                const previous = new Date(viewedMonth.getFullYear(), viewedMonth.getMonth() - 1, 1);
+                                if (previous >= new Date(minDate.getFullYear(), minDate.getMonth(), 1)) viewedMonth = previous;
+                                renderCalendar();
+                            });
+                            calendar.querySelector('[data-calendar-next]').addEventListener('click', () => {
+                                viewedMonth = new Date(viewedMonth.getFullYear(), viewedMonth.getMonth() + 1, 1);
+                                renderCalendar();
+                            });
+                            document.addEventListener('click', event => {
+                                if (!calendar.hidden && !event.target.closest('.day-tour-date-wrap')) {
+                                    calendar.hidden = true;
+                                    displayInput.setAttribute('aria-expanded', 'false');
+                                }
+                            });
+                            renderCalendar();
+                        }
+
                         const refreshSidebarPrices = () => {
                             const selectedDate = travelDate.value;
                             const guests = Math.max(1, Number(adults.value || 1) + Number(children.value || 0));
@@ -4447,6 +4704,11 @@
                         [travelDate, adults, children].forEach((input) => input.addEventListener('change',
                             refreshSidebarPrices));
                         sidebarBookingForm.addEventListener('submit', (event) => {
+                            if (calendar && !travelDate.value) {
+                                event.preventDefault();
+                                document.getElementById('dayTourDateError')?.classList.remove('d-none');
+                                return;
+                            }
                             if (!sidebarBookingForm.querySelector(
                                     'input[name="pricing_option"]:checked:not(:disabled)')) {
                                 event.preventDefault();

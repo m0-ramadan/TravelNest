@@ -262,6 +262,8 @@ class PackageBookingService
         array $roomsData = [],
         ?string $accommodation = null,
     ): array {
+        $this->validateOperatingDay($package, $travelDate);
+
         if (
             \Illuminate\Support\Str::startsWith($optionId, 'travel_package')
             || ($package->package_type === 'travel_package' && ! empty($roomsData) && ($accommodation || $package->tourPackageAccommodations->isNotEmpty()))
@@ -352,6 +354,40 @@ class PackageBookingService
             'quantity' => $option['price_unit'] === 'per_room' ? $rooms : max(1, $payingTravellers),
             'total' => round($total, 2),
         ];
+    }
+
+    /**
+     * Day tours may only be booked on the weekdays selected in the package
+     * editor. Empty schedules and legacy "daily" values mean every day.
+     */
+    public function validateOperatingDay(Package $package, CarbonInterface|string $travelDate): void
+    {
+        if ($package->package_type !== 'day_tour') {
+            return;
+        }
+
+        $operatingDays = collect((array) $package->operating_days)
+            ->map(fn ($day) => strtolower(trim((string) $day)))
+            ->filter()
+            ->values();
+
+        if (
+            $operatingDays->isEmpty()
+            || $operatingDays->contains(fn ($day) => in_array($day, ['daily', 'everyday', 'every day', 'all'], true))
+        ) {
+            return;
+        }
+
+        $selectedDay = strtolower(Carbon::parse($travelDate)->englishDayOfWeek);
+        $isAvailable = $operatingDays->contains(function ($day) use ($selectedDay) {
+            return $day === $selectedDay || substr($day, 0, 3) === substr($selectedDay, 0, 3);
+        });
+
+        if (! $isAvailable) {
+            throw ValidationException::withMessages([
+                'travel_date' => __('This tour is not available on the selected date. Please choose an operating day.'),
+            ]);
+        }
     }
 
     public function paymentMethods(Package $package): Collection

@@ -68,6 +68,73 @@ class WebsiteCheckoutTest extends TestCase
         $this->assertMatchesRegularExpression('/value="category"\s+checked/', $response->getContent());
     }
 
+    public function test_day_tour_booking_calendar_receives_the_configured_operating_days(): void
+    {
+        $package = $this->package([
+            'package_type' => 'day_tour',
+            'adult_price' => 100,
+            'child_price' => 50,
+            'operating_days' => ['wednesday'],
+        ]);
+
+        $this->get(route('website.packages.show.simple', $package->slug))
+            ->assertOk()
+            ->assertSee('id="dayTourCalendar"', false)
+            ->assertSee('id="sidebar_adults"', false)
+            ->assertSee('Adults (12+ years)')
+            ->assertSee('Children (2–11 years)')
+            ->assertSee('data-operating-days=', false)
+            ->assertSee('wednesday');
+    }
+
+    public function test_day_tour_quote_rejects_a_date_outside_its_operating_days(): void
+    {
+        $package = $this->package([
+            'package_type' => 'day_tour',
+            'adult_price' => 100,
+            'operating_days' => ['wednesday'],
+        ]);
+        $package = app(PackageBookingService::class)->loadForCheckout($package->slug);
+        $unavailableDate = now()->next('Thursday')->toDateString();
+
+        try {
+            app(PackageBookingService::class)->quote(
+                $package,
+                'category',
+                $unavailableDate,
+                2,
+                0,
+                0,
+                1,
+            );
+            $this->fail('An unavailable weekday was accepted.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('travel_date', $exception->errors());
+        }
+    }
+
+    public function test_daily_day_tour_accepts_any_future_weekday(): void
+    {
+        $package = $this->package([
+            'package_type' => 'day_tour',
+            'adult_price' => 100,
+            'operating_days' => ['daily'],
+        ]);
+        $package = app(PackageBookingService::class)->loadForCheckout($package->slug);
+
+        $quote = app(PackageBookingService::class)->quote(
+            $package,
+            'category',
+            now()->next('Thursday')->toDateString(),
+            2,
+            0,
+            0,
+            1,
+        );
+
+        $this->assertSame(200.0, $quote['total']);
+    }
+
     public function test_checkout_recalculates_total_and_creates_travelers_before_paymob_redirect(): void
     {
         $this->configurePaymob();
