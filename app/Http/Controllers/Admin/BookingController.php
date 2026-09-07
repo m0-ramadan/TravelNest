@@ -31,8 +31,8 @@ class BookingController extends Controller
                         });
                 });
             })
-            ->when($request->filled('package_id'), fn ($q) => $q->where('package_id', $request->integer('package_id')))
-            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->input('status')))
+            ->when($request->filled('package_id'), fn($q) => $q->where('package_id', $request->integer('package_id')))
+            ->when($request->filled('status'), fn($q) => $q->where('status', $request->input('status')))
             ->latest()
             ->paginate($this->perPage($request));
 
@@ -110,9 +110,11 @@ class BookingController extends Controller
         if ($booking->payments()->exists()) {
             $factor = (int) config('services.paymob.minor_unit_factor', 100);
 
-            if (Money::toMinor((string) $data['total_amount'], $factor)
-                    !== Money::toMinor((string) $booking->total_amount, $factor)
-                || strtoupper($data['currency_code']) !== strtoupper((string) $booking->currency_code)) {
+            if (
+                Money::toMinor((string) $data['total_amount'], $factor)
+                !== Money::toMinor((string) $booking->total_amount, $factor)
+                || strtoupper($data['currency_code']) !== strtoupper((string) $booking->currency_code)
+            ) {
                 return back()
                     ->withInput()
                     ->with('error', 'Total amount and currency cannot change after a payment attempt exists.');
