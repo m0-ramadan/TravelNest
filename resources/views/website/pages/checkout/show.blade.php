@@ -562,10 +562,14 @@
                                         id="travel_date" name="travel_date" type="date"
                                         min="{{ today()->toDateString() }}"
                                         value="{{ old('travel_date', request('travel_date')) }}" required></div>
-                                <div class="checkout-field"><label
-                                        for="rooms">{{ $package->package_type === 'nile_cruise' ? __('Number of Cabins') : __('Number of Rooms') }}
-                                        *</label><input id="rooms" name="rooms" type="number" min="1"
-                                        max="20" value="{{ old('rooms', request('rooms', 1)) }}" required></div>
+                                @if ($package->package_type === 'day_tour')
+                                    <input id="rooms" name="rooms" type="hidden" value="1">
+                                @else
+                                    <div class="checkout-field"><label
+                                            for="rooms">{{ $package->package_type === 'nile_cruise' ? __('Number of Cabins') : __('Number of Rooms') }}
+                                            *</label><input id="rooms" name="rooms" type="number" min="1"
+                                            max="20" value="{{ old('rooms', request('rooms', 1)) }}" required></div>
+                                @endif
                                 @if ($isTravelPackage)
                                     <input type="hidden" name="pricing_option" value="travel_package">
                                     @if ($accommodation)
@@ -715,14 +719,20 @@
                                 <div><span>{{ __('Travel Date') }}</span><strong
                                         id="summaryDate">{{ request('travel_date') ?: '—' }}</strong></div>
                             </div>
-                            <div class="summary-line"><i class="la la-bed"></i>
-                                <div><span>{{ __('Accommodation') }}</span><strong
-                                        id="summaryOption">{{ $travelPackageQuote['accommodation_name'] ?? ($accommodation ?: '—') }}</strong>
+                            @if ($package->package_type === 'day_tour')
+                                <div class="summary-line"><i class="la la-compass"></i>
+                                    <div><span>{{ __('Tour Type') }}</span><strong>{{ __('Day Tour') }}</strong></div>
                                 </div>
-                            </div>
+                            @else
+                                <div class="summary-line"><i class="la la-bed"></i>
+                                    <div><span>{{ __('Accommodation') }}</span><strong
+                                            id="summaryOption">{{ $travelPackageQuote['accommodation_name'] ?? ($accommodation ?: '—') }}</strong>
+                                    </div>
+                                </div>
+                            @endif
                             <div class="summary-line"><i class="la la-users"></i>
                                 <div><span>{{ __('Total Guests') }}</span><strong
-                                        id="summaryGuests">{{ (int) request('adults', 1) + (int) request('children', 0) }}</strong>
+                                        id="summaryGuests">{{ (int) request('adults', 1) + (int) request('children', 0) + (int) request('infants', 0) }}</strong>
                                 </div>
                             </div>
                         </div>

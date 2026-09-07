@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Admin;
 use App\Models\Booking;
 use App\Models\NileCruiseCabin;
 use App\Models\NileCruiseDuration;
@@ -38,7 +39,6 @@ class WebsiteCheckoutTest extends TestCase
 
     public function test_priced_package_shows_booking_and_enquiry_actions(): void
     {
-        $package = $this->package(['adult_price' => 100, 'child_price' => 50]);
         $package = $this->package(['package_type' => 'day_tour', 'adult_price' => 100, 'child_price' => 50]);
 
         $this->get(route('website.packages.show.simple', $package->slug))
@@ -80,11 +80,32 @@ class WebsiteCheckoutTest extends TestCase
         $this->get(route('website.packages.show.simple', $package->slug))
             ->assertOk()
             ->assertSee('id="dayTourCalendar"', false)
+            ->assertSee('id="dayTourPriceBox"', false)
+            ->assertSee('sidebar-price-options d-none', false)
             ->assertSee('id="sidebar_adults"', false)
+            ->assertSee('id="sidebar_children"', false)
+            ->assertSee('id="sidebar_infants"', false)
             ->assertSee('Adults (12+ years)')
             ->assertSee('Children (2–11 years)')
+            ->assertSee('Infants (Under 2 years)')
             ->assertSee('data-operating-days=', false)
             ->assertSee('wednesday');
+
+        $checkoutResponse = $this->get(route('website.checkout.show', [
+            'slug' => $package->slug,
+            'travel_date' => now()->next('Wednesday')->toDateString(),
+            'adults' => 2,
+            'children' => 1,
+            'infants' => 1,
+            'pricing_option' => 'category',
+        ]));
+
+        $checkoutResponse
+            ->assertOk()
+            ->assertDontSee('Number of Rooms')
+            ->assertDontSee('Number of Cabins')
+            ->assertSee('name="rooms" type="hidden"', false)
+            ->assertSee('name="infants"', false);
     }
 
     public function test_day_tour_quote_rejects_a_date_outside_its_operating_days(): void
@@ -443,6 +464,88 @@ class WebsiteCheckoutTest extends TestCase
             ->assertOk()
             ->assertSee('Standard')
             ->assertSee(__('Room') . ' 1');
+    }
+
+    public function test_day_tour_booking_with_infants_saves_and_displays_in_dashboard(): void
+    {
+        $this->configurePaymob();
+
+        $package = $this->package([
+            'title' => ['en' => 'Pyramids Day Tour'],
+            'package_type' => 'day_tour',
+            'adult_price' => 100,
+            'child_price' => 50,
+            'infant_price' => 0,
+        ]);
+
+        Http::fake([
+            'https://accept.paymob.com/v1/intention/' => Http::response([
+                'id' => 'intention-dt-infant-1',
+                'intention_order_id' => 'order-dt-infant-1',
+                'client_secret' => 'safe-dt-client-secret',
+            ], 201),
+        ]);
+
+        $travelDate = now()->addMonth()->toDateString();
+        $response = $this->post(route('website.checkout.store', $package->slug), [
+            'pricing_option' => 'category',
+            'travel_date' => $travelDate,
+            'rooms' => 1,
+            'adults' => 2,
+            'children' => 1,
+            'infants' => 1,
+            'lead_title' => 'Mr',
+            'lead_first_name' => 'John',
+            'lead_last_name' => 'Doe',
+            'traveler_2_title' => 'Mrs',
+            'traveler_2_first_name' => 'Jane',
+            'traveler_2_last_name' => 'Doe',
+            'traveler_3_title' => 'Mr',
+            'traveler_3_first_name' => 'Leo',
+            'traveler_3_last_name' => 'Doe',
+            'traveler_4_title' => 'Miss',
+            'traveler_4_first_name' => 'Mia',
+            'traveler_4_last_name' => 'Doe',
+            'email' => 'john.infant@example.test',
+            'phone' => '+201099887766',
+            'country' => 'United States',
+            'pickup_location' => 'Four Seasons Hotel Cairo',
+            'special_requests' => 'Baby car seat needed.',
+            'payment_method' => 'paymob',
+            'terms' => 1,
+        ]);
+
+        $response->assertRedirectContains('accept.paymob.com/unifiedcheckout');
+
+        $booking = Booking::query()->where('package_id', $package->id)->sole();
+        $this->assertSame(2, $booking->adults);
+        $this->assertSame(1, $booking->children);
+        $this->assertSame(1, $booking->infants);
+        $this->assertSame(4, $booking->travellers_count);
+        $this->assertSame(4, $booking->travelers()->count());
+
+        $infantTraveler = $booking->travelers()->where('traveler_type', 'infant')->first();
+        $this->assertNotNull($infantTraveler);
+        $this->assertSame('Mia', $infantTraveler->first_name);
+
+        $admin = Admin::create([
+            'name' => 'Admin User',
+            'email' => 'admin_infant_test@example.com',
+            'password' => bcrypt('password'),
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->get(route('admin.bookings.show', $booking))
+            ->assertOk()
+            ->assertSee('4')
+            ->assertSee('2 بالغين · 1 أطفال · 1 رضع')
+            ->assertSee('رضيع (Infant)')
+            ->assertSee('Mia Doe');
+
+        $this->actingAs($admin, 'admin')
+            ->get(route('admin.bookings.index'))
+            ->assertOk()
+            ->assertSee('2 بالغ · 1 طفل · 1 رضيع');
     }
 
     private function package(array $overrides = []): Package

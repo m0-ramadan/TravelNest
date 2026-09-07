@@ -1159,6 +1159,46 @@
             box-shadow: 0 0 0 3px rgba(210, 154, 78, .1)
         }
 
+        .day-tour-price-box {
+            background: linear-gradient(135deg, #fdfbf7 0%, #f9f4ea 100%);
+            border: 1.5px solid rgba(210, 154, 78, 0.35);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin: 14px 0 10px;
+        }
+        .day-tour-price-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .day-tour-price-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .day-tour-tier-badge {
+            background: rgba(210, 154, 78, 0.15);
+            color: #b0782b;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+        .day-tour-price-total {
+            font-size: 26px;
+            font-weight: 800;
+            color: #1c325c;
+            line-height: 1.1;
+        }
+        .day-tour-price-breakdown {
+            font-size: 12px;
+            margin-top: 4px;
+            color: #777;
+        }
+
         .package-show-template .sidebar-option-name {
             color: #1c325c !important;
             font-weight: 800;
@@ -4403,24 +4443,48 @@
                                                     <button type="button" class="qty-btn" onclick="changeQty('sidebar_children', 1)" aria-label="{{ __('Increase children') }}">+</button>
                                                 </div>
                                             </div>
+                                            <div class="quantity-control">
+                                                <label for="sidebar_infants">{{ __('Infants (Under 2 years)') }}</label>
+                                                <div class="qty-buttons">
+                                                    <button type="button" class="qty-btn" onclick="changeQty('sidebar_infants', -1)" aria-label="{{ __('Decrease infants') }}">−</button>
+                                                    <input type="number" id="sidebar_infants" name="infants" class="qty-input" value="0" min="0" max="20" readonly>
+                                                    <button type="button" class="qty-btn" onclick="changeQty('sidebar_infants', 1)" aria-label="{{ __('Increase infants') }}">+</button>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <input type="hidden" name="rooms" value="1">
-                                        <input type="hidden" name="infants" value="0">
-                                        <div class="sidebar-price-options">
+                                        <div class="sidebar-price-options d-none">
                                             @foreach ($bookingPricingOptions as $option)
                                                 <label class="sidebar-price-option">
                                                     <input type="radio" name="pricing_option" value="{{ $option['id'] }}"
                                                         data-valid-from="{{ $option['valid_from'] }}"
                                                         data-valid-to="{{ $option['valid_to'] }}"
                                                         data-pax-min="{{ $option['pax_min'] ?? '' }}"
-                                                        data-pax-max="{{ $option['pax_max'] ?? '' }}" required>
+                                                        data-pax-max="{{ $option['pax_max'] ?? '' }}"
+                                                        data-amount="{{ $option['amount'] ?? 0 }}"
+                                                        data-price-unit="{{ $option['price_unit'] ?? '' }}"
+                                                        data-adult-price="{{ $option['adult_price'] ?? 0 }}"
+                                                        data-child-price="{{ $option['child_price'] ?? 0 }}"
+                                                        data-infant-price="{{ $option['infant_price'] ?? 0 }}"
+                                                        data-currency-symbol="{{ $option['currency_symbol'] ?? '$' }}"
+                                                        data-label="{{ $option['label'] ?? '' }}"
+                                                        data-description="{{ $option['description'] ?? '' }}" required>
                                                     <span class="sidebar-price-option-card">
                                                         <span><span class="sidebar-option-name">{{ $option['label'] }}</span><span class="sidebar-option-desc">{{ $option['description'] }}</span></span>
                                                         <span class="sidebar-option-price">{{ $option['currency_symbol'] }}{{ number_format($option['amount'], 2) }}</span>
                                                     </span>
                                                 </label>
                                             @endforeach
+                                        </div>
+
+                                        <div class="day-tour-price-box" id="dayTourPriceBox">
+                                            <div class="day-tour-price-header">
+                                                <span class="day-tour-price-label">{{ __('Total Price') }}</span>
+                                                <span class="day-tour-tier-badge" id="dayTourTierBadge"></span>
+                                            </div>
+                                            <div class="day-tour-price-total" id="dayTourPriceTotal"></div>
+                                            <div class="day-tour-price-breakdown text-muted" id="dayTourPriceBreakdown"></div>
                                         </div>
                                         <div class="alert-danger mt-3" id="sidebarNoPrices" style="display:none">
                                             {{ __('No booking price is available for these details.') }}
@@ -4654,7 +4718,12 @@
                         const travelDate = document.getElementById('sidebar_travel_date');
                         const adults = document.getElementById('sidebar_adults');
                         const children = document.getElementById('sidebar_children');
+                        const infants = document.getElementById('sidebar_infants');
                         const noPrices = document.getElementById('sidebarNoPrices');
+                        const dayTourPriceBox = document.getElementById('dayTourPriceBox');
+                        const dayTourPriceTotal = document.getElementById('dayTourPriceTotal');
+                        const dayTourTierBadge = document.getElementById('dayTourTierBadge');
+                        const dayTourPriceBreakdown = document.getElementById('dayTourPriceBreakdown');
 
                         const calendar = document.getElementById('dayTourCalendar');
                         if (calendar) {
@@ -4736,8 +4805,12 @@
 
                         const refreshSidebarPrices = () => {
                             const selectedDate = travelDate.value;
-                            const guests = Math.max(1, Number(adults.value || 1) + Number(children.value || 0));
+                            const numAdults = Number(adults?.value || 1);
+                            const numChildren = Number(children?.value || 0);
+                            const numInfants = Number(infants?.value || 0);
+                            const guests = Math.max(1, numAdults + numChildren + numInfants);
                             let firstAvailable = null;
+                            let bestOption = null;
 
                             sidebarBookingForm.querySelectorAll('.sidebar-price-option').forEach((label) => {
                                 const input = label.querySelector('input[type="radio"]');
@@ -4749,18 +4822,71 @@
                                 const guestsMatch = (!min || guests >= min) && (!max || guests <= max);
                                 const available = dateMatches && guestsMatch;
 
-                                label.style.display = available ? '' : 'none';
+                                if (!dayTourPriceBox) {
+                                    label.style.display = available ? '' : 'none';
+                                }
                                 input.disabled = !available;
                                 if (available && !firstAvailable) firstAvailable = input;
+                                if (available) {
+                                    if (!bestOption || (min > 0 && Number(bestOption.dataset.paxMin || 0) === 0)) {
+                                        bestOption = input;
+                                    }
+                                }
                             });
 
-                            const selected = sidebarBookingForm.querySelector(
-                                'input[name="pricing_option"]:checked:not(:disabled)');
-                            if (!selected && firstAvailable) firstAvailable.checked = true;
-                            noPrices.style.display = firstAvailable ? 'none' : 'block';
+                            const activeInput = bestOption || firstAvailable;
+                            if (activeInput) {
+                                activeInput.checked = true;
+                            }
+
+                            if (dayTourPriceBox) {
+                                if (activeInput) {
+                                    const symbol = activeInput.dataset.currencySymbol || '$';
+                                    const unit = activeInput.dataset.priceUnit;
+                                    const amount = parseFloat(activeInput.dataset.amount || 0);
+                                    const adultPrice = parseFloat(activeInput.dataset.adultPrice || 0);
+                                    const childPrice = parseFloat(activeInput.dataset.childPrice || 0);
+                                    const infantPrice = parseFloat(activeInput.dataset.infantPrice || 0);
+
+                                    let total = 0;
+                                    let breakdown = '';
+                                    if (unit === 'category') {
+                                        total = (numAdults * adultPrice) + (numChildren * childPrice) + (numInfants * infantPrice);
+                                        const parts = [];
+                                        parts.push(`${numAdults} × ${symbol}${adultPrice.toFixed(0)}`);
+                                        if (numChildren > 0) parts.push(`${numChildren} × ${symbol}${childPrice.toFixed(0)}`);
+                                        if (numInfants > 0) parts.push(`${numInfants} × ${symbol}${infantPrice.toFixed(0)}`);
+                                        breakdown = parts.join(' + ');
+                                    } else if (unit === 'per_booking') {
+                                        total = amount;
+                                        breakdown = `${symbol}${amount.toFixed(0)} per booking`;
+                                    } else if (unit === 'per_adult') {
+                                        total = amount * numAdults;
+                                        breakdown = `${numAdults} × ${symbol}${amount.toFixed(0)}`;
+                                    } else {
+                                        total = amount * Math.max(1, numAdults + numChildren);
+                                        breakdown = `${numAdults + numChildren} × ${symbol}${amount.toFixed(0)}`;
+                                    }
+
+                                    dayTourPriceTotal.textContent = `${symbol}${total.toFixed(0)}`;
+                                    if (dayTourTierBadge) {
+                                        dayTourTierBadge.textContent = activeInput.dataset.label || '';
+                                    }
+                                    if (dayTourPriceBreakdown) {
+                                        dayTourPriceBreakdown.textContent = breakdown;
+                                    }
+                                    dayTourPriceBox.style.display = 'block';
+                                    noPrices.style.display = 'none';
+                                } else {
+                                    dayTourPriceBox.style.display = 'none';
+                                    noPrices.style.display = 'block';
+                                }
+                            } else {
+                                noPrices.style.display = firstAvailable ? 'none' : 'block';
+                            }
                         };
 
-                        [travelDate, adults, children].forEach((input) => input.addEventListener('change',
+                        [travelDate, adults, children, infants].filter(Boolean).forEach((input) => input.addEventListener('change',
                             refreshSidebarPrices));
                         sidebarBookingForm.addEventListener('submit', (event) => {
                             if (calendar && !travelDate.value) {

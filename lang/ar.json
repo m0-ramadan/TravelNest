@@ -2081,5 +2081,8 @@
     "Trip Facilities": "مرافق الرحلة",
     "Cruise Facilities & Ship Amenities": "مرافق وخدمات الكروز",
     "Will appear in trip facilities": "ستظهر في مرافق الرحلة",
-    "Select the facilities and amenities that appear on the trip or cruise page.": "اختر المرافق والخدمات التي تظهر في صفحة الرحلة أو الكروز."
+    "Select the facilities and amenities that appear on the trip or cruise page.": "اختر المرافق والخدمات التي تظهر في صفحة الرحلة أو الكروز.",
+    "Infants (Under 2 years)": "الرضع (أقل من سنتين)",
+    "Decrease infants": "تقليل الرضع",
+    "Increase infants": "زيادة الرضع"
 }
