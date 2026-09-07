@@ -362,6 +362,89 @@ HTML;
         $this->assertSame('nile_cruise', $luxorResult['package']->category?->category_type);
     }
 
+    public function test_cruise_import_assigns_type_and_category_and_repairs_on_update(): void
+    {
+        $type = \App\Models\NileCruiseType::firstOrCreate(
+            ['slug' => 'luxor-aswan-nile-cruises'],
+            ['name' => ['en' => 'Luxor and Aswan Nile Cruises'], 'is_active' => true]
+        );
+        $category = \App\Models\NileCruiseCategory::firstOrCreate(
+            ['nile_cruise_type_id' => $type->id, 'slug' => 'standard-nile-cruises'],
+            ['name' => ['en' => 'Standard Nile Cruises'], 'is_active' => true]
+        );
+        $html = str_replace(
+            ['7 Days Egypt Tour Packages', '7 Day Cairo, Alexandria and Nile Cruise Tour Package by Flight'],
+            ['Luxor and Aswan Nile Cruises</a></li><li>Standard Nile Cruises', 'Test Nile Cruise'],
+            $this->getSampleTourHtml()
+        );
+        $this->fakeHttpResponses($html);
+        $url = 'https://www.luxorandaswan.com/Egypt/cruise/test-nile-cruise';
+        $service = app(ExternalTourImportService::class);
+        $options = ['rewrite' => false, 'download_images' => false];
+        $package = $service->import($url, $options)['package'];
+        $this->assertEquals($type->id, $package->nile_cruise_type_id);
+        $this->assertEquals($category->id, $package->nile_cruise_category_id);
+
+        $package->update(['nile_cruise_type_id' => null, 'nile_cruise_category_id' => null]);
+        $updated = $service->import($url, $options + ['update' => true])['package'];
+        $this->assertSame($package->id, $updated->id);
+        $this->assertEquals($type->id, $updated->nile_cruise_type_id);
+        $this->assertEquals($category->id, $updated->nile_cruise_category_id);
+
+        $view = app(\App\Http\Controllers\Website\NileCruiseController::class)
+            ->showLuxorAswanCategory(\Illuminate\Http\Request::create('/'), $category->slug);
+        $this->assertContains($package->id, $view->getData()['paginated']->pluck('id')->all());
+    }
+
+    public function test_cruise_taxonomy_uses_breadcrumb_tier_not_marketing_description(): void
+    {
+        $resolver = app(\App\Services\ExternalTours\ExternalNileCruiseTaxonomyResolver::class);
+        $type = \App\Models\NileCruiseType::firstOrCreate(
+            ['slug' => 'luxor-aswan-nile-cruises'],
+            ['name' => ['en' => 'Luxor and Aswan Nile Cruises'], 'is_active' => true]
+        );
+        foreach (['standard', 'deluxe', 'ultra-deluxe', 'luxury'] as $tier) {
+            $category = \App\Models\NileCruiseCategory::firstOrCreate(
+                ['nile_cruise_type_id' => $type->id, 'slug' => $tier . '-nile-cruises'],
+                ['name' => ['en' => $tier], 'is_active' => true]
+            );
+            $facts = [
+                'package_type' => 'nile_cruise',
+                'title' => 'Luxury Nile Cruise',
+                'breadcrumbs' => ['Luxor and Aswan Nile Cruises', str_replace('-', ' ', $tier) . ' Nile Cruises']
+            ];
+            $resolved = $resolver->resolve($facts);
+            $this->assertEquals($category->id, $resolved['nile_cruise_category_id']);
+        }
+        $unknown = $resolver->resolve([
+            'package_type' => 'nile_cruise',
+            'breadcrumbs' => ['Luxor and Aswan Nile Cruises'],
+            'description' => 'Luxury cruise with standard cabins'
+        ]);
+        $this->assertNull($unknown['nile_cruise_category_id']);
+        $this->assertNotEmpty($unknown['warnings']);
+        $land = $resolver->resolve(['package_type' => 'travel_package', 'title' => 'Luxury Dahabiya and Cairo']);
+        $this->assertNull($land['nile_cruise_type_id']);
+
+        foreach (['dahabiya-nile-cruise' => 'Dahabiya Nile Cruise', 'lake-nasser-cruise' => 'Lake Nasser Cruise'] as $slug => $label) {
+            $otherType = \App\Models\NileCruiseType::firstOrCreate(
+                ['slug' => $slug],
+                ['name' => ['en' => $label], 'is_active' => true]
+            );
+            $resolved = $resolver->resolve(['package_type' => 'nile_cruise', 'breadcrumbs' => [$label]]);
+            $this->assertEquals($otherType->id, $resolved['nile_cruise_type_id']);
+            $this->assertNull($resolved['nile_cruise_category_id']);
+        }
+    }
+
+    public function test_parser_handles_missing_open_graph_metadata(): void
+    {
+        $html = preg_replace('/<meta property="og:[^>]+>/', '', $this->getSampleTourHtml());
+        $parsed = app(LuxorAndAswanTourPageParser::class)->parse($html, $this->sampleUrl);
+        $this->assertStringContainsString('Cairo', $parsed['title']);
+        $this->assertNotEmpty($parsed['images']);
+    }
+
     public function test_extracts_and_persists_correct_duration(): void
     {
         $this->fakeHttpResponses($this->getSampleTourHtml(3));
@@ -686,5 +769,37 @@ HTML;
 
         $attractionIds = $package->packageAttractions->pluck('attraction_id')->toArray();
         $this->assertSame(count($attractionIds), count(array_unique($attractionIds)), 'Package has duplicate attractions attached.');
+    }
+
+    /** @test */
+    public function it_rejects_soft_404_pages_from_remote_source(): void
+    {
+        $notFoundHtml = <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>404 - Page Not Found | Luxor and Aswan Travel</title>
+</head>
+<body>
+    <h1>404</h1>
+    <p>The page you're looking for couldn't be found.</p>
+</body>
+</html>
+HTML;
+
+        Http::fake([
+            'https://www.luxorandaswan.com/*' => Http::response($notFoundHtml, 200),
+        ]);
+
+        /** @var ExternalTourImportService $service */
+        $service = app(ExternalTourImportService::class);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage("404 - Page Not Found");
+
+        $service->import('https://www.luxorandaswan.com/Egypt/cruise/invalid-tour-slug', [
+            'rewrite' => false,
+            'download_images' => false,
+        ]);
     }
 }

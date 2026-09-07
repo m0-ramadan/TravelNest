@@ -33,7 +33,7 @@ class PackageBookingService
 
     public function hasBookablePrice(Package $package): bool
     {
-        return $this->pricingOptions($package)->isNotEmpty();
+        return $package->package_type !== 'nile_cruise' && $this->pricingOptions($package)->isNotEmpty();
     }
 
     public function pricingOptions(Package $package, CarbonInterface|string|null $travelDate = null): Collection

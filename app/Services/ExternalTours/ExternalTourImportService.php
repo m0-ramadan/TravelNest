@@ -98,6 +98,9 @@ class ExternalTourImportService
 
         // 6. Resolve Taxonomy & Dependencies
         $resolvedTaxonomy = $this->resolveTaxonomy($data, $warnings);
+        $cruiseTaxonomy = app(ExternalNileCruiseTaxonomyResolver::class)->resolve($parsedData);
+        $resolvedTaxonomy['nile_cruise'] = $cruiseTaxonomy;
+        $resolvedTaxonomy['warnings'] = array_merge($resolvedTaxonomy['warnings'], $cruiseTaxonomy['warnings']);
         $warnings = $resolvedTaxonomy['warnings'];
 
         // 7. Atomic DB Transaction (All writes in single transaction)
@@ -595,6 +598,18 @@ class ExternalTourImportService
 
             'is_active' => true,
         ];
+
+        foreach (['nile_cruise_type_id', 'nile_cruise_category_id'] as $field) {
+            // Keep a manual assignment when the source does not provide a usable classification.
+            $packageAttributes[$field] = $taxonomy['nile_cruise'][$field] ?? $existingPackage?->{$field};
+        }
+        if ($data['package_type'] !== 'nile_cruise' ||
+            ($existingPackage?->nile_cruise_type_id && $existingPackage->nile_cruise_type_id !== $packageAttributes['nile_cruise_type_id'])) {
+            $packageAttributes['nile_cruise_category_id'] = $taxonomy['nile_cruise']['nile_cruise_category_id'] ?? null;
+        }
+        if ($data['package_type'] !== 'nile_cruise') {
+            $packageAttributes['nile_cruise_type_id'] = null;
+        }
 
         if ($existingPackage && $updateMode) {
             $existingPackage->update($packageAttributes);

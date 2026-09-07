@@ -329,7 +329,7 @@ class TripController extends BaseWebsiteController
         $sharedDepositPolicy = trim((string) ($package->deposit_policy ?: ($legacyNileDetail?->deposit_policy ?? '')));
         $bookingService = app(\App\Services\PackageBookingService::class);
         $bookingPricingOptions = $bookingService->pricingOptions($package);
-        $hasBookablePrice = $bookingPricingOptions->isNotEmpty();
+        $hasBookablePrice = $package->package_type !== 'nile_cruise' && $bookingPricingOptions->isNotEmpty();
         $travelPackageMatrix = $package->package_type === 'travel_package'
             ? $bookingService->getTravelPackageMatrix($package)
             : null;

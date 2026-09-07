@@ -17,6 +17,9 @@ class LuxorAndAswanTourPageParser
     public function parse(string $html, string $sourceUrl): array
     {
         $crawler = new Crawler($html);
+        if ($this->isNotFoundPage($crawler, $html)) {
+            throw new \RuntimeException("Tour import failed: The source URL returned a '404 - Page Not Found' page. Please verify that the URL is correct.");
+        }
         $normalizedUrl = strtolower(rtrim($sourceUrl, '/'));
         $sourceHost = parse_url($sourceUrl, PHP_URL_HOST) ?? 'luxorandaswan.com';
         $sourceSlug = basename(parse_url($sourceUrl, PHP_URL_PATH) ?? '');
@@ -136,7 +139,8 @@ class LuxorAndAswanTourPageParser
         }
 
         // 2. OpenGraph og:title
-        $ogTitle = $crawler->filter('meta[property="og:title"]')->attr('content');
+        $ogTitle = $crawler->filter('meta[property="og:title"]')->count()
+            ? $crawler->filter('meta[property="og:title"]')->attr('content') : null;
         if (!empty($ogTitle)) {
             return $this->cleanTitle($ogTitle);
         }
@@ -1112,7 +1116,8 @@ class LuxorAndAswanTourPageParser
         }
 
         // 2. OpenGraph image
-        $og = $crawler->filter('meta[property="og:image"]')->attr('content');
+        $og = $crawler->filter('meta[property="og:image"]')->count()
+            ? $crawler->filter('meta[property="og:image"]')->attr('content') : null;
         if (!empty($og)) {
             $urls[] = $this->resolveAbsoluteUrl($og, $sourceUrl);
         }
@@ -1451,5 +1456,27 @@ class LuxorAndAswanTourPageParser
         }
 
         return $warnings;
+    }
+
+    /**
+     * Detect if remote page is a soft-404 error page.
+     */
+    public function isNotFoundPage(Crawler $crawler, string $html): bool
+    {
+        $titleTag = $crawler->filter('title')->count() ? trim($crawler->filter('title')->text()) : '';
+        if (preg_match('/^404\b|page not found/i', $titleTag)) {
+            return true;
+        }
+
+        $h1Tag = $crawler->filter('h1')->count() ? trim($crawler->filter('h1')->text()) : '';
+        if (preg_match('/^404\b|page not found/i', $h1Tag)) {
+            return true;
+        }
+
+        if (str_contains($html, "The page you're looking for couldn't be found")) {
+            return true;
+        }
+
+        return false;
     }
 }

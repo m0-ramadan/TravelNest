@@ -1400,6 +1400,16 @@
             color: var(--rich-gold, #c5955b)
         }
 
+        #mobileBookingModal .sidebar-content {
+            padding: 0;
+        }
+
+        #mobileBookingModal .day-tour-calendar {
+            position: static;
+            width: 100%;
+            margin-top: 8px;
+        }
+
         .fixed-mobile-btn {
             position: fixed;
             bottom: 18px;
@@ -3119,7 +3129,7 @@
                         </a>
                     @endif
                     @if ($hasBookablePrice)
-                        <a href="{{ route('website.checkout.show', $package->slug) }}" class="gold-btn">
+                        <a href="{{ route('website.checkout.show', $package->slug) }}" class="gold-btn" data-mobile-booking>
                             <i class="la la-calendar-check"></i> {{ __('Book Now') }}
                         </a>
                     @endif
@@ -4517,13 +4527,29 @@
 
     <div class="fixed-mobile-btn d-lg-none">
         @if ($hasBookablePrice)
-            <a href="{{ route('website.checkout.show', $package->slug) }}" class="mobile-enquiry-btn"
+            <a href="{{ route('website.checkout.show', $package->slug) }}" class="mobile-enquiry-btn" data-mobile-booking
                 style="margin-right:8px"><i class="la la-calendar-check"></i> {{ __('Book Now') }}</a>
         @endif
         <a href="#" class="mobile-enquiry-btn" data-bs-toggle="modal" data-bs-target="#simpleEnquiryModal">
             <i class="la la-envelope"></i> {{ $hasBookablePrice ? __('Enquire') : __('Submit Enquiry') }}
         </a>
     </div>
+
+    @if ($hasBookablePrice)
+        <div class="modal fade" id="mobileBookingModal" tabindex="-1" aria-labelledby="mobileBookingModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="mobileBookingModalLabel">{{ __('Select Your Booking') }}</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="{{ __('Close') }}"></button>
+                    </div>
+                    <div class="modal-body" id="mobileBookingBody"></div>
+                </div>
+            </div>
+        </div>
+    @endif
 
     <div class="modal fade" id="simpleEnquiryModal" tabindex="-1" aria-labelledby="simpleEnquiryModalLabel"
         aria-hidden="true">
@@ -4588,6 +4614,39 @@
 
                     if (reserveTabs.length) {
                         activateReserveTab(location.hash === '#enquiryFormDesktop' ? 'enquiry' : 'booking');
+                    }
+
+                    const mobileBookingModal = document.getElementById('mobileBookingModal');
+                    if (mobileBookingModal && reserveBookingPanel) {
+                        const bookingHome = document.createComment('Booking panel desktop position');
+                        reserveBookingPanel.before(bookingHome);
+                        const mobileViewport = window.matchMedia('(max-width: 991.98px)');
+                        let bookingWasHidden = false;
+
+                        // Move the live form so its values, validation and price handlers stay shared.
+                        mobileBookingModal.addEventListener('show.bs.modal', () => {
+                            bookingWasHidden = reserveBookingPanel.hidden;
+                            reserveBookingPanel.hidden = false;
+                            document.getElementById('mobileBookingBody').append(reserveBookingPanel);
+                        });
+                        mobileBookingModal.addEventListener('hidden.bs.modal', () => {
+                            bookingHome.after(reserveBookingPanel);
+                            reserveBookingPanel.hidden = bookingWasHidden;
+                        });
+                        document.querySelectorAll('[data-mobile-booking]').forEach((button) => {
+                            button.addEventListener('click', (event) => {
+                                if (!mobileViewport.matches) return;
+                                event.preventDefault();
+                                window.bootstrap.Modal.getOrCreateInstance(mobileBookingModal).show(button);
+                            });
+                        });
+                        const closeDesktopBookingModal = () => {
+                            if (!mobileViewport.matches) {
+                                window.bootstrap.Modal.getInstance(mobileBookingModal)?.hide();
+                            }
+                        };
+                        mobileViewport.addEventListener('change', closeDesktopBookingModal);
+                        mobileBookingModal.addEventListener('shown.bs.modal', closeDesktopBookingModal);
                     }
 
                     const sidebarBookingForm = document.getElementById('sidebarBookingForm');
