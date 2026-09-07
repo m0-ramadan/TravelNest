@@ -8,21 +8,23 @@
     $infantMaxAge = (int) ($package->infant_max_age ?? 1);
     $currencySymbol = $package->currency?->symbol ?? '$';
 @endphp
-<form class="{{ $isCruiseEnquiry ? 'nile-cruise-enquiry' : '' }}" method="post" action="{{ route('website.inquiries.store') }}">
+<form class="{{ $isCruiseEnquiry ? 'nile-cruise-enquiry' : '' }}" method="post"
+    action="{{ route('website.inquiries.store') }}">
     @csrf
     <input type="hidden" name="package_id" value="{{ $package->id }}">
     <input type="hidden" name="title" value="{{ $title }}">
-    @unless($isCruiseEnquiry)
-    <input type="hidden" name="selected_pricing_tier" value="2_persons">
-    <input type="hidden" name="price_per_person" value="">
-    <input type="hidden" name="calculated_total" value="">
+    @unless ($isCruiseEnquiry)
+        <input type="hidden" name="selected_pricing_tier" value="2_persons">
+        <input type="hidden" name="price_per_person" value="">
+        <input type="hidden" name="calculated_total" value="">
     @endunless
 
     <div class="input-box">
         <label class="label-text" for="enquiry_name_{{ $suffix }}">{{ __('Your Name *') }}</label>
         <div class="form-group">
             <span class="la la-user form-icon"></span>
-            <input class="form-control" type="text" id="enquiry_name_{{ $suffix }}" name="name" required placeholder="{{ $isCruiseEnquiry ? __('Enter your full name') : __('Your name') }}"
+            <input class="form-control" type="text" id="enquiry_name_{{ $suffix }}" name="name" required
+                placeholder="{{ $isCruiseEnquiry ? __('Enter your full name') : __('Your name') }}"
                 value="{{ old('name') }}">
         </div>
         @error('name')
@@ -34,7 +36,8 @@
         <label class="label-text" for="enquiry_email_{{ $suffix }}">{{ __('Your Email *') }}</label>
         <div class="form-group">
             <span class="la la-envelope-o form-icon"></span>
-            <input class="form-control" type="email" id="enquiry_email_{{ $suffix }}" name="email" required placeholder="{{ $isCruiseEnquiry ? 'your.email@example.com' : __('Email address') }}"
+            <input class="form-control" type="email" id="enquiry_email_{{ $suffix }}" name="email" required
+                placeholder="{{ $isCruiseEnquiry ? 'your.email@example.com' : __('Email address') }}"
                 value="{{ old('email') }}">
         </div>
         @error('email')
@@ -42,7 +45,7 @@
         @enderror
     </div>
 
-    @if($isCruiseEnquiry)
+    @if ($isCruiseEnquiry)
         <div class="input-box">
             <label class="label-text" for="enquiry_country_{{ $suffix }}">{{ __('Country') }} *</label>
             <div class="form-group">
@@ -62,7 +65,8 @@
     <div class="input-box">
         <label class="label-text" for="enquiry_phone_{{ $suffix }}">{{ __('Phone Number') }}</label>
         <div class="form-group">
-            <input class="form-control" type="tel" id="enquiry_phone_{{ $suffix }}" name="phone" placeholder="{{ $isCruiseEnquiry ? '+1 (555) 123-4567' : __('Phone Number') }}"
+            <input class="form-control" type="tel" id="enquiry_phone_{{ $suffix }}" name="phone"
+                placeholder="{{ $isCruiseEnquiry ? '+1 (555) 123-4567' : __('Phone Number') }}"
                 value="{{ old('phone') }}">
         </div>
         @error('phone')
@@ -74,7 +78,8 @@
         <label class="label-text" for="enquiry_travel_date_{{ $suffix }}">{{ __('Date *') }}</label>
         <div class="form-group">
             <span class="la la-calendar form-icon"></span>
-            <input id="enquiry_travel_date_{{ $suffix }}" name="travel_date" class="form-control" type="date" required value="{{ old('travel_date', $isCruiseEnquiry ? now()->toDateString() : null) }}">
+            <input id="enquiry_travel_date_{{ $suffix }}" name="travel_date" class="form-control" type="date"
+                required value="{{ old('travel_date', $isCruiseEnquiry ? now()->toDateString() : null) }}">
         </div>
         @error('travel_date')
             <small class="text-danger d-block mt-1">{{ $message }}</small>
@@ -118,34 +123,34 @@
             @enderror
         </div>
 
-        @unless($isCruiseEnquiry)
-        <div class="quantity-control">
-            <label for="infants_book_{{ $suffix }}">
-                {{ __('trips.infants') }}
-                {{ __('trips.infants_age', ['from' => $infantMinAge, 'to' => $infantMaxAge]) }}
-            </label>
-            <div class="qty-buttons">
-                <button type="button" class="qty-btn" data-qty-target="infants_book_{{ $suffix }}"
-                    data-qty-step="-1">-</button>
-                <input type="number" id="infants_book_{{ $suffix }}" name="infants" class="qty-input"
-                    value="{{ old('infants', 0) }}" min="0" readonly>
-                <button type="button" class="qty-btn" data-qty-target="infants_book_{{ $suffix }}"
-                    data-qty-step="1">+</button>
+        @unless ($isCruiseEnquiry)
+            <div class="quantity-control">
+                <label for="infants_book_{{ $suffix }}">
+                    {{ __('trips.infants') }}
+                    {{ __('trips.infants_age', ['from' => $infantMinAge, 'to' => $infantMaxAge]) }}
+                </label>
+                <div class="qty-buttons">
+                    <button type="button" class="qty-btn" data-qty-target="infants_book_{{ $suffix }}"
+                        data-qty-step="-1">-</button>
+                    <input type="number" id="infants_book_{{ $suffix }}" name="infants" class="qty-input"
+                        value="{{ old('infants', 0) }}" min="0" readonly>
+                    <button type="button" class="qty-btn" data-qty-target="infants_book_{{ $suffix }}"
+                        data-qty-step="1">+</button>
+                </div>
+                @error('infants')
+                    <small class="text-danger d-block mt-1">{{ $message }}</small>
+                @enderror
             </div>
-            @error('infants')
-                <small class="text-danger d-block mt-1">{{ $message }}</small>
-            @enderror
-        </div>
         @endunless
     </div>
 
-    @if(!$isCruiseEnquiry && ($hasBookablePrice ?? false))
+    @if (!$isCruiseEnquiry && ($hasBookablePrice ?? false))
         <div class="input-box">
             <label class="label-text">{{ __('Estimated total') }}</label>
             <div class="form-group">
                 <span class="la la-calculator form-icon"></span>
-                <input class="form-control js-booking-total-display" type="text" id="booking_total_{{ $suffix }}"
-                    value="{{ $currencySymbol }}0.00" readonly>
+                <input class="form-control js-booking-total-display" type="text"
+                    id="booking_total_{{ $suffix }}" value="{{ $currencySymbol }}0.00" readonly>
             </div>
         </div>
     @endif
@@ -154,51 +159,121 @@
         <label class="label-text" for="enquiry_comment_{{ $suffix }}">{{ __('Message') }}</label>
         <div class="form-group">
             <span class="la la-pencil form-icon" style="top:24px"></span>
-            <textarea class="message-control form-control" id="enquiry_comment_{{ $suffix }}" name="comment" placeholder="{{ __('Please advise your tour requirements') }}">{{ old('comment') }}</textarea>
+            <textarea class="message-control form-control" id="enquiry_comment_{{ $suffix }}" name="comment"
+                placeholder="{{ __('Please advise your tour requirements') }}">{{ old('comment') }}</textarea>
         </div>
         @error('comment')
             <small class="text-danger d-block mt-1">{{ $message }}</small>
         @enderror
     </div>
 
-    @unless($isCruiseEnquiry)
-    {{-- غير مربوط: recaptcha-holder متساب لأنك محتاج تضيف site key + secret key لو هتشغل Google reCAPTCHA --}}
-    <div class="input-box">
-        <div class="form-group">
-            <div class="recaptcha-holder"></div>
+    @unless ($isCruiseEnquiry)
+        {{-- غير مربوط: recaptcha-holder متساب لأنك محتاج تضيف site key + secret key لو هتشغل Google reCAPTCHA --}}
+        <div class="input-box">
+            <div class="form-group">
+                <div class="recaptcha-holder"></div>
+            </div>
         </div>
-    </div>
-
     @endunless
 
     <div class="btn-box">
-        <button type="submit" class="submit-btn" style="width:100%">@if($isCruiseEnquiry)<i class="la la-paper-plane" aria-hidden="true"></i> @endif{{ __('Submit Enquiry') }}</button>
+        <button type="submit" class="submit-btn" style="width:100%">
+            @if ($isCruiseEnquiry)
+                <i class="la la-paper-plane" aria-hidden="true"></i>
+            @endif{{ __('Submit Enquiry') }}
+        </button>
     </div>
 
-    @unless($isCruiseEnquiry)
-    <div class="trust-indicators">
-        <div class="trust-item-small"><i class="la la-shield-alt"></i><span>{{ __('Secure Enquiry') }}</span></div>
-        <div class="trust-item-small"><i class="la la-clock"></i><span>{{ __('24/7 Support') }}</span></div>
-        <div class="trust-item-small"><i class="la la-award"></i><span>{{ __('Best Price Guarantee') }}</span></div>
-    </div>
+    @unless ($isCruiseEnquiry)
+        <div class="trust-indicators">
+            <div class="trust-item-small"><i class="la la-shield-alt"></i><span>{{ __('Secure Enquiry') }}</span></div>
+            <div class="trust-item-small"><i class="la la-clock"></i><span>{{ __('24/7 Support') }}</span></div>
+            <div class="trust-item-small"><i class="la la-award"></i><span>{{ __('Best Price Guarantee') }}</span></div>
+        </div>
     @endunless
 </form>
 
-@if($isCruiseEnquiry)
+@if ($isCruiseEnquiry)
     @once
         <style>
-            .nile-cruise-enquiry .label-text { font-size: 13px; font-weight: 600; }
-            .nile-cruise-enquiry .form-icon { display: none; }
-            .nile-cruise-enquiry .form-control { border: 1px solid #d8dfeb; border-radius: 12px; padding: 13px 14px; font-size: 14px; min-height: 47px; }
-            .nile-cruise-enquiry select.form-control { appearance: auto; }
-            .nile-cruise-enquiry .quantity-control { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 11px 13px; border: 1px solid #f0e8df; border-radius: 12px; background: #fff; }
-            .nile-cruise-enquiry .quantity-control label { margin: 0; color: #1c325c; font-size: 12px; font-weight: 600; }
-            .nile-cruise-enquiry .qty-buttons { margin: 0; gap: 6px; }
-            .nile-cruise-enquiry .qty-btn { width: 32px; height: 32px; background: #c5955b; color: #fff; }
-            .nile-cruise-enquiry .qty-input { border: 0; background: transparent; padding: 0; width: 39px; color: #1c325c; font-weight: 700; appearance: textfield; -moz-appearance: textfield; }
-            .nile-cruise-enquiry .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; }
-            .nile-cruise-enquiry .message-control { min-height: 110px; }
-            .nile-cruise-enquiry .submit-btn { border: 0; border-radius: 13px; padding: 13px; background: linear-gradient(110deg, #c5955b, #b7880a); color: #1c325c; }
+            .nile-cruise-enquiry .label-text {
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+            .nile-cruise-enquiry .form-icon {
+                display: none;
+            }
+
+            .nile-cruise-enquiry .form-control {
+                border: 1px solid #d8dfeb;
+                border-radius: 12px;
+                padding: 13px 14px;
+                font-size: 14px;
+                min-height: 47px;
+            }
+
+            .nile-cruise-enquiry select.form-control {
+                appearance: auto;
+            }
+
+            .nile-cruise-enquiry .quantity-control {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 11px 13px;
+                border: 1px solid #f0e8df;
+                border-radius: 12px;
+                background: #fff;
+            }
+
+            .nile-cruise-enquiry .quantity-control label {
+                margin: 0;
+                color: #1c325c;
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            .nile-cruise-enquiry .qty-buttons {
+                margin: 0;
+                gap: 6px;
+            }
+
+            .nile-cruise-enquiry .qty-btn {
+                width: 32px;
+                height: 32px;
+                background: #c5955b;
+                color: #fff;
+            }
+
+            .nile-cruise-enquiry .qty-input {
+                border: 0;
+                background: transparent;
+                padding: 0;
+                width: 39px;
+                color: #1c325c;
+                font-weight: 700;
+                appearance: textfield;
+                -moz-appearance: textfield;
+            }
+
+            .nile-cruise-enquiry .qty-input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+            }
+
+            .nile-cruise-enquiry .message-control {
+                min-height: 110px;
+            }
+
+            .nile-cruise-enquiry .submit-btn {
+                border: 0;
+                border-radius: 13px;
+                padding: 13px;
+                background: linear-gradient(110deg, #c5955b, #b7880a);
+                color: #1c325c;
+            }
         </style>
     @endonce
 @endif
