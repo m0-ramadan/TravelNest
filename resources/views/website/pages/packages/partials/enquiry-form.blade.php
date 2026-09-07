@@ -144,16 +144,7 @@
         @endunless
     </div>
 
-    @if (!$isCruiseEnquiry && ($hasBookablePrice ?? false))
-        <div class="input-box">
-            <label class="label-text">{{ __('Estimated total') }}</label>
-            <div class="form-group">
-                <span class="la la-calculator form-icon"></span>
-                <input class="form-control js-booking-total-display" type="text"
-                    id="booking_total_{{ $suffix }}" value="{{ $currencySymbol }}0.00" readonly>
-            </div>
-        </div>
-    @endif
+
 
     <div class="input-box">
         <label class="label-text" for="enquiry_comment_{{ $suffix }}">{{ __('Message') }}</label>
@@ -328,14 +319,16 @@
         }
 
         function updateBookingTotal() {
-            if (!adultsInput || !totalInput) return;
+            if (!adultsInput) return;
 
             const form = adultsInput.closest('form');
             const adultsCount = Math.max(parseInt(adultsInput.value || '1', 10), 1);
             const pricePerPerson = getTierRate(adultsCount);
             const calculatedTotal = pricePerPerson * adultsCount;
 
-            totalInput.value = formatMoney(calculatedTotal);
+            if (totalInput) {
+                totalInput.value = formatMoney(calculatedTotal);
+            }
 
             if (form) {
                 const selectedTierInput = form.querySelector('input[name="selected_pricing_tier"]');
