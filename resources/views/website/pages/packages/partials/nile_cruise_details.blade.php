@@ -175,11 +175,11 @@
         {{-- 3. Itinerary Section --}}
         @include('website.pages.packages.partials.nile_cruise.itinerary')
 
-        {{-- 4. Includes / Excludes Section --}}
-        @include('website.pages.packages.partials.nile_cruise.includes_excludes')
-
-        {{-- 5. Pricing & Packages Section --}}
+        {{-- 4. Pricing & Packages Section --}}
         @include('website.pages.packages.partials.nile_cruise.pricing')
+
+        {{-- 5. Includes / Excludes Section --}}
+        @include('website.pages.packages.partials.nile_cruise.includes_excludes')
 
         {{-- 6. Cruise Facilities Section --}}
         @include('website.pages.packages.partials.nile_cruise.facilities')

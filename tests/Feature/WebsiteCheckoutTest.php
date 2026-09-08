@@ -47,7 +47,6 @@ class WebsiteCheckoutTest extends TestCase
             ->assertSee('Enquiry Form')
             ->assertSee('id="reserveBookingPanel"', false)
             ->assertSee('id="reserveEnquiryPanel"', false)
-            ->assertSee('id="sidebarBookingForm"', false);
             ->assertSee('id="sidebarBookingForm"', false)
             ->assertDontSee('Estimated total');
 

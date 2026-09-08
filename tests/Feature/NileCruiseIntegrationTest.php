@@ -6,7 +6,11 @@ use App\Models\Admin;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Currency;
+use App\Models\NileCruiseCabin;
 use App\Models\NileCruiseCategory;
+use App\Models\NileCruiseDuration;
+use App\Models\NileCruiseSeasonPrice;
+use App\Models\NileCruiseSeasonPriceItem;
 use App\Models\NileCruiseType;
 use App\Models\Package;
 use App\Models\PackageCategory;
@@ -205,5 +209,78 @@ class NileCruiseIntegrationTest extends TestCase
         $response->assertSee('/nile-cruises');
         $response->assertSee('/nile-cruises/luxor-aswan-nile-cruises');
         $response->assertSee('dahabiya-nile-cruise');
+    }
+
+    public function test_nile_cruise_details_page_renders_pricing_before_inclusions_exclusions(): void
+    {
+        $country = Country::create([
+            'name' => ['en' => 'Egypt', 'ar' => 'مصر'],
+            'slug' => 'egypt-test-' . uniqid(),
+            'code' => 'EG',
+        ]);
+        $category = PackageCategory::create([
+            'name' => 'Nile Cruises Category',
+            'slug' => 'nile-cruises-cat-' . uniqid(),
+            'category_type' => 'nile_cruise',
+        ]);
+        $type = NileCruiseType::first();
+
+        $package = Package::create([
+            'title' => ['en' => 'Royal Nile Cruise Experience'],
+            'slug' => 'royal-nile-cruise-experience',
+            'package_type' => 'nile_cruise',
+            'country_id' => $country->id,
+            'package_category_id' => $category->id,
+            'nile_cruise_type_id' => $type->id,
+            'is_active' => true,
+            'adult_price' => 500,
+        ]);
+
+        $duration = NileCruiseDuration::create([
+            'package_id' => $package->id,
+            'title' => '4 Nights / 5 Days',
+            'days' => 5,
+            'nights' => 4,
+            'is_active' => true,
+        ]);
+
+        $season = NileCruiseSeasonPrice::create([
+            'package_id' => $package->id,
+            'nile_cruise_duration_id' => $duration->id,
+            'season_name' => ['en' => 'Winter Season'],
+            'date_from' => now()->toDateString(),
+            'date_to' => now()->addMonths(3)->toDateString(),
+            'is_active' => true,
+        ]);
+
+        $cabin = NileCruiseCabin::create([
+            'package_id' => $package->id,
+            'name' => 'Standard Cabin',
+            'quantity' => 5,
+        ]);
+
+        NileCruiseSeasonPriceItem::create([
+            'nile_cruise_season_price_id' => $season->id,
+            'nile_cruise_cabin_id' => $cabin->id,
+            'occupancy_type' => 'double',
+            'price' => 450,
+        ]);
+
+        $package->inclusions()->create([
+            'title' => 'Free Airport Pickup',
+            'description' => 'Free Airport Pickup',
+            'type' => 'included',
+        ]);
+
+        $response = $this->get(route('website.packages.show.simple', $package->slug));
+        $response->assertOk();
+
+        $content = $response->getContent();
+        $pricingPos = strpos($content, 'id="pricing-packages"');
+        $includesPos = strpos($content, 'id="includes-excludes"');
+
+        $this->assertNotFalse($pricingPos, 'Pricing & Packages section must be present.');
+        $this->assertNotFalse($includesPos, 'Includes & Excludes section must be present.');
+        $this->assertLessThan($includesPos, $pricingPos, 'Pricing & Packages must appear before Includes & Excludes.');
     }
 }
