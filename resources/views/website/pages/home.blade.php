@@ -175,7 +175,7 @@
             </div>
         </section>
 
-        <section class="section-pad light-section">
+        {{-- <section class="section-pad light-section">
             <div class="container">
                 <div class="section-heading reveal-up">
                     <div class="section-kicker">
@@ -203,7 +203,7 @@
                     @endforeach
                 </div>
             </div>
-        </section>
+        </section> --}}
 
         <section class="section-pad">
             <div class="container">
