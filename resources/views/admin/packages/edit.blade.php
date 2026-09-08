@@ -309,6 +309,7 @@
         }
 
         .wizard-stepper {
+            scroll-margin-top: 100px;
             padding: 22px 28px 10px;
             border-bottom: 1px solid var(--wizard-border);
         }
@@ -1602,6 +1603,9 @@
                     </div>
 
                     <div class="wizard-top-actions">
+                        <a href="{{ route('admin.packages.show', $package) }}" class="btn btn-outline-light">
+                            <i class="ti ti-eye me-1"></i> {{ admin_t('عرض الرحلة') }}
+                        </a>
                         <button type="button" class="btn btn-warning text-dark fw-bold js-ai-translate-missing-btn" data-package-id="{{ $package->id }}">
                             <span class="btn-icon-text">
                                 <i class="ti ti-language"></i>
@@ -2027,7 +2031,11 @@
                                             @error('featured_image')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
-                                            <div class="preview-grid" id="featuredPreview"></div>
+                                            <div class="preview-grid" id="featuredPreview">
+                                                @if ($savedFeaturedUrl)
+                                                    <div class="preview-card"><img src="{{ $savedFeaturedUrl }}" alt="{{ $packageTitle }}"></div>
+                                                @endif
+                                            </div>
                                         </div>
 
                                         <div>
@@ -2049,9 +2057,15 @@
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                             <div class="preview-grid" id="galleryPreview">
+                                                @foreach ($savedGalleryUrls as $imageUrl)
+                                                    <div class="preview-card"><img src="{{ $imageUrl }}" alt="{{ $packageTitle }}" loading="lazy"></div>
+                                                @endforeach
+                                                @if (!$savedGalleryUrls)
                                                 <div class="empty-state" id="galleryEmptyState">
                                                     {{ admin_t('لا توجد صور في المعرض حتى الآن.') }}</div>
+                                                @endif
                                             </div>
+                                            <p class="field-hint mt-2">{{ admin_t('اختيار صور جديدة يستبدل المعرض الحالي عند الحفظ. اترك الحقل فارغًا للاحتفاظ بالصور الحالية.') }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -3227,7 +3241,7 @@
                                     <i class="ti ti-arrow-{{ $isRtl ? 'left' : 'right' }}"></i>
                                 </span>
                             </button>
-                            <button type="submit" class="btn btn-wizard-primary d-none-force" id="submitWizardBtn">
+                            <button type="submit" class="btn btn-wizard-primary" id="submitWizardBtn">
                                 <span class="btn-icon-text">
                                     <i class="ti ti-device-floppy"></i>
                                     <span>{{ admin_t('حفظ وتحديث الرحلة') }}</span>
@@ -3377,7 +3391,9 @@
             const addFaqBtn = document.getElementById('addFaqBtn');
             const totalSteps = {{ count($steps) }};
             const initialStep = {{ $initialStep }};
-            const draftKey = 'travelnest-package-create-draft';
+            const draftKey = @json('travelnest-package-edit-' . $package->id . '-draft');
+            const savedFeaturedUrl = @json($savedFeaturedUrl);
+            const savedGalleryUrls = @json($savedGalleryUrls);
             let currentStep = initialStep;
             let highestStep = initialStep;
             let isDirty = {{ $viewErrors->any() || old() ? 'true' : 'false' }};
@@ -3411,7 +3427,7 @@
 
             const stepTitles = @json(array_column($steps, 'title'));
             const requiredFieldsByStep = {
-                1: ['title', 'category_id', 'destination_id', 'package_type'],
+                1: ['title', 'destination_id', 'package_type'],
                 2: [],
                 3: [],
                 4: [],
@@ -3442,8 +3458,9 @@
             }
 
             function scrollToTopOfWizard() {
-                if (form) {
-                    form.scrollIntoView({
+                const stepper = document.querySelector('.wizard-stepper');
+                if (stepper) {
+                    stepper.scrollIntoView({
                         behavior: 'smooth',
                         block: 'start'
                     });
@@ -3454,11 +3471,10 @@
                 stepButtons.forEach((button, index) => {
                     const step = index + 1;
                     button.classList.toggle('is-active', step === currentStep);
-                    button.classList.toggle('is-complete', step < currentStep || (step <= highestStep && step !== currentStep));
-                    button.classList.toggle('is-disabled', step > highestStep + 1);
+                    button.setAttribute('aria-current', step === currentStep ? 'step' : 'false');
                     const badge = button.querySelector('.wizard-step-badge');
                     if (badge) {
-                        badge.innerHTML = step < currentStep || (step < highestStep && step !== currentStep) ? '<i class="ti ti-check"></i>' : step;
+                        badge.textContent = step;
                     }
                 });
             }
@@ -3482,7 +3498,6 @@
 
                 if (prevBtn) prevBtn.disabled = currentStep === 1;
                 if (nextBtn) nextBtn.classList.toggle('d-none-force', currentStep === totalSteps);
-                if (submitBtn) submitBtn.classList.toggle('d-none-force', currentStep !== totalSteps);
             }
 
             function showStep(step) {
@@ -3540,7 +3555,7 @@
 
                 requiredFields.forEach(name => {
                     const field = form.querySelector(`[name="${name}"]`);
-                    if (!field) {
+                    if (!field || field.disabled) {
                         return;
                     }
 
@@ -3572,7 +3587,7 @@
                 if (!form) return {};
                 const data = {};
                 Array.from(form.elements).forEach(element => {
-                    if (!element.name || element.type === 'file' || element.type === 'password' || element.disabled) {
+                    if (!element.name || ['_token', '_method'].includes(element.name) || element.type === 'file' || element.type === 'password' || element.disabled) {
                         return;
                     }
 
@@ -3605,6 +3620,7 @@
             function restoreDraft(data) {
                 if (!form) return;
                 Object.entries(data).forEach(([name, value]) => {
+                    if (['_token', '_method'].includes(name)) return;
                     const field = form.querySelector(`[name="${CSS.escape(name)}"]`);
                     if (!field) {
                         return;
@@ -3650,7 +3666,12 @@
                     return;
                 }
 
-                const storedDraft = localStorage.getItem(draftKey);
+                let storedDraft;
+                try {
+                    storedDraft = localStorage.getItem(draftKey);
+                } catch (error) {
+                    return;
+                }
                 if (!storedDraft) {
                     return;
                 }
@@ -3766,11 +3787,23 @@
                 counter.textContent = `${input.value.length} / ${max}`;
             }
 
+            function appendSavedPreview(container, url, label) {
+                const card = document.createElement('div');
+                card.className = 'preview-card';
+                const image = document.createElement('img');
+                image.src = url;
+                image.alt = label;
+                image.loading = 'lazy';
+                card.appendChild(image);
+                container.appendChild(card);
+            }
+
             function renderFeaturedPreview() {
                 if (!featuredPreview) return;
                 featuredPreview.innerHTML = '';
 
                 if (!featuredFile) {
+                    if (savedFeaturedUrl) appendSavedPreview(featuredPreview, savedFeaturedUrl, texts.imagePreview);
                     return;
                 }
 
@@ -3807,6 +3840,10 @@
                 galleryPreview.innerHTML = '';
 
                 if (!galleryFiles.length) {
+                    if (savedGalleryUrls.length) {
+                        savedGalleryUrls.forEach(url => appendSavedPreview(galleryPreview, url, texts.galleryPreview));
+                        return;
+                    }
                     galleryPreview.innerHTML =
                         `<div class="empty-state" id="galleryEmptyState">${texts.noGallery}</div>`;
                     return;
@@ -3820,12 +3857,13 @@
                         card.innerHTML = `
                             <img src="${event.target.result}" alt="">
                             <div class="preview-card-footer">
-                                <span>${file.name}</span>
+                                <span data-file-name></span>
                                 <button type="button" class="preview-remove" data-gallery-index="${index}">
                                     <i class="ti ti-x"></i>
                                 </button>
                             </div>
                         `;
+                        card.querySelector('[data-file-name]').textContent = file.name;
                         galleryPreview.appendChild(card);
                     };
                     reader.readAsDataURL(file);
@@ -4235,7 +4273,7 @@
                     durationNightsEl?.value ? durationNightsEl.value + ' {{ admin_t('ليلة') }}' : '',
                     durationHoursEl?.value ? durationHoursEl.value + ' {{ admin_t('ساعة') }}' : ''
                 ].filter(Boolean).join(' / ');
-                const imagesCount = (featuredFile ? 1 : 0) + galleryFiles.length;
+                const imagesCount = (featuredFile || savedFeaturedUrl ? 1 : 0) + (galleryFiles.length || savedGalleryUrls.length);
                 const itineraryCount = document.querySelectorAll('.itinerary-item').length;
 
                 const selectedPackageType = packageTypeSelect?.value || '';
@@ -4316,12 +4354,6 @@
             stepButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     const targetStep = Number(button.dataset.stepTrigger);
-                    if (targetStep > highestStep + 1) {
-                        return;
-                    }
-                    if (targetStep > currentStep && !validateStep(currentStep)) {
-                        return;
-                    }
                     showStep(targetStep);
                 });
             });
@@ -4503,7 +4535,7 @@
                     submitBtn.disabled = true;
                     submitBtn.innerHTML = `<span class="btn-icon-text"><span class="spinner-border spinner-border-sm"></span><span>${texts.saving}</span></span>`;
                 }
-                localStorage.removeItem(draftKey);
+                try { localStorage.removeItem(draftKey); } catch (error) { /* Storage may be unavailable. */ }
             });
 
             window.addEventListener('beforeunload', function(event) {

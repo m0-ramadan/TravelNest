@@ -259,4 +259,36 @@ class PackageTypesCreationCycleTest extends TestCase
         $this->assertTrue($day2->meals_lunch);
         $this->assertTrue($day2->meals_dinner);
     }
+    public function test_show_and_edit_render_saved_media_for_each_trip_type(): void
+    {
+        foreach (['day_tour', 'travel_package', 'nile_cruise'] as $type) {
+            $package = Package::create([
+                'title' => ['en' => 'Saved trip ' . $type],
+                'slug' => 'saved-trip-' . $type,
+                'package_type' => $type,
+                'category_id' => $this->category->id,
+                'primary_country_id' => $this->country->id,
+                'currency_id' => $this->currency->id,
+                'duration_type' => $type === 'day_tour' ? 'hours' : 'days',
+                'duration_hours' => $type === 'day_tour' ? 6 : null,
+                'featured_image' => 'website/images/day-tours/cairo-day-tours.jpg',
+                'gallery_images' => [
+                    ['path' => 'website/images/day-tours/luxor-day-tours.jpg'],
+                    ['url' => 'https://example.com/gallery.jpg'],
+                ],
+            ]);
+
+            foreach (['show', 'edit'] as $action) {
+                $response = $this->actingAs($this->admin, 'admin')
+                    ->get(route('admin.packages.' . $action, $package));
+                $response->assertOk()
+                    ->assertSee('Saved trip ' . $type)
+                    ->assertSee('website/images/day-tours/cairo-day-tours.jpg')
+                    ->assertSee('website/images/day-tours/luxor-day-tours.jpg')
+                    ->assertSee('https://example.com/gallery.jpg');
+                $response->assertViewHas('savedGalleryUrls', fn ($urls) => count($urls) === 2);
+            }
+        }
+    }
+
 }

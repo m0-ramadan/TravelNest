@@ -124,10 +124,34 @@ class PackageController extends Controller
         return redirect()->route('admin.packages.index')->with('success', 'تم إنشاء الرحلة بنجاح.');
     }
 
+    private function packageMediaData(Package $package): array
+    {
+        $mediaUrl = static function ($image) {
+            $path = is_array($image) ? ($image['path'] ?? $image['url'] ?? '') : $image;
+            if (!is_string($path) || trim($path) === '') {
+                return null;
+            }
+            if (preg_match('~^https?://~i', $path)) {
+                return $path;
+            }
+            $path = ltrim($path, '/');
+            if (!file_exists(public_path($path)) && file_exists(public_path('storage/' . $path))) {
+                $path = 'storage/' . $path;
+            }
+            return asset($path);
+        };
+
+        return [
+            'savedFeaturedUrl' => $mediaUrl($package->featured_image),
+            'savedGalleryUrls' => collect($package->gallery_images ?? [])->map($mediaUrl)->filter()->values()->all(),
+        ];
+    }
+
     public function show(Package $package): View
     {
         $package->load([
             'category',
+            'primaryCountry',
             'destination.city',
             'currency',
             'facilities',
@@ -158,7 +182,7 @@ class PackageController extends Controller
             'nileCruiseDurations.seasonPrices.items.cabin',
         ]);
 
-        return view('admin.packages.show', compact('package'));
+        return view('admin.packages.show', array_merge(compact('package'), $this->packageMediaData($package)));
     }
 
     public function edit(Package $package): View
@@ -186,7 +210,7 @@ class PackageController extends Controller
             'nileCruiseDurations.seasonPrices.items.cabin',
         ]);
 
-        return view('admin.packages.edit', [
+        return view('admin.packages.edit', array_merge($this->packageMediaData($package), [
             'package' => $package,
             'categories' => PackageCategory::all(),
             'destinations' => $this->packageCities(),
@@ -196,7 +220,7 @@ class PackageController extends Controller
             ),
             'nileCruiseTypes' => \App\Models\NileCruiseType::where('is_active', true)->with('categories')->orderBy('sort_order')->get(),
             'paymentMethods' => PaymentMethod::active()->orderBy('id')->get(),
-        ]);
+        ]));
     }
 
     public function update(Request $request, Package $package): RedirectResponse
