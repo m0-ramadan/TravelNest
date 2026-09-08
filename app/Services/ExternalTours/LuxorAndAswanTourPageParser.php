@@ -276,7 +276,7 @@ class LuxorAndAswanTourPageParser
 
         // 3. Check itinerary days count
         if ($days === null && !empty($itinerary)) {
-            $days = count($itinerary);
+            $days = isset($itinerary[0]['program']) ? $itinerary[0]['program']['days'] : count($itinerary);
         }
 
         // Fallback default if completely undetectable
@@ -508,12 +508,36 @@ class LuxorAndAswanTourPageParser
     {
         $itinerary = [];
 
-        $dayCards = $crawler->filter('.itinerary-section .day-card, #itinerary .day-card, .day-card');
+        // Walk headings and cards in document order so numbering can restart per program.
+        $program = null;
+        $programIndex = 0;
+        $dayCards = $crawler->filter('.itinerary-program-title, #itinerary h3, .itinerary-section h3, .day-card');
         foreach ($dayCards as $index => $cardNode) {
             $cardCrawler = new Crawler($cardNode);
+            if (!in_array('day-card', preg_split('/\s+/', $cardNode->getAttribute('class')), true)) {
+                $heading = trim(preg_replace('/\s+/', ' ', $cardNode->textContent));
+                $durationHeading = preg_replace_callback(
+                    '/\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen)\b/i',
+                    fn ($word) => (string) (array_search(strtolower($word[1]), ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen'], true) + 1),
+                    $heading
+                );
+                $hasDays = preg_match('/(\d+)[\s–—-]*Days?\b/iu', $durationHeading, $dayMatch);
+                $hasNights = preg_match('/(\d+)[\s–—-]*Nights?\b/iu', $durationHeading, $nightMatch);
+                if ($hasDays || $hasNights) {
+                    $days = $hasDays ? (int) $dayMatch[1] : (int) $nightMatch[1] + 1;
+                    $program = [
+                        'id' => ++$programIndex,
+                        'title' => $heading,
+                        'days' => $days,
+                        'nights' => $hasNights ? (int) $nightMatch[1] : max(0, $days - 1),
+                        'departure_day' => preg_match('/\bEvery\s+[A-Za-z]+/i', $heading, $departure) ? $departure[0] : null,
+                    ];
+                }
+                continue;
+            }
 
             // Day number
-            $dayNumber = $index + 1;
+            $dayNumber = count($itinerary) + 1;
             $numNode = $cardCrawler->filter('.day-number');
             if ($numNode->count() > 0 && is_numeric(trim($numNode->text()))) {
                 $dayNumber = (int) trim($numNode->text());
@@ -563,6 +587,7 @@ class LuxorAndAswanTourPageParser
             $activities = $this->extractDayActivities($description, $title);
 
             $itinerary[] = [
+                'program' => $program,
                 'day_number' => $dayNumber,
                 'title' => $title,
                 'description' => $description,
@@ -739,6 +764,7 @@ class LuxorAndAswanTourPageParser
 
                 $seasons[] = [
                     'name' => $seasonName,
+                    'period' => trim($cardCrawler->filter('.pricing-season')->text('')) ?: null,
                     'sort_order' => $sIdx + 1,
                     'items' => $priceItems,
                 ];
@@ -782,6 +808,7 @@ class LuxorAndAswanTourPageParser
 
                     $seasons[] = [
                         'name' => $seasonName,
+                        'period' => trim($c->filter('.pricing-season')->text('')) ?: null,
                         'sort_order' => $idx + 1,
                         'items' => $priceItems,
                     ];

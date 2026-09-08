@@ -5,9 +5,13 @@
     $hasSeasonPrices = $ncDurations->contains(fn($d) => $d->seasonPrices
         ->where('is_active', true)
         ->contains(fn($season) => $season->items->contains(fn($item) => (float)$item->price > 0)));
+    $fareAccommodations = $package->tourPackageAccommodations?->where('is_active', true) ?? collect();
+    $hasFareAccommodations = $fareAccommodations->contains(fn($acc) => $acc->seasons
+        ->where('is_active', true)
+        ->contains(fn($season) => $season->items->where('is_active', true)->contains(fn($item) => (float)$item->price > 0)));
 @endphp
 
-@if($hasSeasonPrices || $ncAddons->isNotEmpty())
+@if($hasSeasonPrices || $hasFareAccommodations || $ncAddons->isNotEmpty())
     <section class="content-section" id="pricing-packages">
         <h2 class="section-header">{{ __('Pricing & Packages') }}</h2>
         <p class="section-subtitle">{{ __('Choose your preferred duration and season. Prices are shown using the cruise pricing configured for each cabin or occupancy option.') }}</p>
@@ -79,6 +83,10 @@
                     @endif
                 @endforeach
             </div>
+        @endif
+
+        @if($hasFareAccommodations)
+            @include('website.pages.packages.partials.nile_cruise.imported_pricing')
         @endif
 
         @if($ncAddons->isNotEmpty())

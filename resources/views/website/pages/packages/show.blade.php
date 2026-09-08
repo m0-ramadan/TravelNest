@@ -1166,12 +1166,14 @@
             padding: 14px 16px;
             margin: 14px 0 10px;
         }
+
         .day-tour-price-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 6px;
         }
+
         .day-tour-price-label {
             font-size: 13px;
             font-weight: 600;
@@ -1179,6 +1181,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
         .day-tour-tier-badge {
             background: rgba(210, 154, 78, 0.15);
             color: #b0782b;
@@ -1187,12 +1190,14 @@
             padding: 3px 8px;
             border-radius: 20px;
         }
+
         .day-tour-price-total {
             font-size: 26px;
             font-weight: 800;
             color: #1c325c;
             line-height: 1.1;
         }
+
         .day-tour-price-breakdown {
             font-size: 12px;
             margin-top: 4px;
@@ -2171,8 +2176,8 @@
 
 
         /* =========================================================
-                           Nile Cruise body redesign — body only, shared header/footer untouched
-                           ========================================================= */
+                               Nile Cruise body redesign — body only, shared header/footer untouched
+                               ========================================================= */
         .nile-cruise-page .main-container {
             background:
                 radial-gradient(circle at 8% 8%, rgba(215, 239, 250, .58), transparent 34%),
@@ -2655,30 +2660,30 @@
 
         .nile-cruise-page .faq-accordion {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
+            grid-template-columns: 1fr;
+            gap: 12px;
         }
 
         .nile-cruise-page .faq-accordion .day-card {
             margin: 0 !important;
-            border-radius: 10px;
+            border-radius: 12px;
         }
 
         .nile-cruise-page .faq-accordion .day-header {
-            padding: 10px 12px;
+            padding: 14px 18px;
             background: #fff;
-            gap: 9px;
+            gap: 12px;
         }
 
         .nile-cruise-page .faq-accordion .day-number {
-            width: 28px !important;
-            height: 28px !important;
-            min-width: 28px !important;
-            font-size: .9rem !important;
+            width: 36px !important;
+            height: 36px !important;
+            min-width: 36px !important;
+            font-size: 1.15rem !important;
         }
 
         .nile-cruise-page .faq-accordion .day-title {
-            font-size: .78rem !important;
+            font-size: 1.05rem !important;
         }
 
         .nile-cruise-page .related-grid {
@@ -3169,7 +3174,8 @@
                         </a>
                     @endif
                     @if ($hasBookablePrice)
-                        <a href="{{ route('website.checkout.show', $package->slug) }}" class="gold-btn" data-mobile-booking>
+                        <a href="{{ route('website.checkout.show', $package->slug) }}" class="gold-btn"
+                            data-mobile-booking>
                             <i class="la la-calendar-check"></i> {{ __('Book Now') }}
                         </a>
                     @endif
@@ -3201,7 +3207,21 @@
                 <div class="col-lg-8">
                     @php
                         $isExtendedNileCruise =
-                            $package->package_type === 'nile_cruise' && $package->nileCruiseDurations->isNotEmpty();
+                            $package->package_type === 'nile_cruise' &&
+                            $package->nileCruiseDurations->where('is_active', true)->isNotEmpty();
+                        $hasNileCruisePrices =
+                            $isExtendedNileCruise &&
+                            $package->nileCruiseDurations
+                                ->where('is_active', true)
+                                ->contains(
+                                    fn($duration) => $duration->seasonPrices
+                                        ->where('is_active', true)
+                                        ->contains(
+                                            fn($season) => $season->items->contains(
+                                                fn($item) => (float) $item->price > 0,
+                                            ),
+                                        ),
+                                );
                     @endphp
                     <section id="about" class="content-section">
                         <h2 class="section-header">{{ __('About') }} {{ $title }}</h2>
@@ -3489,6 +3509,7 @@
                         $hasDynamicNileFacilities =
                             $isNileCruisePackage && ($facilities->isNotEmpty() || $nileFacilityStats->isNotEmpty());
                     @endphp
+
                     @if (!$isNileCruisePackage && $facilities->count())
                         <section class="content-section">
                             <h2 class="section-header">
@@ -3809,6 +3830,8 @@
                         </section>
                     @endif
 
+
+
                     @if (!$isNileCruisePackage && ($included->count() || $excluded->count()))
                         <section class="content-section">
                             <h2 class="section-header">{{ __('What\'s Included') }}</h2>
@@ -3846,11 +3869,12 @@
                     @endif
 
                     @include('website.pages.packages.partials.common_experience_details')
-
                     @php
-                        $groupTiersForDisplay = collect((array) ($package->group_pricing_tiers ?? []))->filter(
-                            fn($tier) => is_array($tier) && (float) ($tier['price_per_person'] ?? 0) > 0,
-                        );
+                        $groupTiersForDisplay = collect(
+                            $package->package_type === 'nile_cruise'
+                                ? []
+                                : (array) ($package->group_pricing_tiers ?? []),
+                        )->filter(fn($tier) => is_array($tier) && (float) ($tier['price_per_person'] ?? 0) > 0);
                         $hasAccommodations =
                             $package->tourPackageAccommodations && $package->tourPackageAccommodations->isNotEmpty();
                         $hasAnyStandardPricing =
@@ -3862,7 +3886,7 @@
                             $groupTiersForDisplay->isNotEmpty() ||
                             $hasAccommodations;
                     @endphp
-                    @if (!$isExtendedNileCruise && $hasAnyStandardPricing)
+                    @if (!$isNileCruisePackage && !$hasNileCruisePrices && $hasAnyStandardPricing)
                         <section class="content-section pricing-showcase" id="pricing-section">
                             <h2 class="section-header">{{ __('Pricing & Packages') }}</h2>
                             <p class="group-pricing-subtitle">
@@ -4313,8 +4337,7 @@
                             </div>
                             <div class="sidebar-content reserve-tab-panel" id="reserveBookingPanel" role="tabpanel">
                                 @if ($package->package_type === 'travel_package')
-                                    <form method="get"
-                                        action="{{ route('website.checkout.show', $package->slug) }}"
+                                    <form method="get" action="{{ route('website.checkout.show', $package->slug) }}"
                                         id="sidebarTravelPackageForm">
                                         <input type="hidden" name="pricing_option" value="travel_package">
                                         <input type="hidden" name="totalAdults" id="tp_totalAdults" value="2">
@@ -4326,13 +4349,13 @@
                                         <!-- Date Field -->
                                         <div class="input-box mb-3">
                                             <label class="label-text" for="tp_travel_date"
-                                                style="font-weight: 600; color: #1c325c; font-size: 13px; margin-bottom: 6px; display: block;">{{ __('Date') }} *</label>
+                                                style="font-weight: 600; color: #1c325c; font-size: 13px; margin-bottom: 6px; display: block;">{{ __('Date') }}
+                                                *</label>
                                             <div class="form-group position-relative">
                                                 <span class="la la-calendar form-icon"
                                                     style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 18px; color: #c5955b; z-index: 2;"></span>
-                                                <input id="tp_travel_date" name="travel_date"
-                                                    class="form-control" type="date"
-                                                    value="{{ today()->toDateString() }}"
+                                                <input id="tp_travel_date" name="travel_date" class="form-control"
+                                                    type="date" value="{{ today()->toDateString() }}"
                                                     min="{{ today()->toDateString() }}" required
                                                     style="padding-left: 42px; border-radius: 10px; height: 46px; border: 1px solid #dce2e8; font-size: 14px;">
                                             </div>
@@ -4341,7 +4364,8 @@
                                         <!-- Rooms Field -->
                                         <div class="input-box mb-3">
                                             <label class="label-text" for="tp_rooms"
-                                                style="font-weight: 600; color: #1c325c; font-size: 13px; margin-bottom: 6px; display: block;">{{ __('Rooms') }} *</label>
+                                                style="font-weight: 600; color: #1c325c; font-size: 13px; margin-bottom: 6px; display: block;">{{ __('Rooms') }}
+                                                *</label>
                                             <div class="form-group">
                                                 <div class="select-contain w-auto">
                                                     <select id="tp_rooms" name="rooms"
@@ -4349,23 +4373,28 @@
                                                         style="border-radius: 10px; height: 46px; border: 1px solid #dce2e8; font-size: 14px;">
                                                         <option value="" disabled>{{ __('Select Rooms') }}</option>
                                                         @for ($r = 1; $r <= 10; $r++)
-                                                            <option value="{{ $r }}" {{ $r === 1 ? 'selected' : '' }}>{{ $r }}</option>
+                                                            <option value="{{ $r }}"
+                                                                {{ $r === 1 ? 'selected' : '' }}>{{ $r }}
+                                                            </option>
                                                         @endfor
                                                     </select>
                                                 </div>
-                                                <div id="tp_roomError" style="color:red; display:none; font-size: 13px; margin-top: 4px;">
+                                                <div id="tp_roomError"
+                                                    style="color:red; display:none; font-size: 13px; margin-top: 4px;">
                                                     {{ __('Please select the number of rooms.') }}
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div id="tp_capacityNotice" class="room-capacity-notice mb-2" style="display:none;"></div>
+                                        <div id="tp_capacityNotice" class="room-capacity-notice mb-2"
+                                            style="display:none;"></div>
 
                                         <!-- Dynamic Room Cards with Accommodations Type, Adults, Children -->
                                         <div id="tp_roomFields" class="tp-room-fields mb-2"></div>
 
                                         <!-- Live Estimated Price Summary Box -->
-                                        <div id="tp_priceSummaryBox" class="tp-price-summary-box mb-3" style="display: none;">
+                                        <div id="tp_priceSummaryBox" class="tp-price-summary-box mb-3"
+                                            style="display: none;">
                                             <div class="tp-price-summary-header">
                                                 <span>{{ __('Estimated Price') }}</span>
                                                 <span class="tp-price-total" id="tp_displayTotal">$0.00</span>
@@ -4379,15 +4408,15 @@
                                                     <span>{{ __('Remaining Balance') }}:</span>
                                                     <span id="tp_displayBalance">$0.00</span>
                                                 </div>
-                                                <small class="text-muted d-block mt-2" style="font-size: 11.5px; line-height: 1.35;">
+                                                <small class="text-muted d-block mt-2"
+                                                    style="font-size: 11.5px; line-height: 1.35;">
                                                     💡 {{ __('Remaining balance due 30 days prior to departure.') }}
                                                 </small>
                                             </div>
                                         </div>
 
                                         <div class="btn-box mt-3">
-                                            <button type="submit" id="tp_bookButton"
-                                                class="submit-btn w-100"
+                                            <button type="submit" id="tp_bookButton" class="submit-btn w-100"
                                                 style="background: linear-gradient(135deg, #c5955b 0%, #a87940 100%); color: #fff; font-weight: 700; border-radius: 10px; padding: 14px; font-size: 16px; border: none; box-shadow: 0 4px 15px rgba(197, 149, 91, 0.35); cursor: pointer; transition: all 0.2s;">
                                                 <i class="la la-calendar-check me-1"></i>
                                                 {{ __('Book Now') }}
@@ -4396,26 +4425,29 @@
                                     </form>
                                 @elseif ($package->package_type === 'day_tour')
                                     <h4 class="booking-request-title">{{ __('Select Your Booking') }}</h4>
-                                    <form method="get"
-                                        action="{{ route('website.checkout.show', $package->slug) }}"
+                                    <form method="get" action="{{ route('website.checkout.show', $package->slug) }}"
                                         id="sidebarBookingForm" class="day-tour-booking-form"
                                         data-operating-days='@json($operatingDays->values())'
                                         data-min-date="{{ today()->toDateString() }}">
                                         <div class="input-box">
-                                            <label class="label-text" for="day_tour_date_display">{{ __('Date') }} *</label>
+                                            <label class="label-text" for="day_tour_date_display">{{ __('Date') }}
+                                                *</label>
                                             <div class="form-group day-tour-date-wrap">
                                                 <span class="la la-calendar form-icon"></span>
-                                                <input id="day_tour_date_display" class="form-control day-tour-date-display"
-                                                    type="text" autocomplete="off" placeholder="{{ __('Travel Date') }}"
-                                                    readonly required aria-haspopup="dialog" aria-expanded="false">
+                                                <input id="day_tour_date_display"
+                                                    class="form-control day-tour-date-display" type="text"
+                                                    autocomplete="off" placeholder="{{ __('Travel Date') }}" readonly
+                                                    required aria-haspopup="dialog" aria-expanded="false">
                                                 <input id="sidebar_travel_date" type="hidden" name="travel_date">
                                                 <div class="day-tour-calendar" id="dayTourCalendar" role="dialog"
                                                     aria-label="{{ __('Choose an available travel date') }}" hidden>
                                                     <div class="day-tour-calendar-header">
-                                                        <button type="button" class="day-tour-calendar-nav" data-calendar-prev
+                                                        <button type="button" class="day-tour-calendar-nav"
+                                                            data-calendar-prev
                                                             aria-label="{{ __('Previous month') }}">‹</button>
                                                         <div class="day-tour-calendar-title" aria-live="polite"></div>
-                                                        <button type="button" class="day-tour-calendar-nav" data-calendar-next
+                                                        <button type="button" class="day-tour-calendar-nav"
+                                                            data-calendar-next
                                                             aria-label="{{ __('Next month') }}">›</button>
                                                     </div>
                                                     <div class="day-tour-calendar-grid"></div>
@@ -4430,25 +4462,43 @@
                                             <div class="quantity-control">
                                                 <label for="sidebar_adults">{{ __('Adults (12+ years)') }}</label>
                                                 <div class="qty-buttons">
-                                                    <button type="button" class="qty-btn" onclick="changeQty('sidebar_adults', -1)" aria-label="{{ __('Decrease adults') }}">−</button>
-                                                    <input type="number" id="sidebar_adults" name="adults" class="qty-input" value="2" min="1" max="40" readonly>
-                                                    <button type="button" class="qty-btn" onclick="changeQty('sidebar_adults', 1)" aria-label="{{ __('Increase adults') }}">+</button>
+                                                    <button type="button" class="qty-btn"
+                                                        onclick="changeQty('sidebar_adults', -1)"
+                                                        aria-label="{{ __('Decrease adults') }}">−</button>
+                                                    <input type="number" id="sidebar_adults" name="adults"
+                                                        class="qty-input" value="2" min="1" max="40"
+                                                        readonly>
+                                                    <button type="button" class="qty-btn"
+                                                        onclick="changeQty('sidebar_adults', 1)"
+                                                        aria-label="{{ __('Increase adults') }}">+</button>
                                                 </div>
                                             </div>
                                             <div class="quantity-control">
                                                 <label for="sidebar_children">{{ __('Children (2–11 years)') }}</label>
                                                 <div class="qty-buttons">
-                                                    <button type="button" class="qty-btn" onclick="changeQty('sidebar_children', -1)" aria-label="{{ __('Decrease children') }}">−</button>
-                                                    <input type="number" id="sidebar_children" name="children" class="qty-input" value="0" min="0" max="40" readonly>
-                                                    <button type="button" class="qty-btn" onclick="changeQty('sidebar_children', 1)" aria-label="{{ __('Increase children') }}">+</button>
+                                                    <button type="button" class="qty-btn"
+                                                        onclick="changeQty('sidebar_children', -1)"
+                                                        aria-label="{{ __('Decrease children') }}">−</button>
+                                                    <input type="number" id="sidebar_children" name="children"
+                                                        class="qty-input" value="0" min="0" max="40"
+                                                        readonly>
+                                                    <button type="button" class="qty-btn"
+                                                        onclick="changeQty('sidebar_children', 1)"
+                                                        aria-label="{{ __('Increase children') }}">+</button>
                                                 </div>
                                             </div>
                                             <div class="quantity-control">
                                                 <label for="sidebar_infants">{{ __('Infants (Under 2 years)') }}</label>
                                                 <div class="qty-buttons">
-                                                    <button type="button" class="qty-btn" onclick="changeQty('sidebar_infants', -1)" aria-label="{{ __('Decrease infants') }}">−</button>
-                                                    <input type="number" id="sidebar_infants" name="infants" class="qty-input" value="0" min="0" max="20" readonly>
-                                                    <button type="button" class="qty-btn" onclick="changeQty('sidebar_infants', 1)" aria-label="{{ __('Increase infants') }}">+</button>
+                                                    <button type="button" class="qty-btn"
+                                                        onclick="changeQty('sidebar_infants', -1)"
+                                                        aria-label="{{ __('Decrease infants') }}">−</button>
+                                                    <input type="number" id="sidebar_infants" name="infants"
+                                                        class="qty-input" value="0" min="0" max="20"
+                                                        readonly>
+                                                    <button type="button" class="qty-btn"
+                                                        onclick="changeQty('sidebar_infants', 1)"
+                                                        aria-label="{{ __('Increase infants') }}">+</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -4457,7 +4507,8 @@
                                         <div class="sidebar-price-options d-none">
                                             @foreach ($bookingPricingOptions as $option)
                                                 <label class="sidebar-price-option">
-                                                    <input type="radio" name="pricing_option" value="{{ $option['id'] }}"
+                                                    <input type="radio" name="pricing_option"
+                                                        value="{{ $option['id'] }}"
                                                         data-valid-from="{{ $option['valid_from'] }}"
                                                         data-valid-to="{{ $option['valid_to'] }}"
                                                         data-pax-min="{{ $option['pax_min'] ?? '' }}"
@@ -4471,8 +4522,11 @@
                                                         data-label="{{ $option['label'] ?? '' }}"
                                                         data-description="{{ $option['description'] ?? '' }}" required>
                                                     <span class="sidebar-price-option-card">
-                                                        <span><span class="sidebar-option-name">{{ $option['label'] }}</span><span class="sidebar-option-desc">{{ $option['description'] }}</span></span>
-                                                        <span class="sidebar-option-price">{{ $option['currency_symbol'] }}{{ number_format($option['amount'], 2) }}</span>
+                                                        <span><span
+                                                                class="sidebar-option-name">{{ $option['label'] }}</span><span
+                                                                class="sidebar-option-desc">{{ $option['description'] }}</span></span>
+                                                        <span
+                                                            class="sidebar-option-price">{{ $option['currency_symbol'] }}{{ number_format($option['amount'], 2) }}</span>
                                                     </span>
                                                 </label>
                                             @endforeach
@@ -4484,70 +4538,71 @@
                                                 <span class="day-tour-tier-badge" id="dayTourTierBadge"></span>
                                             </div>
                                             <div class="day-tour-price-total" id="dayTourPriceTotal"></div>
-                                            <div class="day-tour-price-breakdown text-muted" id="dayTourPriceBreakdown"></div>
+                                            <div class="day-tour-price-breakdown text-muted" id="dayTourPriceBreakdown">
+                                            </div>
                                         </div>
                                         <div class="alert-danger mt-3" id="sidebarNoPrices" style="display:none">
                                             {{ __('No booking price is available for these details.') }}
                                         </div>
-                                        <button type="submit" class="sidebar-checkout-btn"><i class="la la-calendar-check"></i>{{ __('Book Now') }}</button>
+                                        <button type="submit" class="sidebar-checkout-btn"><i
+                                                class="la la-calendar-check"></i>{{ __('Book Now') }}</button>
                                     </form>
                                 @else
-                                        <h4 class="booking-request-title">{{ __('Select Your Booking') }}</h4>
-                                        <p class="booking-request-copy">
-                                            {{ __('Choose your travel details and an available price, then continue to checkout.') }}
-                                        </p>
-                                        <form method="get"
-                                            action="{{ route('website.checkout.show', $package->slug) }}"
-                                            id="sidebarBookingForm">
-                                            <div class="sidebar-booking-grid">
-                                                <div class="input-box"><label class="label-text"
-                                                        for="sidebar_travel_date">{{ __('Travel Date') }}</label><input
-                                                        class="form-control" id="sidebar_travel_date" type="date"
-                                                        name="travel_date" min="{{ today()->toDateString() }}" required>
-                                                </div>
-                                                <div class="input-box"><label class="label-text"
-                                                        for="sidebar_rooms">{{ $package->package_type === 'nile_cruise' ? __('Cabins') : __('Rooms') }}</label><input
-                                                        class="form-control" id="sidebar_rooms" type="number"
-                                                        name="rooms" min="1" max="20" value="1"
-                                                        required></div>
-                                                <div class="input-box"><label class="label-text"
-                                                        for="sidebar_adults">{{ __('Adults') }}</label><input
-                                                        class="form-control" id="sidebar_adults" type="number"
-                                                        name="adults" min="1" max="40" value="1"
-                                                        required></div>
-                                                <div class="input-box"><label class="label-text"
-                                                        for="sidebar_children">{{ __('Children') }}</label><input
-                                                        class="form-control" id="sidebar_children" type="number"
-                                                        name="children" min="0" max="40" value="0"
-                                                        required>
-                                                </div>
+                                    <h4 class="booking-request-title">{{ __('Select Your Booking') }}</h4>
+                                    <p class="booking-request-copy">
+                                        {{ __('Choose your travel details and an available price, then continue to checkout.') }}
+                                    </p>
+                                    <form method="get" action="{{ route('website.checkout.show', $package->slug) }}"
+                                        id="sidebarBookingForm">
+                                        <div class="sidebar-booking-grid">
+                                            <div class="input-box"><label class="label-text"
+                                                    for="sidebar_travel_date">{{ __('Travel Date') }}</label><input
+                                                    class="form-control" id="sidebar_travel_date" type="date"
+                                                    name="travel_date" min="{{ today()->toDateString() }}" required>
                                             </div>
-                                            <input type="hidden" name="infants" value="0">
-                                            <div class="sidebar-price-options">
-                                                @foreach ($bookingPricingOptions as $option)
-                                                    <label class="sidebar-price-option">
-                                                        <input type="radio" name="pricing_option"
-                                                            value="{{ $option['id'] }}"
-                                                            data-valid-from="{{ $option['valid_from'] }}"
-                                                            data-valid-to="{{ $option['valid_to'] }}"
-                                                            data-pax-min="{{ $option['pax_min'] ?? '' }}"
-                                                            data-pax-max="{{ $option['pax_max'] ?? '' }}" required>
-                                                        <span class="sidebar-price-option-card">
-                                                            <span><span
-                                                                    class="sidebar-option-name">{{ $option['label'] }}</span><span
-                                                                    class="sidebar-option-desc">{{ $option['description'] }}</span></span>
-                                                            <span
-                                                                class="sidebar-option-price">{{ $option['currency_symbol'] }}{{ number_format($option['amount'], 2) }}</span>
-                                                        </span>
-                                                    </label>
-                                                @endforeach
+                                            <div class="input-box"><label class="label-text"
+                                                    for="sidebar_rooms">{{ $package->package_type === 'nile_cruise' ? __('Cabins') : __('Rooms') }}</label><input
+                                                    class="form-control" id="sidebar_rooms" type="number"
+                                                    name="rooms" min="1" max="20" value="1"
+                                                    required></div>
+                                            <div class="input-box"><label class="label-text"
+                                                    for="sidebar_adults">{{ __('Adults') }}</label><input
+                                                    class="form-control" id="sidebar_adults" type="number"
+                                                    name="adults" min="1" max="40" value="1"
+                                                    required></div>
+                                            <div class="input-box"><label class="label-text"
+                                                    for="sidebar_children">{{ __('Children') }}</label><input
+                                                    class="form-control" id="sidebar_children" type="number"
+                                                    name="children" min="0" max="40" value="0"
+                                                    required>
                                             </div>
-                                            <div class="alert-danger mt-3" id="sidebarNoPrices" style="display:none">
-                                                {{ __('No booking price is available for these details.') }}</div>
-                                            <button type="submit" class="sidebar-checkout-btn"><i
-                                                    class="la la-arrow-right"></i>{{ __('Continue to Checkout') }}</button>
-                                        </form>
-                                    @endif
+                                        </div>
+                                        <input type="hidden" name="infants" value="0">
+                                        <div class="sidebar-price-options">
+                                            @foreach ($bookingPricingOptions as $option)
+                                                <label class="sidebar-price-option">
+                                                    <input type="radio" name="pricing_option"
+                                                        value="{{ $option['id'] }}"
+                                                        data-valid-from="{{ $option['valid_from'] }}"
+                                                        data-valid-to="{{ $option['valid_to'] }}"
+                                                        data-pax-min="{{ $option['pax_min'] ?? '' }}"
+                                                        data-pax-max="{{ $option['pax_max'] ?? '' }}" required>
+                                                    <span class="sidebar-price-option-card">
+                                                        <span><span
+                                                                class="sidebar-option-name">{{ $option['label'] }}</span><span
+                                                                class="sidebar-option-desc">{{ $option['description'] }}</span></span>
+                                                        <span
+                                                            class="sidebar-option-price">{{ $option['currency_symbol'] }}{{ number_format($option['amount'], 2) }}</span>
+                                                    </span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                        <div class="alert-danger mt-3" id="sidebarNoPrices" style="display:none">
+                                            {{ __('No booking price is available for these details.') }}</div>
+                                        <button type="submit" class="sidebar-checkout-btn"><i
+                                                class="la la-arrow-right"></i>{{ __('Continue to Checkout') }}</button>
+                                    </form>
+                                @endif
                             </div>
                             <div class="sidebar-content reserve-tab-panel" id="reserveEnquiryPanel" role="tabpanel"
                                 hidden>
@@ -4591,8 +4646,9 @@
 
     <div class="fixed-mobile-btn d-lg-none">
         @if ($hasBookablePrice)
-            <a href="{{ route('website.checkout.show', $package->slug) }}" class="mobile-enquiry-btn" data-mobile-booking
-                style="margin-right:8px"><i class="la la-calendar-check"></i> {{ __('Book Now') }}</a>
+            <a href="{{ route('website.checkout.show', $package->slug) }}" class="mobile-enquiry-btn"
+                data-mobile-booking style="margin-right:8px"><i class="la la-calendar-check"></i>
+                {{ __('Book Now') }}</a>
         @endif
         <a href="#" class="mobile-enquiry-btn" data-bs-toggle="modal" data-bs-target="#simpleEnquiryModal">
             <i class="la la-envelope"></i> {{ $hasBookablePrice ? __('Enquire') : __('Submit Enquiry') }}
@@ -4646,368 +4702,397 @@
             const current = parseInt(input.value || min);
             const max = parseInt(input.getAttribute('max') || '999');
             input.value = Math.min(max, Math.max(min, current + amount));
-            input.dispatchEvent(new Event('change', { bubbles: true }));
+            input.dispatchEvent(new Event('change', {
+                bubbles: true
+            }));
         };
 
         document.addEventListener('DOMContentLoaded', function() {
-                    const reserveTabs = document.querySelectorAll('[data-reserve-tab]');
-                    const reserveBookingPanel = document.getElementById('reserveBookingPanel');
-                    const reserveEnquiryPanel = document.getElementById('reserveEnquiryPanel');
+            const reserveTabs = document.querySelectorAll('[data-reserve-tab]');
+            const reserveBookingPanel = document.getElementById('reserveBookingPanel');
+            const reserveEnquiryPanel = document.getElementById('reserveEnquiryPanel');
 
-                    const activateReserveTab = (tabName) => {
-                        if (!reserveBookingPanel || !reserveEnquiryPanel) return;
+            const activateReserveTab = (tabName) => {
+                if (!reserveBookingPanel || !reserveEnquiryPanel) return;
 
-                        reserveBookingPanel.hidden = tabName !== 'booking';
-                        reserveEnquiryPanel.hidden = tabName !== 'enquiry';
-                        reserveTabs.forEach((button) => {
-                            const active = button.dataset.reserveTab === tabName;
-                            button.classList.toggle('is-active', active);
-                            button.setAttribute('aria-selected', active ? 'true' : 'false');
+                reserveBookingPanel.hidden = tabName !== 'booking';
+                reserveEnquiryPanel.hidden = tabName !== 'enquiry';
+                reserveTabs.forEach((button) => {
+                    const active = button.dataset.reserveTab === tabName;
+                    button.classList.toggle('is-active', active);
+                    button.setAttribute('aria-selected', active ? 'true' : 'false');
+                });
+
+                if (tabName === 'enquiry') {
+                    history.replaceState(null, '', '#enquiryFormDesktop');
+                } else if (location.hash === '#enquiryFormDesktop') {
+                    history.replaceState(null, '', location.pathname + location.search);
+                }
+            };
+
+            reserveTabs.forEach((button) => button.addEventListener('click', () => {
+                activateReserveTab(button.dataset.reserveTab);
+            }));
+
+            if (reserveTabs.length) {
+                activateReserveTab(location.hash === '#enquiryFormDesktop' ? 'enquiry' : 'booking');
+            }
+
+            const mobileBookingModal = document.getElementById('mobileBookingModal');
+            if (mobileBookingModal && reserveBookingPanel) {
+                const bookingHome = document.createComment('Booking panel desktop position');
+                reserveBookingPanel.before(bookingHome);
+                const mobileViewport = window.matchMedia('(max-width: 991.98px)');
+                let bookingWasHidden = false;
+
+                // Move the live form so its values, validation and price handlers stay shared.
+                mobileBookingModal.addEventListener('show.bs.modal', () => {
+                    bookingWasHidden = reserveBookingPanel.hidden;
+                    reserveBookingPanel.hidden = false;
+                    document.getElementById('mobileBookingBody').append(reserveBookingPanel);
+                });
+                mobileBookingModal.addEventListener('hidden.bs.modal', () => {
+                    bookingHome.after(reserveBookingPanel);
+                    reserveBookingPanel.hidden = bookingWasHidden;
+                });
+                document.querySelectorAll('[data-mobile-booking]').forEach((button) => {
+                    button.addEventListener('click', (event) => {
+                        if (!mobileViewport.matches) return;
+                        event.preventDefault();
+                        window.bootstrap.Modal.getOrCreateInstance(mobileBookingModal).show(button);
+                    });
+                });
+                const closeDesktopBookingModal = () => {
+                    if (!mobileViewport.matches) {
+                        window.bootstrap.Modal.getInstance(mobileBookingModal)?.hide();
+                    }
+                };
+                mobileViewport.addEventListener('change', closeDesktopBookingModal);
+                mobileBookingModal.addEventListener('shown.bs.modal', closeDesktopBookingModal);
+            }
+
+            const sidebarBookingForm = document.getElementById('sidebarBookingForm');
+            if (sidebarBookingForm) {
+                const travelDate = document.getElementById('sidebar_travel_date');
+                const adults = document.getElementById('sidebar_adults');
+                const children = document.getElementById('sidebar_children');
+                const infants = document.getElementById('sidebar_infants');
+                const noPrices = document.getElementById('sidebarNoPrices');
+                const dayTourPriceBox = document.getElementById('dayTourPriceBox');
+                const dayTourPriceTotal = document.getElementById('dayTourPriceTotal');
+                const dayTourTierBadge = document.getElementById('dayTourTierBadge');
+                const dayTourPriceBreakdown = document.getElementById('dayTourPriceBreakdown');
+
+                const calendar = document.getElementById('dayTourCalendar');
+                if (calendar) {
+                    const displayInput = document.getElementById('day_tour_date_display');
+                    const dateError = document.getElementById('dayTourDateError');
+                    const minDateParts = sidebarBookingForm.dataset.minDate.split('-').map(Number);
+                    const minDate = new Date(minDateParts[0], minDateParts[1] - 1, minDateParts[2]);
+                    const selectedDays = JSON.parse(sidebarBookingForm.dataset.operatingDays || '[]')
+                        .map(day => String(day).trim().toLowerCase()).filter(Boolean);
+                    const daily = !selectedDays.length || selectedDays.some(day => ['daily', 'everyday',
+                        'every day', 'all'
+                    ].includes(day));
+                    const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                    const allowedIndexes = selectedDays.map(day => weekdays.findIndex(name => name === day || name
+                        .slice(0, 3) === day.slice(0, 3))).filter(index => index >= 0);
+                    const title = calendar.querySelector('.day-tour-calendar-title');
+                    const grid = calendar.querySelector('.day-tour-calendar-grid');
+                    let viewedMonth = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+
+                    const toIso = date => [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(
+                        date.getDate()).padStart(2, '0')].join('-');
+                    const isAvailable = date => date >= minDate && (daily || allowedIndexes.includes(date
+                .getDay()));
+                    const renderCalendar = () => {
+                        const locale = document.documentElement.lang || 'en';
+                        title.textContent = viewedMonth.toLocaleDateString(locale, {
+                            month: 'short',
+                            year: 'numeric'
+                        });
+                        grid.innerHTML = '';
+                        weekdays.forEach((day, index) => {
+                            const label = document.createElement('div');
+                            label.className = 'day-tour-calendar-weekday';
+                            const sample = new Date(2026, 7, 2 + index);
+                            label.textContent = sample.toLocaleDateString(locale, {
+                                weekday: 'short'
+                            }).slice(0, 2);
+                            grid.appendChild(label);
                         });
 
-                        if (tabName === 'enquiry') {
-                            history.replaceState(null, '', '#enquiryFormDesktop');
-                        } else if (location.hash === '#enquiryFormDesktop') {
-                            history.replaceState(null, '', location.pathname + location.search);
+                        const first = new Date(viewedMonth.getFullYear(), viewedMonth.getMonth(), 1);
+                        const start = new Date(first);
+                        start.setDate(1 - first.getDay());
+                        for (let offset = 0; offset < 42; offset++) {
+                            const date = new Date(start);
+                            date.setDate(start.getDate() + offset);
+                            const button = document.createElement('button');
+                            button.type = 'button';
+                            button.className = 'day-tour-calendar-day';
+                            button.textContent = date.getDate();
+                            button.dataset.date = toIso(date);
+                            if (date.getMonth() !== viewedMonth.getMonth()) button.classList.add('is-outside');
+                            if (!isAvailable(date) || date.getMonth() !== viewedMonth.getMonth()) button
+                                .disabled = true;
+                            if (travelDate.value === button.dataset.date) button.classList.add('is-selected');
+                            button.addEventListener('click', () => {
+                                travelDate.value = button.dataset.date;
+                                displayInput.value = date.toLocaleDateString(locale, {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric'
+                                });
+                                displayInput.setAttribute('aria-expanded', 'false');
+                                calendar.hidden = true;
+                                dateError?.classList.add('d-none');
+                                travelDate.dispatchEvent(new Event('change', {
+                                    bubbles: true
+                                }));
+                            });
+                            grid.appendChild(button);
                         }
                     };
 
-                    reserveTabs.forEach((button) => button.addEventListener('click', () => {
-                        activateReserveTab(button.dataset.reserveTab);
-                    }));
-
-                    if (reserveTabs.length) {
-                        activateReserveTab(location.hash === '#enquiryFormDesktop' ? 'enquiry' : 'booking');
-                    }
-
-                    const mobileBookingModal = document.getElementById('mobileBookingModal');
-                    if (mobileBookingModal && reserveBookingPanel) {
-                        const bookingHome = document.createComment('Booking panel desktop position');
-                        reserveBookingPanel.before(bookingHome);
-                        const mobileViewport = window.matchMedia('(max-width: 991.98px)');
-                        let bookingWasHidden = false;
-
-                        // Move the live form so its values, validation and price handlers stay shared.
-                        mobileBookingModal.addEventListener('show.bs.modal', () => {
-                            bookingWasHidden = reserveBookingPanel.hidden;
-                            reserveBookingPanel.hidden = false;
-                            document.getElementById('mobileBookingBody').append(reserveBookingPanel);
-                        });
-                        mobileBookingModal.addEventListener('hidden.bs.modal', () => {
-                            bookingHome.after(reserveBookingPanel);
-                            reserveBookingPanel.hidden = bookingWasHidden;
-                        });
-                        document.querySelectorAll('[data-mobile-booking]').forEach((button) => {
-                            button.addEventListener('click', (event) => {
-                                if (!mobileViewport.matches) return;
-                                event.preventDefault();
-                                window.bootstrap.Modal.getOrCreateInstance(mobileBookingModal).show(button);
-                            });
-                        });
-                        const closeDesktopBookingModal = () => {
-                            if (!mobileViewport.matches) {
-                                window.bootstrap.Modal.getInstance(mobileBookingModal)?.hide();
-                            }
-                        };
-                        mobileViewport.addEventListener('change', closeDesktopBookingModal);
-                        mobileBookingModal.addEventListener('shown.bs.modal', closeDesktopBookingModal);
-                    }
-
-                    const sidebarBookingForm = document.getElementById('sidebarBookingForm');
-                    if (sidebarBookingForm) {
-                        const travelDate = document.getElementById('sidebar_travel_date');
-                        const adults = document.getElementById('sidebar_adults');
-                        const children = document.getElementById('sidebar_children');
-                        const infants = document.getElementById('sidebar_infants');
-                        const noPrices = document.getElementById('sidebarNoPrices');
-                        const dayTourPriceBox = document.getElementById('dayTourPriceBox');
-                        const dayTourPriceTotal = document.getElementById('dayTourPriceTotal');
-                        const dayTourTierBadge = document.getElementById('dayTourTierBadge');
-                        const dayTourPriceBreakdown = document.getElementById('dayTourPriceBreakdown');
-
-                        const calendar = document.getElementById('dayTourCalendar');
-                        if (calendar) {
-                            const displayInput = document.getElementById('day_tour_date_display');
-                            const dateError = document.getElementById('dayTourDateError');
-                            const minDateParts = sidebarBookingForm.dataset.minDate.split('-').map(Number);
-                            const minDate = new Date(minDateParts[0], minDateParts[1] - 1, minDateParts[2]);
-                            const selectedDays = JSON.parse(sidebarBookingForm.dataset.operatingDays || '[]')
-                                .map(day => String(day).trim().toLowerCase()).filter(Boolean);
-                            const daily = !selectedDays.length || selectedDays.some(day => ['daily', 'everyday', 'every day', 'all'].includes(day));
-                            const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-                            const allowedIndexes = selectedDays.map(day => weekdays.findIndex(name => name === day || name.slice(0, 3) === day.slice(0, 3))).filter(index => index >= 0);
-                            const title = calendar.querySelector('.day-tour-calendar-title');
-                            const grid = calendar.querySelector('.day-tour-calendar-grid');
-                            let viewedMonth = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
-
-                            const toIso = date => [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
-                            const isAvailable = date => date >= minDate && (daily || allowedIndexes.includes(date.getDay()));
-                            const renderCalendar = () => {
-                                const locale = document.documentElement.lang || 'en';
-                                title.textContent = viewedMonth.toLocaleDateString(locale, { month: 'short', year: 'numeric' });
-                                grid.innerHTML = '';
-                                weekdays.forEach((day, index) => {
-                                    const label = document.createElement('div');
-                                    label.className = 'day-tour-calendar-weekday';
-                                    const sample = new Date(2026, 7, 2 + index);
-                                    label.textContent = sample.toLocaleDateString(locale, { weekday: 'short' }).slice(0, 2);
-                                    grid.appendChild(label);
-                                });
-
-                                const first = new Date(viewedMonth.getFullYear(), viewedMonth.getMonth(), 1);
-                                const start = new Date(first);
-                                start.setDate(1 - first.getDay());
-                                for (let offset = 0; offset < 42; offset++) {
-                                    const date = new Date(start);
-                                    date.setDate(start.getDate() + offset);
-                                    const button = document.createElement('button');
-                                    button.type = 'button';
-                                    button.className = 'day-tour-calendar-day';
-                                    button.textContent = date.getDate();
-                                    button.dataset.date = toIso(date);
-                                    if (date.getMonth() !== viewedMonth.getMonth()) button.classList.add('is-outside');
-                                    if (!isAvailable(date) || date.getMonth() !== viewedMonth.getMonth()) button.disabled = true;
-                                    if (travelDate.value === button.dataset.date) button.classList.add('is-selected');
-                                    button.addEventListener('click', () => {
-                                        travelDate.value = button.dataset.date;
-                                        displayInput.value = date.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
-                                        displayInput.setAttribute('aria-expanded', 'false');
-                                        calendar.hidden = true;
-                                        dateError?.classList.add('d-none');
-                                        travelDate.dispatchEvent(new Event('change', { bubbles: true }));
-                                    });
-                                    grid.appendChild(button);
-                                }
-                            };
-
-                            displayInput.addEventListener('click', () => {
-                                calendar.hidden = !calendar.hidden;
-                                displayInput.setAttribute('aria-expanded', calendar.hidden ? 'false' : 'true');
-                                if (!calendar.hidden) renderCalendar();
-                            });
-                            calendar.querySelector('[data-calendar-prev]').addEventListener('click', () => {
-                                const previous = new Date(viewedMonth.getFullYear(), viewedMonth.getMonth() - 1, 1);
-                                if (previous >= new Date(minDate.getFullYear(), minDate.getMonth(), 1)) viewedMonth = previous;
-                                renderCalendar();
-                            });
-                            calendar.querySelector('[data-calendar-next]').addEventListener('click', () => {
-                                viewedMonth = new Date(viewedMonth.getFullYear(), viewedMonth.getMonth() + 1, 1);
-                                renderCalendar();
-                            });
-                            document.addEventListener('click', event => {
-                                if (!calendar.hidden && !event.target.closest('.day-tour-date-wrap')) {
-                                    calendar.hidden = true;
-                                    displayInput.setAttribute('aria-expanded', 'false');
-                                }
-                            });
-                            renderCalendar();
+                    displayInput.addEventListener('click', () => {
+                        calendar.hidden = !calendar.hidden;
+                        displayInput.setAttribute('aria-expanded', calendar.hidden ? 'false' : 'true');
+                        if (!calendar.hidden) renderCalendar();
+                    });
+                    calendar.querySelector('[data-calendar-prev]').addEventListener('click', () => {
+                        const previous = new Date(viewedMonth.getFullYear(), viewedMonth.getMonth() - 1, 1);
+                        if (previous >= new Date(minDate.getFullYear(), minDate.getMonth(), 1))
+                            viewedMonth = previous;
+                        renderCalendar();
+                    });
+                    calendar.querySelector('[data-calendar-next]').addEventListener('click', () => {
+                        viewedMonth = new Date(viewedMonth.getFullYear(), viewedMonth.getMonth() + 1, 1);
+                        renderCalendar();
+                    });
+                    document.addEventListener('click', event => {
+                        if (!calendar.hidden && !event.target.closest('.day-tour-date-wrap')) {
+                            calendar.hidden = true;
+                            displayInput.setAttribute('aria-expanded', 'false');
                         }
+                    });
+                    renderCalendar();
+                }
 
-                        const refreshSidebarPrices = () => {
-                            const selectedDate = travelDate.value;
-                            const numAdults = Number(adults?.value || 1);
-                            const numChildren = Number(children?.value || 0);
-                            const numInfants = Number(infants?.value || 0);
-                            const guests = Math.max(1, numAdults + numChildren + numInfants);
-                            let firstAvailable = null;
-                            let bestOption = null;
+                const refreshSidebarPrices = () => {
+                    const selectedDate = travelDate.value;
+                    const numAdults = Number(adults?.value || 1);
+                    const numChildren = Number(children?.value || 0);
+                    const numInfants = Number(infants?.value || 0);
+                    const guests = Math.max(1, numAdults + numChildren + numInfants);
+                    let firstAvailable = null;
+                    let bestOption = null;
 
-                            sidebarBookingForm.querySelectorAll('.sidebar-price-option').forEach((label) => {
-                                const input = label.querySelector('input[type="radio"]');
-                                const min = Number(input.dataset.paxMin || 0);
-                                const max = Number(input.dataset.paxMax || 0);
-                                const dateMatches = !selectedDate ||
-                                    ((!input.dataset.validFrom || selectedDate >= input.dataset.validFrom) &&
-                                        (!input.dataset.validTo || selectedDate <= input.dataset.validTo));
-                                const guestsMatch = (!min || guests >= min) && (!max || guests <= max);
-                                const available = dateMatches && guestsMatch;
+                    sidebarBookingForm.querySelectorAll('.sidebar-price-option').forEach((label) => {
+                        const input = label.querySelector('input[type="radio"]');
+                        const min = Number(input.dataset.paxMin || 0);
+                        const max = Number(input.dataset.paxMax || 0);
+                        const dateMatches = !selectedDate ||
+                            ((!input.dataset.validFrom || selectedDate >= input.dataset.validFrom) &&
+                                (!input.dataset.validTo || selectedDate <= input.dataset.validTo));
+                        const guestsMatch = (!min || guests >= min) && (!max || guests <= max);
+                        const available = dateMatches && guestsMatch;
 
-                                if (!dayTourPriceBox) {
-                                    label.style.display = available ? '' : 'none';
-                                }
-                                input.disabled = !available;
-                                if (available && !firstAvailable) firstAvailable = input;
-                                if (available) {
-                                    if (!bestOption || (min > 0 && Number(bestOption.dataset.paxMin || 0) === 0)) {
-                                        bestOption = input;
-                                    }
-                                }
-                            });
-
-                            const activeInput = bestOption || firstAvailable;
-                            if (activeInput) {
-                                activeInput.checked = true;
+                        if (!dayTourPriceBox) {
+                            label.style.display = available ? '' : 'none';
+                        }
+                        input.disabled = !available;
+                        if (available && !firstAvailable) firstAvailable = input;
+                        if (available) {
+                            if (!bestOption || (min > 0 && Number(bestOption.dataset.paxMin || 0) ===
+                                0)) {
+                                bestOption = input;
                             }
+                        }
+                    });
 
-                            if (dayTourPriceBox) {
-                                if (activeInput) {
-                                    const symbol = activeInput.dataset.currencySymbol || '$';
-                                    const unit = activeInput.dataset.priceUnit;
-                                    const amount = parseFloat(activeInput.dataset.amount || 0);
-                                    const adultPrice = parseFloat(activeInput.dataset.adultPrice || 0);
-                                    const childPrice = parseFloat(activeInput.dataset.childPrice || 0);
-                                    const infantPrice = parseFloat(activeInput.dataset.infantPrice || 0);
+                    const activeInput = bestOption || firstAvailable;
+                    if (activeInput) {
+                        activeInput.checked = true;
+                    }
 
-                                    let total = 0;
-                                    let breakdown = '';
-                                    if (unit === 'category') {
-                                        total = (numAdults * adultPrice) + (numChildren * childPrice) + (numInfants * infantPrice);
-                                        const parts = [];
-                                        parts.push(`${numAdults} × ${symbol}${adultPrice.toFixed(0)}`);
-                                        if (numChildren > 0) parts.push(`${numChildren} × ${symbol}${childPrice.toFixed(0)}`);
-                                        if (numInfants > 0) parts.push(`${numInfants} × ${symbol}${infantPrice.toFixed(0)}`);
-                                        breakdown = parts.join(' + ');
-                                    } else if (unit === 'per_booking') {
-                                        total = amount;
-                                        breakdown = `${symbol}${amount.toFixed(0)} per booking`;
-                                    } else if (unit === 'per_adult') {
-                                        total = amount * numAdults;
-                                        breakdown = `${numAdults} × ${symbol}${amount.toFixed(0)}`;
-                                    } else {
-                                        total = amount * Math.max(1, numAdults + numChildren);
-                                        breakdown = `${numAdults + numChildren} × ${symbol}${amount.toFixed(0)}`;
-                                    }
+                    if (dayTourPriceBox) {
+                        if (activeInput) {
+                            const symbol = activeInput.dataset.currencySymbol || '$';
+                            const unit = activeInput.dataset.priceUnit;
+                            const amount = parseFloat(activeInput.dataset.amount || 0);
+                            const adultPrice = parseFloat(activeInput.dataset.adultPrice || 0);
+                            const childPrice = parseFloat(activeInput.dataset.childPrice || 0);
+                            const infantPrice = parseFloat(activeInput.dataset.infantPrice || 0);
 
-                                    dayTourPriceTotal.textContent = `${symbol}${total.toFixed(0)}`;
-                                    if (dayTourTierBadge) {
-                                        dayTourTierBadge.textContent = activeInput.dataset.label || '';
-                                    }
-                                    if (dayTourPriceBreakdown) {
-                                        dayTourPriceBreakdown.textContent = breakdown;
-                                    }
-                                    dayTourPriceBox.style.display = 'block';
-                                    noPrices.style.display = 'none';
-                                } else {
-                                    dayTourPriceBox.style.display = 'none';
-                                    noPrices.style.display = 'block';
-                                }
+                            let total = 0;
+                            let breakdown = '';
+                            if (unit === 'category') {
+                                total = (numAdults * adultPrice) + (numChildren * childPrice) + (numInfants *
+                                    infantPrice);
+                                const parts = [];
+                                parts.push(`${numAdults} × ${symbol}${adultPrice.toFixed(0)}`);
+                                if (numChildren > 0) parts.push(
+                                    `${numChildren} × ${symbol}${childPrice.toFixed(0)}`);
+                                if (numInfants > 0) parts.push(
+                                    `${numInfants} × ${symbol}${infantPrice.toFixed(0)}`);
+                                breakdown = parts.join(' + ');
+                            } else if (unit === 'per_booking') {
+                                total = amount;
+                                breakdown = `${symbol}${amount.toFixed(0)} per booking`;
+                            } else if (unit === 'per_adult') {
+                                total = amount * numAdults;
+                                breakdown = `${numAdults} × ${symbol}${amount.toFixed(0)}`;
                             } else {
-                                noPrices.style.display = firstAvailable ? 'none' : 'block';
+                                total = amount * Math.max(1, numAdults + numChildren);
+                                breakdown = `${numAdults + numChildren} × ${symbol}${amount.toFixed(0)}`;
                             }
-                        };
 
-                        [travelDate, adults, children, infants].filter(Boolean).forEach((input) => input.addEventListener('change',
-                            refreshSidebarPrices));
-                        sidebarBookingForm.addEventListener('submit', (event) => {
-                            if (calendar && !travelDate.value) {
-                                event.preventDefault();
-                                document.getElementById('dayTourDateError')?.classList.remove('d-none');
-                                return;
+                            dayTourPriceTotal.textContent = `${symbol}${total.toFixed(0)}`;
+                            if (dayTourTierBadge) {
+                                dayTourTierBadge.textContent = activeInput.dataset.label || '';
                             }
-                            if (!sidebarBookingForm.querySelector(
-                                    'input[name="pricing_option"]:checked:not(:disabled)')) {
-                                event.preventDefault();
-                                noPrices.style.display = 'block';
+                            if (dayTourPriceBreakdown) {
+                                dayTourPriceBreakdown.textContent = breakdown;
                             }
-                        });
-                        refreshSidebarPrices();
+                            dayTourPriceBox.style.display = 'block';
+                            noPrices.style.display = 'none';
+                        } else {
+                            dayTourPriceBox.style.display = 'none';
+                            noPrices.style.display = 'block';
+                        }
+                    } else {
+                        noPrices.style.display = firstAvailable ? 'none' : 'block';
                     }
+                };
 
-                    const tpForm = document.getElementById('sidebarTravelPackageForm');
-                    if (tpForm) {
-                        const matrixData = @json($travelPackageMatrix['matrix'] ?? []);
-                        const accommodationsList = @json($travelPackageMatrix['accommodations'] ?? []);
-                        const currencySymbol = @json($currencySymbol ?? '$');
-                        const travelDateInput = document.getElementById('tp_travel_date');
-                        const roomsSelect = document.getElementById('tp_rooms');
-                        const roomFields = document.getElementById('tp_roomFields');
-                        const totalAdultsInput = document.getElementById('tp_totalAdults');
-                        const totalChildrenInput = document.getElementById('tp_totalChildren');
-                        const formAdultsInput = document.getElementById('tp_form_adults');
-                        const formChildrenInput = document.getElementById('tp_form_children');
-                        const priceSummaryBox = document.getElementById('tp_priceSummaryBox');
-                        const displayTotal = document.getElementById('tp_displayTotal');
-                        const displayDeposit = document.getElementById('tp_displayDeposit');
-                        const displayBalance = document.getElementById('tp_displayBalance');
+                [travelDate, adults, children, infants].filter(Boolean).forEach((input) => input.addEventListener(
+                    'change',
+                    refreshSidebarPrices));
+                sidebarBookingForm.addEventListener('submit', (event) => {
+                    if (calendar && !travelDate.value) {
+                        event.preventDefault();
+                        document.getElementById('dayTourDateError')?.classList.remove('d-none');
+                        return;
+                    }
+                    if (!sidebarBookingForm.querySelector(
+                            'input[name="pricing_option"]:checked:not(:disabled)')) {
+                        event.preventDefault();
+                        noPrices.style.display = 'block';
+                    }
+                });
+                refreshSidebarPrices();
+            }
 
-                        function getSelectedSeason() {
-                            const val = travelDateInput ? travelDateInput.value : '';
-                            if (!val) return 'winter';
-                            const date = new Date(val);
-                            if (isNaN(date.getTime())) return 'winter';
-                            const month = date.getMonth() + 1;
-                            return (month >= 5 && month <= 8) ? 'summer' : 'winter';
+            const tpForm = document.getElementById('sidebarTravelPackageForm');
+            if (tpForm) {
+                const matrixData = @json($travelPackageMatrix['matrix'] ?? []);
+                const accommodationsList = @json($travelPackageMatrix['accommodations'] ?? []);
+                const currencySymbol = @json($currencySymbol ?? '$');
+                const travelDateInput = document.getElementById('tp_travel_date');
+                const roomsSelect = document.getElementById('tp_rooms');
+                const roomFields = document.getElementById('tp_roomFields');
+                const totalAdultsInput = document.getElementById('tp_totalAdults');
+                const totalChildrenInput = document.getElementById('tp_totalChildren');
+                const formAdultsInput = document.getElementById('tp_form_adults');
+                const formChildrenInput = document.getElementById('tp_form_children');
+                const priceSummaryBox = document.getElementById('tp_priceSummaryBox');
+                const displayTotal = document.getElementById('tp_displayTotal');
+                const displayDeposit = document.getElementById('tp_displayDeposit');
+                const displayBalance = document.getElementById('tp_displayBalance');
+
+                function getSelectedSeason() {
+                    const val = travelDateInput ? travelDateInput.value : '';
+                    if (!val) return 'winter';
+                    const date = new Date(val);
+                    if (isNaN(date.getTime())) return 'winter';
+                    const month = date.getMonth() + 1;
+                    return (month >= 5 && month <= 8) ? 'summer' : 'winter';
+                }
+
+                function getRoomRates(accName) {
+                    const season = getSelectedSeason();
+                    if (!accName && accommodationsList.length > 0) {
+                        accName = accommodationsList[0].name;
+                    }
+                    if (accName && matrixData[accName] && matrixData[accName][season]) {
+                        return matrixData[accName][season];
+                    }
+                    if (accName) {
+                        const lower = accName.toLowerCase();
+                        for (const key of Object.keys(matrixData)) {
+                            if (key.toLowerCase() === lower && matrixData[key][season]) {
+                                return matrixData[key][season];
+                            }
                         }
+                    }
+                    const firstKey = Object.keys(matrixData)[0];
+                    if (firstKey && matrixData[firstKey][season]) {
+                        return matrixData[firstKey][season];
+                    }
+                    return {
+                        single: 0,
+                        double: 0,
+                        triple: 0
+                    };
+                }
 
-                        function getRoomRates(accName) {
-                            const season = getSelectedSeason();
-                            if (!accName && accommodationsList.length > 0) {
-                                accName = accommodationsList[0].name;
-                            }
-                            if (accName && matrixData[accName] && matrixData[accName][season]) {
-                                return matrixData[accName][season];
-                            }
-                            if (accName) {
-                                const lower = accName.toLowerCase();
-                                for (const key of Object.keys(matrixData)) {
-                                    if (key.toLowerCase() === lower && matrixData[key][season]) {
-                                        return matrixData[key][season];
-                                    }
-                                }
-                            }
-                            const firstKey = Object.keys(matrixData)[0];
-                            if (firstKey && matrixData[firstKey][season]) {
-                                return matrixData[firstKey][season];
-                            }
-                            return { single: 0, double: 0, triple: 0 };
-                        }
+                function calculateRoomPrice(rates, adults, children) {
+                    const single = Number(rates.single || 0);
+                    const double = Number(rates.double || 0);
+                    const triple = Number(rates.triple || 0);
 
-                        function calculateRoomPrice(rates, adults, children) {
-                            const single = Number(rates.single || 0);
-                            const double = Number(rates.double || 0);
-                            const triple = Number(rates.triple || 0);
+                    if (adults === 1 && children === 0) {
+                        return single;
+                    }
+                    if (adults === 1 && (children === 1 || children === 2)) {
+                        return double * 2;
+                    }
+                    if (adults === 2) {
+                        const base = double * 2;
+                        const childRate = double * 0.50;
+                        return base + (children * childRate);
+                    }
+                    if (adults === 3) {
+                        return triple * 3;
+                    }
+                    if (triple > 0) {
+                        return (triple * adults) + (children * triple * 0.50);
+                    }
+                    return (double * adults) + (children * double * 0.50);
+                }
 
-                            if (adults === 1 && children === 0) {
-                                return single;
-                            }
-                            if (adults === 1 && (children === 1 || children === 2)) {
-                                return double * 2;
-                            }
-                            if (adults === 2) {
-                                const base = double * 2;
-                                const childRate = double * 0.50;
-                                return base + (children * childRate);
-                            }
-                            if (adults === 3) {
-                                return triple * 3;
-                            }
-                            if (triple > 0) {
-                                return (triple * adults) + (children * triple * 0.50);
-                            }
-                            return (double * adults) + (children * double * 0.50);
-                        }
-
-                        function generateRooms() {
-                            const numRooms = parseInt(roomsSelect ? roomsSelect.value : 1, 10) || 1;
-                            const existingData = [];
-                            roomFields.querySelectorAll('.room-group-container').forEach((roomEl) => {
-                                const accEl = roomEl.querySelector('.tp-room-acc-select');
-                                const adultEl = roomEl.querySelector('.tp-adult-select');
-                                const childEl = roomEl.querySelector('.tp-child-select');
-                                if (accEl) {
-                                    existingData.push({
-                                        acc: accEl.value,
-                                        adults: parseInt(adultEl.value, 10) || 2,
-                                        children: parseInt(childEl.value, 10) || 0,
-                                    });
-                                }
+                function generateRooms() {
+                    const numRooms = parseInt(roomsSelect ? roomsSelect.value : 1, 10) || 1;
+                    const existingData = [];
+                    roomFields.querySelectorAll('.room-group-container').forEach((roomEl) => {
+                        const accEl = roomEl.querySelector('.tp-room-acc-select');
+                        const adultEl = roomEl.querySelector('.tp-adult-select');
+                        const childEl = roomEl.querySelector('.tp-child-select');
+                        if (accEl) {
+                            existingData.push({
+                                acc: accEl.value,
+                                adults: parseInt(adultEl.value, 10) || 2,
+                                children: parseInt(childEl.value, 10) || 0,
                             });
+                        }
+                    });
 
-                            roomFields.innerHTML = '';
+                    roomFields.innerHTML = '';
 
-                            for (let i = 1; i <= numRooms; i++) {
-                                const prev = existingData[i - 1] || {};
-                                const selectedAcc = prev.acc || (accommodationsList[0]?.name || 'Standard');
-                                const selectedAdults = prev.adults !== undefined ? prev.adults : (i === 1 ? 2 : 1);
-                                const selectedChildren = prev.children !== undefined ? prev.children : 0;
+                    for (let i = 1; i <= numRooms; i++) {
+                        const prev = existingData[i - 1] || {};
+                        const selectedAcc = prev.acc || (accommodationsList[0]?.name || 'Standard');
+                        const selectedAdults = prev.adults !== undefined ? prev.adults : (i === 1 ? 2 : 1);
+                        const selectedChildren = prev.children !== undefined ? prev.children : 0;
 
-                                let accOptions = '';
-                                accommodationsList.forEach((a) => {
-                                    const isSel = a.name === selectedAcc ? 'selected' : '';
-                                    accOptions += `<option value="${a.name}" ${isSel}>${a.name}</option>`;
-                                });
+                        let accOptions = '';
+                        accommodationsList.forEach((a) => {
+                            const isSel = a.name === selectedAcc ? 'selected' : '';
+                            accOptions += `<option value="${a.name}" ${isSel}>${a.name}</option>`;
+                        });
 
-                                const roomHtml = `
+                        const roomHtml = `
                                     <div class="room-group-container mb-2 p-3 rounded" style="background: #fff; border: 1px solid rgba(28, 50, 92, 0.12); box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
                                         <div class="room-header d-flex justify-content-between align-items-center mb-2" style="border-bottom: 1px dashed rgba(28, 50, 92, 0.1); padding-bottom: 6px;">
                                             <h6 class="room-title mb-0" style="font-weight: 700; color: #1c325c; font-size: 14.5px;">{{ __('Room') }} ${i}</h6>
@@ -5039,290 +5124,296 @@
                                         </div>
                                     </div>
                                 `;
-                                roomFields.insertAdjacentHTML('beforeend', roomHtml);
-                            }
-
-                            recalculateAllPrices();
-                        }
-
-                        function recalculateAllPrices() {
-                            let totalPkgPrice = 0;
-                            let totalA = 0;
-                            let totalC = 0;
-
-                            roomFields.querySelectorAll('.room-group-container').forEach((roomEl, idx) => {
-                                const i = idx + 1;
-                                const accSel = roomEl.querySelector('.tp-room-acc-select');
-                                const adultSel = roomEl.querySelector('.tp-adult-select');
-                                const childSel = roomEl.querySelector('.tp-child-select');
-                                const priceTag = roomEl.querySelector(`#tp_room_${i}_priceTag`);
-                                if (!accSel || !adultSel || !childSel) return;
-
-                                const accName = accSel.value;
-                                const rates = getRoomRates(accName);
-                                const maxGuests = Number(rates.triple || 0) > 0 ? 3 : 2;
-
-                                let a = parseInt(adultSel.value, 10) || 1;
-                                let c = parseInt(childSel.value, 10) || 0;
-
-                                if (a + c > maxGuests) {
-                                    c = Math.max(0, maxGuests - a);
-                                    childSel.value = c;
-                                }
-
-                                const rPrice = calculateRoomPrice(rates, a, c);
-                                if (priceTag) {
-                                    priceTag.textContent = `${currencySymbol}${rPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
-                                }
-
-                                totalPkgPrice += rPrice;
-                                totalA += a;
-                                totalC += c;
-                            });
-
-                            if (totalAdultsInput) totalAdultsInput.value = totalA;
-                            if (totalChildrenInput) totalChildrenInput.value = totalC;
-                            if (formAdultsInput) formAdultsInput.value = totalA;
-                            if (formChildrenInput) formChildrenInput.value = totalC;
-
-                            if (totalPkgPrice > 0) {
-                                const deposit = totalPkgPrice * 0.5;
-                                const balance = totalPkgPrice - deposit;
-
-                                if (displayTotal) {
-                                    displayTotal.textContent = `${currencySymbol}${totalPkgPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
-                                }
-                                if (displayDeposit) {
-                                    displayDeposit.textContent = `${currencySymbol}${deposit.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
-                                }
-                                if (displayBalance) {
-                                    displayBalance.textContent = `${currencySymbol}${balance.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
-                                }
-                                if (priceSummaryBox) {
-                                    priceSummaryBox.style.display = 'block';
-                                }
-                            } else if (priceSummaryBox) {
-                                priceSummaryBox.style.display = 'none';
-                            }
-                        }
-
-                        if (travelDateInput) {
-                            travelDateInput.addEventListener('change', recalculateAllPrices);
-                        }
-                        if (roomsSelect) {
-                            roomsSelect.addEventListener('change', generateRooms);
-                        }
-
-                        roomFields.addEventListener('change', (e) => {
-                            if (e.target.matches('.tp-room-acc-select, .tp-adult-select, .tp-child-select')) {
-                                recalculateAllPrices();
-                            }
-                        });
-
-                        tpForm.addEventListener('submit', (e) => {
-                            if (travelDateInput && !travelDateInput.value) {
-                                e.preventDefault();
-                                travelDateInput.focus();
-                                return;
-                            }
-                            if (roomsSelect && !roomsSelect.value) {
-                                e.preventDefault();
-                                const roomErr = document.getElementById('tp_roomError');
-                                if (roomErr) roomErr.style.display = 'block';
-                                roomsSelect.focus();
-                                return;
-                            }
-                            recalculateAllPrices();
-                        });
-
-                        generateRooms();
+                        roomFields.insertAdjacentHTML('beforeend', roomHtml);
                     }
 
-                    const collapseTriggers = document.querySelectorAll(
-                                                    '[data-collapse-target]');
+                    recalculateAllPrices();
+                }
 
-                                                const setCollapseState = (trigger, content, isOpen) => {
-                                                    content.classList.toggle('open', isOpen);
-                                                    content.classList.toggle('active', isOpen);
-                                                    content.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
-                                                    trigger.setAttribute('aria-expanded', isOpen ? 'true' :
-                                                    'false');
-                                                    content.style.maxHeight = isOpen ? `${content.scrollHeight}px` :
-                                                        '0px';
-                                                };
+                function recalculateAllPrices() {
+                    let totalPkgPrice = 0;
+                    let totalA = 0;
+                    let totalC = 0;
 
-                                                collapseTriggers.forEach((trigger) => {
-                                                    const content = document.getElementById(trigger.dataset
-                                                        .collapseTarget);
+                    roomFields.querySelectorAll('.room-group-container').forEach((roomEl, idx) => {
+                        const i = idx + 1;
+                        const accSel = roomEl.querySelector('.tp-room-acc-select');
+                        const adultSel = roomEl.querySelector('.tp-adult-select');
+                        const childSel = roomEl.querySelector('.tp-child-select');
+                        const priceTag = roomEl.querySelector(`#tp_room_${i}_priceTag`);
+                        if (!accSel || !adultSel || !childSel) return;
 
-                                                    if (!content) {
-                                                        return;
-                                                    }
+                        const accName = accSel.value;
+                        const rates = getRoomRates(accName);
+                        const maxGuests = Number(rates.triple || 0) > 0 ? 3 : 2;
 
-                                                    setCollapseState(
-                                                        trigger,
-                                                        content,
-                                                        content.classList.contains('open') || content.classList
-                                                        .contains('active')
-                                                    );
+                        let a = parseInt(adultSel.value, 10) || 1;
+                        let c = parseInt(childSel.value, 10) || 0;
 
-                                                    trigger.addEventListener('click', function() {
-                                                        setCollapseState(this, content, this.getAttribute(
-                                                            'aria-expanded') !== 'true');
-                                                    });
-                                                });
+                        if (a + c > maxGuests) {
+                            c = Math.max(0, maxGuests - a);
+                            childSel.value = c;
+                        }
 
-                                                window.addEventListener('resize', function() {
-                                                    document.querySelectorAll('.collapsible-content.open').forEach((
-                                                        content) => {
-                                                        content.style.maxHeight =
-                                                            `${content.scrollHeight}px`;
-                                                    });
-                                                });
+                        const rPrice = calculateRoomPrice(rates, a, c);
+                        if (priceTag) {
+                            priceTag.textContent =
+                                `${currencySymbol}${rPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+                        }
 
-                                                const mobileFixedButton = document.querySelector('.fixed-mobile-btn');
-                                                const footer = document.querySelector('.footer');
+                        totalPkgPrice += rPrice;
+                        totalA += a;
+                        totalC += c;
+                    });
 
-                                                if (mobileFixedButton && footer) {
-                                                    if ('IntersectionObserver' in window) {
-                                                        const footerObserver = new IntersectionObserver((entries) => {
-                                                            mobileFixedButton.classList.toggle(
-                                                                'is-footer-visible',
-                                                                entries.some((entry) => entry
-                                                                    .isIntersecting)
-                                                            );
-                                                        }, {
-                                                            rootMargin: '0px 0px -24px 0px',
-                                                            threshold: 0
-                                                        });
+                    if (totalAdultsInput) totalAdultsInput.value = totalA;
+                    if (totalChildrenInput) totalChildrenInput.value = totalC;
+                    if (formAdultsInput) formAdultsInput.value = totalA;
+                    if (formChildrenInput) formChildrenInput.value = totalC;
 
-                                                        footerObserver.observe(footer);
-                                                    } else {
-                                                        const syncMobileButtonWithFooter = () => {
-                                                            const footerTop = footer.getBoundingClientRect().top;
-                                                            mobileFixedButton.classList.toggle(
-                                                                'is-footer-visible',
-                                                                footerTop < window.innerHeight - 24
-                                                            );
-                                                        };
+                    if (totalPkgPrice > 0) {
+                        const deposit = totalPkgPrice * 0.5;
+                        const balance = totalPkgPrice - deposit;
 
-                                                        window.addEventListener('scroll', syncMobileButtonWithFooter, {
-                                                            passive: true
-                                                        });
-                                                        window.addEventListener('resize', syncMobileButtonWithFooter);
-                                                        syncMobileButtonWithFooter();
-                                                    }
-                                                }
+                        if (displayTotal) {
+                            displayTotal.textContent =
+                                `${currencySymbol}${totalPkgPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+                        }
+                        if (displayDeposit) {
+                            displayDeposit.textContent =
+                                `${currencySymbol}${deposit.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+                        }
+                        if (displayBalance) {
+                            displayBalance.textContent =
+                                `${currencySymbol}${balance.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+                        }
+                        if (priceSummaryBox) {
+                            priceSummaryBox.style.display = 'block';
+                        }
+                    } else if (priceSummaryBox) {
+                        priceSummaryBox.style.display = 'none';
+                    }
+                }
 
-                                                document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-                                                    anchor.addEventListener('click', function(e) {
-                                                        const href = this.getAttribute('href');
+                if (travelDateInput) {
+                    travelDateInput.addEventListener('change', recalculateAllPrices);
+                }
+                if (roomsSelect) {
+                    roomsSelect.addEventListener('change', generateRooms);
+                }
 
-                                                        if (!href || href === '#' || this.hasAttribute(
-                                                                'data-bs-toggle')) {
-                                                            return;
-                                                        }
+                roomFields.addEventListener('change', (e) => {
+                    if (e.target.matches('.tp-room-acc-select, .tp-adult-select, .tp-child-select')) {
+                        recalculateAllPrices();
+                    }
+                });
 
-                                                        let target = null;
+                tpForm.addEventListener('submit', (e) => {
+                    if (travelDateInput && !travelDateInput.value) {
+                        e.preventDefault();
+                        travelDateInput.focus();
+                        return;
+                    }
+                    if (roomsSelect && !roomsSelect.value) {
+                        e.preventDefault();
+                        const roomErr = document.getElementById('tp_roomError');
+                        if (roomErr) roomErr.style.display = 'block';
+                        roomsSelect.focus();
+                        return;
+                    }
+                    recalculateAllPrices();
+                });
 
-                                                        try {
-                                                            target = document.querySelector(href);
-                                                        } catch (error) {
-                                                            return;
-                                                        }
+                generateRooms();
+            }
 
-                                                        if (!target) return;
+            const collapseTriggers = document.querySelectorAll(
+                '[data-collapse-target]');
 
-                                                        e.preventDefault();
-                                                        window.scrollTo({
-                                                            top: target.offsetTop - 90,
-                                                            behavior: 'smooth'
-                                                        });
-                                                    });
-                                                });
+            const setCollapseState = (trigger, content, isOpen) => {
+                content.classList.toggle('open', isOpen);
+                content.classList.toggle('active', isOpen);
+                content.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+                trigger.setAttribute('aria-expanded', isOpen ? 'true' :
+                    'false');
+                content.style.maxHeight = isOpen ? `${content.scrollHeight}px` :
+                    '0px';
+            };
 
-                                                const galleryImages = @json(array_values($gallery ?? []));
-                                                const lightbox = document.getElementById('galleryLightbox');
+            collapseTriggers.forEach((trigger) => {
+                const content = document.getElementById(trigger.dataset
+                    .collapseTarget);
 
-                                                if (!lightbox || !galleryImages.length) {
-                                                    return;
-                                                }
+                if (!content) {
+                    return;
+                }
 
-                                                const lightboxImage = document.getElementById('galleryLightboxImage');
-                                                const lightboxCounter = document.getElementById(
-                                                    'galleryLightboxCounter');
-                                                const closeButton = document.getElementById('galleryLightboxClose');
-                                                const prevButton = document.getElementById('galleryLightboxPrev');
-                                                const nextButton = document.getElementById('galleryLightboxNext');
-                                                const triggers = document.querySelectorAll('.js-gallery-trigger');
-                                                let currentIndex = 0;
+                setCollapseState(
+                    trigger,
+                    content,
+                    content.classList.contains('open') || content.classList
+                    .contains('active')
+                );
 
-                                                const updateLightbox = () => {
-                                                    lightboxImage.src = galleryImages[currentIndex];
-                                                    lightboxCounter.textContent =
-                                                        `${currentIndex + 1} / ${galleryImages.length}`;
-                                                    prevButton.style.display = galleryImages.length > 1 ?
-                                                        'inline-flex' : 'none';
-                                                    nextButton.style.display = galleryImages.length > 1 ?
-                                                        'inline-flex' : 'none';
-                                                };
+                trigger.addEventListener('click', function() {
+                    setCollapseState(this, content, this.getAttribute(
+                        'aria-expanded') !== 'true');
+                });
+            });
 
-                                                const openLightbox = (index) => {
-                                                    currentIndex = index;
-                                                    updateLightbox();
-                                                    lightbox.classList.add('open');
-                                                    lightbox.setAttribute('aria-hidden', 'false');
-                                                    document.body.style.overflow = 'hidden';
-                                                };
+            window.addEventListener('resize', function() {
+                document.querySelectorAll('.collapsible-content.open').forEach((
+                    content) => {
+                    content.style.maxHeight =
+                        `${content.scrollHeight}px`;
+                });
+            });
 
-                                                const closeLightbox = () => {
-                                                    lightbox.classList.remove('open');
-                                                    lightbox.setAttribute('aria-hidden', 'true');
-                                                    document.body.style.overflow = '';
-                                                };
+            const mobileFixedButton = document.querySelector('.fixed-mobile-btn');
+            const footer = document.querySelector('.footer');
 
-                                                const showNext = () => {
-                                                    currentIndex = (currentIndex + 1) % galleryImages.length;
-                                                    updateLightbox();
-                                                };
+            if (mobileFixedButton && footer) {
+                if ('IntersectionObserver' in window) {
+                    const footerObserver = new IntersectionObserver((entries) => {
+                        mobileFixedButton.classList.toggle(
+                            'is-footer-visible',
+                            entries.some((entry) => entry
+                                .isIntersecting)
+                        );
+                    }, {
+                        rootMargin: '0px 0px -24px 0px',
+                        threshold: 0
+                    });
 
-                                                const showPrev = () => {
-                                                    currentIndex = (currentIndex - 1 + galleryImages.length) %
-                                                        galleryImages.length;
-                                                    updateLightbox();
-                                                };
+                    footerObserver.observe(footer);
+                } else {
+                    const syncMobileButtonWithFooter = () => {
+                        const footerTop = footer.getBoundingClientRect().top;
+                        mobileFixedButton.classList.toggle(
+                            'is-footer-visible',
+                            footerTop < window.innerHeight - 24
+                        );
+                    };
 
-                                                triggers.forEach((trigger) => {
-                                                    trigger.addEventListener('click', function(e) {
-                                                        e.preventDefault();
-                                                        openLightbox(Number(this.dataset.galleryIndex ||
-                                                        0));
-                                                    });
-                                                });
+                    window.addEventListener('scroll', syncMobileButtonWithFooter, {
+                        passive: true
+                    });
+                    window.addEventListener('resize', syncMobileButtonWithFooter);
+                    syncMobileButtonWithFooter();
+                }
+            }
 
-                                                closeButton.addEventListener('click', closeLightbox); nextButton
-                                                .addEventListener('click', showNext); prevButton.addEventListener(
-                                                    'click', showPrev);
+            document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+                anchor.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
 
-                                                lightbox.addEventListener('click', function(e) {
-                                                    if (e.target === lightbox) {
-                                                        closeLightbox();
-                                                    }
-                                                });
+                    if (!href || href === '#' || this.hasAttribute(
+                            'data-bs-toggle')) {
+                        return;
+                    }
 
-                                                document.addEventListener('keydown', function(e) {
-                                                    if (!lightbox.classList.contains('open')) {
-                                                        return;
-                                                    }
+                    let target = null;
 
-                                                    if (e.key === 'Escape') {
-                                                        closeLightbox();
-                                                    } else if (e.key === 'ArrowRight') {
-                                                        showNext();
-                                                    } else if (e.key === 'ArrowLeft') {
-                                                        showPrev();
-                                                    }
-                                                });
-                                            });
+                    try {
+                        target = document.querySelector(href);
+                    } catch (error) {
+                        return;
+                    }
+
+                    if (!target) return;
+
+                    e.preventDefault();
+                    window.scrollTo({
+                        top: target.offsetTop - 90,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            const galleryImages = @json(array_values($gallery ?? []));
+            const lightbox = document.getElementById('galleryLightbox');
+
+            if (!lightbox || !galleryImages.length) {
+                return;
+            }
+
+            const lightboxImage = document.getElementById('galleryLightboxImage');
+            const lightboxCounter = document.getElementById(
+                'galleryLightboxCounter');
+            const closeButton = document.getElementById('galleryLightboxClose');
+            const prevButton = document.getElementById('galleryLightboxPrev');
+            const nextButton = document.getElementById('galleryLightboxNext');
+            const triggers = document.querySelectorAll('.js-gallery-trigger');
+            let currentIndex = 0;
+
+            const updateLightbox = () => {
+                lightboxImage.src = galleryImages[currentIndex];
+                lightboxCounter.textContent =
+                    `${currentIndex + 1} / ${galleryImages.length}`;
+                prevButton.style.display = galleryImages.length > 1 ?
+                    'inline-flex' : 'none';
+                nextButton.style.display = galleryImages.length > 1 ?
+                    'inline-flex' : 'none';
+            };
+
+            const openLightbox = (index) => {
+                currentIndex = index;
+                updateLightbox();
+                lightbox.classList.add('open');
+                lightbox.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            };
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('open');
+                lightbox.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            };
+
+            const showNext = () => {
+                currentIndex = (currentIndex + 1) % galleryImages.length;
+                updateLightbox();
+            };
+
+            const showPrev = () => {
+                currentIndex = (currentIndex - 1 + galleryImages.length) %
+                    galleryImages.length;
+                updateLightbox();
+            };
+
+            triggers.forEach((trigger) => {
+                trigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    openLightbox(Number(this.dataset.galleryIndex ||
+                        0));
+                });
+            });
+
+            closeButton.addEventListener('click', closeLightbox);
+            nextButton
+                .addEventListener('click', showNext);
+            prevButton.addEventListener(
+                'click', showPrev);
+
+            lightbox.addEventListener('click', function(e) {
+                if (e.target === lightbox) {
+                    closeLightbox();
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (!lightbox.classList.contains('open')) {
+                    return;
+                }
+
+                if (e.key === 'Escape') {
+                    closeLightbox();
+                } else if (e.key === 'ArrowRight') {
+                    showNext();
+                } else if (e.key === 'ArrowLeft') {
+                    showPrev();
+                }
+            });
+        });
     </script>
 @endsection

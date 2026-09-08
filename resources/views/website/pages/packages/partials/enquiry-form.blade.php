@@ -145,6 +145,7 @@
     </div>
 
 
+
     <div class="input-box">
         <label class="label-text" for="enquiry_comment_{{ $suffix }}">{{ __('Message') }}</label>
         <div class="form-group">
@@ -318,6 +319,7 @@
         }
 
         function updateBookingTotal() {
+            if (!adultsInput || !totalInput) return;
             if (!adultsInput) return;
 
             const form = adultsInput.closest('form');
@@ -325,6 +327,7 @@
             const pricePerPerson = getTierRate(adultsCount);
             const calculatedTotal = pricePerPerson * adultsCount;
 
+            totalInput.value = formatMoney(calculatedTotal);
             if (totalInput) {
                 totalInput.value = formatMoney(calculatedTotal);
             }

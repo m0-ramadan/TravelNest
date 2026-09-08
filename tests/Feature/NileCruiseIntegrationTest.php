@@ -272,15 +272,77 @@ class NileCruiseIntegrationTest extends TestCase
             'type' => 'included',
         ]);
 
+        $package->update([
+            'cancellation_policy' => ['en' => 'Free cancellation up to 30 days before arrival.'],
+        ]);
+
         $response = $this->get(route('website.packages.show.simple', $package->slug));
         $response->assertOk();
 
         $content = $response->getContent();
         $pricingPos = strpos($content, 'id="pricing-packages"');
+        $importantInfoPos = strpos($content, 'id="important-information"');
         $includesPos = strpos($content, 'id="includes-excludes"');
 
         $this->assertNotFalse($pricingPos, 'Pricing & Packages section must be present.');
+        $this->assertNotFalse($importantInfoPos, 'Important Information section must be present.');
         $this->assertNotFalse($includesPos, 'Includes & Excludes section must be present.');
-        $this->assertLessThan($includesPos, $pricingPos, 'Pricing & Packages must appear before Includes & Excludes.');
+        $this->assertLessThan($importantInfoPos, $pricingPos, 'Pricing & Packages must appear before Important Information.');
+        $this->assertLessThan($includesPos, $importantInfoPos, 'Important Information must appear before Includes & Excludes.');
+    }
+
+    public function test_nile_cruise_with_accommodations_pricing_renders_in_pricing_packages_section_before_important_info_and_inclusions(): void
+    {
+        $luxorType = NileCruiseType::where('slug', 'luxor-aswan-nile-cruises')->first();
+        $deluxeCategory = NileCruiseCategory::where('slug', 'deluxe-nile-cruises')->first();
+
+        $package = Package::create([
+            'title' => ['en' => 'Imported Nile Cruise Test', 'ar' => 'تجربة نايل كروز'],
+            'slug' => 'imported-nile-cruise-test',
+            'package_type' => 'nile_cruise',
+            'nile_cruise_type_id' => $luxorType->id,
+            'nile_cruise_category_id' => $deluxeCategory->id,
+            'cancellation_policy' => ['en' => 'Non refundable deposit.'],
+        ]);
+
+        $acc = $package->tourPackageAccommodations()->create([
+            'name' => 'Standard Cabin Tier',
+            'is_active' => true,
+        ]);
+
+        $season = $acc->seasons()->create([
+            'package_id' => $package->id,
+            'name' => ['en' => 'Winter 2026', 'ar' => 'شتاء 2026'],
+            'is_active' => true,
+        ]);
+
+        $season->items()->create([
+            'occupancy_type' => 'double',
+            'label' => ['en' => 'Double Cabin', 'ar' => 'كابينة مزدوجة'],
+            'price' => 700,
+            'is_active' => true,
+        ]);
+
+        $package->inclusions()->create([
+            'title' => 'Buffet Breakfast Included',
+            'description' => 'Buffet Breakfast Included',
+            'type' => 'included',
+        ]);
+
+        $response = $this->get(route('website.packages.show.simple', $package->slug));
+        $response->assertOk();
+
+        $content = $response->getContent();
+        $pricingPos = strpos($content, 'id="pricing-packages"');
+        $genericPricingPos = strpos($content, 'id="pricing-section"');
+        $importantInfoPos = strpos($content, 'id="important-information"');
+        $includesPos = strpos($content, 'id="includes-excludes"');
+
+        $this->assertNotFalse($pricingPos, 'Pricing & Packages section must be present for accommodation fares.');
+        $this->assertFalse($genericPricingPos, 'Generic pricing section must NOT be present for Nile Cruise.');
+        $this->assertNotFalse($importantInfoPos, 'Important Information section must be present.');
+        $this->assertNotFalse($includesPos, 'Includes & Excludes section must be present.');
+        $this->assertLessThan($importantInfoPos, $pricingPos, 'Pricing & Packages must appear before Important Information.');
+        $this->assertLessThan($includesPos, $importantInfoPos, 'Important Information must appear before Includes & Excludes.');
     }
 }
