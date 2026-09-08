@@ -375,32 +375,46 @@
         @include('website.pages.packages.partials.nile_cruise.facilities')
 
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                document.querySelectorAll('.nc-duration-tab').forEach(function(btn) {
-                    btn.addEventListener('click', function() {
-                        if (scope) {
-                            scope.querySelectorAll('.nc-duration-tab').forEach(x => x.classList.remove(
-                                'active'));
-                            scope.querySelectorAll('.nc-duration-panel').forEach(x => x.classList
-                                .remove('active'));
+            (function() {
+                function bindNcDurationTabs() {
+                    document.querySelectorAll('.nc-duration-tab').forEach(function(btn) {
+                        if (btn.dataset.ncBound === 'true') return;
+                        btn.dataset.ncBound = 'true';
+
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const scope = btn.closest('#cruise-itineraries') || btn.closest('.main-container') || document;
+                            const targetId = btn.dataset.ncDurationTarget;
+                            if (!targetId) return;
+
+                            scope.querySelectorAll('.nc-duration-tab').forEach(function(x) {
+                                x.classList.remove('active');
+                            });
+                            scope.querySelectorAll('.nc-duration-panel').forEach(function(x) {
+                                x.classList.remove('active');
+                            });
+
                             btn.classList.add('active');
-                            const target = document.getElementById(btn.dataset.ncDurationTarget);
+                            const target = document.getElementById(targetId);
                             if (target) {
                                 target.classList.add('active');
-                                target.querySelectorAll('[data-collapse-target]').forEach(function(
-                                    trigger) {
-                                    const content = document.getElementById(trigger.dataset
-                                        .collapseTarget);
-                                    if (content && (content.classList.contains('open') ||
-                                            content.classList.contains('active'))) {
+                                target.querySelectorAll('[data-collapse-target]').forEach(function(trigger) {
+                                    const content = document.getElementById(trigger.dataset.collapseTarget);
+                                    if (content && (content.classList.contains('open') || content.classList.contains('active'))) {
                                         content.style.maxHeight = content.scrollHeight + 'px';
                                     }
                                 });
                             }
-                        }
+                        });
                     });
-                });
-            });
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', bindNcDurationTabs);
+                } else {
+                    bindNcDurationTabs();
+                }
+            })();
         </script>
     @endif
 @endif
