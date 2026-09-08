@@ -273,19 +273,17 @@
                         <div class="card-image">
                             <div class="badge-top">{{ __('Day Tours') }}</div>
 
-                            <a href="{{ route('website.day_tours.index') }}"
-                                aria-label="{{ __('Egypt Day Tours & Excursions') }}">
+                            <a href="{{ route('website.day_tours.index') }}" aria-label="{{ __('Egypt Day Tours') }}">
                                 <img src="{{ asset('website/photos/experiences/day-tours.jpg') }}"
-                                    alt="{{ __('Egypt Day Tours & Excursions') }}" width="800" height="500"
-                                    loading="lazy" decoding="async"
+                                    alt="{{ __('Egypt Day Tours') }}" width="800" height="500" loading="lazy"
+                                    decoding="async"
                                     onerror="this.onerror=null;this.src='{{ asset('website/images/day-tours/cairo-day-tours.jpg') }}';">
                             </a>
                         </div>
 
                         <div class="card-body">
                             <h3 class="deal-title">
-                                <a
-                                    href="{{ route('website.day_tours.index') }}">{{ __('Egypt Day Tours & Excursions') }}</a>
+                                <a href="{{ route('website.day_tours.index') }}">{{ __('Egypt Day Tours') }}</a>
                             </h3>
 
                             <div class="deal-meta">
@@ -308,13 +306,13 @@
                     {{-- Category 2: Travel Packages --}}
                     <div class="deal-card reveal-up">
                         <div class="card-image">
-                            <div class="badge-top">{{ __('Travel Packages') }}</div>
+                            <div class="badge-top">{{ __('Tour Packages') }}</div>
 
                             <a href="{{ route('website.travel_packages.index') }}"
-                                aria-label="{{ __('Comprehensive Egypt Travel Packages') }}">
+                                aria-label="{{ __('Egypt Tour Packages') }}">
                                 <img src="{{ asset('website/photos/experiences/travel-packages.jpg') }}"
-                                    alt="{{ __('Comprehensive Egypt Travel Packages') }}" width="800" height="500"
-                                    loading="lazy" decoding="async"
+                                    alt="{{ __('Egypt Tour Packages') }}" width="800" height="500" loading="lazy"
+                                    decoding="async"
                                     onerror="this.onerror=null;this.src='{{ asset('website/images/travel-packages/7-days-egypt-vacation.jpg') }}';">
                             </a>
                         </div>
@@ -322,7 +320,7 @@
                         <div class="card-body">
                             <h3 class="deal-title">
                                 <a
-                                    href="{{ route('website.travel_packages.index') }}">{{ __('Comprehensive Egypt Travel Packages') }}</a>
+                                    href="{{ route('website.travel_packages.index') }}">{{ __('Egypt Tour Packages') }}</a>
                             </h3>
 
                             <div class="deal-meta">
@@ -336,7 +334,7 @@
                             </p>
 
                             <a href="{{ route('website.travel_packages.index') }}" class="gold-btn deal-btn mt-auto">
-                                {{ __('Explore Travel Packages') }}
+                                {{ __('Explore Tour Packages') }}
                                 <i class="la la-arrow-right"></i>
                             </a>
                         </div>
@@ -348,18 +346,17 @@
                             <div class="badge-top">{{ __('Nile Cruises') }}</div>
 
                             <a href="{{ route('website.nile_cruises.index') }}"
-                                aria-label="{{ __('Luxury Nile River Cruises') }}">
+                                aria-label="{{ __('Egypt Nile Cruise') }}">
                                 <img src="{{ asset('website/photos/experiences/nile-cruises.jpg') }}"
-                                    alt="{{ __('Luxury Nile River Cruises') }}" width="800" height="500"
-                                    loading="lazy" decoding="async"
+                                    alt="{{ __('Egypt Nile Cruise') }}" width="800" height="500" loading="lazy"
+                                    decoding="async"
                                     onerror="this.onerror=null;this.src='{{ asset('website/images/nile-cruises/luxor-aswan.jpg') }}';">
                             </a>
                         </div>
 
                         <div class="card-body">
                             <h3 class="deal-title">
-                                <a
-                                    href="{{ route('website.nile_cruises.index') }}">{{ __('Luxury Nile River Cruises') }}</a>
+                                <a href="{{ route('website.nile_cruises.index') }}">{{ __('Egypt Nile Cruise') }}</a>
                             </h3>
 
                             <div class="deal-meta">

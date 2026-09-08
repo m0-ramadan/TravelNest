@@ -17,11 +17,11 @@ class WebsiteHomeCategoryShowcaseTest extends TestCase
         $response->assertSee(route('website.day_tours.index'), false);
         $response->assertSee(route('website.travel_packages.index'), false);
         $response->assertSee(route('website.nile_cruises.index'), false);
-        $response->assertSee('Egypt Day Tours &amp; Excursions', false);
-        $response->assertSee('Comprehensive Egypt Travel Packages', false);
-        $response->assertSee('Luxury Nile River Cruises', false);
+        $response->assertSee('Egypt Day Tours', false);
+        $response->assertSee('Egypt Tour Packages', false);
+        $response->assertSee('Egypt Nile Cruise', false);
         $response->assertSee('Explore Day Tours', false);
-        $response->assertSee('Explore Travel Packages', false);
+        $response->assertSee('Explore Tour Packages', false);
         $response->assertSee('Explore Nile Cruises', false);
         $response->assertSee('website/photos/experiences/day-tours.jpg', false);
         $response->assertSee('website/photos/experiences/travel-packages.jpg', false);
@@ -39,9 +39,9 @@ class WebsiteHomeCategoryShowcaseTest extends TestCase
         $response->assertSee(route('website.day_tours.index'), false);
         $response->assertSee(route('website.travel_packages.index'), false);
         $response->assertSee(route('website.nile_cruises.index'), false);
-        $response->assertSee('رحلات وجولات اليوم الواحد في مصر', false);
-        $response->assertSee('باقات السفر والعطلات المتكاملة في مصر', false);
-        $response->assertSee('رحلات النايل كروز الفاخرة بين الأقصر وأسوان', false);
+        $response->assertSee('جولات اليوم الواحد في مصر', false);
+        $response->assertSee('باقات السفر في مصر', false);
+        $response->assertSee('رحلات النايل كروز في مصر', false);
         $response->assertSee('استكشف رحلات اليوم الواحد', false);
         $response->assertSee('استكشف الباقات السياحية', false);
         $response->assertSee('استكشف رحلات الكروز النيلية', false);
