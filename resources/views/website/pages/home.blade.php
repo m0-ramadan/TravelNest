@@ -258,67 +258,126 @@
             <div class="container">
                 <div class="section-heading reveal-up">
                     <div class="section-kicker">
-                        <i class="la la-suitcase"></i>
-                        {{ __('Featured Tours') }}
+                        <i class="la la-compass"></i>
+                        {{ __('Tour Categories') }}
                     </div>
                     <h2 class="section-title">{{ __('Signature Egypt Experiences') }}</h2>
                     <p class="section-subtitle">
-                        {{ __('Discover our most requested journeys, from iconic landmarks to luxurious Nile adventures.') }}
+                        {{ __('Discover our premier journey categories, from iconic day excursions to comprehensive vacation packages and luxury Nile cruises.') }}
                     </p>
                 </div>
 
                 <div class="cards-grid">
-                    @forelse ($featuredPackages as $package)
-                        <div class="deal-card reveal-up">
-                            <div class="card-image">
-                                @if ($package['is_ultra_luxury'])
-                                    <div class="badge-top">{{ __('Ultra Luxury') }}</div>
-                                @elseif ($package['is_best_seller'])
-                                    <div class="badge-top">{{ __('Best Seller') }}</div>
-                                @endif
+                    {{-- Category 1: Day Tours --}}
+                    <div class="deal-card reveal-up">
+                        <div class="card-image">
+                            <div class="badge-top">{{ __('Day Tours') }}</div>
 
-                                <div class="deal-price">{{ $package['price'] }}</div>
+                            <a href="{{ route('website.day_tours.index') }}"
+                                aria-label="{{ __('Egypt Day Tours & Excursions') }}">
+                                <img src="{{ asset('website/photos/experiences/day-tours.jpg') }}"
+                                    alt="{{ __('Egypt Day Tours & Excursions') }}" width="800" height="500"
+                                    loading="lazy" decoding="async"
+                                    onerror="this.onerror=null;this.src='{{ asset('website/images/day-tours/cairo-day-tours.jpg') }}';">
+                            </a>
+                        </div>
 
-                                <a href="{{ $package['url'] }}">
-                                    <img src="{{ $package['image'] }}" alt="{{ $package['title'] }}" width="800"
-                                        height="500" loading="lazy" decoding="async">
-                                </a>
+                        <div class="card-body">
+                            <h3 class="deal-title">
+                                <a
+                                    href="{{ route('website.day_tours.index') }}">{{ __('Egypt Day Tours & Excursions') }}</a>
+                            </h3>
+
+                            <div class="deal-meta">
+                                <span><i class="la la-clock"></i>{{ __('Full & Half Day') }}</span>
+                                <span><i class="la la-map-marker"></i>{{ __('Cairo, Luxor & Red Sea') }}</span>
+                                <span><i class="la la-user-tie"></i>{{ __('Private Guided') }}</span>
                             </div>
 
-                            <div class="card-body">
-                                <h3 class="deal-title">
-                                    <a href="{{ $package['url'] }}">{{ $package['title'] }}</a>
-                                </h3>
+                            <p class="deal-description">
+                                {{ __('Discover Egypt\'s iconic landmarks and ancient marvels on private guided day trips. From the Giza Pyramids to Luxor\'s temples and Red Sea shores, experience unforgettable day adventures.') }}
+                            </p>
 
-                                <div class="deal-meta">
-                                    <span><i class="la la-clock"></i>{{ $package['duration'] }}</span>
-                                    <span><i class="la la-users"></i>{{ $package['tour_type'] }}</span>
-                                    @if ($package['route_text'])
-                                        <span><i class="la la-map-marker"></i>{{ $package['route_text'] }}</span>
-                                    @endif
-                                </div>
+                            <a href="{{ route('website.day_tours.index') }}" class="gold-btn deal-btn mt-auto">
+                                {{ __('Explore Day Tours') }}
+                                <i class="la la-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
 
-                                <p class="deal-description">{{ $package['description'] }}</p>
+                    {{-- Category 2: Travel Packages --}}
+                    <div class="deal-card reveal-up">
+                        <div class="card-image">
+                            <div class="badge-top">{{ __('Travel Packages') }}</div>
 
-                                @if (!empty($package['tags']))
-                                    <div class="tag-list">
-                                        @foreach ($package['tags'] as $tag)
-                                            <span class="feature-tag">{{ $tag }}</span>
-                                        @endforeach
-                                    </div>
-                                @endif
+                            <a href="{{ route('website.travel_packages.index') }}"
+                                aria-label="{{ __('Comprehensive Egypt Travel Packages') }}">
+                                <img src="{{ asset('website/photos/experiences/travel-packages.jpg') }}"
+                                    alt="{{ __('Comprehensive Egypt Travel Packages') }}" width="800" height="500"
+                                    loading="lazy" decoding="async"
+                                    onerror="this.onerror=null;this.src='{{ asset('website/images/travel-packages/7-days-egypt-vacation.jpg') }}';">
+                            </a>
+                        </div>
 
-                                <a href="{{ $package['url'] }}" class="gold-btn deal-btn">
-                                    {{ __('Explore Journey') }}
-                                    <i class="la la-arrow-right"></i>
-                                </a>
+                        <div class="card-body">
+                            <h3 class="deal-title">
+                                <a
+                                    href="{{ route('website.travel_packages.index') }}">{{ __('Comprehensive Egypt Travel Packages') }}</a>
+                            </h3>
+
+                            <div class="deal-meta">
+                                <span><i class="la la-calendar"></i>{{ __('Multi-Day Journeys') }}</span>
+                                <span><i class="la la-hotel"></i>{{ __('5-Star & Luxury Stays') }}</span>
+                                <span><i class="la la-sliders-h"></i>{{ __('Customizable Itineraries') }}</span>
                             </div>
+
+                            <p class="deal-description">
+                                {{ __('Multi-day curated journeys combining ancient wonders, luxury hotel stays, desert adventures, and bespoke cultural itineraries with seamless transfers and dedicated support.') }}
+                            </p>
+
+                            <a href="{{ route('website.travel_packages.index') }}" class="gold-btn deal-btn mt-auto">
+                                {{ __('Explore Travel Packages') }}
+                                <i class="la la-arrow-right"></i>
+                            </a>
                         </div>
-                    @empty
-                        <div class="empty-state">
-                            {{ __('No featured packages found. Add active packages from the admin panel.') }}
+                    </div>
+
+                    {{-- Category 3: Nile Cruises --}}
+                    <div class="deal-card reveal-up">
+                        <div class="card-image">
+                            <div class="badge-top">{{ __('Nile Cruises') }}</div>
+
+                            <a href="{{ route('website.nile_cruises.index') }}"
+                                aria-label="{{ __('Luxury Nile River Cruises') }}">
+                                <img src="{{ asset('website/photos/experiences/nile-cruises.jpg') }}"
+                                    alt="{{ __('Luxury Nile River Cruises') }}" width="800" height="500"
+                                    loading="lazy" decoding="async"
+                                    onerror="this.onerror=null;this.src='{{ asset('website/images/nile-cruises/luxor-aswan.jpg') }}';">
+                            </a>
                         </div>
-                    @endforelse
+
+                        <div class="card-body">
+                            <h3 class="deal-title">
+                                <a
+                                    href="{{ route('website.nile_cruises.index') }}">{{ __('Luxury Nile River Cruises') }}</a>
+                            </h3>
+
+                            <div class="deal-meta">
+                                <span><i class="la la-ship"></i>{{ __('Luxor & Aswan Sights') }}</span>
+                                <span><i class="la la-moon"></i>{{ __('3 to 7 Night Cruises') }}</span>
+                                <span><i class="la la-utensils"></i>{{ __('Full Board Dining') }}</span>
+                            </div>
+
+                            <p class="deal-description">
+                                {{ __('Sail timeless waters between Luxor and Aswan aboard five-star ships, boutique Dahabiyas, and Lake Nasser floating palaces with world-class dining and guided temple visits.') }}
+                            </p>
+
+                            <a href="{{ route('website.nile_cruises.index') }}" class="gold-btn deal-btn mt-auto">
+                                {{ __('Explore Nile Cruises') }}
+                                <i class="la la-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
