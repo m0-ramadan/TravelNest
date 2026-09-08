@@ -383,7 +383,8 @@
 
                         btn.addEventListener('click', function(e) {
                             e.preventDefault();
-                            const scope = btn.closest('#cruise-itineraries') || btn.closest('.main-container') || document;
+                            const scope = btn.closest('#cruise-itineraries') || btn.closest(
+                                '.main-container') || document;
                             const targetId = btn.dataset.ncDurationTarget;
                             if (!targetId) return;
 
@@ -398,9 +399,12 @@
                             const target = document.getElementById(targetId);
                             if (target) {
                                 target.classList.add('active');
-                                target.querySelectorAll('[data-collapse-target]').forEach(function(trigger) {
-                                    const content = document.getElementById(trigger.dataset.collapseTarget);
-                                    if (content && (content.classList.contains('open') || content.classList.contains('active'))) {
+                                target.querySelectorAll('[data-collapse-target]').forEach(function(
+                                trigger) {
+                                    const content = document.getElementById(trigger.dataset
+                                        .collapseTarget);
+                                    if (content && (content.classList.contains('open') || content
+                                            .classList.contains('active'))) {
                                         content.style.maxHeight = content.scrollHeight + 'px';
                                     }
                                 });
