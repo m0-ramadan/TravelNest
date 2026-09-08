@@ -291,4 +291,48 @@ class PackageTypesCreationCycleTest extends TestCase
         }
     }
 
+    public function test_admin_trip_pages_load_populated_season_prices_with_and_without_currency(): void
+    {
+        foreach ([$this->currency->id, null] as $currencyId) {
+            $package = Package::create([
+                'title' => ['en' => 'Season priced trip'],
+                'slug' => 'season-priced-trip-' . ($currencyId ?? 'no-currency'),
+                'package_type' => 'travel_package',
+                'category_id' => $this->category->id,
+                'primary_country_id' => $this->country->id,
+                'currency_id' => $this->currency->id,
+            ]);
+            $accommodation = $package->tourPackageAccommodations()->create([
+                'name' => 'Deluxe accommodation',
+                'is_active' => true,
+            ]);
+            $season = $accommodation->seasons()->create([
+                'package_id' => $package->id,
+                'name' => ['en' => 'Summer'],
+                'currency_id' => $currencyId,
+                'is_active' => true,
+            ]);
+            $price = $season->items()->create([
+                'occupancy_type' => 'double',
+                'label' => ['en' => 'Double room'],
+                'price' => 175,
+                'price_unit' => 'per_person',
+                'is_active' => true,
+            ]);
+
+            foreach (['show', 'edit'] as $action) {
+                $response = $this->actingAs($this->admin, 'admin')
+                    ->get(route('admin.packages.' . $action, $package));
+                $response->assertOk()->assertSee('Season priced trip');
+                $response->assertViewHas('package', function ($loadedPackage) use ($price, $currencyId) {
+                    $loadedSeason = $loadedPackage->tourPackageAccommodations->first()->seasons->first();
+                    return $loadedSeason->relationLoaded('currency')
+                        && $loadedSeason->currency?->id === $currencyId
+                        && $loadedSeason->relationLoaded('items')
+                        && $loadedSeason->items->first()->id === $price->id;
+                });
+            }
+        }
+    }
+
 }
