@@ -168,6 +168,43 @@ class PackageTypesCreationCycleTest extends TestCase
         $this->assertEquals('Cairo', $day1->overnight_location);
         $this->assertEquals('5-star hotel in Cairo', $day1->accommodation);
         $this->assertTrue((bool)$day1->meals_dinner);
+        $this->assertNull($package->destination_id);
+    }
+
+    public function test_travel_package_does_not_require_or_persist_destination_id(): void
+    {
+        $response = $this->actingAs($this->admin, 'admin')->post(route('admin.packages.store'), array_merge($this->defaultAgeRules(), [
+            'title' => 'Egypt Classic Tour Package',
+            'package_type' => 'travel_package',
+            'category_id' => $this->category->id,
+            'primary_country_id' => $this->country->id,
+            'currency_id' => $this->currency->id,
+            'tour_type' => 'group',
+            'duration_type' => 'days',
+            'duration_days' => 5,
+            'duration_nights' => 4,
+            'adult_price' => 900,
+            'tour_city_ids' => [$this->city->id],
+            'itinerary' => [
+                [
+                    'day_number' => 1,
+                    'title' => 'Arrival Day',
+                    'duration' => 'Day 1',
+                    'description' => 'Arrival and transfer.',
+                ]
+            ],
+        ]));
+
+        $response->assertSessionHasNoErrors();
+        $response->assertRedirect(route('admin.packages.index'));
+
+        $package = Package::where('slug', 'egypt-classic-tour-package')->firstOrFail();
+        $this->assertEquals('travel_package', $package->package_type);
+        $this->assertNull($package->destination_id);
+
+        $editResponse = $this->actingAs($this->admin, 'admin')->get(route('admin.packages.edit', $package->id));
+        $editResponse->assertOk();
+        $editResponse->assertSee('data-tour-type-section="day_tour,shore_excursion,custom"', false);
     }
 
     public function test_can_create_and_update_nile_cruise(): void
@@ -286,7 +323,7 @@ class PackageTypesCreationCycleTest extends TestCase
                     ->assertSee('website/images/day-tours/cairo-day-tours.jpg')
                     ->assertSee('website/images/day-tours/luxor-day-tours.jpg')
                     ->assertSee('https://example.com/gallery.jpg');
-                $response->assertViewHas('savedGalleryUrls', fn ($urls) => count($urls) === 2);
+                $response->assertViewHas('savedGalleryUrls', fn($urls) => count($urls) === 2);
             }
         }
     }
@@ -334,5 +371,4 @@ class PackageTypesCreationCycleTest extends TestCase
             }
         }
     }
-
 }

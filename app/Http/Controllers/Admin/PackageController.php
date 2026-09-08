@@ -943,7 +943,7 @@ class PackageController extends Controller
             : null;
 
         $data['package_type'] = $this->normalizePackageType($data['package_type'] ?? null);
-        if ($data['package_type'] === 'nile_cruise') {
+        if (in_array($data['package_type'], ['nile_cruise', 'travel_package'], true)) {
             $data['destination_id'] = null;
         }
 
