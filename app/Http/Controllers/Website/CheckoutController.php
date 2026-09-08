@@ -72,28 +72,7 @@ class CheckoutController extends BaseWebsiteController
             }
         }
 
-        $countries = \App\Models\Country::query()
-            ->orderBy('id')
-            ->get()
-            ->map(fn($country) => $country->display_name)
-            ->filter()
-            ->values();
-
-        if ($countries->isEmpty()) {
-            $countries = collect([
-                'United States',
-                'United Kingdom',
-                'Canada',
-                'Australia',
-                'Germany',
-                'France',
-                'Italy',
-                'Spain',
-                'Egypt',
-                'Saudi Arabia',
-                'United Arab Emirates'
-            ]);
-        }
+        $countries = \App\Support\CountryList::all();
 
         return view('website.pages.checkout.show', [
             'package' => $package,

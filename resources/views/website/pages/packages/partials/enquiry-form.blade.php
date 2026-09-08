@@ -52,7 +52,7 @@
                 <select class="form-control" id="enquiry_country_{{ $suffix }}" name="nationality" required>
                     <option value="">{{ __('Select your country') }}</option>
                     @foreach ($countries as $country)
-                        <option value="{{ $country }}" @selected(old('nationality') === $country)>{{ $country }}</option>
+                        <option value="{{ $country }}" @selected(old('nationality') === $country)>{{ __($country) }}</option>
                     @endforeach
                 </select>
             </div>

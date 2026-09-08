@@ -334,34 +334,7 @@ class TripController extends BaseWebsiteController
             ? $bookingService->getTravelPackageMatrix($package)
             : null;
 
-        $countries = Country::query()
-            ->orderBy('id')
-            ->get()
-            ->map(fn($country) => $country->display_name)
-            ->filter()
-            ->values();
-
-        if ($countries->isEmpty()) {
-            $countries = collect([
-                'Egypt',
-                'United States',
-                'United Kingdom',
-                'Canada',
-                'Australia',
-                'Germany',
-                'France',
-                'Italy',
-                'Spain',
-                'Japan',
-                'China',
-                'India',
-                'Saudi Arabia',
-                'United Arab Emirates',
-                'Morocco',
-                'Jordan',
-                'Turkey',
-            ]);
-        }
+        $countries = \App\Support\CountryList::all();
 
         $relatedPackages = Package::query()
             ->with(['currency'])

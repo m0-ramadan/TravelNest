@@ -639,7 +639,7 @@
                                         <option value="">{{ __('Select your country') }}</option>
                                         @foreach ($countries as $cName)
                                             <option value="{{ $cName }}" @selected(old('country') === $cName)>
-                                                {{ $cName }}</option>
+                                                {{ __($cName) }}</option>
                                         @endforeach
                                     </select>
                                 </div>

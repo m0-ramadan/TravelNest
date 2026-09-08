@@ -549,6 +549,48 @@ class WebsiteCheckoutTest extends TestCase
             ->assertSee('2 بالغ · 1 طفل · 1 رضيع');
     }
 
+    public function test_checkout_displays_full_world_countries_list(): void
+    {
+        $package = $this->package(['package_type' => 'day_tour', 'adult_price' => 100, 'child_price' => 50]);
+
+        \App\Models\Country::create(['name' => ['en' => 'Egypt'], 'code' => 'EG', 'slug' => 'egypt', 'is_active' => true]);
+
+        $response = $this->get(route('website.checkout.show', [
+            'slug' => $package->slug,
+            'travel_date' => now()->addMonth()->toDateString(),
+            'rooms' => 1,
+            'adults' => 1,
+            'pricing_option' => 'category',
+        ]));
+
+        $response->assertOk()
+            ->assertSee('value="Egypt"', false)
+            ->assertSee('value="United States"', false)
+            ->assertSee('value="United Kingdom"', false)
+            ->assertSee('value="Germany"', false)
+            ->assertSee('value="France"', false)
+            ->assertSee('value="Saudi Arabia"', false)
+            ->assertSee('value="United Arab Emirates"', false)
+            ->assertSee('value="Japan"', false)
+            ->assertSee('value="Australia"', false)
+            ->assertSee('value="Canada"', false);
+
+        $arResponse = $this->withSession(['locale' => 'ar'])->get(route('website.checkout.show', [
+            'slug' => $package->slug,
+            'travel_date' => now()->addMonth()->toDateString(),
+            'rooms' => 1,
+            'adults' => 1,
+            'pricing_option' => 'category',
+        ]));
+
+        $arResponse->assertOk()
+            ->assertSee('مصر')
+            ->assertSee('الولايات المتحدة')
+            ->assertSee('المملكة العربية السعودية')
+            ->assertSee('ألمانيا')
+            ->assertSee('فرنسا');
+    }
+
     private function package(array $overrides = []): Package
     {
         return Package::create(array_merge([
