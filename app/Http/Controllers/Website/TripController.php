@@ -127,7 +127,9 @@ class TripController extends BaseWebsiteController
             $canonicalUrl = url('/' . ltrim($rawCanonicalUrl, '/'));
         }
 
-        $gallery = [];
+        // The hero is also the first image in the lightbox, followed by every
+        // stored gallery image. array_unique below prevents duplicates.
+        $gallery = [$heroImage];
         $galleryImages = $package->getRawOriginal('gallery_images') ?? $package->gallery_images;
 
         if (!empty($galleryImages)) {
@@ -155,10 +157,6 @@ class TripController extends BaseWebsiteController
         }
 
         $gallery = array_values(array_unique(array_filter($gallery)));
-
-        if (empty($gallery)) {
-            $gallery[] = $heroImage;
-        }
 
         $canonicalTypes = ['day_tour', 'travel_package', 'nile_cruise'];
         $isDayTour = $package->package_type === 'day_tour'

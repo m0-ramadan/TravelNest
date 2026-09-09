@@ -1230,9 +1230,33 @@ class LuxorAndAswanTourPageParser
             if (!empty($dataBg)) {
                 $urls[] = $this->resolveAbsoluteUrl($dataBg, $sourceUrl);
             }
+
+            $style = $node->getAttribute('style');
+            if (preg_match('/background(?:-image)?\s*:\s*url\(["\']?([^"\')]+)["\']?\)/i', $style, $match)) {
+                $urls[] = $this->resolveAbsoluteUrl($match[1], $sourceUrl);
+            }
         }
 
-        // 4. Attractions and gallery images
+        // 4. Gallery links can be hidden anchors without an <img> element.
+        $galleryNodes = $crawler->filter('[data-fancybox="gallery"], .gallery-btn, a[href*="gallery"]');
+        $galleryUrls = [];
+        foreach ($galleryNodes as $galleryNode) {
+            $src = $galleryNode->getAttribute('data-src')
+                ?: $galleryNode->getAttribute('data-lazy-src')
+                ?: $galleryNode->getAttribute('href');
+
+            if (!empty($src)) {
+                $galleryUrls[] = $this->resolveAbsoluteUrl($src, $sourceUrl);
+            }
+        }
+
+        // When the page exposes an explicit gallery, trust it and do not mix in
+        // unrelated page artwork such as awards, payment cards, or footer assets.
+        if ($galleryUrls !== []) {
+            return array_values(array_unique(array_filter(array_merge($urls, $galleryUrls))));
+        }
+
+        // 5. Attractions and regular inline images
         $imgNodes = $crawler->filter('img');
         foreach ($imgNodes as $img) {
             $src = $img->getAttribute('data-lazy-src')

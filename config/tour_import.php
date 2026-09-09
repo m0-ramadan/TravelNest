@@ -67,7 +67,7 @@ return [
     */
     'image_disk' => env('TOUR_IMPORT_IMAGE_DISK', 'public'),
     'image_directory' => env('TOUR_IMPORT_IMAGE_DIRECTORY', 'packages/imported'),
-    'max_images' => (int) env('TOUR_IMPORT_MAX_IMAGES', 10),
+    'max_images' => (int) env('TOUR_IMPORT_MAX_IMAGES', 30),
     'max_image_bytes' => (int) env('TOUR_IMPORT_MAX_IMAGE_BYTES', 5 * 1024 * 1024), // 5MB
 
     /*

@@ -61,7 +61,7 @@ class ExternalTourImageDownloader
     {
         $disk = (string) ($options['disk'] ?? config('tour_import.image_disk', 'public'));
         $baseDir = rtrim((string) ($options['directory'] ?? config('tour_import.image_directory', 'packages/imported')), '/');
-        $maxImages = (int) ($options['max_images'] ?? config('tour_import.max_images', 10));
+        $maxImages = (int) ($options['max_images'] ?? config('tour_import.max_images', 30));
         $maxBytes = (int) ($options['max_image_bytes'] ?? config('tour_import.max_image_bytes', 5 * 1024 * 1024));
         $timeout = (int) ($options['timeout'] ?? config('tour_import.timeout', 30));
         $connectTimeout = (int) ($options['connect_timeout'] ?? config('tour_import.connect_timeout', 10));

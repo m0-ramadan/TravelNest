@@ -847,7 +847,13 @@ HTML;
 
     public function test_parser_filters_unwanted_images_and_creates_stable_source_id(): void
     {
-        $html = $this->getSampleTourHtml(3);
+        $html = str_replace(
+            '</body>',
+            '<a class="gallery-btn" data-fancybox="gallery" href="/images/cruise-main.jpg">View Gallery</a>'
+                . '<a class="visually-hidden" data-fancybox="gallery" data-src="/images/cruise-cabin.jpg" href="/images/cruise-cabin.jpg">Gallery image</a>'
+                . '</body>',
+            $this->getSampleTourHtml(3)
+        );
         $parser = new LuxorAndAswanTourPageParser();
         $downloader = new ExternalTourImageDownloader();
 
@@ -857,6 +863,9 @@ HTML;
         $this->assertSame('7-Day-Cairo-Alexandria-and-Nile-Cruise-Tour-Package-by-Flight', $parsed['source_slug']);
 
         $filteredImages = $downloader->filterCandidateUrls($parsed['images']);
+
+        $this->assertContains('https://www.luxorandaswan.com/images/cruise-main.jpg', $filteredImages);
+        $this->assertContains('https://www.luxorandaswan.com/images/cruise-cabin.jpg', $filteredImages);
 
         foreach ($filteredImages as $img) {
             $this->assertStringNotContainsString('logo', strtolower($img));
