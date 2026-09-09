@@ -563,7 +563,210 @@
             border-radius: 0 12px 12px 0;
             text-align: right;
             font-weight: 800;
-            color: var(--rich-gold, #c5955b)
+            color: var(--rich-gold, #c5955b);
+        }
+
+        /* Nile Cruise Season Cards (Image 2 design) */
+        .nc-season-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 10px;
+        }
+
+        .nc-season-card {
+            border-radius: 12px;
+            overflow: hidden;
+            background: #ffffff;
+            box-shadow: 0 4px 18px rgba(15, 30, 60, 0.05);
+            border: 1px solid rgba(28, 50, 92, 0.12);
+            transition: all 0.25s ease;
+        }
+
+        .nc-season-card-header {
+            width: 100%;
+            background: #1c3552 !important;
+            color: #ffffff;
+            border: none;
+            outline: none;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            text-align: left;
+            transition: background-color 0.2s ease;
+            text-decoration: none;
+        }
+
+        .nc-season-card-header:hover {
+            background: #162c44 !important;
+        }
+
+        .nc-season-card-header .nc-season-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .nc-season-card-header .nc-season-period {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.75);
+            font-weight: 400;
+            margin: 0;
+            text-align: center;
+        }
+
+        .nc-season-card-header .nc-season-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nc-season-card-header .nc-season-from {
+            color: #c5955b;
+            font-weight: 700;
+            font-size: 1.05rem;
+            white-space: nowrap;
+        }
+
+        .nc-season-card-header .nc-season-arrow {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 1.15rem;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .nc-season-card-header.collapsed .nc-season-arrow {
+            transform: rotate(180deg);
+        }
+
+        .nc-season-card-body {
+            background: #ffffff;
+            padding: 0;
+        }
+
+        .nc-cabin-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.15s ease;
+        }
+
+        .nc-cabin-row:last-child {
+            border-bottom: none;
+        }
+
+        .nc-cabin-row:hover {
+            background: #fafcff;
+        }
+
+        .nc-cabin-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1c325c;
+            margin: 0;
+        }
+
+        .nc-cabin-price-col {
+            text-align: right;
+        }
+
+        .nc-cabin-price-val {
+            display: flex;
+            align-items: baseline;
+            justify-content: flex-end;
+            gap: 6px;
+        }
+
+        .nc-cabin-currency {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #64748b;
+            letter-spacing: 0.5px;
+        }
+
+        .nc-cabin-amount {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #c5955b;
+            line-height: 1;
+        }
+
+        .nc-cabin-price-sub {
+            font-size: 0.82rem;
+            color: #64748b;
+            margin-top: 4px;
+            font-weight: 400;
+        }
+
+        /* Dark Mode */
+        html[data-theme='dark'] .nc-season-card {
+            background: #1c1c1c !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        html[data-theme='dark'] .nc-season-card-header {
+            background: #132235 !important;
+        }
+
+        html[data-theme='dark'] .nc-season-card-body {
+            background: #1c1c1c !important;
+        }
+
+        html[data-theme='dark'] .nc-cabin-row {
+            border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+        }
+
+        html[data-theme='dark'] .nc-cabin-row:hover {
+            background: rgba(255, 255, 255, 0.02) !important;
+        }
+
+        html[data-theme='dark'] .nc-cabin-name {
+            color: #f8fafc !important;
+        }
+
+        html[data-theme='dark'] .nc-cabin-currency,
+        html[data-theme='dark'] .nc-cabin-price-sub {
+            color: #94a3b8 !important;
+        }
+
+        @media (max-width: 767px) {
+            .nc-season-card-header {
+                padding: 14px 16px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .nc-season-card-header .nc-season-title {
+                font-size: 1.05rem;
+            }
+
+            .nc-season-card-header .nc-season-period {
+                order: 3;
+                width: 100%;
+                text-align: left;
+                font-size: 0.85rem;
+            }
+
+            .nc-cabin-row {
+                padding: 16px;
+            }
+
+            .nc-cabin-name {
+                font-size: 0.95rem;
+            }
+
+            .nc-cabin-amount {
+                font-size: 1.25rem;
+            }
         }
 
         .pricing-showcase {
@@ -2176,8 +2379,8 @@
 
 
         /* =========================================================
-                               Nile Cruise body redesign — body only, shared header/footer untouched
-                               ========================================================= */
+                                   Nile Cruise body redesign — body only, shared header/footer untouched
+                                   ========================================================= */
         .nile-cruise-page .main-container {
             background:
                 radial-gradient(circle at 8% 8%, rgba(215, 239, 250, .58), transparent 34%),
@@ -3987,44 +4190,195 @@
                                                         @endif
 
                                                         @if ($acc->seasons->isNotEmpty())
-                                                            <div class="price-table-wrap">
-                                                                <table class="price-table">
-                                                                    <thead>
-                                                                        <tr>
-                                                                            <th>{{ __('Season / Period') }}</th>
-                                                                            <th>{{ __('Occupancy / Room Type') }}</th>
-                                                                            <th>{{ __('Price per Person') }}</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        @foreach ($acc->seasons as $season)
-                                                                            @foreach ($season->items as $item)
-                                                                                <tr>
-                                                                                    @if ($loop->first)
-                                                                                        <td rowspan="{{ $season->items->count() }}"
-                                                                                            class="fw-bold"
-                                                                                            style="background: var(--pearl-luxury, #faf8f3);">
-                                                                                            {{ $season->display_season_name }}
-                                                                                            @if ($season->date_from || $season->date_to)
+                                                            @if ($package->package_type === 'nile_cruise')
+                                                                <div class="nc-season-cards">
+                                                                    @foreach ($acc->seasons as $seasonIndex => $season)
+                                                                        @php
+                                                                            $validItems = $season->items->filter(
+                                                                                fn($it) => (float) $it->price > 0,
+                                                                            );
+                                                                            $minPrice = $validItems->isNotEmpty()
+                                                                                ? $validItems->min('price')
+                                                                                : $season->items->min('price') ?? 0;
+                                                                            $periodText = '';
+                                                                            if (
+                                                                                $season->date_from &&
+                                                                                $season->date_to
+                                                                            ) {
+                                                                                $periodText =
+                                                                                    $season->date_from->format('F') .
+                                                                                    ' ' .
+                                                                                    __('to') .
+                                                                                    ' ' .
+                                                                                    $season->date_to->format('F');
+                                                                            } elseif ($seasonIndex % 2 === 0) {
+                                                                                $periodText = __('May to August');
+                                                                            } else {
+                                                                                $periodText = __('September to April');
+                                                                            }
+                                                                            $isOpen = $seasonIndex < 2;
+                                                                        @endphp
+                                                                        <div class="nc-season-card">
+                                                                            <button type="button"
+                                                                                class="nc-season-card-header {{ $isOpen ? '' : 'collapsed' }}"
+                                                                                data-bs-toggle="collapse"
+                                                                                data-bs-target="#seasonCollapse{{ $acc->id }}_{{ $season->id }}"
+                                                                                aria-expanded="{{ $isOpen ? 'true' : 'false' }}">
+                                                                                <span
+                                                                                    class="nc-season-title">{{ $season->display_season_name }}</span>
+                                                                                @if ($periodText)
+                                                                                    <span
+                                                                                        class="nc-season-period">{{ $periodText }}</span>
+                                                                                @endif
+                                                                                <span class="nc-season-right">
+                                                                                    <span class="nc-season-from">
+                                                                                        {{ __('From') }}:
+                                                                                        {{ $currencySymbol }}{{ number_format((float) $minPrice, 0) }}
+                                                                                    </span>
+                                                                                    <i
+                                                                                        class="la la-angle-up nc-season-arrow"></i>
+                                                                                </span>
+                                                                            </button>
+                                                                            <div id="seasonCollapse{{ $acc->id }}_{{ $season->id }}"
+                                                                                class="collapse {{ $isOpen ? 'show' : '' }}">
+                                                                                <div class="nc-season-card-body">
+                                                                                    @foreach ($season->items as $item)
+                                                                                        @php
+                                                                                            $rawLabel =
+                                                                                                (string) $item->display_label;
+                                                                                            $cabinLabel = preg_replace(
+                                                                                                '/\broom\b/i',
+                                                                                                'Cabin',
+                                                                                                $rawLabel,
+                                                                                            );
+                                                                                            if (
+                                                                                                app()->getLocale() ===
+                                                                                                'ar'
+                                                                                            ) {
+                                                                                                $cabinLabel = str_replace(
+                                                                                                    'غرفة',
+                                                                                                    'كابينة',
+                                                                                                    $cabinLabel,
+                                                                                                );
+                                                                                            }
+
+                                                                                            $occ = strtolower(
+                                                                                                trim(
+                                                                                                    (string) $item->occupancy_type,
+                                                                                                ),
+                                                                                            );
+                                                                                            if (!$occ) {
+                                                                                                if (
+                                                                                                    stripos(
+                                                                                                        $rawLabel,
+                                                                                                        'triple',
+                                                                                                    ) !== false
+                                                                                                ) {
+                                                                                                    $occ = 'triple';
+                                                                                                } elseif (
+                                                                                                    stripos(
+                                                                                                        $rawLabel,
+                                                                                                        'double',
+                                                                                                    ) !== false
+                                                                                                ) {
+                                                                                                    $occ = 'double';
+                                                                                                } elseif (
+                                                                                                    stripos(
+                                                                                                        $rawLabel,
+                                                                                                        'single',
+                                                                                                    ) !== false
+                                                                                                ) {
+                                                                                                    $occ = 'single';
+                                                                                                }
+                                                                                            }
+
+                                                                                            $subtext = match ($occ) {
+                                                                                                'triple' => __(
+                                                                                                    'per adult in a triple share cabin',
+                                                                                                ),
+                                                                                                'double' => __(
+                                                                                                    'per adult in a double share cabin',
+                                                                                                ),
+                                                                                                'single' => __(
+                                                                                                    'per adult in a single share cabin',
+                                                                                                ),
+                                                                                                default => __(
+                                                                                                    'per adult in a :type share cabin',
+                                                                                                    [
+                                                                                                        'type' =>
+                                                                                                            $occ ?:
+                                                                                                            __(
+                                                                                                                'standard',
+                                                                                                            ),
+                                                                                                    ],
+                                                                                                ),
+                                                                                            };
+                                                                                        @endphp
+                                                                                        <div class="nc-cabin-row">
+                                                                                            <div class="nc-cabin-name">
+                                                                                                {{ $cabinLabel }}</div>
+                                                                                            <div
+                                                                                                class="nc-cabin-price-col">
                                                                                                 <div
-                                                                                                    class="small text-muted fw-normal">
-                                                                                                    {{ $season->date_from?->format('M d') }}
-                                                                                                    -
-                                                                                                    {{ $season->date_to?->format('M d') }}
+                                                                                                    class="nc-cabin-price-val">
+                                                                                                    <span
+                                                                                                        class="nc-cabin-currency">{{ $package->currency?->code ?: 'USD' }}</span>
+                                                                                                    <span
+                                                                                                        class="nc-cabin-amount">{{ $currencySymbol }}{{ number_format((float) $item->price, 0) }}</span>
                                                                                                 </div>
-                                                                                            @endif
+                                                                                                <div
+                                                                                                    class="nc-cabin-price-sub">
+                                                                                                    {{ $subtext }}
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    @endforeach
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+                                                            @else
+                                                                <div class="price-table-wrap">
+                                                                    <table class="price-table">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>{{ __('Season / Period') }}</th>
+                                                                                <th>{{ __('Occupancy / Room Type') }}</th>
+                                                                                <th>{{ __('Price per Person') }}</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            @foreach ($acc->seasons as $season)
+                                                                                @foreach ($season->items as $item)
+                                                                                    <tr>
+                                                                                        @if ($loop->first)
+                                                                                            <td rowspan="{{ $season->items->count() }}"
+                                                                                                class="fw-bold"
+                                                                                                style="background: var(--pearl-luxury, #faf8f3);">
+                                                                                                {{ $season->display_season_name }}
+                                                                                                @if ($season->date_from || $season->date_to)
+                                                                                                    <div
+                                                                                                        class="small text-muted fw-normal">
+                                                                                                        {{ $season->date_from?->format('M d') }}
+                                                                                                        -
+                                                                                                        {{ $season->date_to?->format('M d') }}
+                                                                                                    </div>
+                                                                                                @endif
+                                                                                            </td>
+                                                                                        @endif
+                                                                                        <td>{{ $item->display_label }}
                                                                                         </td>
-                                                                                    @endif
-                                                                                    <td>{{ $item->display_label }}</td>
-                                                                                    <td><strong
-                                                                                            style="color: var(--rich-gold, #c5955b); font-size: 1.1rem;">{{ $currencySymbol }}{{ number_format((float) $item->price, 0) }}</strong>
-                                                                                    </td>
-                                                                                </tr>
+                                                                                        <td><strong
+                                                                                                style="color: var(--rich-gold, #c5955b); font-size: 1.1rem;">{{ $currencySymbol }}{{ number_format((float) $item->price, 0) }}</strong>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                @endforeach
                                                                             @endforeach
-                                                                        @endforeach
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            @endif
                                                         @endif
                                                     </div>
                                                 </div>
@@ -4804,7 +5158,7 @@
                     const toIso = date => [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(
                         date.getDate()).padStart(2, '0')].join('-');
                     const isAvailable = date => date >= minDate && (daily || allowedIndexes.includes(date
-                .getDay()));
+                        .getDay()));
                     const renderCalendar = () => {
                         const locale = document.documentElement.lang || 'en';
                         title.textContent = viewedMonth.toLocaleDateString(locale, {
@@ -4905,7 +5259,7 @@
                         if (available && !firstAvailable) firstAvailable = input;
                         if (available) {
                             if (!bestOption || (min > 0 && Number(bestOption.dataset.paxMin || 0) ===
-                                0)) {
+                                    0)) {
                                 bestOption = input;
                             }
                         }

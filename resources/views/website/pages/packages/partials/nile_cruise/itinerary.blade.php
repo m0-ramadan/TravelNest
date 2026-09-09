@@ -61,24 +61,33 @@
                                         @endif
 
                                         @if($day->activities->isNotEmpty())
-                                            <div class="activities-list mt-3">
-                                                <strong class="d-block mb-2 activity-header" style="font-size: 0.95rem;">
-                                                    <i class="la la-map-pin" style="color: var(--rich-gold, #c5955b);"></i> {{ __('Key Activities & Visits:') }}
-                                                </strong>
-                                                @foreach($day->activities as $activity)
-                                                    @php $activityHeading = $activity->display_title ?: $activity->attraction?->display_name; @endphp
-                                                    <div class="nc-activity ps-3 border-start border-3 mb-2">
-                                                        @if($activityHeading)
-                                                            @if($activity->attraction?->slug)
-                                                                <strong><a href="{{ route('website.attractions.show', $activity->attraction->slug) }}" class="activity-link">{{ $activityHeading }}</a></strong>
-                                                            @else
-                                                                <strong class="activity-title">{{ $activityHeading }}</strong>
-                                                            @endif
+                                            <div class="nc-tour-groups mt-3">
+                                                @foreach($day->activities->groupBy(fn ($activity) => $activity->display_section_title) as $sectionTitle => $activities)
+                                                    <section class="nc-tour-group">
+                                                        @if($sectionTitle)
+                                                            <h4 class="nc-tour-group-title"><span aria-hidden="true"></span>{{ $sectionTitle }}</h4>
                                                         @endif
-                                                        @if($activity->display_description)
-                                                            <div class="small text-muted mt-1">{!! nl2br(e($activity->display_description)) !!}</div>
+                                                        @if($activities->first()?->display_section_description)
+                                                            <p class="nc-tour-group-description">{{ $activities->first()->display_section_description }}</p>
                                                         @endif
-                                                    </div>
+                                                        <div class="nc-tour-sites">
+                                                            @foreach($activities as $activity)
+                                                                @php $activityHeading = $activity->display_title ?: $activity->attraction?->display_name; @endphp
+                                                                <article class="nc-activity">
+                                                                    @if($activityHeading)
+                                                                        @if($activity->attraction?->slug)
+                                                                            <h5><a href="{{ route('website.attractions.show', $activity->attraction->slug) }}" class="activity-link">{{ $activityHeading }}</a></h5>
+                                                                        @else
+                                                                            <h5 class="activity-title"><span aria-hidden="true"></span>{{ $activityHeading }}</h5>
+                                                                        @endif
+                                                                    @endif
+                                                                    @if($activity->display_description)
+                                                                        <div class="nc-activity-description">{!! nl2br(e($activity->display_description)) !!}</div>
+                                                                    @endif
+                                                                </article>
+                                                            @endforeach
+                                                        </div>
+                                                    </section>
                                                 @endforeach
                                             </div>
                                         @endif

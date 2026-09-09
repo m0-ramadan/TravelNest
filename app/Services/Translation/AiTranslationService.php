@@ -10,6 +10,7 @@ use App\Models\PackageHighlight;
 use App\Models\PackageInclusion;
 use App\Models\NileCruiseCabin;
 use App\Models\NileCruiseItineraryDay;
+use App\Models\NileCruiseItineraryActivity;
 use App\Services\Translation\DTOs\TranslationOptions;
 use App\Services\Translation\DTOs\TranslationResult;
 use App\Services\Translation\DTOs\TranslationUnit;
@@ -474,6 +475,12 @@ class AiTranslationService
             if ($ncDay) {
                 $ncDay->setTranslation($unit->field, $unit->targetLanguage, $translatedText);
                 $ncDay->save();
+            }
+        } elseif ($unit->entityType === 'nile_cruise_itinerary_activity') {
+            $activity = NileCruiseItineraryActivity::find($unit->entityId);
+            if ($activity) {
+                $activity->setTranslation($unit->field, $unit->targetLanguage, $translatedText);
+                $activity->save();
             }
         }
     }

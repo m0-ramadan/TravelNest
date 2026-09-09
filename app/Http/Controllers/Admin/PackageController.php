@@ -787,6 +787,8 @@ class PackageController extends Controller
             'nile_cruise.durations.*.itinerary.*.meals' => ['nullable'],
             'nile_cruise.durations.*.itinerary.*.overnight' => ['nullable', 'string'],
             'nile_cruise.durations.*.itinerary.*.activities' => ['nullable', 'array'],
+            'nile_cruise.durations.*.itinerary.*.activities.*.section_title' => ['nullable', 'string'],
+            'nile_cruise.durations.*.itinerary.*.activities.*.section_description' => ['nullable', 'string'],
             'nile_cruise.durations.*.itinerary.*.activities.*.title' => ['nullable', 'string'],
             'nile_cruise.durations.*.itinerary.*.activities.*.description' => ['nullable', 'string'],
             'nile_cruise.durations.*.itinerary.*.activities.*.attraction_id' => ['nullable', 'integer', 'exists:attractions,id'],

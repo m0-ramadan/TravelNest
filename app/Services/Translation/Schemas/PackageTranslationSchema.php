@@ -185,6 +185,24 @@ class PackageTranslationSchema
                                 );
                             }
                         }
+                        foreach ($ncDay->activities as $activity) {
+                            foreach (['section_title' => 'text', 'section_description' => 'text', 'title' => 'text', 'description' => 'text'] as $activityField => $activityType) {
+                                $translations = $activity->getTranslations($activityField);
+                                $source = $translations[$sourceLang] ?? null;
+                                $target = $translations[$targetLang] ?? null;
+                                if (!empty(trim((string) $source)) && (!$missingOnly || empty(trim((string) $target)))) {
+                                    $units[] = new TranslationUnit(
+                                        entityType: 'nile_cruise_itinerary_activity',
+                                        entityId: $activity->id,
+                                        field: $activityField,
+                                        sourceLanguage: $sourceLang,
+                                        targetLanguage: $targetLang,
+                                        sourceText: (string) $source,
+                                        structuredType: $activityType
+                                    );
+                                }
+                            }
+                        }
                     }
                 }
             }

@@ -41,7 +41,7 @@ class NileCruiseItineraryImporter
             $duration->itineraryDays()->delete();
 
             foreach ($days as $day) {
-                $duration->itineraryDays()->create([
+                $itineraryDay = $duration->itineraryDays()->create([
                     'day_number' => $day['day_number'],
                     'title' => ['en' => $day['title'], 'ar' => ''],
                     'description' => ['en' => $day['description'], 'ar' => ''],
@@ -49,6 +49,26 @@ class NileCruiseItineraryImporter
                     'overnight' => ['en' => $day['overnight_location'] ?? '', 'ar' => ''],
                     'sort_order' => $day['day_number'],
                 ]);
+
+                foreach (($day['activities'] ?? []) as $activityIndex => $activity) {
+                    $activity = is_array($activity) ? $activity : ['title' => (string) $activity];
+                    $title = trim((string) ($activity['title'] ?? ''));
+                    $description = trim((string) ($activity['description'] ?? ''));
+                    $sectionTitle = trim((string) ($activity['section_title'] ?? ''));
+                    $sectionDescription = trim((string) ($activity['section_description'] ?? ''));
+
+                    if ($title === '' && $description === '' && $sectionTitle === '') {
+                        continue;
+                    }
+
+                    $itineraryDay->activities()->create([
+                        'title' => ['en' => $title, 'ar' => ''],
+                        'description' => ['en' => $description, 'ar' => ''],
+                        'section_title' => ['en' => $sectionTitle, 'ar' => ''],
+                        'section_description' => ['en' => $sectionDescription, 'ar' => ''],
+                        'sort_order' => $activityIndex + 1,
+                    ]);
+                }
             }
         }
 

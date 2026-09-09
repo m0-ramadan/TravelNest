@@ -2281,6 +2281,74 @@ html[data-theme="dark"] .border-bottom {
     text-decoration: underline;
 }
 
+body.website-theme-shell .nc-tour-group {
+    margin: 18px 0;
+    padding: 20px;
+    border: 1px solid var(--website-shell-border) !important;
+    border-inline-start: 3px solid var(--deep-teal, #2c5282) !important;
+    border-radius: 12px;
+    background: var(--website-shell-surface-soft) !important;
+}
+
+body.website-theme-shell .nc-tour-group-title,
+body.website-theme-shell .nc-activity .activity-title,
+body.website-theme-shell .nc-activity h5 {
+    color: var(--website-shell-heading) !important;
+    font-family: var(--heading-font, Georgia, serif);
+}
+
+.nc-tour-group-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 16px;
+    font-size: 1.15rem;
+}
+
+.nc-tour-group-title > span,
+.nc-activity .activity-title > span {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    flex: 0 0 9px;
+    border-radius: 50%;
+    background: var(--website-shell-icon-primary);
+    box-shadow: 0 0 0 5px rgba(15, 95, 143, 0.1);
+}
+
+body.website-theme-shell .nc-tour-group-description {
+    margin: -4px 0 16px;
+    color: var(--website-shell-muted) !important;
+}
+
+.nc-tour-sites {
+    display: grid;
+    gap: 12px;
+}
+
+body.website-theme-shell .nc-tour-sites .nc-activity {
+    padding: 16px;
+    border: 1px solid var(--website-shell-border) !important;
+    border-left-color: var(--website-shell-border) !important;
+    border-radius: 10px;
+    background: var(--website-shell-surface) !important;
+    box-shadow: 0 8px 22px rgba(8, 47, 73, 0.06);
+}
+
+.nc-activity .activity-title,
+.nc-activity h5 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 9px;
+    font-size: 1rem;
+}
+
+body.website-theme-shell .nc-activity-description {
+    color: var(--website-shell-text) !important;
+    line-height: 1.75;
+}
+
 /* Dark Mode Overrides for Itinerary */
 html[data-theme="dark"] .itinerary-section .day-card,
 html[data-theme="dark"] .itinerary-section .collapsible-content,
@@ -2296,6 +2364,11 @@ html[data-theme="dark"] .itinerary-section .day-header {
     background-color: #1c273e !important;
     color: #ffffff !important;
     border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme="dark"] body.website-theme-shell .nc-tour-group-title > span,
+html[data-theme="dark"] body.website-theme-shell .nc-activity .activity-title > span {
+    box-shadow: 0 0 0 5px rgba(125, 211, 252, 0.1);
 }
 
 html[data-theme="dark"] .itinerary-section .day-title {

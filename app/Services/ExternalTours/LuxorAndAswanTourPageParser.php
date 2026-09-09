@@ -552,14 +552,10 @@ class LuxorAndAswanTourPageParser
             }
 
             // Description
-            $descParagraphs = [];
-            $contentNode = $cardCrawler->filter('.day-content p');
-            foreach ($contentNode as $p) {
-                $pText = trim(preg_replace('/\s+/', ' ', $p->textContent));
-                if (!empty($pText) && stripos($pText, 'Meals Included') === false) {
-                    $descParagraphs[] = $pText;
-                }
-            }
+            // Only keep paragraphs that belong directly to the day. Paragraphs inside
+            // tour/site cards are stored as structured activities below.
+            $contentNode = $cardCrawler->filter('.day-content')->first();
+            $descParagraphs = $this->directParagraphTexts($contentNode);
             $description = implode("\n\n", $descParagraphs);
 
             // Meals extraction
@@ -584,7 +580,13 @@ class LuxorAndAswanTourPageParser
             // Overnight and transport facts
             $overnight = $this->detectOvernightLocation($description);
             $transport = $this->detectTransportNotes($description);
-            $activities = $this->extractDayActivities($description, $title);
+            $activities = $this->extractStructuredDayActivities($cardCrawler);
+            if ($activities === []) {
+                $activities = array_map(
+                    fn (string $activity) => ['title' => $activity, 'description' => ''],
+                    $this->extractDayActivities($description, $title)
+                );
+            }
 
             $itinerary[] = [
                 'program' => $program,
@@ -604,6 +606,78 @@ class LuxorAndAswanTourPageParser
         }
 
         return $itinerary;
+    }
+
+    /**
+     * Preserve the source hierarchy: tour/optional heading -> named sites.
+     */
+    protected function extractStructuredDayActivities(Crawler $dayCard): array
+    {
+        $activities = [];
+        $sections = $dayCard->filter('.day-content .tour-section, .day-content .optional-experience');
+
+        foreach ($sections as $sectionNode) {
+            $section = new Crawler($sectionNode);
+            $sectionTitle = trim(preg_replace(
+                '/\s+/',
+                ' ',
+                $section->filter('.tour-title, .optional-title')->first()->text('')
+            ));
+            $sectionDescription = $this->directParagraphTexts($section)[0] ?? '';
+            $sites = $section->filter('.site-highlight');
+
+            foreach ($sites as $siteIndex => $siteNode) {
+                $site = new Crawler($siteNode);
+                $siteTitle = trim(preg_replace('/\s+/', ' ', $site->filter('.site-name')->first()->text('')));
+                $siteDescription = trim(preg_replace('/\s+/', ' ', $site->filter('p')->first()->text('')));
+
+                if ($siteTitle === '' && $siteDescription === '') {
+                    continue;
+                }
+
+                $activities[] = [
+                    'section_title' => $sectionTitle,
+                    'section_description' => $siteIndex === 0 ? $sectionDescription : '',
+                    'title' => $siteTitle,
+                    'description' => $siteDescription,
+                ];
+            }
+
+            // Some source pages have a titled tour block without named site cards.
+            if ($sites->count() === 0 && ($sectionTitle !== '' || $sectionDescription !== '')) {
+                $activities[] = [
+                    'section_title' => $sectionTitle,
+                    'section_description' => '',
+                    'title' => $sectionTitle,
+                    'description' => $sectionDescription,
+                ];
+            }
+        }
+
+        return $activities;
+    }
+
+    /** @return array<int, string> */
+    protected function directParagraphTexts(Crawler $crawler): array
+    {
+        $node = $crawler->getNode(0);
+        if (!$node) {
+            return [];
+        }
+
+        $paragraphs = [];
+        foreach ($node->childNodes as $child) {
+            if (!$child instanceof \DOMElement || strtolower($child->tagName) !== 'p') {
+                continue;
+            }
+
+            $text = trim(preg_replace('/\s+/', ' ', $child->textContent));
+            if ($text !== '' && stripos($text, 'Meals Included') === false) {
+                $paragraphs[] = $text;
+            }
+        }
+
+        return $paragraphs;
     }
 
     protected function detectOvernightLocation(string $text): string

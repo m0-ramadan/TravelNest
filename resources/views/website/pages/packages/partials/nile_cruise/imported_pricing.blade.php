@@ -1,23 +1,25 @@
 <style>
     .nc-fare-card {
-        margin-bottom: 18px;
-        border: 1px solid #e5e9ed;
-        border-radius: 14px;
+        margin-bottom: 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
         overflow: hidden;
-        background: #fff;
-        box-shadow: 0 4px 14px rgba(20, 40, 60, .05);
+        background: #ffffff;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .nc-fare-card summary {
-        display: grid;
-        grid-template-columns: 1fr 1fr auto 18px;
+        display: flex;
+        justify-content: space-between;
         align-items: center;
         gap: 16px;
-        padding: 20px;
+        padding: 18px 24px;
         cursor: pointer;
         list-style: none;
-        background: linear-gradient(110deg, #1c355c, #204d59);
-        color: #fff;
+        background: #1f405c;
+        color: #ffffff;
+        user-select: none;
     }
 
     .nc-fare-card summary::-webkit-details-marker {
@@ -25,25 +27,42 @@
     }
 
     .nc-fare-duration {
-        font-family: 'Playfair Display', serif;
+        flex: 1;
+        text-align: left;
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 1.15rem;
         font-weight: 700;
+        color: #ffffff;
+        letter-spacing: 0.2px;
     }
 
     .nc-fare-period {
-        font-size: .85rem;
-        color: #e1ecf1;
+        flex: 1;
         text-align: center;
+        font-size: 0.95rem;
+        color: #cbd5e1;
+        font-weight: 400;
+    }
+
+    .nc-fare-right {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
     }
 
     .nc-fare-from {
-        color: #d9a35d;
+        color: #c5955b;
         font-weight: 700;
+        font-size: 1.05rem;
         white-space: nowrap;
     }
 
     .nc-fare-chevron {
-        color: #d9a35d;
-        transition: transform .2s;
+        color: #c5955b;
+        flex-shrink: 0;
+        transition: transform 0.25s ease;
     }
 
     .nc-fare-card[open] .nc-fare-chevron {
@@ -55,98 +74,138 @@
         justify-content: space-between;
         align-items: center;
         gap: 16px;
-        padding: 24px 20px;
-        border-top: 1px solid #f0f1f4;
+        padding: 20px 24px;
+        border-top: 1px solid #f1f5f9;
+        background: #ffffff;
     }
 
     .nc-fare-label {
-        font-weight: 600;
-        color: #29436a;
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: #1e293b;
     }
 
     .nc-fare-amount {
-        text-align: end;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        text-align: right;
     }
 
-    .nc-fare-amount strong {
-        color: #bd8b48;
-        font: 700 1.35rem 'Playfair Display', serif;
+    .nc-fare-price-line {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
     }
 
     .nc-fare-currency {
-        color: #7b8798;
-        font-size: .7rem;
-        margin-inline-end: 8px;
+        color: #64748b;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .nc-fare-amount strong {
+        color: #c5955b;
+        font-family: 'Playfair Display', Georgia, serif;
+        font-weight: 700;
+        font-size: 1.55rem;
+        line-height: 1;
     }
 
     .nc-fare-note {
         display: block;
-        color: #7b8798;
-        font-size: .75rem;
-        margin-top: 5px;
+        color: #64748b;
+        font-size: 0.82rem;
+        margin-top: 4px;
+        font-weight: 400;
     }
 
     html[data-theme='dark'] .nc-fare-card {
         background: #142238;
         border-color: #33445a;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
     html[data-theme='dark'] .nc-fare-row {
-        border-color: #33445a;
+        background: #142238;
+        border-color: #24354c;
     }
 
     html[data-theme='dark'] .nc-fare-label {
-        color: #e0e8f4;
+        color: #f1f5f9;
     }
 
-    @media(max-width: 575px) {
+    html[data-theme='dark'] .nc-fare-currency,
+    html[data-theme='dark'] .nc-fare-note {
+        color: #94a3b8;
+    }
+
+    @media (max-width: 640px) {
         .nc-fare-card summary {
+            padding: 14px 16px;
             gap: 8px;
-            padding: 16px 12px;
-            grid-template-columns: 1fr auto 14px;
+        }
+
+        .nc-fare-duration {
+            font-size: 1rem;
         }
 
         .nc-fare-period {
-            grid-column: 1;
-            grid-row: 2;
-            text-align: start;
+            font-size: 0.85rem;
         }
 
         .nc-fare-from {
-            grid-column: 2;
-            grid-row: 1 / span 2;
-            font-size: .85rem;
-        }
-
-        .nc-fare-chevron {
-            grid-column: 3;
-            grid-row: 1 / span 2;
+            font-size: 0.95rem;
         }
 
         .nc-fare-row {
-            padding: 20px 12px;
+            padding: 16px;
+        }
+
+        .nc-fare-label {
+            font-size: 0.95rem;
+        }
+
+        .nc-fare-amount strong {
+            font-size: 1.35rem;
         }
     }
 </style>
 @php $fareAccommodations = $package->tourPackageAccommodations->where('is_active', true); @endphp
 @foreach ($fareAccommodations as $accommodation)
     @if ($fareAccommodations->count() > 1)
-        <h3 class="mb-3">{{ $accommodation->name }}</h3>
+        <h3 class="mb-3" style="font-family: 'Playfair Display', serif; color: var(--primary-navy, #1c325c);">
+            {{ $accommodation->name }}</h3>
     @endif
     @foreach ($accommodation->seasons->where('is_active', true)->values() as $seasonIndex => $season)
         @php
             $fareItems = $season->items->where('is_active', true)->filter(fn($item) => (float) $item->price > 0);
             $fareSymbol = $season->currency?->symbol ?: $currencySymbol ?? ($package->currency?->symbol ?? '$');
             $fareCode = $season->currency?->code ?: ($package->currency?->code ?: 'USD');
+            $seasonPeriod = $season->period;
+            if (empty($seasonPeriod)) {
+                if ($season->date_from && $season->date_to) {
+                    $seasonPeriod =
+                        $season->date_from->format('F') . ' ' . __('to') . ' ' . $season->date_to->format('F');
+                } else {
+                    $seasonPeriod = $seasonIndex % 2 === 0 ? __('May to August') : __('September to April');
+                }
+            }
         @endphp
         @if ($fareItems->isNotEmpty())
             <details class="nc-fare-card" {{ $seasonIndex < 2 ? 'open' : '' }}>
                 <summary>
                     <span class="nc-fare-duration">{{ $season->display_season_name }}</span>
-                    <span
-                        class="nc-fare-period">{{ $season->period ?: trim(($season->date_from?->format('M d') ?? '') . ' – ' . ($season->date_to?->format('M d') ?? ''), ' –') }}</span>
-                    <span class="nc-fare-from">{{ __('From') }}: {{ $fareSymbol }}{{ number_format((float) $fareItems->min('price'), 0) }}</span>
-                    <i class="la la-chevron-down nc-fare-chevron" aria-hidden="true"></i>
+                    <span class="nc-fare-period">{{ $seasonPeriod }}</span>
+                    <div class="nc-fare-right">
+                        <span class="nc-fare-from">{{ __('From') }}: {{ $fareSymbol }}{{ number_format((float) $fareItems->min('price'), 0) }}</span>
+                        <svg class="nc-fare-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
                 </summary>
                 @foreach ($fareItems as $item)
                     @php
@@ -160,15 +219,25 @@
                             'double' => __('per adult in a double share cabin'),
                             'single' => __('per adult in a single share cabin'),
                         ];
+                        $label =
+                            $cabinLabels[strtolower((string) $item->occupancy_type)] ??
+                            str_ireplace(
+                                'Room',
+                                'Cabin',
+                                $item->display_label ?: ucfirst((string) $item->occupancy_type),
+                            );
+                        $note =
+                            $cabinNotes[strtolower((string) $item->occupancy_type)] ??
+                            ($item->price_unit === 'per_person' ? __('per person') : __($item->price_unit));
                     @endphp
                     <div class="nc-fare-row">
-                        <span
-                            class="nc-fare-label">{{ $cabinLabels[$item->occupancy_type] ?? $item->display_label }}</span>
+                        <span class="nc-fare-label">{{ $label }}</span>
                         <div class="nc-fare-amount">
-                            <span class="nc-fare-currency">{{ $fareCode }}</span>
-                            <strong>{{ $fareSymbol }}{{ number_format((float) $item->price, 0) }}</strong>
-                            <small
-                                class="nc-fare-note">{{ $item->price_unit === 'per_person' ? $cabinNotes[$item->occupancy_type] ?? __('per person') : __($item->price_unit) }}</small>
+                            <div class="nc-fare-price-line">
+                                <span class="nc-fare-currency">{{ $fareCode }}</span>
+                                <strong>{{ $fareSymbol }}{{ number_format((float) $item->price, 0) }}</strong>
+                            </div>
+                            <small class="nc-fare-note">{{ $note }}</small>
                         </div>
                     </div>
                 @endforeach

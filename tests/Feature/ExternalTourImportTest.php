@@ -422,6 +422,41 @@ HTML;
         $this->assertSame(5, $package->nileCruiseDurations()->where('days', 5)->first()->itineraryDays()->count());
     }
 
+    public function test_cruise_import_preserves_tour_section_and_site_subtitles(): void
+    {
+        $html = str_replace(
+            '<div class="day-content"><p>Explore Luxor on Wednesday.</p><div class="meals-list">Breakfast Lunch</div></div>',
+            '<div class="day-content">'
+                . '<p>Embarkation on board before lunch.</p>'
+                . '<div class="tour-section"><h4 class="tour-title">Afternoon Tour</h4>'
+                . '<div class="site-highlight"><h5 class="site-name">High Dam</h5><p class="day-description">Panoramic views of Lake Nasser.</p></div>'
+                . '<div class="site-highlight"><h5 class="site-name">Philae Temple</h5><p class="day-description">Reach the temple by motorboat.</p></div>'
+                . '</div><p>Dinner and overnight on board in Aswan.</p>'
+                . '<div class="meals-list">Breakfast Lunch</div></div>',
+            $this->getCruiseProgramsHtml()
+        );
+        $this->fakeHttpResponses($html);
+
+        $package = app(ExternalTourImportService::class)->import(
+            'https://www.luxorandaswan.com/Egypt/cruise/structured-itinerary',
+            ['rewrite' => false, 'download_images' => false]
+        )['package'];
+
+        $day = $package->nileCruiseDurations->first()->itineraryDays->first();
+        $this->assertSame("Embarkation on board before lunch.\n\nDinner and overnight on board in Aswan.", $day->display_description);
+        $this->assertCount(2, $day->activities);
+        $this->assertSame('Afternoon Tour', $day->activities[0]->display_section_title);
+        $this->assertSame('High Dam', $day->activities[0]->display_title);
+        $this->assertSame('Panoramic views of Lake Nasser.', $day->activities[0]->display_description);
+
+        $view = view('website.pages.packages.partials.nile_cruise.itinerary', [
+            'package' => $package->fresh(), 'title' => 'Test Nile Cruise',
+        ])->render();
+        $this->assertStringContainsString('Afternoon Tour', $view);
+        $this->assertStringContainsString('High Dam', $view);
+        $this->assertStringContainsString('Philae Temple', $view);
+    }
+
     public function test_same_length_cruise_programs_keep_both_directions(): void
     {
         $html = str_replace(

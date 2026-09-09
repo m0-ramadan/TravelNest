@@ -429,13 +429,17 @@ class NileCruisePackageService
 
                 $activityTitle = trim((string) ($activityData['title'] ?? ''));
                 $activityDescription = trim((string) ($activityData['description'] ?? ''));
+                $sectionTitle = trim((string) ($activityData['section_title'] ?? ''));
+                $sectionDescription = trim((string) ($activityData['section_description'] ?? ''));
                 $attractionId = $this->nullableInt($activityData['attraction_id'] ?? null);
 
-                if ($activityTitle === '' && $activityDescription === '' && $attractionId === null) {
+                if ($activityTitle === '' && $activityDescription === '' && $sectionTitle === '' && $attractionId === null) {
                     continue;
                 }
 
                 $day->activities()->create([
+                    'section_title' => $this->translated($sectionTitle),
+                    'section_description' => $this->translated($sectionDescription),
                     'title' => $this->translated($activityTitle),
                     'description' => $this->translated($activityDescription),
                     'attraction_id' => $attractionId,
