@@ -331,6 +331,16 @@ class TripController extends BaseWebsiteController
         $travelPackageMatrix = $package->package_type === 'travel_package'
             ? $bookingService->getTravelPackageMatrix($package)
             : null;
+        $travelPackageInitialPrice = null;
+        if ($travelPackageMatrix) {
+            $defaultAccommodation = $travelPackageMatrix['accommodations'][0]['name'] ?? null;
+            $defaultSeason = now()->month >= 5 && now()->month <= 8 ? 'summer' : 'winter';
+            $defaultRates = $defaultAccommodation
+                ? ($travelPackageMatrix['matrix'][$defaultAccommodation][$defaultSeason] ?? [])
+                : [];
+            $calculatedInitialPrice = $bookingService->calculateRoomPrice($defaultRates, 2, 0);
+            $travelPackageInitialPrice = $calculatedInitialPrice > 0 ? $calculatedInitialPrice : null;
+        }
 
         $countries = \App\Support\CountryList::all();
 
@@ -402,7 +412,8 @@ class TripController extends BaseWebsiteController
             'isDayTour',
             'hasBookablePrice',
             'bookingPricingOptions',
-            'travelPackageMatrix'
+            'travelPackageMatrix',
+            'travelPackageInitialPrice'
         ));
     }
 

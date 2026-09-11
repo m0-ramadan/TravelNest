@@ -9,6 +9,7 @@ use App\Models\NileCruiseDuration;
 use App\Models\NileCruiseSeasonPrice;
 use App\Models\NileCruiseSeasonPriceItem;
 use App\Models\Package;
+use App\Models\PackagePrice;
 use App\Models\PaymentMethod;
 use App\Models\TourPackageAccommodation;
 use App\Models\TourPackagePriceItem;
@@ -67,6 +68,58 @@ class WebsiteCheckoutTest extends TestCase
             ->assertDontSee('name="nationality"', false);
 
         $this->assertMatchesRegularExpression('/value="category"\s+checked/', $response->getContent());
+    }
+
+    public function test_day_tour_shows_group_pricing_cards_without_the_legacy_price_table(): void
+    {
+        $package = $this->package([
+            'package_type' => 'day_tour',
+            'price_from' => 75,
+        ]);
+
+        PackagePrice::create([
+            'package_id' => $package->id,
+            'label' => ['en' => 'Legacy Solo Price'],
+            'price_type' => 'per_person',
+            'amount' => 358,
+        ]);
+
+        $response = $this->get(route('website.packages.show.simple', $package->slug));
+
+        $response
+            ->assertOk()
+            ->assertSee('Solo Traveler')
+            ->assertSee('group-pricing-grid', false)
+            ->assertSee('From $62.00')
+            ->assertSee('value="group:0"', false)
+            ->assertDontSee('price-box pricing-options', false)
+            ->assertDontSee('Legacy Solo Price');
+
+        $bookingService = app(PackageBookingService::class);
+        $options = $bookingService->pricingOptions($package->fresh());
+
+        $this->assertSame(
+            ['group:0', 'group:1', 'group:2', 'group:3', 'group:4', 'group:5'],
+            $options->pluck('id')->all(),
+        );
+        $this->assertSame(98.0, $bookingService->quote(
+            $package->fresh(),
+            'group:0',
+            now()->addMonth(),
+            1,
+            0,
+            0,
+            1,
+        )['total']);
+        $this->assertSame(150.0, $bookingService->quote(
+            $package->fresh(),
+            'group:1',
+            now()->addMonth(),
+            2,
+            0,
+            0,
+            1,
+        )['total']);
     }
 
     public function test_day_tour_booking_calendar_receives_the_configured_operating_days(): void

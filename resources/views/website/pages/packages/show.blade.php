@@ -3328,6 +3328,23 @@
                 'amount' => number_format($firstBookableOption['amount'], 2),
             ]);
         }
+        if ($package->package_type === 'travel_package' && ($travelPackageInitialPrice ?? 0) > 0) {
+            $priceText = __('trips.from_price', [
+                'currency' => $currencySymbol,
+                'amount' => number_format($travelPackageInitialPrice, 2),
+            ]);
+        }
+
+        $dayTourGroupOptions = $package->package_type === 'day_tour'
+            ? $bookingPricingOptions->where('source', 'group_tier')
+            : collect();
+        if ($dayTourGroupOptions->isNotEmpty()) {
+            $lowestGroupOption = $dayTourGroupOptions->sortBy('amount')->first();
+            $priceText = __('trips.from_price', [
+                'currency' => $lowestGroupOption['currency_symbol'],
+                'amount' => number_format($lowestGroupOption['amount'], 2),
+            ]);
+        }
     @endphp
 
     <section class="breadcrumb-top-bar">
@@ -4074,10 +4091,13 @@
                     @include('website.pages.packages.partials.common_experience_details')
                     @php
                         $groupTiersForDisplay = collect(
-                            $package->package_type === 'nile_cruise'
+                            in_array($package->package_type, ['nile_cruise', 'travel_package'], true)
                                 ? []
                                 : (array) ($package->group_pricing_tiers ?? []),
                         )->filter(fn($tier) => is_array($tier) && (float) ($tier['price_per_person'] ?? 0) > 0);
+                        if ($package->package_type === 'day_tour' && $dayTourGroupOptions->isEmpty()) {
+                            $groupTiersForDisplay = collect();
+                        }
                         $hasAccommodations =
                             $package->tourPackageAccommodations && $package->tourPackageAccommodations->isNotEmpty();
                         $hasAnyStandardPricing =
@@ -4388,7 +4408,7 @@
                                 </div>
                             @endif
 
-                            @if ($prices->count())
+                            @if ($package->package_type !== 'day_tour' && $prices->count())
                                 <div class="price-box pricing-options">
                                     <div class="price-table-wrap">
                                         <table class="price-table">
@@ -4669,7 +4689,8 @@
                                     {{ __('Fill out the form and our travel team will get back to you shortly.') }}</p>
                             @endif
                             @if ($priceText)
-                                <div class="sidebar-price"><span class="item">{{ $priceText }}</span></div>
+                                <div class="sidebar-price"><span class="item" id="sidebarDynamicPrice"
+                                        data-from-label="{{ __('From') }}">{{ $priceText }}</span></div>
                             @else
                                 <div class="sidebar-price"><span class="item">{{ __('Ask for Price') }}</span></div>
                             @endif
@@ -5354,6 +5375,7 @@
                 const displayTotal = document.getElementById('tp_displayTotal');
                 const displayDeposit = document.getElementById('tp_displayDeposit');
                 const displayBalance = document.getElementById('tp_displayBalance');
+                const dynamicSidebarPrice = document.getElementById('sidebarDynamicPrice');
 
                 function getSelectedSeason() {
                     const val = travelDateInput ? travelDateInput.value : '';
@@ -5528,6 +5550,15 @@
                     if (totalPkgPrice > 0) {
                         const deposit = totalPkgPrice * 0.5;
                         const balance = totalPkgPrice - deposit;
+
+                        if (dynamicSidebarPrice) {
+                            const formattedTotal = totalPkgPrice.toLocaleString('en-US', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+                            dynamicSidebarPrice.textContent =
+                                `${dynamicSidebarPrice.dataset.fromLabel} ${currencySymbol}${formattedTotal}`;
+                        }
 
                         if (displayTotal) {
                             displayTotal.textContent =

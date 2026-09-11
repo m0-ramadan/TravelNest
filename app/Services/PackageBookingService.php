@@ -41,6 +41,16 @@ class PackageBookingService
         $date = $travelDate ? Carbon::parse($travelDate)->startOfDay() : null;
         $options = collect();
 
+        // Group-size tiers are the canonical day-tour price source. Keeping
+        // legacy package_prices/category rows in the same list can make the
+        // booking widget select a stale price that conflicts with the cards.
+        if (
+            $package->package_type === 'day_tour'
+            && ($this->hasExplicitGroupPricing($package) || $this->hasDayTourStartingPrice($package))
+        ) {
+            return $this->groupPricingOptions($package);
+        }
+
         if ($package->package_type === 'nile_cruise') {
             foreach ($package->nileCruiseDurations->where('is_active', true) as $duration) {
                 foreach ($duration->seasonPrices->where('is_active', true) as $season) {
@@ -160,46 +170,8 @@ class PackageBookingService
             ]);
         }
 
-        $rawTiers = $package->getRawOriginal('group_pricing_tiers');
-        $hasExplicitTiers = is_array($rawTiers)
-            ? $rawTiers !== []
-            : trim((string) $rawTiers) !== '' && trim((string) $rawTiers) !== '[]';
-        $hasExplicitTierColumns = collect([
-            $package->price_1_person,
-            $package->price_2_persons,
-            $package->price_3_persons,
-            $package->price_4_persons,
-            $package->price_5_persons,
-            $package->price_6_plus_persons,
-        ])->contains(fn($value) => $value !== null && (float) $value > 0);
-
-        if ($hasExplicitTiers || $hasExplicitTierColumns) {
-            foreach ($package->group_pricing_tiers as $index => $tier) {
-                if (! is_array($tier) || (float) ($tier['price_per_person'] ?? 0) <= 0) {
-                    continue;
-                }
-
-                $options->push([
-                    'id' => 'group:' . $index,
-                    'source' => 'group_tier',
-                    'source_id' => null,
-                    'label' => (string) ($tier['title'] ?? __('Group Price')),
-                    'description' => (string) ($tier['persons_label'] ?? ''),
-                    'amount' => (float) $tier['price_per_person'],
-                    'price_unit' => 'per_adult',
-                    'currency_code' => strtoupper((string) ($package->currency?->code ?: 'USD')),
-                    'currency_symbol' => (string) ($package->currency?->symbol ?: '$'),
-                    'occupancy_type' => null,
-                    'cabin_id' => null,
-                    'available_rooms' => null,
-                    'max_adults_per_room' => null,
-                    'max_children_per_room' => null,
-                    'pax_min' => (int) ($tier['min'] ?? $tier['persons_count'] ?? 1),
-                    'pax_max' => isset($tier['max']) ? (int) $tier['max'] : null,
-                    'valid_from' => null,
-                    'valid_to' => null,
-                ]);
-            }
+        if ($this->hasExplicitGroupPricing($package)) {
+            $options = $options->concat($this->groupPricingOptions($package));
         }
 
         if ((float) ($package->adult_price ?? 0) > 0) {
@@ -249,6 +221,76 @@ class PackageBookingService
         }
 
         return $options->unique('id')->values();
+    }
+
+    private function hasExplicitGroupPricing(Package $package): bool
+    {
+        $rawTiers = $package->getRawOriginal('group_pricing_tiers');
+        $hasExplicitTiers = is_array($rawTiers)
+            ? $rawTiers !== []
+            : trim((string) $rawTiers) !== '' && trim((string) $rawTiers) !== '[]';
+
+        $hasExplicitTierColumns = collect([
+            $package->price_1_person,
+            $package->price_2_persons,
+            $package->price_3_persons,
+            $package->price_4_persons,
+            $package->price_5_persons,
+            $package->price_6_plus_persons,
+        ])->contains(fn($value) => $value !== null && (float) $value > 0);
+
+        if (! $hasExplicitTiers && ! $hasExplicitTierColumns) {
+            return false;
+        }
+
+        return collect($package->group_pricing_tiers)
+            ->contains(fn($tier) => is_array($tier) && (float) ($tier['price_per_person'] ?? 0) > 0);
+    }
+
+    private function hasDayTourStartingPrice(Package $package): bool
+    {
+        return (float) ($package->price_from ?: $package->start_from_price) > 0;
+    }
+
+    private function groupPricingOptions(Package $package): Collection
+    {
+        $roundGeneratedDayTourPrices = $package->package_type === 'day_tour'
+            && ! $this->hasExplicitGroupPricing($package);
+
+        return collect($package->group_pricing_tiers)
+            ->map(function ($tier, $index) use ($package, $roundGeneratedDayTourPrices) {
+                if (! is_array($tier) || (float) ($tier['price_per_person'] ?? 0) <= 0) {
+                    return null;
+                }
+
+                $amount = (float) $tier['price_per_person'];
+                if ($roundGeneratedDayTourPrices) {
+                    $amount = round($amount);
+                }
+
+                return [
+                    'id' => 'group:' . $index,
+                    'source' => 'group_tier',
+                    'source_id' => null,
+                    'label' => (string) ($tier['title'] ?? __('Group Price')),
+                    'description' => (string) ($tier['persons_label'] ?? ''),
+                    'amount' => $amount,
+                    'price_unit' => 'per_person',
+                    'currency_code' => strtoupper((string) ($package->currency?->code ?: 'USD')),
+                    'currency_symbol' => (string) ($package->currency?->symbol ?: '$'),
+                    'occupancy_type' => null,
+                    'cabin_id' => null,
+                    'available_rooms' => null,
+                    'max_adults_per_room' => null,
+                    'max_children_per_room' => null,
+                    'pax_min' => (int) ($tier['min'] ?? $tier['persons_count'] ?? 1),
+                    'pax_max' => isset($tier['max']) ? (int) $tier['max'] : null,
+                    'valid_from' => null,
+                    'valid_to' => null,
+                ];
+            })
+            ->filter()
+            ->values();
     }
 
     public function quote(
