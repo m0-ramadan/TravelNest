@@ -29,7 +29,7 @@ class WebsiteDestinationService
                     ->with('country')
                     ->withCount(['attractions', 'packages'])
                     ->where('is_active', true)
-                    ->orderByDesc('is_featured')
+                    ->where('is_featured', true)
                     ->orderBy('sort_order')
                     ->limit($limit)
                     ->get()

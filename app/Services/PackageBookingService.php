@@ -27,6 +27,7 @@ class PackageBookingService
                 'tourPackageAccommodations.hotels',
                 'tourPackageAccommodations.seasons.currency',
                 'tourPackageAccommodations.seasons.items',
+                'addons.currency',
             ])
             ->firstOrFail();
     }
@@ -34,6 +35,62 @@ class PackageBookingService
     public function hasBookablePrice(Package $package): bool
     {
         return $package->package_type !== 'nile_cruise' && $this->pricingOptions($package)->isNotEmpty();
+    }
+
+    public function activeAddons(Package $package): Collection
+    {
+        return $package->addons
+            ->where('is_active', true)
+            ->filter(fn ($addon) => (float) $addon->price > 0)
+            ->map(function ($addon) use ($package) {
+                $currency = $addon->currency ?: $package->currency;
+
+                return [
+                    'id' => (int) $addon->id,
+                    'title' => (string) $addon->title,
+                    'description' => (string) ($addon->description ?? ''),
+                    'amount' => (float) $addon->price,
+                    'price_unit' => $this->normalizeAddonPriceUnit($addon->price_unit),
+                    'price_unit_label' => $addon->price_unit ?: __('per booking'),
+                    'currency_code' => strtoupper((string) ($currency?->code ?: $package->currency?->code ?: 'USD')),
+                    'currency_symbol' => (string) ($currency?->symbol ?: $package->currency?->symbol ?: '$'),
+                ];
+            })
+            ->values();
+    }
+
+    public function quoteAddons(Package $package, array $addonIds, int $adults, int $children, int $rooms): Collection
+    {
+        $ids = collect($addonIds)
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($ids->isEmpty()) {
+            return collect();
+        }
+
+        $addons = $this->activeAddons($package)->whereIn('id', $ids)->values();
+        if ($addons->count() !== $ids->count()) {
+            throw ValidationException::withMessages([
+                'addon_ids' => __('One of the selected add-ons is no longer available.'),
+            ]);
+        }
+
+        return $addons->map(function (array $addon) use ($adults, $children, $rooms) {
+            $quantity = match ($addon['price_unit']) {
+                'per_person' => max(1, $adults + $children),
+                'per_adult' => max(1, $adults),
+                'per_room' => max(1, $rooms),
+                default => 1,
+            };
+
+            return $addon + [
+                'quantity' => $quantity,
+                'total' => round((float) $addon['amount'] * $quantity, 2),
+            ];
+        });
     }
 
     public function pricingOptions(Package $package, CarbonInterface|string|null $travelDate = null): Collection
@@ -45,7 +102,7 @@ class PackageBookingService
         // legacy package_prices/category rows in the same list can make the
         // booking widget select a stale price that conflicts with the cards.
         if (
-            $package->package_type === 'day_tour'
+            in_array($package->package_type, ['day_tour', 'shore_excursion'], true)
             && ($this->hasExplicitGroupPricing($package) || $this->hasDayTourStartingPrice($package))
         ) {
             return $this->groupPricingOptions($package);
@@ -254,7 +311,7 @@ class PackageBookingService
 
     private function groupPricingOptions(Package $package): Collection
     {
-        $roundGeneratedDayTourPrices = $package->package_type === 'day_tour'
+        $roundGeneratedDayTourPrices = in_array($package->package_type, ['day_tour', 'shore_excursion'], true)
             && ! $this->hasExplicitGroupPricing($package);
 
         return collect($package->group_pricing_tiers)
@@ -404,7 +461,7 @@ class PackageBookingService
      */
     public function validateOperatingDay(Package $package, CarbonInterface|string $travelDate): void
     {
-        if ($package->package_type !== 'day_tour') {
+        if (! in_array($package->package_type, ['day_tour', 'shore_excursion'], true)) {
             return;
         }
 
@@ -834,5 +891,17 @@ class PackageBookingService
             'valid_from' => null,
             'valid_to' => null,
         ];
+    }
+
+    private function normalizeAddonPriceUnit(?string $unit): string
+    {
+        $normalized = str_replace(['-', ' '], '_', strtolower(trim((string) $unit)));
+
+        return match ($normalized) {
+            'per_person', 'person', 'per_traveler', 'traveler', 'per_guest', 'guest' => 'per_person',
+            'per_adult', 'adult' => 'per_adult',
+            'per_room', 'room' => 'per_room',
+            default => 'per_booking',
+        };
     }
 }

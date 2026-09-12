@@ -80,6 +80,7 @@ class CheckoutController extends BaseWebsiteController
             'heroImage' => $package->image_url,
             'durationText' => $this->packageDuration($package),
             'pricingOptions' => $bookingService->pricingOptions($package),
+            'activeAddons' => $bookingService->activeAddons($package),
             'paymentMethods' => $bookingService->paymentMethods($package),
             'isTravelPackage' => $isTravelPackage,
             'travelPackageQuote' => $travelPackageQuote,
@@ -140,6 +141,8 @@ class CheckoutController extends BaseWebsiteController
             'travelers.*.title' => ['required', Rule::in(['Mr', 'Mrs', 'Ms', 'Miss', 'Dr'])],
             'travelers.*.first_name' => ['required', 'string', 'max:120'],
             'travelers.*.last_name' => ['required', 'string', 'max:120'],
+            'addon_ids' => ['nullable', 'array'],
+            'addon_ids.*' => ['integer'],
             'payment_method' => ['required', Rule::in($providers)],
             'terms' => ['accepted'],
         ]);
@@ -175,12 +178,22 @@ class CheckoutController extends BaseWebsiteController
             $request->input('accommodation')
         );
 
+        $addonQuotes = $bookingService->quoteAddons(
+            $package,
+            $data['addon_ids'] ?? [],
+            (int) $data['adults'],
+            (int) $data['children'],
+            (int) $data['rooms']
+        );
+        $addonsTotal = round((float) $addonQuotes->sum('total'), 2);
+        $grandTotal = round((float) $quote['total'] + $addonsTotal, 2);
+
         $selectedMethod = $availableMethods->firstWhere('provider', $data['payment_method']);
         if (! $selectedMethod) {
             throw ValidationException::withMessages(['payment_method' => __('The selected payment method is unavailable.')]);
         }
 
-        $booking = DB::transaction(function () use ($data, $package, $quote): Booking {
+        $booking = DB::transaction(function () use ($data, $package, $quote, $addonQuotes, $addonsTotal, $grandTotal): Booking {
             $lead = $data['travelers'][0];
             $client = Client::query()->firstOrNew(['email' => strtolower($data['email'])]);
             $client->fill([
@@ -201,7 +214,7 @@ class CheckoutController extends BaseWebsiteController
                 'package_id' => $package->id,
                 'booking_number' => $bookingNumber,
                 'status' => 'pending',
-                'total_amount' => $quote['total'],
+                'total_amount' => $grandTotal,
                 'paid_amount' => 0,
                 'currency_code' => $quote['currency_code'],
                 'payment_status' => 'unpaid',
@@ -217,6 +230,10 @@ class CheckoutController extends BaseWebsiteController
                     'option_label' => $quote['label'],
                     'rooms' => $quote['rooms'],
                     'room_breakdown' => $quote['room_breakdown'] ?? null,
+                    'base_total' => $quote['total'],
+                    'addons_total' => $addonsTotal,
+                    'selected_addons' => $addonQuotes->values()->all(),
+                    'grand_total' => $grandTotal,
                     'deposit_amount' => $quote['deposit_amount'] ?? null,
                     'remaining_balance' => $quote['remaining_balance'] ?? null,
                     'payment_provider' => $data['payment_method'],
@@ -258,6 +275,26 @@ class CheckoutController extends BaseWebsiteController
                     'remaining_balance' => $quote['remaining_balance'] ?? null,
                 ],
             ]);
+
+            foreach ($addonQuotes as $addonQuote) {
+                $booking->items()->create([
+                    'pricing_source' => 'package_addon',
+                    'source_id' => $addonQuote['id'],
+                    'cabin_id' => null,
+                    'option_label' => $addonQuote['title'],
+                    'occupancy_type' => null,
+                    'unit_price' => $addonQuote['amount'],
+                    'quantity' => $addonQuote['quantity'],
+                    'room_count' => 1,
+                    'total_amount' => $addonQuote['total'],
+                    'meta' => [
+                        'description' => $addonQuote['description'] ?? null,
+                        'price_unit' => $addonQuote['price_unit'],
+                        'currency_code' => $addonQuote['currency_code'],
+                        'currency_symbol' => $addonQuote['currency_symbol'],
+                    ],
+                ]);
+            }
 
             return $booking->fresh(['client', 'package', 'items', 'travelers']);
         }, 3);

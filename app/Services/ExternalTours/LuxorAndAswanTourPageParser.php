@@ -85,6 +85,7 @@ class LuxorAndAswanTourPageParser
 
             'pricing' => $pricingData,
             'accommodations' => $pricingData['accommodations'] ?? [],
+            'addons' => [],
             'start_from_price' => $pricingData['min_price'],
             'price_from' => $pricingData['min_price'],
             'price_to' => $pricingData['max_price'],
@@ -98,10 +99,282 @@ class LuxorAndAswanTourPageParser
             'images' => $images,
         ];
 
+        if (str_ends_with(strtolower($sourceHost), 'ramassidetours.com')) {
+            $facts = $this->applyRamassideOverrides($facts, $crawler);
+        }
+
         $facts['package_type'] = $this->detectPackageType($facts);
         $facts['warnings'] = $this->detectConflicts($facts, $crawler);
 
         return $facts;
+    }
+
+    /**
+     * Ramasside exposes shore-excursion facts in content cards and a small
+     * JavaScript pricing object rather than the legacy selectors above.
+     */
+    protected function applyRamassideOverrides(array $facts, Crawler $crawler): array
+    {
+        $bodyText = trim(preg_replace('/\s+/', ' ', $crawler->filter('body')->text('')));
+        $overviewParagraphs = [];
+        $included = [];
+        $excluded = [];
+        $highlights = [];
+
+        foreach ($crawler->filter('.content-card') as $cardNode) {
+            $card = new Crawler($cardNode);
+            $heading = strtolower(trim($card->filter('h3')->first()->text('')));
+            $content = $card->filter('.tour-text')->first();
+
+            if (str_contains($heading, 'tour highlights')) {
+                foreach ($content->filter('p') as $node) {
+                    $text = $this->cleanRamassideText($node->textContent);
+                    if ($text !== '') {
+                        $highlights[] = [
+                            'title' => Str::limit($text, 120, '...'),
+                            'description' => $text,
+                            'sort_order' => count($highlights) + 1,
+                        ];
+                    }
+                }
+                continue;
+            }
+
+            if (!str_contains($heading, 'tour overview')) {
+                continue;
+            }
+
+            $section = 'overview';
+            $contentNode = $content->getNode(0);
+            foreach ($contentNode?->childNodes ?? [] as $child) {
+                if (!$child instanceof \DOMElement) {
+                    continue;
+                }
+
+                if (strtolower($child->tagName) === 'h3') {
+                    $sectionHeading = strtolower(trim($child->textContent));
+                    $section = match (true) {
+                        str_contains($sectionHeading, 'include') => 'included',
+                        str_contains($sectionHeading, 'exclude') => 'excluded',
+                        str_contains($sectionHeading, 'trip notes') => 'notes',
+                        default => 'other',
+                    };
+                    continue;
+                }
+
+                if (strtolower($child->tagName) !== 'p') {
+                    continue;
+                }
+
+                $text = $this->cleanRamassideText($child->textContent);
+                if ($text === '') {
+                    continue;
+                }
+
+                if ($section === 'overview') {
+                    $overviewParagraphs[] = $text;
+                } elseif (in_array($section, ['included', 'excluded'], true)) {
+                    $item = [
+                        'type' => $section,
+                        'item_type' => $section,
+                        'title' => Str::limit($text, 100, '...'),
+                        'content' => $text,
+                        'description' => $text,
+                        'sort_order' => $section === 'included' ? count($included) + 1 : count($excluded) + 1,
+                    ];
+                    if ($section === 'included') {
+                        $included[] = $item;
+                    } else {
+                        $excluded[] = $item;
+                    }
+                }
+            }
+        }
+
+        if (preg_match('/Approx\.?\s*(\d+)(?:\s*[-–]\s*(\d+))?\s*hours?/i', $bodyText, $duration)) {
+            $facts['duration_days'] = 1;
+            $facts['duration_nights'] = 0;
+            $facts['duration_text'] = 'Approx. ' . $duration[1]
+                . (!empty($duration[2]) ? '-' . $duration[2] : '') . ' hours';
+        }
+
+        $port = null;
+        if (preg_match('/from\s+([A-Za-z ]+?\s+Port)\b/i', $facts['title'], $portMatch)) {
+            $port = trim($portMatch[1]);
+        }
+
+        $cities = [];
+        foreach (['Safaga', 'Alexandria', 'Port Said', 'Ain Sokhna', 'Luxor', 'Cairo', 'Giza', 'Hurghada'] as $city) {
+            if (stripos($facts['title'] . ' ' . implode(' ', $overviewParagraphs), $city) !== false) {
+                $cities[] = $city === 'Giza' ? 'Cairo' : $city;
+            }
+        }
+        $cities = array_values(array_unique($cities));
+
+        $tiers = $this->extractRamassideGroupPricing($crawler);
+        $tierPrices = array_column($tiers, 'price_per_person');
+
+        $description = implode("\n\n", $overviewParagraphs);
+        if ($description !== '') {
+            $facts['description'] = $description;
+            $facts['short_description'] = $overviewParagraphs[0] ?? $facts['short_description'];
+            $facts['itinerary'] = [[
+                'program' => null,
+                'day_number' => 1,
+                'title' => 'Cruise Port Shore Excursion',
+                'description' => $description,
+                'meals' => stripos($description, 'lunch') !== false ? ['lunch'] : [],
+                'meals_breakfast' => false,
+                'meals_lunch' => stripos($description, 'lunch') !== false,
+                'meals_dinner' => false,
+                'overnight_location' => '',
+                'accommodation' => '',
+                'transport_notes' => 'Air-conditioned vehicle from and back to the cruise port',
+                'activities' => [],
+                'sort_order' => 1,
+            ]];
+        }
+
+        if ($highlights !== []) {
+            $facts['highlights'] = $highlights;
+        }
+        if ($included !== []) {
+            $facts['inclusions'] = $included;
+        }
+        if ($excluded !== []) {
+            $facts['exclusions'] = $excluded;
+        }
+        if ($cities !== []) {
+            $facts['cities'] = $cities;
+            $facts['primary_city'] = $cities[0];
+            $facts['route_text'] = implode(' - ', $cities);
+        }
+        if ($port) {
+            $facts['pickup_location'] = $port;
+            $facts['dropoff_location'] = $port;
+        }
+        $facts['schedule_text'] = stripos($bodyText, 'Everyday') !== false ? 'Everyday' : $facts['schedule_text'];
+        $facts['tour_type'] = stripos($bodyText, 'small group') !== false ? 'shared' : 'private';
+        $facts['breadcrumbs'][] = 'Shore Excursions';
+        $facts['group_pricing_tiers'] = $tiers;
+        $facts['addons'] = $this->extractRamassideAddons($crawler);
+        $facts['pricing']['accommodations'] = [];
+        $facts['accommodations'] = [];
+
+        if ($tierPrices !== []) {
+            $facts['start_from_price'] = min($tierPrices);
+            $facts['price_from'] = min($tierPrices);
+            $facts['price_to'] = max($tierPrices);
+            $facts['adult_price'] = min($tierPrices);
+        }
+
+        if (preg_match('/Children Policy\s*(.+?)(?=Payment Policy|Cancellation Policy|Booking Policy|$)/i', $bodyText, $policy)) {
+            $facts['policies']['children_policy'] = trim($policy[1]);
+        }
+
+        return $facts;
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    protected function extractRamassideAddons(Crawler $crawler): array
+    {
+        $addons = [];
+        $seen = [];
+
+        foreach ($crawler->filter('#addonsList .addon-item') as $node) {
+            $item = new Crawler($node);
+            $title = $item->filter('.addon-name')->count()
+                ? $this->cleanRamassideText(html_entity_decode($item->filter('.addon-name')->text(''), ENT_QUOTES | ENT_HTML5))
+                : '';
+            $title = trim($title);
+
+            if (strcasecmp($title, 'Great Pyramid Ticket') === 0) {
+                $title = 'Inside The Great Pyramid Ticket';
+            }
+
+            $price = 0.0;
+            if ($item->filter('input.addon-check')->count()) {
+                $price = (float) $item->filter('input.addon-check')->attr('value');
+            }
+            if ($price <= 0 && $item->filter('.addon-price')->count()) {
+                $rawPrice = $item->filter('.addon-price')->text('');
+                if (preg_match('/([0-9]+(?:\.[0-9]+)?)/', $rawPrice, $match)) {
+                    $price = (float) $match[1];
+                }
+            }
+
+            $key = strtolower($title);
+            if ($title === '' || $price <= 0 || isset($seen[$key])) {
+                continue;
+            }
+
+            $seen[$key] = true;
+            $addons[] = [
+                'title' => $title,
+                'description' => '',
+                'price' => $price,
+                'price_unit' => 'per booking',
+                'is_active' => true,
+                'sort_order' => count($addons),
+            ];
+        }
+
+        return $addons;
+    }
+
+    /** @return array<int, array<string, int|float|string>> */
+    protected function extractRamassideGroupPricing(Crawler $crawler): array
+    {
+        $html = $crawler->html();
+        $plans = [];
+        $basePrice = null;
+
+        if (preg_match('/groupPlans\s*:\s*(\[[^;\n]*\])/i', $html, $match)) {
+            $decoded = json_decode($match[1], true);
+            $plans = is_array($decoded) ? $decoded : [];
+        }
+        if (preg_match('/basePrice\s*:\s*([0-9]+(?:\.[0-9]+)?)/i', $html, $match)) {
+            $basePrice = (float) $match[1];
+        }
+
+        $source = $plans[0] ?? [];
+        $definitions = [
+            ['key' => 'single', 'title' => 'Solo Traveler', 'min' => 1, 'max' => 1],
+            ['key' => 'persons_2_3', 'title' => 'Small Group', 'min' => 2, 'max' => 3],
+            ['key' => 'persons_4_6', 'title' => 'Medium Group', 'min' => 4, 'max' => 6],
+            ['key' => 'persons_7_10', 'title' => 'Large Group', 'min' => 7, 'max' => 10],
+        ];
+        $tiers = [];
+
+        foreach ($definitions as $definition) {
+            $price = (float) ($source[$definition['key']] ?? 0);
+            if ($price <= 0) {
+                continue;
+            }
+            $tiers[] = $definition + [
+                'label' => $definition['title'],
+                'price_per_person' => $price,
+            ];
+        }
+
+        if ($basePrice && $basePrice > 0 && ($tiers === [] || $basePrice < min(array_column($tiers, 'price_per_person')))) {
+            $tiers[] = [
+                'title' => 'Large Group Tour',
+                'label' => 'Large Group Tour',
+                'min' => 11,
+                'max' => 50,
+                'price_per_person' => $basePrice,
+            ];
+        }
+
+        return $tiers;
+    }
+
+    protected function cleanRamassideText(string $text): string
+    {
+        $text = preg_replace('/Ramasside\s+Tours?/i', 'Etro Tours', $text);
+
+        return trim(preg_replace('/\s+/', ' ', $text));
     }
 
     /**
@@ -172,6 +445,7 @@ class LuxorAndAswanTourPageParser
 
     protected function cleanTitle(string $title): string
     {
+        $title = preg_replace('/\s*[|–-]\s*Ramasside\s+Tours?.*$/i', '', $title);
         $clean = preg_replace('/(\s*-\s*|\s*\|\s*|\s*–\s*).*?(luxor\s*and\s*aswan|travel).*$/i', '', $title);
         $clean = preg_replace('/\s+/', ' ', $clean);
         return trim($clean);
@@ -1145,11 +1419,11 @@ class LuxorAndAswanTourPageParser
         $faq = [];
 
         // 1. Check if FAQ exists in HTML
-        $faqItems = $crawler->filter('.faq-item, .faq-card, .accordion-item');
+        $faqItems = $crawler->filter('.faq-item, .faq-card, .accordion-item, .faq-tour-item');
         foreach ($faqItems as $item) {
             $c = new Crawler($item);
-            $q = trim($c->filter('.faq-question, .accordion-header, h4')->text(''));
-            $a = trim($c->filter('.faq-answer, .accordion-body, p')->text(''));
+            $q = trim($c->filter('.faq-question, .accordion-header, .day-title, h4')->text(''));
+            $a = trim($c->filter('.faq-answer, .accordion-body, .day-body, p')->text(''));
             if (!empty($q) && !empty($a)) {
                 $faq[] = ['question' => $q, 'answer' => $a];
             }
@@ -1238,7 +1512,7 @@ class LuxorAndAswanTourPageParser
         }
 
         // 4. Gallery links can be hidden anchors without an <img> element.
-        $galleryNodes = $crawler->filter('[data-fancybox="gallery"], .gallery-btn, a[href*="gallery"]');
+        $galleryNodes = $crawler->filter('[data-fancybox="gallery"], .tour-gallery a.glightbox, a.glightbox[data-gallery="tour-gallery"], .gallery-btn, a[href*="gallery"]');
         $galleryUrls = [];
         foreach ($galleryNodes as $galleryNode) {
             $src = $galleryNode->getAttribute('data-src')
@@ -1391,14 +1665,15 @@ class LuxorAndAswanTourPageParser
             return 'nile_cruise';
         }
 
-        // 2. Day Tour: duration <= 1 or explicitly day tour / excursion
-        if ($durationDays <= 1 || $this->isDayTour($breadcrumbs, $sourceUrl, $title)) {
-            return 'day_tour';
-        }
-
-        // 3. Shore Excursion
+        // 2. Shore excursions must be checked before the generic "excursion"
+        // day-tour rule, otherwise their breadcrumb is misclassified.
         if ($this->isShoreExcursion($breadcrumbs, $sourceUrl, $title)) {
             return 'shore_excursion';
+        }
+
+        // 3. Day Tour: duration <= 1 or explicitly day tour / excursion
+        if ($durationDays <= 1 || $this->isDayTour($breadcrumbs, $sourceUrl, $title)) {
+            return 'day_tour';
         }
 
         // 4. Default to travel_package (multi-day tour packages)

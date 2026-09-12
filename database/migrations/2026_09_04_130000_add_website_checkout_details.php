@@ -38,7 +38,7 @@ return new class extends Migration
         if (! Schema::hasTable('booking_items')) {
             Schema::create('booking_items', function (Blueprint $table) {
                 $table->id();
-                $table->foreignId('booking_id')->unique()->constrained()->cascadeOnDelete();
+                $table->foreignId('booking_id')->constrained()->cascadeOnDelete();
                 $table->string('pricing_source', 40);
                 $table->unsignedBigInteger('source_id')->nullable();
                 $table->foreignId('cabin_id')->nullable()->constrained('nile_cruise_cabins')->nullOnDelete();

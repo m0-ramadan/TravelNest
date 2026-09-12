@@ -55,6 +55,7 @@ class SitemapController extends BaseWebsiteController
             $this->makeUrl(route('website.blogs.index'), null, 'weekly', '0.8'),
             $this->makeUrl(route('website.trips'), null, 'daily', '0.9'),
             $this->makeUrl(route('website.tours.all'), null, 'daily', '0.9'),
+            $this->makeUrl(route('website.shore_excursions.index'), null, 'daily', '0.9'),
             $this->makeUrl(route('website.tailor_made.index'), null, 'monthly', '0.7'),
         ]);
     }
@@ -70,6 +71,7 @@ class SitemapController extends BaseWebsiteController
             'multi-country-tours',
             'search',
             'services',
+            'shore-excursions',
             'tailor-made',
             'tours',
             'trips',

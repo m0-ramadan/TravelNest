@@ -80,6 +80,7 @@ class ExternalTourImportService
                     'pricing_levels_count' => count($parsedData['pricing']['accommodations'] ?? []),
                     'images_discovered_count' => count($parsedData['images'] ?? []),
                     'images_downloaded_count' => 0,
+                    'addons_count' => count($parsedData['addons'] ?? []),
                 ],
             ];
         }
@@ -145,6 +146,7 @@ class ExternalTourImportService
                 'pricing_levels_count' => count($data['pricing']['accommodations'] ?? []),
                 'images_discovered_count' => count($data['images'] ?? []),
                 'images_downloaded_count' => $downloadedCount,
+                'addons_count' => count($data['addons'] ?? []),
             ],
         ];
     }
@@ -298,6 +300,15 @@ class ExternalTourImportService
         // 2. Country
         $defaultCountryCode = (string) config('tour_import.default_country_code', 'EG');
         $country = Country::where('code', $defaultCountryCode)->first();
+        if (!$country) {
+            $country = Country::create([
+                'code' => $defaultCountryCode,
+                'name' => ['en' => $defaultCountryCode === 'EG' ? 'Egypt' : $defaultCountryCode, 'ar' => ''],
+                'slug' => Str::slug($defaultCountryCode === 'EG' ? 'Egypt' : $defaultCountryCode),
+                'is_active' => true,
+                'sort_order' => 9999,
+            ]);
+        }
 
         // 3. Category
         $title = $data['title'] ?? '';
@@ -328,7 +339,14 @@ class ExternalTourImportService
                     'nights' => null,
                 ];
             } else {
-                $warnings[] = "City [{$cityName}] not found in database; skipped pivot association.";
+                $cityModel = $this->createImportedCity($cityName, $country);
+                $allDbCities->push($cityModel);
+                $matchedCities[] = [
+                    'model' => $cityModel,
+                    'stop_order' => $index + 1,
+                    'is_primary' => $index === 0,
+                    'nights' => null,
+                ];
             }
         }
 
@@ -494,6 +512,30 @@ class ExternalTourImportService
         return null;
     }
 
+    protected function createImportedCity(string $name, Country $country): City
+    {
+        $name = trim($name);
+        $baseSlug = Str::slug($name) ?: 'imported-city';
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (City::where('country_id', $country->id)->where('slug', $slug)->exists()) {
+            $slug = "{$baseSlug}-{$counter}";
+            $counter++;
+        }
+
+        return City::create([
+            'country_id' => $country->id,
+            'name' => ['en' => $name, 'ar' => ''],
+            'slug' => $slug,
+            'short_description' => ['en' => '', 'ar' => ''],
+            'description' => ['en' => '', 'ar' => ''],
+            'is_active' => true,
+            'is_featured' => false,
+            'sort_order' => 9999,
+        ]);
+    }
+
     /**
      * Match an attraction name safely against DB attractions.
      */
@@ -621,6 +663,7 @@ class ExternalTourImportService
             'location_summary' => ['en' => $data['route_text'], 'ar' => ''],
 
             'tour_type' => $data['tour_type'],
+            'group_pricing_tiers' => $data['group_pricing_tiers'] ?? [],
 
             'pricing_information' => $data['policies']['pricing_information'] ?? null,
             'children_policy' => $data['policies']['children_policy'] ?? null,
@@ -795,7 +838,31 @@ class ExternalTourImportService
             }
         }
 
-        // 5. Attach Cities pivot
+        // 5. Create optional add-ons imported from the source booking widget.
+        if (array_key_exists('addons', $data)) {
+            $package->addons()->delete();
+
+            foreach ((array) $data['addons'] as $index => $addon) {
+                $title = trim((string) ($addon['title'] ?? ''));
+                $price = (float) ($addon['price'] ?? 0);
+
+                if ($title === '' || $price <= 0) {
+                    continue;
+                }
+
+                $package->addons()->create([
+                    'title' => $title,
+                    'description' => trim((string) ($addon['description'] ?? '')) ?: null,
+                    'price' => $price,
+                    'currency_id' => $taxonomy['currency']?->id,
+                    'price_unit' => $addon['price_unit'] ?? 'per booking',
+                    'is_active' => array_key_exists('is_active', $addon) ? (bool) $addon['is_active'] : true,
+                    'sort_order' => (int) ($addon['sort_order'] ?? $index),
+                ]);
+            }
+        }
+
+        // 6. Attach Cities pivot
         foreach ($taxonomy['cities'] ?? [] as $cityInfo) {
             $package->cities()->attach($cityInfo['model']->id, [
                 'stop_order' => $cityInfo['stop_order'],
@@ -806,13 +873,13 @@ class ExternalTourImportService
             ]);
         }
 
-        // 6. Attach Tags
+        // 7. Attach Tags
         if (!empty($taxonomy['tags'])) {
             $tagIds = array_map(fn($t) => $t->id, $taxonomy['tags']);
             $package->tags()->syncWithoutDetaching($tagIds);
         }
 
-        // 7. Attach Attractions
+        // 8. Attach Attractions
         $seenAttractionIds = [];
         foreach ($taxonomy['attractions'] ?? [] as $attraction) {
             if (in_array($attraction->id, $seenAttractionIds, true)) {

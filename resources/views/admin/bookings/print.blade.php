@@ -83,12 +83,30 @@
             {{ optional($booking->created_at)->translatedFormat('d M Y - h:i A') ?? '-' }}</div>
     </div>
 
-    @if($booking->items->isNotEmpty())
+    @php
+        $addonItems = $booking->items->where('pricing_source', 'package_addon');
+        $mainItems = $booking->items->reject(fn($item) => $item->pricing_source === 'package_addon');
+    @endphp
+
+    @if($mainItems->isNotEmpty())
         <div class="box">
-            @foreach($booking->items as $item)
+            @foreach($mainItems as $item)
                 <div class="row"><span class="label">الإقامة / الكابينة:</span> {{ $item->option_label }}</div>
                 <div class="row"><span class="label">نوع الإشغال:</span> {{ $item->occupancy_type ?: '-' }}</div>
                 <div class="row"><span class="label">عدد الغرف / الكابينات:</span> {{ $item->room_count }}</div>
+            @endforeach
+        </div>
+    @endif
+
+    @if($addonItems->isNotEmpty())
+        <div class="box">
+            <div class="row"><span class="label">Optional Add-ons:</span></div>
+            @foreach($addonItems as $item)
+                <div class="row">
+                    {{ $loop->iteration }}. {{ $item->option_label }}
+                    - {{ $item->quantity }} × {{ number_format((float)$item->unit_price, 2) }}
+                    = {{ number_format((float)$item->total_amount, 2) }} {{ $item->meta['currency_code'] ?? $booking->currency_code }}
+                </div>
             @endforeach
         </div>
     @endif

@@ -407,6 +407,77 @@
             margin-top: 18px
         }
 
+        .checkout-addons {
+            border-top: 1px solid #eadfce;
+            padding-top: 18px;
+        }
+
+        .checkout-addons h3 {
+            color: #1c325c;
+            font-size: 1rem;
+            font-weight: 800;
+            margin: 0 0 12px;
+        }
+
+        .checkout-addons-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .checkout-addon-card {
+            display: grid;
+            grid-template-columns: 22px 1fr auto;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #e4d9cb;
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            background: #fff;
+        }
+
+        .checkout-addon-card input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .checkout-addon-tick {
+            width: 19px;
+            height: 19px;
+            border-radius: 5px;
+            border: 1.5px solid #c8d0dc;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 12px;
+        }
+
+        .checkout-addon-card input:checked+.checkout-addon-tick {
+            background: #c5955b;
+            border-color: #c5955b;
+        }
+
+        .checkout-addon-copy strong {
+            display: block;
+            color: #1c325c;
+            font-size: .88rem;
+        }
+
+        .checkout-addon-copy small {
+            color: #778290;
+            display: block;
+            font-size: .75rem;
+            margin-top: 2px;
+        }
+
+        .checkout-addon-price {
+            color: #bf8339;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
         .total-row {
             display: flex;
             justify-content: space-between;
@@ -562,7 +633,7 @@
                                         id="travel_date" name="travel_date" type="date"
                                         min="{{ today()->toDateString() }}"
                                         value="{{ old('travel_date', request('travel_date')) }}" required></div>
-                                @if ($package->package_type === 'day_tour')
+                                @if (in_array($package->package_type, ['day_tour', 'shore_excursion'], true))
                                     <input id="rooms" name="rooms" type="hidden" value="1">
                                 @else
                                     <div class="checkout-field"><label
@@ -606,6 +677,36 @@
                                     </div>
                                     <div class="checkout-alert field-full" id="noPriceForDate" style="display:none">
                                         {{ __('There is no online booking price for the selected date. Please choose another date or submit an enquiry.') }}
+                                    </div>
+                                @endif
+                                @php
+                                    $checkoutSelectedAddons = collect(old('addon_ids', request('addon_ids', [])))
+                                        ->map(fn($id) => (int) $id)
+                                        ->all();
+                                @endphp
+                                @if ($package->package_type === 'shore_excursion' && ($activeAddons ?? collect())->isNotEmpty())
+                                    <div class="field-full checkout-addons">
+                                        <h3>{{ __('Optional Add-ons') }}</h3>
+                                        <div class="checkout-addons-grid">
+                                            @foreach ($activeAddons as $addon)
+                                                <label class="checkout-addon-card">
+                                                    <input type="checkbox" name="addon_ids[]"
+                                                        value="{{ $addon['id'] }}"
+                                                        data-addon-amount="{{ $addon['amount'] }}"
+                                                        data-addon-unit="{{ $addon['price_unit'] }}"
+                                                        data-addon-symbol="{{ $addon['currency_symbol'] }}"
+                                                        @checked(in_array($addon['id'], $checkoutSelectedAddons, true))>
+                                                    <span class="checkout-addon-tick"><i class="la la-check"></i></span>
+                                                    <span class="checkout-addon-copy">
+                                                        <strong>{{ $addon['title'] }}</strong>
+                                                        @if (!empty($addon['description']))
+                                                            <small>{{ $addon['description'] }}</small>
+                                                        @endif
+                                                    </span>
+                                                    <span class="checkout-addon-price">{{ $addon['currency_symbol'] }}{{ number_format($addon['amount'], 0) }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 @endif
                                 <div class="field-full guest-grid"
@@ -719,9 +820,9 @@
                                 <div><span>{{ __('Travel Date') }}</span><strong
                                         id="summaryDate">{{ request('travel_date') ?: '—' }}</strong></div>
                             </div>
-                            @if ($package->package_type === 'day_tour')
+                            @if (in_array($package->package_type, ['day_tour', 'shore_excursion'], true))
                                 <div class="summary-line"><i class="la la-compass"></i>
-                                    <div><span>{{ __('Tour Type') }}</span><strong>{{ __('Day Tour') }}</strong></div>
+                                    <div><span>{{ __('Tour Type') }}</span><strong>{{ $package->package_type === 'shore_excursion' ? __('Shore Excursion') : __('Day Tour') }}</strong></div>
                                 </div>
                             @else
                                 <div class="summary-line"><i class="la la-bed"></i>
@@ -768,6 +869,11 @@
                             <div class="total-row"><span>{{ __('Package Price') }}</span><strong
                                     id="summarySubtotal">{{ $travelPackageQuote ? $travelPackageQuote['currency_symbol'] . number_format($travelPackageQuote['total'], 0) : '—' }}</strong>
                             </div>
+                            @if ($package->package_type === 'shore_excursion' && ($activeAddons ?? collect())->isNotEmpty())
+                                <div class="total-row" id="summaryAddonsRow" style="display:none">
+                                    <span>{{ __('Optional Add-ons') }}</span><strong id="summaryAddons">—</strong>
+                                </div>
+                            @endif
                             <div class="total-row">
                                 <span>{{ __('Taxes & Fees') }}</span><strong>{{ __('Included') }}</strong>
                             </div>
@@ -816,6 +922,7 @@
             const infants = document.getElementById('infants');
             const rooms = document.getElementById('rooms');
             const date = document.getElementById('travel_date');
+            const addonInputs = Array.from(document.querySelectorAll('input[name="addon_ids[]"]'));
             const travelerContainer = document.getElementById('travelersContainer');
             let travelerValues = Array.isArray(oldTravelers) ? oldTravelers : [];
 
@@ -849,6 +956,30 @@
                 return Number(option.amount) * Math.max(1, number(adults) + number(children));
             }
 
+            function normalizeAddonUnit(unit) {
+                return String(unit || 'per_booking').trim().toLowerCase().replace(/[-\s]+/g, '_');
+            }
+
+            function addonQuantity(unit) {
+                const normalized = normalizeAddonUnit(unit);
+                if (['per_person', 'person', 'per_traveler', 'traveler', 'per_guest', 'guest'].includes(normalized)) {
+                    return Math.max(1, number(adults) + number(children));
+                }
+                if (['per_adult', 'adult'].includes(normalized)) {
+                    return Math.max(1, number(adults));
+                }
+                if (['per_room', 'room'].includes(normalized)) {
+                    return Math.max(1, number(rooms));
+                }
+                return 1;
+            }
+
+            function selectedAddonsTotal() {
+                return addonInputs
+                    .filter(input => input.checked)
+                    .reduce((sum, input) => sum + Number(input.dataset.addonAmount || 0) * addonQuantity(input.dataset.addonUnit), 0);
+            }
+
             function syncSummary() {
                 if (isTravelPkg) {
                     const guests = number(adults) + number(children) + number(infants);
@@ -861,11 +992,20 @@
                 const option = selectedOption();
                 const guests = number(adults) + number(children) + number(infants);
                 document.getElementById('summaryDate').textContent = date.value || '—';
-                document.getElementById('summaryOption').textContent = option ? option.label : '—';
+                const summaryOption = document.getElementById('summaryOption');
+                if (summaryOption) summaryOption.textContent = option ? option.label : '—';
                 document.getElementById('summaryGuests').textContent = guests;
+                const addonsTotal = selectedAddonsTotal();
+                const baseTotal = option ? total(option) : 0;
+                const addonsRow = document.getElementById('summaryAddonsRow');
+                const addonsTarget = document.getElementById('summaryAddons');
                 document.getElementById('summarySubtotal').textContent = option ? money(total(option), option) :
                     '—';
-                document.getElementById('summaryTotal').textContent = option ? money(total(option), option) : '—';
+                if (addonsRow && addonsTarget) {
+                    addonsRow.style.display = addonsTotal > 0 ? '' : 'none';
+                    addonsTarget.textContent = option ? money(addonsTotal, option) : '—';
+                }
+                document.getElementById('summaryTotal').textContent = option ? money(baseTotal + addonsTotal, option) : '—';
             }
 
             function syncOptionAvailability() {
@@ -934,6 +1074,7 @@
             });
             document.querySelectorAll('input[name="pricing_option"]').forEach(input => input.addEventListener(
                 'change', syncSummary));
+            addonInputs.forEach(input => input.addEventListener('change', syncSummary));
             renderTravelers();
             syncOptionAvailability();
             syncSummary();

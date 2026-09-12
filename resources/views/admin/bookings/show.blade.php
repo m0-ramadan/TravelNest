@@ -108,7 +108,8 @@
                             <div class="info-value">
                                 {{ $booking->travellers_count ?? '-' }}
                                 <div class="small opacity-75 mt-1" style="font-size: 13px;">
-                                    {{ $booking->adults ?? 0 }} بالغين · {{ $booking->children ?? 0 }} أطفال · {{ $booking->infants ?? 0 }} رضع
+                                    {{ $booking->adults ?? 0 }} بالغين · {{ $booking->children ?? 0 }} أطفال ·
+                                    {{ $booking->infants ?? 0 }} رضع
                                 </div>
                             </div>
                         </div>
@@ -134,13 +135,16 @@
                         <div class="info-box">
                             <div class="info-label">الهاتف</div>
                             <div class="info-value">
-                                @if(!empty($booking->phone))
-                                    @php($cleanBKPhone = preg_replace('/[^0-9]/', '', $booking->phone))
+                                @if (!empty($booking->phone))
+                                    @php $cleanBKPhone = preg_replace('/[^0-9]/', '', $booking->phone); @endphp
                                     <span class="dir-ltr d-inline-block font-monospace me-2">{{ $booking->phone }}</span>
-                                    <a href="https://wa.me/{{ $cleanBKPhone }}" target="_blank" class="btn btn-sm btn-success rounded-circle px-2 py-1 me-1" title="مراسلة عبر واتساب">
+                                    <a href="https://wa.me/{{ $cleanBKPhone }}" target="_blank"
+                                        class="btn btn-sm btn-success rounded-circle px-2 py-1 me-1"
+                                        title="مراسلة عبر واتساب">
                                         <i class="fab fa-whatsapp fs-6"></i>
                                     </a>
-                                    <a href="tel:{{ $booking->phone }}" class="btn btn-sm btn-info rounded-circle px-2 py-1" title="اتصال هاتفي">
+                                    <a href="tel:{{ $booking->phone }}"
+                                        class="btn btn-sm btn-info rounded-circle px-2 py-1" title="اتصال هاتفي">
                                         <i class="fas fa-phone-alt fs-6"></i>
                                     </a>
                                 @else
@@ -154,11 +158,12 @@
                         <div class="info-box">
                             <div class="info-label">البريد الإلكتروني</div>
                             <div class="info-value">
-                                @if(!empty($booking->email))
+                                @if (!empty($booking->email))
                                     <a href="mailto:{{ $booking->email }}" class="text-white text-decoration-none me-2">
                                         {{ $booking->email }}
                                     </a>
-                                    <a href="mailto:{{ $booking->email }}" class="btn btn-sm btn-primary rounded-circle px-2 py-1" title="مراسلة عبر البريد">
+                                    <a href="mailto:{{ $booking->email }}"
+                                        class="btn btn-sm btn-primary rounded-circle px-2 py-1" title="مراسلة عبر البريد">
                                         <i class="fas fa-envelope"></i>
                                     </a>
                                 @else
@@ -175,37 +180,96 @@
                         </div>
                     </div>
 
-                    @if($booking->items->isNotEmpty())
-                        @foreach($booking->items as $item)
+                    @php
+                        $addonItems = $booking->items->where('pricing_source', 'package_addon');
+                        $mainItems = $booking->items->reject(fn($item) => $item->pricing_source === 'package_addon');
+                    @endphp
+
+                    @if ($mainItems->isNotEmpty())
+                        @foreach ($mainItems as $item)
                             <div class="col-md-6">
                                 <div class="info-box">
                                     <div class="info-label">الإقامة / الكابينة</div>
                                     <div class="info-value">{{ $item->option_label }}</div>
-                                    @if($item->occupancy_type)<small class="opacity-75">{{ $item->occupancy_type }}</small>@endif
+                                    @if ($item->occupancy_type)
+                                        <small class="opacity-75">{{ $item->occupancy_type }}</small>
+                                    @endif
                                 </div>
                             </div>
                             <div class="col-md-3">
-                                <div class="info-box"><div class="info-label">عدد الغرف / الكابينات</div><div class="info-value">{{ $item->room_count }}</div></div>
+                                <div class="info-box">
+                                    <div class="info-label">عدد الغرف / الكابينات</div>
+                                    <div class="info-value">{{ $item->room_count }}</div>
+                                </div>
                             </div>
                             <div class="col-md-3">
-                                <div class="info-box"><div class="info-label">سعر الاختيار</div><div class="info-value">{{ number_format((float)$item->total_amount, 2) }} {{ $booking->currency_code }}</div></div>
+                                <div class="info-box">
+                                    <div class="info-label">سعر الاختيار</div>
+                                    <div class="info-value">{{ number_format((float) $item->total_amount, 2) }}
+                                        {{ $booking->currency_code }}</div>
+                                </div>
                             </div>
                         @endforeach
                     @endif
 
-                    @if($booking->travelers->isNotEmpty())
+                    @if ($addonItems->isNotEmpty())
+                        <div class="col-12">
+                            <div class="info-box">
+                                <div class="info-label mb-3">Optional Add-ons</div>
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-striped mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>الإضافة</th>
+                                                <th>الكمية</th>
+                                                <th>سعر الوحدة</th>
+                                                <th>الإجمالي</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($addonItems as $item)
+                                                <tr>
+                                                    <td>
+                                                        <strong>{{ $item->option_label }}</strong>
+                                                        @if (!empty($item->meta['description']))
+                                                            <div class="small opacity-75">{{ $item->meta['description'] }}
+                                                            </div>
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ $item->quantity }}</td>
+                                                    <td>{{ number_format((float) $item->unit_price, 2) }}
+                                                        {{ $item->meta['currency_code'] ?? $booking->currency_code }}</td>
+                                                    <td>{{ number_format((float) $item->total_amount, 2) }}
+                                                        {{ $item->meta['currency_code'] ?? $booking->currency_code }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if ($booking->travelers->isNotEmpty())
                         <div class="col-12">
                             <div class="info-box">
                                 <div class="info-label mb-3">بيانات المسافرين</div>
                                 <div class="table-responsive">
                                     <table class="table table-dark table-striped mb-0">
-                                        <thead><tr><th>#</th><th>الفئة</th><th>اللقب</th><th>الاسم كما في جواز السفر</th></tr></thead>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>الفئة</th>
+                                                <th>اللقب</th>
+                                                <th>الاسم كما في جواز السفر</th>
+                                            </tr>
+                                        </thead>
                                         <tbody>
-                                            @foreach($booking->travelers as $traveler)
+                                            @foreach ($booking->travelers as $traveler)
                                                 <tr>
                                                     <td>{{ $loop->iteration }}</td>
                                                     <td>
-                                                        @if($traveler->traveler_type === 'infant')
+                                                        @if ($traveler->traveler_type === 'infant')
                                                             <span class="badge bg-info text-dark">رضيع (Infant)</span>
                                                         @elseif($traveler->traveler_type === 'child')
                                                             <span class="badge bg-warning text-dark">طفل (Child)</span>

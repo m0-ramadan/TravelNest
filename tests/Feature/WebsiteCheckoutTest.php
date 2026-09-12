@@ -252,6 +252,79 @@ class WebsiteCheckoutTest extends TestCase
         $this->assertDatabaseHas('payments', ['booking_id' => $booking->id, 'amount' => 250]);
     }
 
+    public function test_shore_excursion_checkout_includes_selected_optional_addons(): void
+    {
+        $this->configurePaymob();
+        $package = $this->package([
+            'package_type' => 'shore_excursion',
+            'adult_price' => 390,
+            'child_price' => 0,
+        ]);
+        $balloon = $package->addons()->create([
+            'title' => 'Hot Air Ballooning in Luxor',
+            'price' => 120,
+            'price_unit' => 'per booking',
+            'is_active' => true,
+        ]);
+        $abuSimbel = $package->addons()->create([
+            'title' => 'Abu Simbel Excursion',
+            'price' => 140,
+            'price_unit' => 'per booking',
+            'is_active' => true,
+        ]);
+
+        $this->get(route('website.checkout.show', [
+            'slug' => $package->slug,
+            'travel_date' => now()->addMonth()->toDateString(),
+            'adults' => 2,
+            'children' => 0,
+            'infants' => 0,
+            'pricing_option' => 'category',
+            'addon_ids' => [$balloon->id, $abuSimbel->id],
+        ]))->assertOk()
+            ->assertSee('Optional Add-ons')
+            ->assertSee('Hot Air Ballooning in Luxor')
+            ->assertSee('Abu Simbel Excursion');
+
+        Http::fake([
+            'https://accept.paymob.com/v1/intention/' => Http::response([
+                'id' => 'intention-2',
+                'intention_order_id' => 'order-2',
+                'client_secret' => 'safe-test-client-secret',
+            ], 201),
+        ]);
+
+        $this->post(route('website.checkout.store', $package->slug), [
+            'pricing_option' => 'category',
+            'travel_date' => now()->addMonth()->toDateString(),
+            'rooms' => 1,
+            'adults' => 2,
+            'children' => 0,
+            'infants' => 0,
+            'addon_ids' => [$balloon->id, $abuSimbel->id],
+            'email' => 'shore@example.test',
+            'phone' => '+201000000002',
+            'travelers' => [
+                ['title' => 'Mr', 'first_name' => 'Lead', 'last_name' => 'Guest'],
+                ['title' => 'Mrs', 'first_name' => 'Second', 'last_name' => 'Guest'],
+            ],
+            'payment_method' => 'paymob',
+            'terms' => 1,
+        ])->assertRedirectContains('accept.paymob.com/unifiedcheckout');
+
+        $booking = Booking::query()->sole();
+        $this->assertSame('1040.00', (string) $booking->total_amount);
+        $this->assertSame(260.0, (float) $booking->checkout_details['addons_total']);
+        $this->assertCount(2, $booking->checkout_details['selected_addons']);
+        $this->assertDatabaseHas('booking_items', [
+            'booking_id' => $booking->id,
+            'pricing_source' => 'package_addon',
+            'option_label' => 'Hot Air Ballooning in Luxor',
+            'total_amount' => 120,
+        ]);
+        $this->assertDatabaseHas('payments', ['booking_id' => $booking->id, 'amount' => 1040]);
+    }
+
     public function test_nile_cruise_rejects_more_cabins_than_inventory(): void
     {
         $package = $this->package(['package_type' => 'nile_cruise']);

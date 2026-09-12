@@ -1407,6 +1407,85 @@
             color: #777;
         }
 
+        .day-tour-addons {
+            border-top: 1px solid rgba(28, 50, 92, .08);
+            padding-top: 14px;
+        }
+
+        .day-tour-addons-title {
+            margin: 0 0 10px;
+            color: #1c325c;
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+        }
+
+        .day-tour-addons-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .day-tour-addon-option {
+            display: grid;
+            grid-template-columns: 22px 1fr auto;
+            align-items: center;
+            gap: 9px;
+            margin: 0;
+            padding: 9px 0;
+            border-bottom: 1px solid rgba(28, 50, 92, .08);
+            cursor: pointer;
+        }
+
+        .day-tour-addon-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .day-tour-addon-check {
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid #c7d0dc;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 12px;
+        }
+
+        .day-tour-addon-option input:checked+.day-tour-addon-check {
+            background: #c5955b;
+            border-color: #c5955b;
+        }
+
+        .day-tour-addon-copy {
+            min-width: 0;
+        }
+
+        .day-tour-addon-title {
+            display: block;
+            color: #1c325c;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.25;
+        }
+
+        .day-tour-addon-copy small {
+            color: #7b8491;
+            display: block;
+            font-size: 11.5px;
+            line-height: 1.35;
+            margin-top: 2px;
+        }
+
+        .day-tour-addon-option strong {
+            color: #c5955b;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
         .package-show-template .sidebar-option-name {
             color: #1c325c !important;
             font-weight: 800;
@@ -3335,7 +3414,7 @@
             ]);
         }
 
-        $dayTourGroupOptions = $package->package_type === 'day_tour'
+        $dayTourGroupOptions = in_array($package->package_type, ['day_tour', 'shore_excursion'], true)
             ? $bookingPricingOptions->where('source', 'group_tier')
             : collect();
         if ($dayTourGroupOptions->isNotEmpty()) {
@@ -4095,7 +4174,7 @@
                                 ? []
                                 : (array) ($package->group_pricing_tiers ?? []),
                         )->filter(fn($tier) => is_array($tier) && (float) ($tier['price_per_person'] ?? 0) > 0);
-                        if ($package->package_type === 'day_tour' && $dayTourGroupOptions->isEmpty()) {
+                        if (in_array($package->package_type, ['day_tour', 'shore_excursion'], true) && $dayTourGroupOptions->isEmpty()) {
                             $groupTiersForDisplay = collect();
                         }
                         $hasAccommodations =
@@ -4408,7 +4487,7 @@
                                 </div>
                             @endif
 
-                            @if ($package->package_type !== 'day_tour' && $prices->count())
+                            @if (!in_array($package->package_type, ['day_tour', 'shore_excursion'], true) && $prices->count())
                                 <div class="price-box pricing-options">
                                     <div class="price-table-wrap">
                                         <table class="price-table">
@@ -4798,7 +4877,7 @@
                                             </button>
                                         </div>
                                     </form>
-                                @elseif ($package->package_type === 'day_tour')
+                                @elseif (in_array($package->package_type, ['day_tour', 'shore_excursion'], true))
                                     <h4 class="booking-request-title">{{ __('Select Your Booking') }}</h4>
                                     <form method="get" action="{{ route('website.checkout.show', $package->slug) }}"
                                         id="sidebarBookingForm" class="day-tour-booking-form"
@@ -4878,6 +4957,42 @@
                                             </div>
                                         </div>
 
+                                        @php
+                                            $sidebarAddons = (($addons ?? collect())->isNotEmpty()
+                                                    ? $addons
+                                                    : ($package->addons ?? collect()))
+                                                ->where('is_active', true)
+                                                ->filter(fn($addon) => (float) $addon->price > 0)
+                                                ->values();
+                                        @endphp
+                                        @if ($package->package_type === 'shore_excursion' && $sidebarAddons->isNotEmpty())
+                                            <div class="day-tour-addons mt-3">
+                                                <h5 class="day-tour-addons-title">{{ __('Optional Add-ons') }}</h5>
+                                                <div class="day-tour-addons-list">
+                                                    @foreach ($sidebarAddons as $addon)
+                                                        @php
+                                                            $addonCurrency = $addon->currency ?: $package->currency;
+                                                        @endphp
+                                                        <label class="day-tour-addon-option">
+                                                            <input type="checkbox" name="addon_ids[]"
+                                                                value="{{ $addon->id }}"
+                                                                data-addon-amount="{{ (float) $addon->price }}"
+                                                                data-addon-unit="{{ $addon->price_unit ?: 'per booking' }}"
+                                                                data-addon-symbol="{{ $addonCurrency?->symbol ?: $currencySymbol }}">
+                                                            <span class="day-tour-addon-check"><i class="la la-check"></i></span>
+                                                            <span class="day-tour-addon-copy">
+                                                                <span class="day-tour-addon-title">{{ $addon->title }}</span>
+                                                                @if ($addon->description)
+                                                                    <small>{{ $addon->description }}</small>
+                                                                @endif
+                                                            </span>
+                                                            <strong>{{ $addonCurrency?->symbol ?: $currencySymbol }}{{ number_format((float) $addon->price, 0) }}</strong>
+                                                        </label>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
+
                                         <input type="hidden" name="rooms" value="1">
                                         <div class="sidebar-price-options d-none">
                                             @foreach ($bookingPricingOptions as $option)
@@ -4909,7 +5024,7 @@
 
                                         <div class="day-tour-price-box" id="dayTourPriceBox">
                                             <div class="day-tour-price-header">
-                                                <span class="day-tour-price-label">{{ __('Total Price') }}</span>
+                                                <span class="day-tour-price-label">{{ __('Estimated Total') }}</span>
                                                 <span class="day-tour-tier-badge" id="dayTourTierBadge"></span>
                                             </div>
                                             <div class="day-tour-price-total" id="dayTourPriceTotal"></div>
@@ -5157,6 +5272,7 @@
                 const dayTourPriceTotal = document.getElementById('dayTourPriceTotal');
                 const dayTourTierBadge = document.getElementById('dayTourTierBadge');
                 const dayTourPriceBreakdown = document.getElementById('dayTourPriceBreakdown');
+                const addonInputs = Array.from(sidebarBookingForm.querySelectorAll('input[name="addon_ids[]"]'));
 
                 const calendar = document.getElementById('dayTourCalendar');
                 if (calendar) {
@@ -5299,6 +5415,24 @@
                             const adultPrice = parseFloat(activeInput.dataset.adultPrice || 0);
                             const childPrice = parseFloat(activeInput.dataset.childPrice || 0);
                             const infantPrice = parseFloat(activeInput.dataset.infantPrice || 0);
+                            const normalizeAddonUnit = (unit) => String(unit || 'per_booking')
+                                .trim().toLowerCase().replace(/[-\s]+/g, '_');
+                            const addonQuantity = (unit) => {
+                                const normalized = normalizeAddonUnit(unit);
+                                if (['per_person', 'person', 'per_traveler', 'traveler', 'per_guest', 'guest'].includes(normalized)) {
+                                    return Math.max(1, numAdults + numChildren);
+                                }
+                                if (['per_adult', 'adult'].includes(normalized)) {
+                                    return Math.max(1, numAdults);
+                                }
+                                if (['per_room', 'room'].includes(normalized)) {
+                                    return 1;
+                                }
+                                return 1;
+                            };
+                            const addonsTotal = addonInputs
+                                .filter(input => input.checked)
+                                .reduce((sum, input) => sum + (parseFloat(input.dataset.addonAmount || 0) * addonQuantity(input.dataset.addonUnit)), 0);
 
                             let total = 0;
                             let breakdown = '';
@@ -5323,6 +5457,11 @@
                                 breakdown = `${numAdults + numChildren} × ${symbol}${amount.toFixed(0)}`;
                             }
 
+                            if (addonsTotal > 0) {
+                                total += addonsTotal;
+                                breakdown += ` + {{ __('Add-ons') }} ${symbol}${addonsTotal.toFixed(0)}`;
+                            }
+
                             dayTourPriceTotal.textContent = `${symbol}${total.toFixed(0)}`;
                             if (dayTourTierBadge) {
                                 dayTourTierBadge.textContent = activeInput.dataset.label || '';
@@ -5344,6 +5483,7 @@
                 [travelDate, adults, children, infants].filter(Boolean).forEach((input) => input.addEventListener(
                     'change',
                     refreshSidebarPrices));
+                addonInputs.forEach((input) => input.addEventListener('change', refreshSidebarPrices));
                 sidebarBookingForm.addEventListener('submit', (event) => {
                     if (calendar && !travelDate.value) {
                         event.preventDefault();

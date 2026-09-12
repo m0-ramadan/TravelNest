@@ -2,11 +2,20 @@
 
 @php
     $isToursPage = request()->routeIs('website.tours.*');
-    $indexRoute = $isToursPage ? route('website.tours.all') : route('website.trips');
+    $isShoreExcursionsPage = request()->routeIs('website.shore_excursions.*');
+    $indexRoute = $isShoreExcursionsPage
+        ? (!empty($pageContent['current_section'])
+            ? route('website.shore_excursions.section', ['section' => $pageContent['current_section']['key']])
+            : route('website.shore_excursions.index'))
+        : ($isToursPage
+            ? route('website.tours.all')
+            : route('website.trips'));
     $firstPackage = $packages->first();
-    $heroImage = is_array($firstPackage)
-        ? $firstPackage['image'] ?? asset('website/photos/home2.webp')
-        : asset('website/photos/home2.webp');
+    $heroImage =
+        $pageContent['hero_image'] ??
+        (is_array($firstPackage)
+            ? $firstPackage['image'] ?? asset('website/photos/home2.webp')
+            : asset('website/photos/home2.webp'));
 @endphp
 
 @section('title', $pageContent['title'] . ' - Etro Tours')
@@ -151,6 +160,137 @@
         .listing-results {
             background: linear-gradient(180deg, #f7fafc 0%, #eef4fb 100%);
             padding: 26px 0 90px;
+        }
+
+        .shore-sections {
+            background: #f7fafc;
+            padding: 12px 0 34px;
+        }
+
+        .shore-sections-head {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+        }
+
+        .shore-sections-head h2 {
+            margin: 0;
+            font-family: 'Playfair Display', serif;
+            color: #1c325c;
+            font-size: clamp(1.7rem, 4vw, 2.45rem);
+        }
+
+        .shore-sections-head p {
+            margin: 8px 0 0;
+            color: #5b6776;
+            max-width: 680px;
+            line-height: 1.75;
+        }
+
+        .shore-section-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .shore-section-card {
+            position: relative;
+            min-height: 245px;
+            overflow: hidden;
+            border-radius: 24px;
+            display: flex;
+            align-items: flex-end;
+            text-decoration: none;
+            color: #fff;
+            background: #1c325c;
+            border: 1px solid rgba(255, 255, 255, .12);
+            box-shadow: 0 16px 40px rgba(16, 33, 63, .12);
+            transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+        }
+
+        .shore-section-card:hover,
+        .shore-section-card.is-active {
+            transform: translateY(-6px);
+            color: #fff;
+            border-color: rgba(197, 149, 91, .65);
+            box-shadow: 0 24px 52px rgba(16, 33, 63, .2);
+        }
+
+        .shore-section-card img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .55s ease;
+        }
+
+        .shore-section-card:hover img {
+            transform: scale(1.08);
+        }
+
+        .shore-section-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(180deg, rgba(16, 33, 63, .05) 0%, rgba(16, 33, 63, .78) 72%, rgba(16, 33, 63, .92) 100%),
+                radial-gradient(circle at top right, rgba(197, 149, 91, .18), transparent 36%);
+        }
+
+        .shore-section-body {
+            position: relative;
+            z-index: 1;
+            padding: 22px;
+            width: 100%;
+        }
+
+        .shore-section-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .shore-section-port {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            border-radius: 999px;
+            padding: 7px 11px;
+            background: rgba(255, 255, 255, .16);
+            backdrop-filter: blur(10px);
+            font-size: .78rem;
+            font-weight: 800;
+        }
+
+        .shore-section-count {
+            border-radius: 999px;
+            padding: 7px 11px;
+            background: rgba(255, 210, 125, .95);
+            color: #1c325c;
+            font-size: .78rem;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .shore-section-body h3 {
+            color: #fff;
+            margin: 0 0 8px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem;
+            line-height: 1.25;
+        }
+
+        .shore-section-body p {
+            margin: 0;
+            color: rgba(255, 255, 255, .86);
+            font-size: .92rem;
+            line-height: 1.65;
         }
 
         .filters-card {
@@ -470,6 +610,7 @@
         }
 
         html[data-theme='dark'] .listing-overview,
+        html[data-theme='dark'] .shore-sections,
         html[data-theme='dark'] .listing-results {
             background: linear-gradient(180deg, #0b1220 0%, #111827 100%) !important;
         }
@@ -578,6 +719,7 @@
             }
 
             .listing-stats,
+            .shore-section-grid,
             .filters-grid {
                 grid-template-columns: minmax(0, 1fr);
             }
@@ -591,6 +733,140 @@
             .results-head {
                 align-items: flex-start;
             }
+        }
+
+        .page-breadcrumb {
+            background: #faf8f3;
+            border-bottom: 1px solid rgba(197, 149, 91, 0.16);
+            padding: 14px 0;
+        }
+
+        .page-breadcrumb .breadcrumb {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+        }
+
+        .page-breadcrumb .breadcrumb-item,
+        .page-breadcrumb .breadcrumb-item a {
+            color: #1c325c;
+            font-size: 0.92rem;
+            text-decoration: none;
+        }
+
+        .page-breadcrumb .breadcrumb-item a:hover {
+            color: #c5955b;
+        }
+
+        .page-breadcrumb .breadcrumb-item.active {
+            color: #9b6a2c;
+            font-weight: 700;
+        }
+
+        .port-nav-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+            padding: 16px 20px;
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid rgba(26, 54, 93, 0.08);
+            box-shadow: 0 8px 24px rgba(16, 33, 63, 0.05);
+        }
+
+        .port-nav-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: 999px;
+            background: #f4f7fb;
+            color: #1c325c;
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            border: 1px solid rgba(26, 54, 93, 0.06);
+        }
+
+        .port-nav-pill:hover {
+            background: #e8eff7;
+            color: #c5955b;
+            transform: translateY(-1px);
+        }
+
+        .port-nav-pill.is-active {
+            background: linear-gradient(135deg, #c5955b 0%, #b8860b 100%);
+            color: #1c325c;
+            border-color: transparent;
+            box-shadow: 0 4px 14px rgba(197, 149, 91, 0.35);
+        }
+
+        .port-nav-pill .count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: rgba(28, 50, 92, 0.1);
+            color: #1c325c;
+            font-size: 0.75rem;
+            font-weight: 800;
+        }
+
+        .port-nav-pill.is-active .count {
+            background: rgba(28, 50, 92, 0.2);
+            color: #1c325c;
+        }
+
+        html[data-theme='dark'] .page-breadcrumb {
+            background: #0b1120 !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        html[data-theme='dark'] .page-breadcrumb .breadcrumb-item,
+        html[data-theme='dark'] .page-breadcrumb .breadcrumb-item a {
+            color: #cbd5e1 !important;
+        }
+
+        html[data-theme='dark'] .page-breadcrumb .breadcrumb-item.active {
+            color: #f4c36a !important;
+        }
+
+        html[data-theme='dark'] .port-nav-bar {
+            background: #111827 !important;
+            border-color: rgba(148, 163, 184, 0.16) !important;
+            box-shadow: none !important;
+        }
+
+        html[data-theme='dark'] .port-nav-pill {
+            background: #0f172a !important;
+            color: var(--charcoal-deep) !important;
+            border-color: rgba(148, 163, 184, 0.14) !important;
+        }
+
+        html[data-theme='dark'] .port-nav-pill:hover {
+            background: #1e293b !important;
+            color: var(--rich-gold) !important;
+        }
+
+        html[data-theme='dark'] .port-nav-pill.is-active {
+            background: linear-gradient(135deg, #c5955b 0%, #b8860b 100%) !important;
+            color: #1c325c !important;
+        }
+
+        html[data-theme='dark'] .port-nav-pill .count {
+            background: rgba(255, 255, 255, 0.12) !important;
+            color: #e2e8f0 !important;
+        }
+
+        html[data-theme='dark'] .port-nav-pill.is-active .count {
+            background: rgba(28, 50, 92, 0.3) !important;
+            color: #1c325c !important;
         }
     </style>
 @endsection
@@ -624,6 +900,29 @@
         </div>
     </section>
 
+    @if ($isShoreExcursionsPage)
+        <section class="page-breadcrumb">
+            <div class="container">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ route('website.home') }}">{{ __('Home') }}</a></li>
+                        <li class="breadcrumb-item {{ empty($pageContent['current_section']) ? 'active' : '' }}">
+                            @if (!empty($pageContent['current_section']))
+                                <a href="{{ route('website.shore_excursions.index') }}">{{ __('Shore Excursions') }}</a>
+                            @else
+                                {{ __('Shore Excursions') }}
+                            @endif
+                        </li>
+                        @if (!empty($pageContent['current_section']))
+                            <li class="breadcrumb-item active" aria-current="page">
+                                {{ $pageContent['current_section']['title'] }}</li>
+                        @endif
+                    </ol>
+                </nav>
+            </div>
+        </section>
+    @endif
+
     <section class="listing-overview">
         <div class="container">
             <div class="overview-card">
@@ -633,148 +932,204 @@
         </div>
     </section>
 
-    <section class="listing-results">
-        <div class="container">
-            <div class="filters-card">
-                <h2 class="filters-title">
-                    <i class="la la-sliders-h"></i>
-                    {{ __('Filter Results') }}
-                </h2>
-
-                <form action="{{ $indexRoute }}" method="GET">
-                    <div class="filters-grid">
-                        <div>
-                            <label for="listing-search">{{ __('Search by keyword') }}</label>
-                            <input id="listing-search" type="text" name="q" class="form-control"
-                                value="{{ $search }}" placeholder="{{ __('Search packages, cruises, tours...') }}">
-                        </div>
-
-                        @if (!empty($destinations) && count($destinations) > 0)
-                            <div>
-                                <label for="listing-destination">{{ __('Destination') }}</label>
-                                <select id="listing-destination" name="destination" class="form-select">
-                                    <option value="">{{ __('All Destinations') }}</option>
-                                    @foreach ($destinations as $dest)
-                                        <option value="{{ $dest['slug'] }}" @selected(($selectedDestinationSlug ?? '') === $dest['slug'])>
-                                            {{ $dest['name'] }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        @endif
-
-                        @if (count($typeOptions) > 1)
-                            <div>
-                                <label for="listing-type">{{ __('Type') }}</label>
-                                <select id="listing-type" name="type" class="form-select">
-                                    <option value="">{{ __('All Types') }}</option>
-                                    @foreach ($typeOptions as $option)
-                                        <option value="{{ $option['value'] }}" @selected($selectedType === $option['value'])>
-                                            {{ $option['label'] }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        @endif
-
-                        @if (request()->filled('duration'))
-                            <input type="hidden" name="duration" value="{{ request('duration') }}">
-                        @endif
-
-
-                        <button type="submit" class="filter-btn">
-                            <i class="la la-search"></i>
-                            {{ __('Filter Results') }}
-                        </button>
-
-                        <a href="{{ $indexRoute }}" class="reset-btn">
-                            <i class="la la-undo"></i>
-                            {{ __('Reset Filters') }}
-                        </a>
+    @if ($isShoreExcursionsPage && empty($pageContent['current_section']) && !empty($pageContent['shore_sections']))
+        <section class="shore-sections">
+            <div class="container">
+                <div class="shore-sections-head">
+                    <div>
+                        <h2>{{ __('Browse by Cruise Port') }}</h2>
+                        <p>{{ __('Choose your arrival port to see shore excursions planned around that cruise stop.') }}
+                        </p>
                     </div>
-                </form>
-            </div>
-
-            <div class="results-head">
-                <div>
-                    <h3>{{ $selectedCategoryName ?: $pageContent['title'] }}</h3>
-                    <p>{{ __('Matching Results') }}: {{ number_format($stats['count']) }}</p>
                 </div>
-            </div>
 
-            @if ($packages->count())
-                <div class="row results-grid">
-                    @foreach ($packages as $package)
-                        <div class="col-lg-4 col-md-6">
-                            <article class="journey-card">
-                                <div class="journey-image">
-                                    <div class="journey-type">{{ $package['type_label'] }}</div>
-
-                                    @if ($package['badge'])
-                                        <div class="journey-badge">{{ $package['badge'] }}</div>
-                                    @endif
-
-                                    <a href="{{ $package['url'] }}">
-                                        <img src="{{ $package['image'] }}" alt="{{ $package['title'] }}" loading="lazy">
-                                    </a>
-
-                                    @if ($package['price'])
-                                        <div class="journey-price">{{ $package['price'] }}</div>
-                                    @endif
+                <div class="shore-section-grid">
+                    @foreach ($pageContent['shore_sections'] as $section)
+                        <a href="{{ $section['url'] }}"
+                            class="shore-section-card {{ !empty($section['active']) ? 'is-active' : '' }}">
+                            <img src="{{ $section['image'] }}" alt="{{ $section['title'] }}" loading="lazy">
+                            <div class="shore-section-body">
+                                <div class="shore-section-meta">
+                                    <span class="shore-section-port"><i
+                                            class="la la-anchor"></i>{{ __('Port Tours') }}</span>
+                                    <span
+                                        class="shore-section-count">{{ trans_choice(':count tour|:count tours', $section['count'], ['count' => $section['count']]) }}</span>
                                 </div>
-
-                                <div class="journey-body">
-                                    @if ($package['country'])
-                                        <div class="journey-country">{{ $package['country'] }}</div>
-                                    @endif
-
-                                    <h3 class="journey-title">
-                                        <a href="{{ $package['url'] }}">{{ $package['title'] }}</a>
-                                    </h3>
-
-                                    <div class="journey-meta">
-                                        <span><i class="la la-clock"></i>{{ $package['duration'] }}</span>
-                                        <span><i class="la la-users"></i>{{ $package['tour_type'] }}</span>
-                                    </div>
-
-                                    @if ($package['schedule'])
-                                        <div class="journey-schedule">
-                                            <i class="la la-calendar-alt"></i>
-                                            <span>{{ $package['schedule'] }}</span>
-                                        </div>
-                                    @endif
-
-                                    <p class="journey-description">{{ $package['description'] }}</p>
-
-                                    @if (!empty($package['highlights']))
-                                        <div class="journey-highlights">
-                                            @foreach ($package['highlights'] as $highlight)
-                                                <span>{{ $highlight }}</span>
-                                            @endforeach
-                                        </div>
-                                    @endif
-
-                                    <a href="{{ $package['url'] }}" class="journey-btn">
-                                        {{ $package['button_text'] }}
-                                        <i class="la la-arrow-right"></i>
-                                    </a>
-                                </div>
-                            </article>
-                        </div>
+                                <h3>{{ $section['title'] }}</h3>
+                                <p>{{ $section['subtitle'] }}</p>
+                            </div>
+                        </a>
                     @endforeach
                 </div>
-            @else
-                <div class="journey-empty">
-                    <h4>{{ $pageContent['empty_title'] }}</h4>
-                    <p>{{ $pageContent['empty_text'] }}</p>
-                </div>
-            @endif
+            </div>
+        </section>
+    @endif
 
-            @if (method_exists($packages, 'links') && $packages->hasPages())
-                <div class="listing-pagination">
-                    {{ $packages->links() }}
+    @if (empty($pageContent['is_landing_hub']))
+        <section class="listing-results">
+            <div class="container">
+                @if ($isShoreExcursionsPage && !empty($pageContent['shore_sections']))
+                    <div class="port-nav-bar">
+                        <a href="{{ route('website.shore_excursions.index') }}"
+                            class="port-nav-pill {{ empty($pageContent['current_section']) ? 'is-active' : '' }}">
+                            <i class="la la-th-large"></i>
+                            <span>{{ __('All Cruise Ports') }}</span>
+                        </a>
+                        @foreach ($pageContent['shore_sections'] as $portSection)
+                            <a href="{{ $portSection['url'] }}"
+                                class="port-nav-pill {{ !empty($portSection['active']) ? 'is-active' : '' }}">
+                                <i class="la la-anchor"></i>
+                                <span>{{ $portSection['title'] }}</span>
+                                @if (!empty($portSection['count']))
+                                    <span class="count">{{ $portSection['count'] }}</span>
+                                @endif
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+                <div class="filters-card">
+                    <h2 class="filters-title">
+                        <i class="la la-sliders-h"></i>
+                        {{ __('Filter Results') }}
+                    </h2>
+
+                    <form action="{{ $indexRoute }}" method="GET">
+                        <div class="filters-grid">
+                            <div>
+                                <label for="listing-search">{{ __('Search by keyword') }}</label>
+                                <input id="listing-search" type="text" name="q" class="form-control"
+                                    value="{{ $search }}"
+                                    placeholder="{{ __('Search packages, cruises, tours...') }}">
+                            </div>
+
+                            @if (!empty($destinations) && count($destinations) > 0)
+                                <div>
+                                    <label for="listing-destination">{{ __('Destination') }}</label>
+                                    <select id="listing-destination" name="destination" class="form-select">
+                                        <option value="">{{ __('All Destinations') }}</option>
+                                        @foreach ($destinations as $dest)
+                                            <option value="{{ $dest['slug'] }}" @selected(($selectedDestinationSlug ?? '') === $dest['slug'])>
+                                                {{ $dest['name'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
+
+                            @if (count($typeOptions) > 1)
+                                <div>
+                                    <label for="listing-type">{{ __('Type') }}</label>
+                                    <select id="listing-type" name="type" class="form-select">
+                                        <option value="">{{ __('All Types') }}</option>
+                                        @foreach ($typeOptions as $option)
+                                            <option value="{{ $option['value'] }}" @selected($selectedType === $option['value'])>
+                                                {{ $option['label'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
+
+                            @if (request()->filled('duration'))
+                                <input type="hidden" name="duration" value="{{ request('duration') }}">
+                            @endif
+
+
+                            <button type="submit" class="filter-btn">
+                                <i class="la la-search"></i>
+                                {{ __('Filter Results') }}
+                            </button>
+
+                            <a href="{{ $indexRoute }}" class="reset-btn">
+                                <i class="la la-undo"></i>
+                                {{ __('Reset Filters') }}
+                            </a>
+                        </div>
+                    </form>
                 </div>
-            @endif
-        </div>
-    </section>
+
+                <div class="results-head">
+                    <div>
+                        <h3>{{ $selectedCategoryName ?: $pageContent['title'] }}</h3>
+                        <p>{{ __('Matching Results') }}: {{ number_format($stats['count']) }}</p>
+                    </div>
+                </div>
+
+                @if ($packages->count())
+                    <div class="row results-grid">
+                        @foreach ($packages as $package)
+                            <div class="col-lg-4 col-md-6">
+                                <article class="journey-card">
+                                    <div class="journey-image">
+                                        <div class="journey-type">{{ $package['type_label'] }}</div>
+
+                                        @if ($package['badge'])
+                                            <div class="journey-badge">{{ $package['badge'] }}</div>
+                                        @endif
+
+                                        <a href="{{ $package['url'] }}">
+                                            <img src="{{ $package['image'] }}" alt="{{ $package['title'] }}"
+                                                loading="lazy">
+                                        </a>
+
+                                        @if ($package['price'])
+                                            <div class="journey-price">{{ $package['price'] }}</div>
+                                        @endif
+                                    </div>
+
+                                    <div class="journey-body">
+                                        @if ($package['country'])
+                                            <div class="journey-country">{{ $package['country'] }}</div>
+                                        @endif
+
+                                        <h3 class="journey-title">
+                                            <a href="{{ $package['url'] }}">{{ $package['title'] }}</a>
+                                        </h3>
+
+                                        <div class="journey-meta">
+                                            <span><i class="la la-clock"></i>{{ $package['duration'] }}</span>
+                                            <span><i class="la la-users"></i>{{ $package['tour_type'] }}</span>
+                                        </div>
+
+                                        @if ($package['schedule'])
+                                            <div class="journey-schedule">
+                                                <i class="la la-calendar-alt"></i>
+                                                <span>{{ $package['schedule'] }}</span>
+                                            </div>
+                                        @endif
+
+                                        <p class="journey-description">{{ $package['description'] }}</p>
+
+                                        @if (!empty($package['highlights']))
+                                            <div class="journey-highlights">
+                                                @foreach ($package['highlights'] as $highlight)
+                                                    <span>{{ $highlight }}</span>
+                                                @endforeach
+                                            </div>
+                                        @endif
+
+                                        <a href="{{ $package['url'] }}" class="journey-btn">
+                                            {{ $package['button_text'] }}
+                                            <i class="la la-arrow-right"></i>
+                                        </a>
+                                    </div>
+                                </article>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="journey-empty">
+                        <h4>{{ $pageContent['empty_title'] }}</h4>
+                        <p>{{ $pageContent['empty_text'] }}</p>
+                    </div>
+                @endif
+
+                @if (method_exists($packages, 'links') && $packages->hasPages())
+                    <div class="listing-pagination">
+                        {{ $packages->links() }}
+                    </div>
+                @endif
+            </div>
+        </section>
+    @endif
 @endsection

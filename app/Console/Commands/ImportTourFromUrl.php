@@ -58,6 +58,7 @@ class ImportTourFromUrl extends Command
             }
             $this->line("Cities: " . ($stats['cities'] ?? ''));
             $this->line("Pricing levels: " . ($stats['pricing_levels_count'] ?? 0));
+            $this->line("Optional add-ons: " . ($stats['addons_count'] ?? 0));
             $this->line("Images discovered: " . ($stats['images_discovered_count'] ?? 0));
 
             if ($result['is_update']) {

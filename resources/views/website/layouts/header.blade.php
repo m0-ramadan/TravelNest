@@ -1,7 +1,7 @@
 @php
     $travelPackagesUrl = route('website.travel_packages.index');
     $dayToursUrl = route('website.tours.all', ['type' => 'day_tour']);
-    $shoreExcursionsUrl = route('website.tours.all', ['type' => 'shore_excursion']);
+    $shoreExcursionsUrl = route('website.shore_excursions.index');
     $tailorMadeUrl = route('website.tailor_made.index');
     $contactEmail = 'info@etrotours.com';
     $navigationDestinations = collect($navigationDestinations ?? []);
@@ -14,7 +14,7 @@
     $isDayToursPage =
         request()->routeIs('website.day_tours.*') ||
         (request()->routeIs('website.tours.all') && request('type') === 'day_tour');
-    $isShoreExcursionsPage = request('type') === 'shore_excursion';
+    $isShoreExcursionsPage = request()->routeIs('website.shore_excursions.*');
     $isOffersPage = request()->routeIs('website.offers');
     $isContactPage = request()->routeIs('website.contact.*');
     $isTailorMadePage = request()->routeIs('website.tailor_made.*');

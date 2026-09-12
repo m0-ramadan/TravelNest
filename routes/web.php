@@ -90,6 +90,16 @@ Route::name('website.')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | Shore Excursions
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/shore-excursions', [PackageController::class, 'shoreExcursions'])
+        ->name('shore_excursions.index');
+    Route::get('/shore-excursions/{section}', [PackageController::class, 'shoreExcursionSection'])
+        ->name('shore_excursions.section');
+
+    /*
+    |--------------------------------------------------------------------------
     | Travel Packages
     |--------------------------------------------------------------------------
     */

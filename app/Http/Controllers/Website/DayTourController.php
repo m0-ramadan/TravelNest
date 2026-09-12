@@ -27,7 +27,7 @@ class DayTourController extends BaseWebsiteController
         // Total active day tours
         $totalDayTours = Package::query()
             ->where('is_active', true)
-            ->whereIn('package_type', ['day_tour', 'shore_excursion'])
+            ->where('package_type', 'day_tour')
             ->count();
 
         // The 7 destination excursion cards matching reference structure
@@ -92,7 +92,7 @@ class DayTourController extends BaseWebsiteController
 
         // Attach actual day tour counts per city if available
         $cityCounts = City::query()
-            ->withCount(['packages' => fn($q) => $q->where('is_active', true)->whereIn('package_type', ['day_tour', 'shore_excursion'])])
+            ->withCount(['packages' => fn($q) => $q->where('is_active', true)->where('package_type', 'day_tour')])
             ->pluck('packages_count', 'slug');
 
         foreach ($destinationCards as &$card) {
