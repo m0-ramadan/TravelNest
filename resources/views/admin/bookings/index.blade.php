@@ -199,7 +199,7 @@
                             placeholder="اسم العميل أو المرجع">
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label">الباقة</label>
                         <select name="package_id" class="form-select">
                             <option value="">كل الباقات</option>
@@ -209,6 +209,30 @@
                                     {{ $package->name }}
                                 </option>
                             @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">نوع الرحلة</label>
+                        <label class="form-label">{{ admin_t('Package Type') }}</label>
+                        <select name="package_type" class="form-select">
+                            <option value="">كل الأنواع</option>
+                            <option value="">{{ admin_t('All Types') }}</option>
+                            <option value="shore_excursion"
+                                {{ request('package_type') === 'shore_excursion' ? 'selected' : '' }}>رحلات شاطئية (Shore
+                                Excursions)</option>
+                            <option value="day_tour" {{ request('package_type') === 'day_tour' ? 'selected' : '' }}>جولات
+                                يومية (Day Tours)</option>
+                            {{ request('package_type') === 'shore_excursion' ? 'selected' : '' }}>Shore Excursions</option>
+                            <option value="day_tour" {{ request('package_type') === 'day_tour' ? 'selected' : '' }}>Day
+                                Tours</option>
+                            <option value="travel_package"
+                                {{ request('package_type') === 'travel_package' ? 'selected' : '' }}>باقات سفر (Travel
+                                Packages)</option>
+                            {{ request('package_type') === 'travel_package' ? 'selected' : '' }}>Travel Packages</option>
+                            <option value="nile_cruise" {{ request('package_type') === 'nile_cruise' ? 'selected' : '' }}>
+                                نايل كروز (Nile Cruises)</option>
+                            Nile Cruises</option>
                         </select>
                     </div>
 
@@ -231,9 +255,11 @@
                         <input type="date" class="form-control" name="from" value="{{ request('from') }}">
                     </div>
 
-                    <div class="col-md-2 d-flex gap-2">
-                        <button class="btn btn-primary w-100" type="submit">فلترة</button>
-                        <a href="{{ route('admin.bookings.index') }}" class="btn btn-secondary w-100">إعادة</a>
+                    <div class="col-md-1 d-flex gap-1">
+                        <button class="btn btn-primary w-100" type="submit" title="فلترة"><i
+                                class="fas fa-filter"></i></button>
+                        <a href="{{ route('admin.bookings.index') }}" class="btn btn-secondary w-100"
+                            title="إعادة تعيين"><i class="fas fa-undo"></i></a>
                     </div>
                 </div>
             </form>
@@ -267,12 +293,25 @@
                         </div>
 
                         <div class="row mb-3">
-                            <div class="col-md-3"><strong>الباقة:</strong> {{ $booking->package->name ?? '-' }}</div>
+                            <div class="col-md-3">
+                                <strong>الباقة:</strong>
+                                @if ($booking->package?->package_type === 'shore_excursion')
+                                    <a href="{{ route('admin.shore-excursions.edit', $booking->package_id) }}"
+                                        class="text-info fw-bold text-decoration-none">
+                                        {{ $booking->package->name ?? '-' }}
+                                    </a>
+                                    <span class="badge bg-info text-dark ms-1" style="font-size: 10px;"><i
+                                            class="fas fa-anchor"></i> شاطئية</span>
+                                    class="fas fa-anchor"></i> Shore Excursion</span>
+                                @else
+                                    {{ $booking->package->name ?? '-' }}
+                                @endif
+                            </div>
                             <div class="col-md-3"><strong>عدد الأفراد:</strong> {{ $booking->travellers_count ?? '-' }}
-                                @if(($booking->adults ?? 0) > 0 || ($booking->children ?? 0) > 0 || ($booking->infants ?? 0) > 0)
-                                    <small class="text-light opacity-75 d-block" style="font-size: 11px;">
-                                        ({{ $booking->adults ?? 0 }} بالغ · {{ $booking->children ?? 0 }} طفل · {{ $booking->infants ?? 0 }} رضيع)
-                                    </small>
+                                @if (($booking->adults ?? 0) > 0 || ($booking->children ?? 0) > 0 || ($booking->infants ?? 0) > 0)
+                                    <small class="text-light opacity-75 d-block"
+                                        style="font-size: 11px;">({{ $booking->adults ?? 0 }} بالغ ·
+                                        {{ $booking->children ?? 0 }} طفل · {{ $booking->infants ?? 0 }} رضيع)</small>
                                 @endif
                             </div>
                             <div class="col-md-3"><strong>إجمالي السعر:</strong>
@@ -287,13 +326,16 @@
                                 {{ optional($booking->created_at)->translatedFormat('d M Y') ?? '-' }}</div>
                             <div class="col-md-3">
                                 <strong>الهاتف:</strong>
-                                @if(!empty($booking->phone))
+                                @if (!empty($booking->phone))
                                     @php($cleanBPhone = preg_replace('/[^0-9]/', '', $booking->phone))
                                     <span class="dir-ltr d-inline-block font-monospace mx-1">{{ $booking->phone }}</span>
-                                    <a href="https://wa.me/{{ $cleanBPhone }}" target="_blank" class="btn btn-sm btn-success rounded-circle px-2 py-1 me-1" title="مراسلة عبر واتساب">
+                                    <a href="https://wa.me/{{ $cleanBPhone }}" target="_blank"
+                                        class="btn btn-sm btn-success rounded-circle px-2 py-1 me-1"
+                                        title="مراسلة عبر واتساب">
                                         <i class="fab fa-whatsapp fs-6"></i>
                                     </a>
-                                    <a href="tel:{{ $booking->phone }}" class="btn btn-sm btn-info rounded-circle px-2 py-1" title="اتصال هاتفي">
+                                    <a href="tel:{{ $booking->phone }}"
+                                        class="btn btn-sm btn-info rounded-circle px-2 py-1" title="اتصال هاتفي">
                                         <i class="fas fa-phone-alt fs-6"></i>
                                     </a>
                                 @else
@@ -302,8 +344,9 @@
                             </div>
                             <div class="col-md-3">
                                 <strong>البريد:</strong>
-                                @if(!empty($booking->email))
-                                    <a href="mailto:{{ $booking->email }}" class="text-info text-decoration-none" title="مراسلة عبر البريد الإلكتروني">
+                                @if (!empty($booking->email))
+                                    <a href="mailto:{{ $booking->email }}" class="text-info text-decoration-none"
+                                        title="مراسلة عبر البريد الإلكتروني">
                                         <i class="fas fa-envelope text-primary me-1"></i>{{ $booking->email }}
                                     </a>
                                 @else
@@ -314,7 +357,8 @@
 
                         <div class="d-flex gap-2 flex-wrap">
                             <a href="{{ route('admin.bookings.show', $booking) }}" class="btn btn-info btn-sm">عرض</a>
-                            <a href="{{ route('admin.bookings.edit', $booking) }}" class="btn btn-warning btn-sm">تعديل</a>
+                            <a href="{{ route('admin.bookings.edit', $booking) }}"
+                                class="btn btn-warning btn-sm">تعديل</a>
                             <a href="{{ route('admin.bookings.print', $booking) }}"
                                 class="btn btn-secondary btn-sm">طباعة</a>
 

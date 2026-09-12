@@ -32,11 +32,21 @@ class BookingController extends Controller
                 });
             })
             ->when($request->filled('package_id'), fn($q) => $q->where('package_id', $request->integer('package_id')))
+            ->when($request->filled('package_type'), function ($query) use ($request) {
+                $query->whereHas('package', function ($q) use ($request) {
+                    $q->where('package_type', $request->input('package_type'));
+                });
+            })
             ->when($request->filled('status'), fn($q) => $q->where('status', $request->input('status')))
             ->latest()
             ->paginate($this->perPage($request));
 
-        return $this->view('admin.bookings.index', ['bookings' => $bookings]);
+        $packages = Package::query()->orderBy('id')->get(['id', 'title', 'package_type']);
+
+        return $this->view('admin.bookings.index', [
+            'bookings' => $bookings,
+            'packages' => $packages,
+        ]);
     }
 
     public function create(): View
@@ -89,7 +99,14 @@ class BookingController extends Controller
 
     public function show(Booking $booking): View
     {
-        $booking->load(['client', 'package', 'payments', 'travelers', 'items.cabin']);
+        $booking->load([
+            'client',
+            'package.nileCruiseDetail',
+            'package.tourPackageAccommodations.hotels',
+            'payments',
+            'travelers',
+            'items.cabin',
+        ]);
 
         return $this->view('admin.bookings.show', compact('booking'));
     }
@@ -214,7 +231,14 @@ class BookingController extends Controller
 
     public function print(Booking $booking): View
     {
-        $booking->load(['client', 'package', 'travelers', 'items.cabin']);
+        $booking->load([
+            'client',
+            'package.nileCruiseDetail',
+            'package.tourPackageAccommodations.hotels',
+            'payments',
+            'travelers',
+            'items.cabin',
+        ]);
 
         return $this->view('admin.bookings.print', compact('booking'));
     }

@@ -353,7 +353,7 @@ class CheckoutController extends BaseWebsiteController
     public function status(string $paymentReference): View
     {
         $payment = Payment::query()
-            ->with(['booking.package', 'paymentMethod'])
+            ->with(['booking.package', 'booking.items', 'booking.travelers', 'paymentMethod'])
             ->where('transaction_reference', $paymentReference)
             ->firstOrFail();
 

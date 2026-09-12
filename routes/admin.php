@@ -31,6 +31,7 @@ use App\Http\Controllers\Admin\SeoMetaController;
 use App\Http\Controllers\Admin\SeoRedirectController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\ShoreExcursionController;
 use App\Http\Controllers\Admin\SocialMediaController;
 use App\Http\Controllers\Admin\StaticPageController;
 use App\Http\Controllers\Admin\SubscribeController;
@@ -269,6 +270,25 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
             Route::get('import-progress/{process}', [ReadyTourController::class, 'importProgress'])->name('import-progress');
             Route::post('import-selected', [ReadyTourController::class, 'importSelected'])->name('import-selected');
             Route::post('import-all', [ReadyTourController::class, 'importAll'])->name('import-all');
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Shore Excursions / الرحلات الشاطئية
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('shore-excursions')->name('shore-excursions.')->group(function () {
+            Route::get('/', [ShoreExcursionController::class, 'index'])->name('index');
+            Route::get('create', [ShoreExcursionController::class, 'create'])->name('create');
+            Route::post('/', [ShoreExcursionController::class, 'store'])->name('store');
+            Route::get('bookings', [ShoreExcursionController::class, 'bookings'])->name('bookings');
+            Route::get('{package}/edit', [ShoreExcursionController::class, 'edit'])->name('edit');
+            Route::put('{package}', [ShoreExcursionController::class, 'update'])->name('update');
+            Route::delete('{package}', [ShoreExcursionController::class, 'destroy'])->name('destroy');
+            Route::post('{package}/toggle-status', [ShoreExcursionController::class, 'toggleStatus'])->name('toggle-status');
+            Route::post('{package}/toggle-featured', [ShoreExcursionController::class, 'toggleFeatured'])->name('toggle-featured');
+            Route::post('{package}/duplicate', [ShoreExcursionController::class, 'duplicate'])->name('duplicate');
+            Route::get('{package}/bookings', [ShoreExcursionController::class, 'packageBookings'])->name('package-bookings');
         });
 
         /*

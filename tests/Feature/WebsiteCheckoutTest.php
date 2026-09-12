@@ -717,6 +717,107 @@ class WebsiteCheckoutTest extends TestCase
             ->assertSee('فرنسا');
     }
 
+    public function test_booking_details_show_and_print_render_package_type_options_and_financial_breakdown(): void
+    {
+        $this->configurePaymob();
+
+        $package = $this->package([
+            'package_type' => 'shore_excursion',
+            'price_from' => 90,
+        ]);
+
+        $addon = \App\Models\PackageAddon::create([
+            'package_id' => $package->id,
+            'title' => 'VIP Cairo Port Pickup',
+            'description' => 'Direct private van from port terminal',
+            'price' => 45,
+            'price_unit' => 'per_person',
+            'is_active' => true,
+        ]);
+
+        Http::fake([
+            'https://accept.paymob.com/v1/intention/' => Http::response([
+                'id' => 'intention-889977',
+                'intention_order_id' => 'order-889977',
+                'client_secret' => 'sec_test_secret',
+            ], 201),
+        ]);
+
+        $checkoutResponse = $this->post(route('website.checkout.store', $package->slug), [
+            'pricing_option' => 'group:1',
+            'travel_date' => now()->addMonth()->toDateString(),
+            'adults' => 2,
+            'children' => 0,
+            'infants' => 0,
+            'rooms' => 1,
+            'email' => 'traveler_shore@example.com',
+            'phone' => '+201099998888',
+            'pickup_location' => 'Alexandria Port Dock 4',
+            'special_requests' => 'Please bring cold bottled water',
+            'addon_ids' => [$addon->id],
+            'payment_method' => 'paymob',
+            'terms' => 1,
+            'travelers' => [
+                ['title' => 'Mr', 'first_name' => 'John', 'last_name' => 'Smith'],
+                ['title' => 'Mrs', 'first_name' => 'Jane', 'last_name' => 'Smith'],
+            ],
+        ]);
+
+        $checkoutResponse->assertRedirectContains('accept.paymob.com/unifiedcheckout');
+
+        $booking = Booking::query()->where('pickup_location', 'Alexandria Port Dock 4')->firstOrFail();
+        $this->assertSame('Alexandria Port Dock 4', $booking->pickup_location);
+        $this->assertCount(2, $booking->items); // 1 main item + 1 addon item
+
+        $admin = Admin::create([
+            'name' => 'Booking Super Admin',
+            'email' => 'booking_admin_details@example.com',
+            'password' => bcrypt('secret123'),
+        ]);
+
+        // 1. Verify Admin Booking Show View
+        $showResponse = $this->actingAs($admin, 'admin')->get(route('admin.bookings.show', $booking));
+        $showResponse->assertOk()
+            ->assertSee('Alexandria Port Dock 4')
+            ->assertSee('Please bring cold bottled water')
+            ->assertSee('VIP Cairo Port Pickup')
+            ->assertSee('رحلة شاطئية (Shore Excursion)')
+            ->assertSee('ملخص التكلفة والحسابات المالية')
+            ->assertSee('تكلفة الرحلة الأساسية')
+            ->assertSee('تكلفة الإضافات المختارة')
+            ->assertSee('المجموع الكلي للحجز')
+            ->assertSee('المبلغ المتبقي')
+            ->assertSee('John Smith');
+
+        // 2. Verify Admin Booking Print View
+        $printResponse = $this->actingAs($admin, 'admin')->get(route('admin.bookings.print', $booking));
+        $printResponse->assertOk()
+            ->assertSee('Alexandria Port Dock 4')
+            ->assertSee('Please bring cold bottled water')
+            ->assertSee('VIP Cairo Port Pickup')
+            ->assertSee('رحلة شاطئية (Shore Excursion)')
+            ->assertSee('ملخص التكلفة والحسابات المالية')
+            ->assertSee('تكلفة الإضافات')
+            ->assertSee('John Smith');
+
+        // 3. Verify Customer Checkout Status View
+        $payment = $booking->payments()->create([
+            'amount' => 50.00,
+            'currency_code' => 'USD',
+            'status' => 'paid',
+            'transaction_reference' => 'PAY-TEST-STATUS-123',
+            'provider' => 'paymob',
+        ]);
+
+        $statusUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute('website.checkout.status', now()->addHour(), ['paymentReference' => 'PAY-TEST-STATUS-123']);
+        $statusResponse = $this->get($statusUrl);
+        $statusResponse->assertOk()
+            ->assertSee($booking->booking_number)
+            ->assertSee('Alexandria Port Dock 4')
+            ->assertSee('VIP Cairo Port Pickup')
+            ->assertSee('Shore Excursion');
+    }
+
     private function package(array $overrides = []): Package
     {
         return Package::create(array_merge([

@@ -51,6 +51,41 @@ if (!function_exists('get_product_image')) {
 }
 
 
+if (!function_exists('get_package_image')) {
+    /**
+     * إرجاع رابط الصورة الصحيح للرحلة (بارزة أو معرض)
+     *
+     * @param string|null $image
+     * @param string|null $fallback
+     * @return string
+     */
+    function get_package_image(?string $image, ?string $fallback = null): string
+    {
+        $fallback = $fallback ?: asset('website/photos/home2.webp');
+
+        if (!$image || trim($image) === '') {
+            return $fallback;
+        }
+
+        if (str_starts_with($image, 'http://') || str_starts_with($image, 'https://')) {
+            return $image;
+        }
+
+        $clean = ltrim($image, '/');
+
+        if (str_starts_with($clean, 'storage/')) {
+            return asset($clean);
+        }
+
+        if (file_exists(public_path($clean))) {
+            return asset($clean);
+        }
+
+        return asset('storage/' . $clean);
+    }
+}
+
+
 if (!function_exists('formatBytes')) {
     function formatBytes($bytes, $precision = 2)
     {
@@ -305,26 +340,68 @@ if (!function_exists('greeting')) {
             return __('تصبح على خير') . ' 🌙';
         }
     }
-    if (!function_exists('adminTrans')) {
-        function adminTrans($value, array $preferred = ['Ar', 'ar', 'en'])
-        {
-            if (!is_array($value)) {
-                return (string) ($value ?? '');
-            }
+}
 
-            foreach ($preferred as $lang) {
-                if (!empty($value[$lang])) {
-                    return (string) $value[$lang];
-                }
-            }
-
-            foreach ($value as $translation) {
-                if (is_string($translation) && trim($translation) !== '') {
-                    return trim($translation);
-                }
-            }
-
-            return '';
+if (!function_exists('adminTrans')) {
+    function adminTrans($value, array $preferred = ['Ar', 'ar', 'en'])
+    {
+        if (!is_array($value)) {
+            return (string) ($value ?? '');
         }
+
+        foreach ($preferred as $lang) {
+            if (!empty($value[$lang])) {
+                return (string) $value[$lang];
+            }
+        }
+
+        foreach ($value as $translation) {
+            if (is_string($translation) && trim($translation) !== '') {
+                return trim($translation);
+            }
+        }
+
+        return '';
+    }
+}
+
+if (!function_exists('admin_translation_maps')) {
+    function admin_translation_maps(): array
+    {
+        static $maps;
+        if ($maps === null) {
+            $transPath = resource_path('views/admin/i18n/translations.php');
+            $maps = file_exists($transPath) ? require $transPath : [];
+        }
+        return $maps;
+    }
+}
+
+if (!function_exists('admin_t')) {
+    function admin_t($key, array $replace = []): string
+    {
+        $key = (string) $key;
+        $locale = app()->getLocale();
+        $maps = admin_translation_maps();
+
+        if ($locale === 'en') {
+            if (isset($maps['en'][$key])) {
+                $val = $maps['en'][$key];
+                if (preg_match('/[\x{0600}-\x{06FF}]/u', $val) && !preg_match('/[\x{0600}-\x{06FF}]/u', $key)) {
+                    $translated = $key;
+                } else {
+                    $translated = $val;
+                }
+            } else {
+                $translated = $key;
+            }
+        } else {
+            $translated = $maps[$locale][$key] ?? $key;
+        }
+
+        foreach ($replace as $name => $value) {
+            $translated = str_replace(':' . $name, (string) $value, $translated);
+        }
+        return $translated;
     }
 }

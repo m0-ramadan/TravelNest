@@ -136,6 +136,39 @@
             </ul>
         </li>
 
+        {{-- Shore Excursions / الرحلات الشاطئية --}}
+        {{-- Shore Excursions --}}
+        @php
+            $shoreExcursionsOpen = request()->routeIs('admin.shore-excursions.*');
+        @endphp
+        <li class="menu-item {{ $shoreExcursionsOpen ? 'active open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-anchor"></i>
+                <div>{{ admin_t('الرحلات الشاطئية') }}</div>
+                <div>{{ admin_t('Shore Excursions') }}</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.shore-excursions.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.shore-excursions.index') }}" class="menu-link">
+                        <div>{{ admin_t('قائمة الرحلات الشاطئية') }}</div>
+                        <div>{{ admin_t('All Shore Excursions') }}</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.shore-excursions.create') ? 'active' : '' }}">
+                    <a href="{{ route('admin.shore-excursions.create') }}" class="menu-link">
+                        <div>{{ admin_t('إضافة رحلة شاطئية') }}</div>
+                        <div>{{ admin_t('Add Shore Excursion') }}</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.shore-excursions.bookings') ? 'active' : '' }}">
+                    <a href="{{ route('admin.shore-excursions.bookings') }}" class="menu-link">
+                        <div>{{ admin_t('حجوزات الرحلات الشاطئية') }}</div>
+                        <div>{{ admin_t('Shore Excursion Bookings') }}</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         {{-- Booking management --}}
         @php
             $bookingOpen = request()->routeIs(

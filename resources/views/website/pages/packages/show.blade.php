@@ -2458,8 +2458,8 @@
 
 
         /* =========================================================
-                                   Nile Cruise body redesign — body only, shared header/footer untouched
-                                   ========================================================= */
+                                       Nile Cruise body redesign — body only, shared header/footer untouched
+                                       ========================================================= */
         .nile-cruise-page .main-container {
             background:
                 radial-gradient(circle at 8% 8%, rgba(215, 239, 250, .58), transparent 34%),
@@ -4174,7 +4174,10 @@
                                 ? []
                                 : (array) ($package->group_pricing_tiers ?? []),
                         )->filter(fn($tier) => is_array($tier) && (float) ($tier['price_per_person'] ?? 0) > 0);
-                        if (in_array($package->package_type, ['day_tour', 'shore_excursion'], true) && $dayTourGroupOptions->isEmpty()) {
+                        if (
+                            in_array($package->package_type, ['day_tour', 'shore_excursion'], true) &&
+                            $dayTourGroupOptions->isEmpty()
+                        ) {
                             $groupTiersForDisplay = collect();
                         }
                         $hasAccommodations =
@@ -4589,19 +4592,20 @@
                         </section>
                     @endif
 
-                    {{-- @if (count($gallery) > 1)
-                        <section class="content-section">
-                            <h2 class="section-header">{{ __('Gallery') }}</h2>
+                    @if (!empty($gallery) && count($gallery) > 0)
+                        <section id="gallery" class="content-section">
+                            <h2 class="section-header">{{ __('Photo Gallery') }}</h2>
                             <div class="gallery-grid">
                                 @foreach ($gallery as $img)
                                     <a class="gallery-item js-gallery-trigger" href="{{ $img }}"
                                         data-gallery-index="{{ $loop->index }}">
-                                        <img src="{{ $img }}" alt="{{ $title }}" loading="lazy">
+                                        <img src="{{ $img }}" alt="{{ $title }}" loading="lazy"
+                                            onerror="this.src='{{ asset('website/photos/home2.webp') }}'">
                                     </a>
                                 @endforeach
                             </div>
                         </section>
-                    @endif --}}
+                    @endif
 
                     @php
                         $cancellationPolicy = $package->getTranslation('cancellation_policy');
@@ -4959,8 +4963,9 @@
 
                                         @php
                                             $sidebarAddons = (($addons ?? collect())->isNotEmpty()
-                                                    ? $addons
-                                                    : ($package->addons ?? collect()))
+                                                ? $addons
+                                                : $package->addons ?? collect()
+                                            )
                                                 ->where('is_active', true)
                                                 ->filter(fn($addon) => (float) $addon->price > 0)
                                                 ->values();
@@ -4979,9 +4984,11 @@
                                                                 data-addon-amount="{{ (float) $addon->price }}"
                                                                 data-addon-unit="{{ $addon->price_unit ?: 'per booking' }}"
                                                                 data-addon-symbol="{{ $addonCurrency?->symbol ?: $currencySymbol }}">
-                                                            <span class="day-tour-addon-check"><i class="la la-check"></i></span>
+                                                            <span class="day-tour-addon-check"><i
+                                                                    class="la la-check"></i></span>
                                                             <span class="day-tour-addon-copy">
-                                                                <span class="day-tour-addon-title">{{ $addon->title }}</span>
+                                                                <span
+                                                                    class="day-tour-addon-title">{{ $addon->title }}</span>
                                                                 @if ($addon->description)
                                                                     <small>{{ $addon->description }}</small>
                                                                 @endif
@@ -5419,7 +5426,9 @@
                                 .trim().toLowerCase().replace(/[-\s]+/g, '_');
                             const addonQuantity = (unit) => {
                                 const normalized = normalizeAddonUnit(unit);
-                                if (['per_person', 'person', 'per_traveler', 'traveler', 'per_guest', 'guest'].includes(normalized)) {
+                                if (['per_person', 'person', 'per_traveler', 'traveler', 'per_guest',
+                                        'guest'
+                                    ].includes(normalized)) {
                                     return Math.max(1, numAdults + numChildren);
                                 }
                                 if (['per_adult', 'adult'].includes(normalized)) {
@@ -5432,7 +5441,8 @@
                             };
                             const addonsTotal = addonInputs
                                 .filter(input => input.checked)
-                                .reduce((sum, input) => sum + (parseFloat(input.dataset.addonAmount || 0) * addonQuantity(input.dataset.addonUnit)), 0);
+                                .reduce((sum, input) => sum + (parseFloat(input.dataset.addonAmount || 0) *
+                                    addonQuantity(input.dataset.addonUnit)), 0);
 
                             let total = 0;
                             let breakdown = '';

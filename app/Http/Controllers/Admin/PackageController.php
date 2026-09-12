@@ -71,6 +71,8 @@ class PackageController extends Controller
             })
             ->when($request->filled('package_type'), function ($query) use ($request) {
                 $query->where('package_type', $request->string('package_type'));
+            }, function ($query) {
+                $query->where('package_type', '!=', 'shore_excursion');
             })
             ->when($request->filled('is_featured'), function ($query) use ($request) {
                 $query->where('is_featured', (bool) $request->integer('is_featured'));
