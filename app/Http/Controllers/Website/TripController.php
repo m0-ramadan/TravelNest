@@ -37,25 +37,31 @@ class TripController extends BaseWebsiteController
     public function show(string $slug)
     {
         $package = Package::query()
-            ->with([
-                'currency',
-                'category',
-                'primaryCountry',
-                'destination.city',
-                'highlights',
-                'facilities',
-                'itineraries',
-                'inclusions',
-                'prices.currency',
-                'packageAttractions.attraction.city',
-                'cruise',
-                'cities',
-                'tags',
-                'addons.currency',
-                'tourPackageDetail',
-                'tourPackageAccommodations.hotels',
-                'tourPackageAccommodations.seasons.currency',
-                'tourPackageAccommodations.seasons.items',
+            ->where('slug', $slug)
+            ->where('is_active', true)
+            ->firstOrFail();
+
+        $with = [
+            'currency',
+            'category',
+            'primaryCountry',
+            'destination.city',
+            'highlights',
+            'facilities',
+            'itineraries',
+            'inclusions',
+            'prices.currency',
+            'packageAttractions.attraction.city',
+            'cruise',
+            'cities',
+            'tags',
+            'addons.currency',
+            'reviews',
+            'testimonials',
+        ];
+
+        if ($package->package_type === 'nile_cruise') {
+            $with = array_merge($with, [
                 'nileCruiseType',
                 'nileCruiseCategory',
                 'nileCruiseDetail',
@@ -68,12 +74,17 @@ class TripController extends BaseWebsiteController
                 'nileCruiseDurations.itineraryDays.activities.attraction',
                 'nileCruiseDurations.seasonPrices.currency',
                 'nileCruiseDurations.seasonPrices.items.cabin',
-                'reviews',
-                'testimonials',
-            ])
-            ->where('slug', $slug)
-            ->where('is_active', true)
-            ->firstOrFail();
+            ]);
+        } elseif ($package->package_type === 'travel_package') {
+            $with = array_merge($with, [
+                'tourPackageDetail',
+                'tourPackageAccommodations.hotels',
+                'tourPackageAccommodations.seasons.currency',
+                'tourPackageAccommodations.seasons.items',
+            ]);
+        }
+
+        $package->loadMissing($with);
 
         $title = $this->translated($package->getRawOriginal('title') ?? $package->title);
         $subtitle = $this->translated($package->getRawOriginal('subtitle') ?? $package->subtitle);

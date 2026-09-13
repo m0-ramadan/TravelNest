@@ -26,10 +26,9 @@ class ShoreExcursionsAdminTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = Admin::create([
+        $this->admin = $this->createSuperAdmin([
             'name' => 'Shore Admin',
             'email' => 'shore_admin@example.com',
-            'password' => bcrypt('password'),
         ]);
 
         $this->country = Country::create([

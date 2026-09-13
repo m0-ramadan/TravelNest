@@ -655,10 +655,9 @@ class WebsiteCheckoutTest extends TestCase
         $this->assertNotNull($infantTraveler);
         $this->assertSame('Mia', $infantTraveler->first_name);
 
-        $admin = Admin::create([
+        $admin = $this->createSuperAdmin([
             'name' => 'Admin User',
             'email' => 'admin_infant_test@example.com',
-            'password' => bcrypt('password'),
         ]);
 
         $this->actingAs($admin, 'admin')
@@ -769,10 +768,9 @@ class WebsiteCheckoutTest extends TestCase
         $this->assertSame('Alexandria Port Dock 4', $booking->pickup_location);
         $this->assertCount(2, $booking->items); // 1 main item + 1 addon item
 
-        $admin = Admin::create([
+        $admin = $this->createSuperAdmin([
             'name' => 'Booking Super Admin',
             'email' => 'booking_admin_details@example.com',
-            'password' => bcrypt('secret123'),
         ]);
 
         // 1. Verify Admin Booking Show View

@@ -84,10 +84,10 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
         Route::get('/admin', [AdminAuthController::class, 'home'])->name('index');
         Route::post('logout', [AdminAuthController::class, 'logout'])->name('logout');
 
-        Route::get('visitors', [VisitorController::class, 'index'])->name('visitors.index');
-        Route::get('visitors/chart', [VisitorController::class, 'chartData'])->name('visitors.chart');
-        Route::get('dashboard/quick-stats', [VisitorController::class, 'quickStats'])->name('dashboard.quick-stats');
-        Route::get('bookings/stats/{year?}', [BookingController::class, 'yearlyStats'])->name('bookings.yearly-stats');
+        Route::get('visitors', [VisitorController::class, 'index'])->middleware('admin.permission:visitors.view')->name('visitors.index');
+        Route::get('visitors/chart', [VisitorController::class, 'chartData'])->middleware('admin.permission:visitors.chart')->name('visitors.chart');
+        Route::get('dashboard/quick-stats', [VisitorController::class, 'quickStats'])->middleware('admin.permission:dashboard.view')->name('dashboard.quick-stats');
+        Route::get('bookings/stats/{year?}', [BookingController::class, 'yearlyStats'])->middleware('admin.permission:bookings.view')->name('bookings.yearly-stats');
 
         /*
         |--------------------------------------------------------------------------
@@ -95,10 +95,10 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
         |--------------------------------------------------------------------------
         */
         Route::prefix('setting')->name('setting.')->group(function () {
-            Route::get('pages', [SettingController::class, 'pages'])->name('pages');
-            Route::get('edit', [SettingController::class, 'edit'])->name('edit');
-            Route::post('update', [SettingController::class, 'update'])->name('update');
-            Route::post('update-pages', [SettingController::class, 'updatepages'])->name('updatepages');
+            Route::get('pages', [SettingController::class, 'pages'])->middleware('admin.permission:settings.pages')->name('pages');
+            Route::get('edit', [SettingController::class, 'edit'])->middleware('admin.permission:settings.edit')->name('edit');
+            Route::post('update', [SettingController::class, 'update'])->middleware('admin.permission:settings.update')->name('update');
+            Route::post('update-pages', [SettingController::class, 'updatepages'])->middleware('admin.permission:settings.update-pages')->name('updatepages');
         });
 
         /*
@@ -106,15 +106,15 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
         | Admins
         |--------------------------------------------------------------------------
         */
-        Route::resource('admins', AdminController::class);
+        Route::resource('admins', AdminController::class)->middleware('admin.permission:admins.view');
 
         Route::prefix('admins')->name('admins.')->group(function () {
-            Route::post('check-email', [AdminController::class, 'checkEmail'])->name('check-email');
-            Route::post('{admin}/toggle-status', [AdminController::class, 'toggleStatus'])->name('toggle-status');
-            Route::post('{admin}/reset-password', [AdminController::class, 'resetPassword'])->name('reset-password');
-            Route::post('bulk/delete', [AdminController::class, 'bulkDelete'])->name('bulk-delete');
-            Route::post('bulk/status', [AdminController::class, 'bulkStatus'])->name('bulk-status');
-            Route::get('export/data', [AdminController::class, 'export'])->name('export');
+            Route::post('check-email', [AdminController::class, 'checkEmail'])->middleware('admin.permission:admins.view')->name('check-email');
+            Route::post('{admin}/toggle-status', [AdminController::class, 'toggleStatus'])->middleware('admin.permission:admins.toggle-status')->name('toggle-status');
+            Route::post('{admin}/reset-password', [AdminController::class, 'resetPassword'])->middleware('admin.permission:admins.reset-password')->name('reset-password');
+            Route::post('bulk/delete', [AdminController::class, 'bulkDelete'])->middleware('admin.permission:admins.delete')->name('bulk-delete');
+            Route::post('bulk/status', [AdminController::class, 'bulkStatus'])->middleware('admin.permission:admins.toggle-status')->name('bulk-status');
+            Route::get('export/data', [AdminController::class, 'export'])->middleware('admin.permission:admins.export')->name('export');
         });
 
         /*
@@ -123,28 +123,28 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
         |--------------------------------------------------------------------------
         */
         Route::prefix('roles')->name('roles.')->group(function () {
-            Route::get('/', [RoleController::class, 'index'])->name('index');
-            Route::get('create', [RoleController::class, 'create'])->name('create');
-            Route::post('/', [RoleController::class, 'store'])->name('store');
-            Route::get('{role}', [RoleController::class, 'show'])->name('show');
-            Route::get('{role}/edit', [RoleController::class, 'edit'])->name('edit');
-            Route::put('{role}', [RoleController::class, 'update'])->name('update');
-            Route::delete('{role}', [RoleController::class, 'destroy'])->name('destroy');
-            Route::get('{role}/permissions', [RoleController::class, 'permissions'])->name('permissions');
-            Route::post('{role}/permissions', [RoleController::class, 'syncPermissions'])->name('permissions.sync');
+            Route::get('/', [RoleController::class, 'index'])->middleware('admin.permission:roles.view')->name('index');
+            Route::get('create', [RoleController::class, 'create'])->middleware('admin.permission:roles.create')->name('create');
+            Route::post('/', [RoleController::class, 'store'])->middleware('admin.permission:roles.create')->name('store');
+            Route::get('{role}', [RoleController::class, 'show'])->middleware('admin.permission:roles.view')->name('show');
+            Route::get('{role}/edit', [RoleController::class, 'edit'])->middleware('admin.permission:roles.edit')->name('edit');
+            Route::put('{role}', [RoleController::class, 'update'])->middleware('admin.permission:roles.edit')->name('update');
+            Route::delete('{role}', [RoleController::class, 'destroy'])->middleware('admin.permission:roles.delete')->name('destroy');
+            Route::get('{role}/permissions', [RoleController::class, 'permissions'])->middleware('admin.permission:roles.permissions')->name('permissions');
+            Route::post('{role}/permissions', [RoleController::class, 'syncPermissions'])->middleware('admin.permission:roles.permissions')->name('permissions.sync');
 
-            Route::get('assign/index', [RoleController::class, 'assignIndex'])->name('assign.index');
-            Route::post('assign/store', [RoleController::class, 'assignRoles'])->name('assign.store');
+            Route::get('assign/index', [RoleController::class, 'assignIndex'])->middleware('admin.permission:roles.assign')->name('assign.index');
+            Route::post('assign/store', [RoleController::class, 'assignRoles'])->middleware('admin.permission:roles.assign')->name('assign.store');
         });
 
         Route::prefix('permissions')->name('permissions.')->group(function () {
-            Route::get('/', [PermissionController::class, 'index'])->name('index');
-            Route::get('create', [PermissionController::class, 'create'])->name('create');
-            Route::post('/', [PermissionController::class, 'store'])->name('store');
-            Route::post('generate', [PermissionController::class, 'generateForModule'])->name('generate');
-            Route::get('{permission}/edit', [PermissionController::class, 'edit'])->name('edit');
-            Route::put('{permission}', [PermissionController::class, 'update'])->name('update');
-            Route::delete('{permission}', [PermissionController::class, 'destroy'])->name('destroy');
+            Route::get('/', [PermissionController::class, 'index'])->middleware('admin.permission:permissions.view')->name('index');
+            Route::get('create', [PermissionController::class, 'create'])->middleware('admin.permission:permissions.create')->name('create');
+            Route::post('/', [PermissionController::class, 'store'])->middleware('admin.permission:permissions.create')->name('store');
+            Route::post('generate', [PermissionController::class, 'generateForModule'])->middleware('admin.permission:permissions.generate')->name('generate');
+            Route::get('{permission}/edit', [PermissionController::class, 'edit'])->middleware('admin.permission:permissions.edit')->name('edit');
+            Route::put('{permission}', [PermissionController::class, 'update'])->middleware('admin.permission:permissions.edit')->name('update');
+            Route::delete('{permission}', [PermissionController::class, 'destroy'])->middleware('admin.permission:permissions.delete')->name('destroy');
         });
 
         /*
@@ -152,13 +152,13 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
         | Users
         |--------------------------------------------------------------------------
         */
-        Route::resource('users', UserController::class);
+        Route::resource('users', UserController::class)->middleware('admin.permission:users.view');
 
         Route::prefix('users')->name('users.')->group(function () {
-            Route::get('export', [UserController::class, 'export'])->name('export');
-            Route::get('stats', [UserController::class, 'getStats'])->name('stats');
-            Route::post('{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('toggle-status');
-            Route::get('{user}/activities', [UserController::class, 'activities'])->name('activities');
+            Route::get('export', [UserController::class, 'export'])->middleware('admin.permission:users.export')->name('export');
+            Route::get('stats', [UserController::class, 'getStats'])->middleware('admin.permission:users.stats')->name('stats');
+            Route::post('{user}/toggle-status', [UserController::class, 'toggleStatus'])->middleware('admin.permission:users.edit')->name('toggle-status');
+            Route::get('{user}/activities', [UserController::class, 'activities'])->middleware('admin.permission:users.view')->name('activities');
         });
 
         /*
@@ -211,11 +211,6 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
             Route::post('{city}/toggle-status', [CityController::class, 'toggleStatus'])->name('toggle-status');
         });
 
-        Route::prefix('regions')->name('regions.')->group(function () {
-            Route::get('by-country/{country}', [RegionController::class, 'byCountry'])->name('by-country');
-            Route::post('{region}/toggle-status', [RegionController::class, 'toggleStatus'])->name('toggle-status');
-        });
-
         Route::prefix('destinations')->name('destinations.')->group(function () {
             Route::get('statistics', [DestinationController::class, 'statistics'])->name('statistics');
             Route::post('bulk-action', [DestinationController::class, 'bulkAction'])->name('bulk-action');
@@ -254,7 +249,6 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
 
         Route::prefix('package-prices')->name('package-prices.')->group(function () {
             Route::get('by-package/{package}', [PackagePriceController::class, 'byPackage'])->name('by-package');
-            Route::post('bulk-action', [PackagePriceController::class, 'bulkAction'])->name('bulk-action');
         });
 
         /*
@@ -298,41 +292,41 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
         */
         // Static CRM routes must be declared before resource wildcards.
         Route::prefix('clients')->name('clients.')->group(function () {
-            Route::get('export', [ClientController::class, 'export'])->name('export');
-            Route::get('{client}/bookings', [ClientController::class, 'bookings'])->name('bookings');
-            Route::get('{client}/inquiries', [ClientController::class, 'inquiries'])->name('inquiries');
-            Route::post('{client}/toggle-status', [ClientController::class, 'toggleStatus'])->name('toggle-status');
+            Route::get('export', [ClientController::class, 'export'])->middleware('admin.permission:clients.view')->name('export');
+            Route::get('{client}/bookings', [ClientController::class, 'bookings'])->middleware('admin.permission:clients.view')->name('bookings');
+            Route::get('{client}/inquiries', [ClientController::class, 'inquiries'])->middleware('admin.permission:clients.view')->name('inquiries');
+            Route::post('{client}/toggle-status', [ClientController::class, 'toggleStatus'])->middleware('admin.permission:clients.edit')->name('toggle-status');
         });
 
         Route::prefix('inquiries')->name('inquiries.')->group(function () {
-            Route::get('statistics', [InquiryController::class, 'statistics'])->name('statistics');
-            Route::post('bulk-action', [InquiryController::class, 'bulkAction'])->name('bulk-action');
-            Route::post('{inquiry}/reply', [InquiryController::class, 'reply'])->name('reply');
-            Route::post('{inquiry}/update-status', [InquiryController::class, 'updateStatus'])->name('update-status');
+            Route::get('statistics', [InquiryController::class, 'statistics'])->middleware('admin.permission:inquiries.view')->name('statistics');
+            Route::post('bulk-action', [InquiryController::class, 'bulkAction'])->middleware('admin.permission:inquiries.edit')->name('bulk-action');
+            Route::post('{inquiry}/reply', [InquiryController::class, 'reply'])->middleware('admin.permission:inquiries.edit')->name('reply');
+            Route::post('{inquiry}/update-status', [InquiryController::class, 'updateStatus'])->middleware('admin.permission:inquiries.edit')->name('update-status');
         });
 
         Route::prefix('bookings')->name('bookings.')->group(function () {
-            Route::get('statistics', [BookingController::class, 'statistics'])->name('statistics');
-            Route::post('bulk-action', [BookingController::class, 'bulkAction'])->name('bulk-action');
-            Route::post('{booking}/update-status', [BookingController::class, 'updateStatus'])->name('update-status');
-            Route::get('{booking}/print', [BookingController::class, 'print'])->name('print');
+            Route::get('statistics', [BookingController::class, 'statistics'])->middleware('admin.permission:bookings.view')->name('statistics');
+            Route::post('bulk-action', [BookingController::class, 'bulkAction'])->middleware('admin.permission:bookings.edit')->name('bulk-action');
+            Route::post('{booking}/update-status', [BookingController::class, 'updateStatus'])->middleware('admin.permission:bookings.update-status')->name('update-status');
+            Route::get('{booking}/print', [BookingController::class, 'print'])->middleware('admin.permission:bookings.print')->name('print');
         });
 
-        Route::resource('clients', ClientController::class);
-        Route::resource('inquiries', InquiryController::class);
-        Route::resource('bookings', BookingController::class);
+        Route::resource('clients', ClientController::class)->middleware('admin.permission:clients.view');
+        Route::resource('inquiries', InquiryController::class)->middleware('admin.permission:inquiries.view');
+        Route::resource('bookings', BookingController::class)->middleware('admin.permission:bookings.view');
         Route::resource('communications', CommunicationController::class)->only([
             'index',
             'show',
             'store',
             'destroy',
-        ]);
+        ])->middleware('admin.permission:communications.view');
 
         Route::prefix('communications')->name('communications.')->group(function () {
-            Route::get('client/{client}', [CommunicationController::class, 'clientCommunications'])->name('client');
-            Route::get('inquiry/{inquiry}', [CommunicationController::class, 'inquiryCommunications'])->name('inquiry');
-            Route::get('booking/{booking}', [CommunicationController::class, 'bookingCommunications'])->name('booking');
-            Route::post('{communication}/mark-sent', [CommunicationController::class, 'markSent'])->name('mark-sent');
+            Route::get('client/{client}', [CommunicationController::class, 'clientCommunications'])->middleware('admin.permission:communications.client')->name('client');
+            Route::get('inquiry/{inquiry}', [CommunicationController::class, 'inquiryCommunications'])->middleware('admin.permission:communications.inquiry')->name('inquiry');
+            Route::get('booking/{booking}', [CommunicationController::class, 'bookingCommunications'])->middleware('admin.permission:communications.booking')->name('booking');
+            Route::post('{communication}/mark-sent', [CommunicationController::class, 'markSent'])->middleware('admin.permission:communications.show')->name('mark-sent');
         });
 
         /*
@@ -342,18 +336,19 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
         */
         // Static payment routes must be declared before resource wildcards.
         Route::patch('payment-methods/{paymentMethod}/toggle-status', [PaymentMethodController::class, 'toggleStatus'])
+            ->middleware('admin.permission:payment-methods.toggle-status')
             ->name('payment-methods.toggle-status');
 
         Route::prefix('payments')->name('payments.')->group(function () {
-            Route::get('statistics', [PaymentController::class, 'statistics'])->name('statistics');
-            Route::get('export', [PaymentController::class, 'export'])->name('export');
-            Route::post('{payment}/update-status', [PaymentController::class, 'updateStatus'])->name('update-status');
-            Route::post('{payment}/refund', [PaymentController::class, 'refund'])->name('refund');
-            Route::post('{payment}/reconcile', [PaymentController::class, 'reconcile'])->name('reconcile');
+            Route::get('statistics', [PaymentController::class, 'statistics'])->middleware('admin.permission:payments.view')->name('statistics');
+            Route::get('export', [PaymentController::class, 'export'])->middleware('admin.permission:payments.view')->name('export');
+            Route::post('{payment}/update-status', [PaymentController::class, 'updateStatus'])->middleware('admin.permission:payments.edit')->name('update-status');
+            Route::post('{payment}/refund', [PaymentController::class, 'refund'])->middleware('admin.permission:payments.edit')->name('refund');
+            Route::post('{payment}/reconcile', [PaymentController::class, 'reconcile'])->middleware('admin.permission:payments.edit')->name('reconcile');
         });
 
-        Route::resource('payment-methods', PaymentMethodController::class);
-        Route::resource('payments', PaymentController::class);
+        Route::resource('payment-methods', PaymentMethodController::class)->middleware('admin.permission:payment-methods.view');
+        Route::resource('payments', PaymentController::class)->middleware('admin.permission:payments.view');
 
         /*
         |--------------------------------------------------------------------------
@@ -401,7 +396,6 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
 
             Route::prefix('ai')->name('ai.')->group(function () {
                 Route::post('enhance-title', [StaticPageController::class, 'enhanceTitleWithAI'])->name('enhance-title');
-                Route::post('translate-content', [StaticPageController::class, 'translateContentWithAI'])->name('translate-content');
                 Route::post('translate', [StaticPageController::class, 'translateWithAI'])->name('translate');
                 Route::post('enhance-content', [StaticPageController::class, 'enhanceContentWithAI'])->name('enhance-content');
                 Route::post('expand-content', [StaticPageController::class, 'expandContentWithAI'])->name('expand-content');
@@ -485,18 +479,18 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
         |--------------------------------------------------------------------------
         */
         Route::prefix('contact-us')->name('contact-us.')->group(function () {
-            Route::get('/', [ContactUsController::class, 'index'])->name('index');
-            Route::get('{contactUs}', [ContactUsController::class, 'show'])->name('show');
-            Route::post('{contactUs}/reply', [ContactUsController::class, 'reply'])->name('reply');
-            Route::post('{contactUs}/status', [ContactUsController::class, 'updateStatus'])->name('status');
-            Route::delete('{contactUs}', [ContactUsController::class, 'destroy'])->name('destroy');
-            Route::post('bulk/status', [ContactUsController::class, 'bulkStatus'])->name('bulk-status');
-            Route::post('bulk/destroy', [ContactUsController::class, 'bulkDestroy'])->name('bulk-destroy');
+            Route::get('/', [ContactUsController::class, 'index'])->middleware('admin.permission:contact-us.view')->name('index');
+            Route::get('{contactUs}', [ContactUsController::class, 'show'])->middleware('admin.permission:contact-us.show')->name('show');
+            Route::post('{contactUs}/reply', [ContactUsController::class, 'reply'])->middleware('admin.permission:contact-us.reply')->name('reply');
+            Route::post('{contactUs}/status', [ContactUsController::class, 'updateStatus'])->middleware('admin.permission:contact-us.status')->name('status');
+            Route::delete('{contactUs}', [ContactUsController::class, 'destroy'])->middleware('admin.permission:contact-us.delete')->name('destroy');
+            Route::post('bulk/status', [ContactUsController::class, 'bulkStatus'])->middleware('admin.permission:contact-us.bulk-status')->name('bulk-status');
+            Route::post('bulk/destroy', [ContactUsController::class, 'bulkDestroy'])->middleware('admin.permission:contact-us.bulk-destroy')->name('bulk-destroy');
         });
 
         Route::prefix('subscriptions')->name('subscribe.')->group(function () {
-            Route::get('/', [SubscribeController::class, 'index'])->name('index');
-            Route::delete('{subscription}', [SubscribeController::class, 'destroy'])->name('destroy');
+            Route::get('/', [SubscribeController::class, 'index'])->middleware('admin.permission:subscriptions.view')->name('index');
+            Route::delete('{subscription}', [SubscribeController::class, 'destroy'])->middleware('admin.permission:subscriptions.delete')->name('destroy');
         });
 
         Route::prefix('social-media')->name('social-media.')->group(function () {
@@ -514,37 +508,37 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
         |--------------------------------------------------------------------------
         */
         Route::prefix('settings')->name('settings.')->group(function () {
-            Route::get('/', [SettingsController::class, 'index'])->name('index');
+            Route::get('/', [SettingsController::class, 'index'])->middleware('admin.permission:settings.view')->name('index');
 
             Route::prefix('general')->group(function () {
-                Route::get('/', [SettingsController::class, 'general'])->name('general');
-                Route::put('/', [SettingsController::class, 'updateGeneral'])->name('general.update');
+                Route::get('/', [SettingsController::class, 'general'])->middleware('admin.permission:settings.general')->name('general');
+                Route::put('/', [SettingsController::class, 'updateGeneral'])->middleware('admin.permission:settings.update')->name('general.update');
             });
 
             Route::prefix('smtp')->group(function () {
-                Route::get('/', [SettingsController::class, 'smtp'])->name('smtp');
-                Route::put('/', [SettingsController::class, 'updateSmtp'])->name('smtp.update');
-                Route::post('test', [SettingsController::class, 'testSmtp'])->name('smtp.test');
+                Route::get('/', [SettingsController::class, 'smtp'])->middleware('admin.permission:settings.smtp')->name('smtp');
+                Route::put('/', [SettingsController::class, 'updateSmtp'])->middleware('admin.permission:settings.update')->name('smtp.update');
+                Route::post('test', [SettingsController::class, 'testSmtp'])->middleware('admin.permission:settings.smtp')->name('smtp.test');
             });
 
             Route::prefix('communication')->group(function () {
-                Route::get('/', [SettingsController::class, 'communication'])->name('communication');
-                Route::put('/', [SettingsController::class, 'updateCommunication'])->name('communication.update');
+                Route::get('/', [SettingsController::class, 'communication'])->middleware('admin.permission:settings.communication')->name('communication');
+                Route::put('/', [SettingsController::class, 'updateCommunication'])->middleware('admin.permission:settings.update')->name('communication.update');
             });
 
             Route::prefix('files')->group(function () {
-                Route::get('/', [SettingsController::class, 'files'])->name('files');
-                Route::put('/', [SettingsController::class, 'updateFiles'])->name('files.update');
-                Route::delete('/', [SettingsController::class, 'deleteFile'])->name('files.delete');
-                Route::post('clear-temp', [SettingsController::class, 'clearTempFiles'])->name('files.clear-temp');
+                Route::get('/', [SettingsController::class, 'files'])->middleware('admin.permission:settings.files')->name('files');
+                Route::put('/', [SettingsController::class, 'updateFiles'])->middleware('admin.permission:settings.update')->name('files.update');
+                Route::delete('/', [SettingsController::class, 'deleteFile'])->middleware('admin.permission:settings.files')->name('files.delete');
+                Route::post('clear-temp', [SettingsController::class, 'clearTempFiles'])->middleware('admin.permission:settings.files')->name('files.clear-temp');
             });
 
-            Route::get('storage-usage', [SettingsController::class, 'getStorageUsage'])->name('storage-usage');
-            Route::get('quick-stats', [SettingsController::class, 'getQuickStats'])->name('quick-stats');
-            Route::get('recent-activities', [SettingsController::class, 'getRecentActivitiesAjax'])->name('recent-activities');
-            Route::get('system-status', [SettingsController::class, 'getSystemStatus'])->name('system-status');
-            Route::post('clear-cache', [SettingsController::class, 'clearCache'])->name('clear-cache');
-            Route::post('toggle-maintenance', [SettingsController::class, 'toggleMaintenance'])->name('toggle-maintenance');
+            Route::get('storage-usage', [SettingsController::class, 'getStorageUsage'])->middleware('admin.permission:settings.view')->name('storage-usage');
+            Route::get('quick-stats', [SettingsController::class, 'getQuickStats'])->middleware('admin.permission:settings.view')->name('quick-stats');
+            Route::get('recent-activities', [SettingsController::class, 'getRecentActivitiesAjax'])->middleware('admin.permission:settings.view')->name('recent-activities');
+            Route::get('system-status', [SettingsController::class, 'getSystemStatus'])->middleware('admin.permission:settings.system-status')->name('system-status');
+            Route::post('clear-cache', [SettingsController::class, 'clearCache'])->middleware('admin.permission:settings.clear-cache')->name('clear-cache');
+            Route::post('toggle-maintenance', [SettingsController::class, 'toggleMaintenance'])->middleware('admin.permission:settings.toggle-maintenance')->name('toggle-maintenance');
         });
 
         /*
@@ -553,12 +547,12 @@ Route::prefix('admin')->name('admin.')->middleware('translate.admin')->group(fun
         |--------------------------------------------------------------------------
         */
         Route::prefix('errors')->name('errors.')->group(function () {
-            Route::get('/', [ErrorController::class, 'index'])->name('index');
-            Route::get('php-errors', [ErrorController::class, 'phpErrors'])->name('php-errors');
-            Route::get('search', [ErrorController::class, 'search'])->name('search');
-            Route::get('download/{filename}', [ErrorController::class, 'download'])->name('download');
-            Route::delete('destroy', [ErrorController::class, 'destroy'])->name('destroy');
-            Route::post('clear-all', [ErrorController::class, 'clearAll'])->name('clear-all');
+            Route::get('/', [ErrorController::class, 'index'])->middleware('admin.permission:errors.view')->name('index');
+            Route::get('php-errors', [ErrorController::class, 'phpErrors'])->middleware('admin.permission:errors.php-errors')->name('php-errors');
+            Route::get('search', [ErrorController::class, 'search'])->middleware('admin.permission:errors.search')->name('search');
+            Route::get('download/{filename}', [ErrorController::class, 'download'])->middleware('admin.permission:errors.download')->name('download');
+            Route::delete('destroy', [ErrorController::class, 'destroy'])->middleware('admin.permission:errors.delete')->name('destroy');
+            Route::post('clear-all', [ErrorController::class, 'clearAll'])->middleware('admin.permission:errors.clear-all')->name('clear-all');
         });
     });
 });

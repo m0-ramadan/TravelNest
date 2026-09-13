@@ -29,10 +29,9 @@ class PackageTypesCreationCycleTest extends TestCase
         parent::setUp();
         $this->seed(NileCruiseSeeder::class);
 
-        $this->admin = Admin::create([
+        $this->admin = $this->createSuperAdmin([
             'name' => 'Admin Test',
             'email' => 'admin_test@example.com',
-            'password' => bcrypt('password'),
         ]);
 
         $this->country = Country::create([
@@ -112,6 +111,94 @@ class PackageTypesCreationCycleTest extends TestCase
         $itinerary = $package->itineraries->first();
         $this->assertEquals('08:00', $itinerary->start_time);
         $this->assertEquals('14:00', $itinerary->end_time);
+    }
+
+    public function test_can_create_and_update_day_tour_with_group_pricing_tiers(): void
+    {
+        $payload = array_merge($this->defaultAgeRules(), [
+            'title' => 'Luxor Day Tour Tiers Test',
+            'package_type' => 'day_tour',
+            'category_id' => $this->category->id,
+            'destination_id' => $this->city->id,
+            'primary_country_id' => $this->country->id,
+            'currency_id' => $this->currency->id,
+            'tour_type' => 'private',
+            'duration_type' => 'hours',
+            'duration_hours' => 8,
+            'experience' => [
+                '_present' => '1',
+                'group_pricing_tiers' => [
+                    [
+                        'title' => 'Solo Traveler',
+                        'min' => 1,
+                        'max' => 1,
+                        'price_per_person' => 200,
+                        'badge_label' => '',
+                    ],
+                    [
+                        'title' => 'Couple',
+                        'min' => 2,
+                        'max' => 2,
+                        'price_per_person' => 120,
+                        'badge_label' => 'Most Popular',
+                    ],
+                ],
+            ],
+        ]);
+
+        $response = $this->actingAs($this->admin, 'admin')->post(route('admin.packages.store'), $payload);
+
+        $response->assertSessionHasNoErrors();
+        $response->assertRedirect(route('admin.packages.index'));
+
+        $package = Package::where('slug', 'luxor-day-tour-tiers-test')->firstOrFail();
+        $this->assertEquals('day_tour', $package->package_type);
+        $this->assertEquals(120, (float) $package->price_from);
+        $this->assertEquals(120, (float) $package->start_from_price);
+        $this->assertEquals(200, (float) $package->price_to);
+        $this->assertEquals(120, (float) $package->adult_price);
+        $this->assertCount(2, $package->group_pricing_tiers);
+
+        // Update day tour prices
+        $updatePayload = array_merge($payload, [
+            'experience' => [
+                '_present' => '1',
+                'group_pricing_tiers' => [
+                    [
+                        'title' => 'Solo Traveler VIP',
+                        'min' => 1,
+                        'max' => 1,
+                        'price_per_person' => 250,
+                        'badge_label' => '',
+                    ],
+                    [
+                        'title' => 'Couple VIP',
+                        'min' => 2,
+                        'max' => 2,
+                        'price_per_person' => 140,
+                        'badge_label' => 'Most Popular',
+                    ],
+                    [
+                        'title' => 'Small Group VIP',
+                        'min' => 3,
+                        'max' => 5,
+                        'price_per_person' => 110,
+                        'badge_label' => 'Best Value',
+                    ],
+                ],
+            ],
+        ]);
+
+        $updateResponse = $this->actingAs($this->admin, 'admin')->put(route('admin.packages.update', $package), $updatePayload);
+        $updateResponse->assertSessionHasNoErrors();
+        $updateResponse->assertRedirect(route('admin.packages.index'));
+
+        $package->refresh();
+        $this->assertEquals(110, (float) $package->price_from);
+        $this->assertEquals(110, (float) $package->start_from_price);
+        $this->assertEquals(250, (float) $package->price_to);
+        $this->assertEquals(110, (float) $package->adult_price);
+        $this->assertCount(3, $package->group_pricing_tiers);
     }
 
     public function test_can_create_and_update_travel_package(): void

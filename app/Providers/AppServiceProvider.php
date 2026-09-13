@@ -3,10 +3,13 @@
 namespace App\Providers;
 
 use App\Models\Article;
+use App\Models\ArticleCategory;
 use App\Models\Attraction;
 use App\Models\City;
 use App\Models\Country;
+use App\Models\Language;
 use App\Models\Package;
+use App\Models\Page;
 use App\Models\Testimonial;
 use App\Services\WebsiteDestinationService;
 use Illuminate\Support\Facades\Cache;
@@ -39,9 +42,18 @@ class AppServiceProvider extends ServiceProvider
             Cache::forever('website.home.version', (int) Cache::get('website.home.version', 1) + 1);
         };
 
-        foreach ([Article::class, Attraction::class, City::class, Country::class, Package::class, Testimonial::class] as $model) {
+        foreach ([Article::class, ArticleCategory::class, Attraction::class, City::class, Country::class, Package::class, Page::class, Testimonial::class] as $model) {
             $model::saved($invalidateWebsiteCache);
             $model::deleted($invalidateWebsiteCache);
         }
+
+        Language::saved(function () {
+            Cache::forget('website.language.default.code');
+            Cache::forget('website.search.locales');
+        });
+        Language::deleted(function () {
+            Cache::forget('website.language.default.code');
+            Cache::forget('website.search.locales');
+        });
     }
 }

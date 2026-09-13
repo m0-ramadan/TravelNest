@@ -7,6 +7,7 @@ use App\Models\Package;
 use App\Models\PackageCategory;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class PackageController extends BaseWebsiteController
@@ -212,11 +213,11 @@ class PackageController extends BaseWebsiteController
         }
 
         $selectedDestination = $selectedDestinationSlug !== ''
-            ? City::query()->where('slug', $selectedDestinationSlug)->first()
+            ? ($destinations->firstWhere('slug', $selectedDestinationSlug) ?? City::query()->where('slug', $selectedDestinationSlug)->first())
             : null;
 
         $packagesQuery = Package::query()
-            ->with(['currency', 'primaryCountry', 'highlights', 'tags', 'cruise', 'category', 'cities'])
+            ->with(['currency', 'primaryCountry', 'highlights', 'tags', 'cruise', 'category'])
             ->where('is_active', true)
             ->whereIn('package_type', $allowedTypes);
 
@@ -458,24 +459,43 @@ class PackageController extends BaseWebsiteController
     private function shoreExcursionSections(Request $request, ?string $activeSectionKey = null): array
     {
         $sectionDefinitions = $this->rawShoreSectionDefinitions();
+        $counts = $this->cachedShoreExcursionCounts($sectionDefinitions);
 
-        $cities = City::query()
-            ->where('is_active', true)
-            ->get()
-            ->keyBy('slug');
-
-        return collect($sectionDefinitions)->map(function (array $section) use ($cities, $activeSectionKey) {
-            $countQuery = Package::query()
-                ->where('is_active', true)
-                ->where('package_type', 'shore_excursion');
-
-            $this->applyShoreSectionScope($countQuery, $section, $cities);
-
+        return collect($sectionDefinitions)->map(function (array $section) use ($counts, $activeSectionKey) {
             return $section + [
                 'url' => route('website.shore_excursions.section', ['section' => $section['key']]),
-                'count' => $countQuery->count(),
+                'count' => $counts[$section['key']] ?? 0,
                 'active' => ($activeSectionKey === $section['key']),
             ];
         })->values()->all();
+    }
+
+    private function cachedShoreExcursionCounts(array $sectionDefinitions): array
+    {
+        $version = (int) Cache::get('website.home.version', 1);
+
+        return Cache::remember(
+            'website.shore.counts.v1.' . $version . '.' . app()->getLocale(),
+            now()->addMinutes(30),
+            function () use ($sectionDefinitions) {
+                $cities = City::query()
+                    ->where('is_active', true)
+                    ->get()
+                    ->keyBy('slug');
+
+                $counts = [];
+                foreach ($sectionDefinitions as $section) {
+                    $countQuery = Package::query()
+                        ->where('is_active', true)
+                        ->where('package_type', 'shore_excursion');
+
+                    $this->applyShoreSectionScope($countQuery, $section, $cities);
+
+                    $counts[$section['key']] = $countQuery->count();
+                }
+
+                return $counts;
+            }
+        );
     }
 }

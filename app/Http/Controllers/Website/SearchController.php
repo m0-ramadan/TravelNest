@@ -7,6 +7,7 @@ use App\Models\Package;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class SearchController extends BaseWebsiteController
@@ -59,16 +60,21 @@ class SearchController extends BaseWebsiteController
             return response()->json([]);
         }
 
-        $items = $this->searchPackages($keyword, 8, false)
-            ->getCollection()
-            ->map(function (Package $package) {
-                return [
-                    'title' => $this->translated($package->getRawOriginal('title') ?? $package->title),
-                    'type' => $this->resultTypeLabel($package),
-                    'url' => $this->packageRoute($package),
-                ];
-            })
-            ->values();
+        $items = Cache::remember(
+            'website.search.suggestions.v1.' . app()->getLocale() . '.' . md5(mb_strtolower($keyword)),
+            now()->addMinutes(5),
+            fn() => $this->searchPackages($keyword, 8, false)
+                ->getCollection()
+                ->map(function (Package $package) {
+                    return [
+                        'title' => $this->translated($package->getRawOriginal('title') ?? $package->title),
+                        'type' => $this->resultTypeLabel($package),
+                        'url' => $this->packageRoute($package),
+                    ];
+                })
+                ->values()
+                ->all()
+        );
 
         return response()->json($items);
     }
@@ -183,16 +189,16 @@ class SearchController extends BaseWebsiteController
 
     private function searchLocales(): array
     {
-        $locales = Language::query()
-            ->where('is_active', true)
-            ->pluck('code')
-            ->filter()
-            ->values()
-            ->all();
+        $locales = Cache::remember('website.search.locales', now()->addHour(), function () {
+            $codes = Language::query()
+                ->where('is_active', true)
+                ->pluck('code')
+                ->filter()
+                ->values()
+                ->all();
 
-        if (empty($locales)) {
-            $locales = ['en', 'ar', 'es', 'ru', 'it', 'It', 'ch'];
-        }
+            return $codes ?: ['en', 'ar', 'es', 'ru', 'it', 'It', 'ch'];
+        });
 
         return array_values(array_unique(array_merge($locales, ['en', 'ar', 'it', 'It', 'ch'])));
     }

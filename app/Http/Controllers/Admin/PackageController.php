@@ -990,7 +990,7 @@ class PackageController extends Controller
         $data['is_best_seller'] = $request->boolean('is_best_seller');
         $data['is_ultra_luxury'] = $request->boolean('is_ultra_luxury');
 
-        [$priceFrom, $priceTo] = $this->resolveCategoryPriceBounds($data);
+        [$priceFrom, $priceTo] = $this->resolveCategoryPriceBounds($data, $request);
         $data['price_from'] = $priceFrom;
         $data['price_to'] = $priceTo;
         $data['start_from_price'] = $priceFrom;
@@ -1066,9 +1066,22 @@ class PackageController extends Controller
         return $normalized;
     }
 
-    private function resolveCategoryPriceBounds(array $data): array
+    private function resolveCategoryPriceBounds(array $data, ?Request $request = null): array
     {
-        $prices = collect([
+        $tierPrices = [];
+        if ($request) {
+            $experienceTiers = $request->input('experience.group_pricing_tiers') ?? $request->input('group_pricing_tiers');
+            if (is_array($experienceTiers)) {
+                foreach ($experienceTiers as $tier) {
+                    $p = $tier['price_per_person'] ?? $tier['price'] ?? null;
+                    if ($p !== null && $p !== '' && (float) $p > 0) {
+                        $tierPrices[] = (float) $p;
+                    }
+                }
+            }
+        }
+
+        $prices = collect(array_merge([
             $data['adult_price'] ?? null,
             $data['child_price'] ?? null,
             $data['infant_price'] ?? null,
@@ -1078,7 +1091,7 @@ class PackageController extends Controller
             $data['price_4_persons'] ?? null,
             $data['price_5_persons'] ?? null,
             $data['price_6_plus_persons'] ?? null,
-        ])->filter(fn($price) => $price !== null && $price !== '');
+        ], $tierPrices))->filter(fn($price) => $price !== null && $price !== '');
 
         $paidPrices = $prices->filter(fn($price) => (float) $price > 0);
 

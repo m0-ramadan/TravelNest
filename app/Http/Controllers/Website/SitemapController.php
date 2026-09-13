@@ -9,20 +9,25 @@ use App\Models\Package;
 use App\Models\Page;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class SitemapController extends BaseWebsiteController
 {
     public function index(): Response
     {
-        $urls = $this->staticUrls()
-            ->merge($this->nileCruiseUrls())
-            ->merge($this->pageUrls())
-            ->merge($this->destinationUrls())
-            ->merge($this->blogCategoryUrls())
-            ->merge($this->articleUrls())
-            ->merge($this->packageUrls())
-            ->unique('loc')
-            ->values();
+        $version = (int) Cache::get('website.home.version', 1);
+
+        $urls = Cache::remember('website.sitemap.v1.' . $version, now()->addHour(), function () {
+            return $this->staticUrls()
+                ->merge($this->nileCruiseUrls())
+                ->merge($this->pageUrls())
+                ->merge($this->destinationUrls())
+                ->merge($this->blogCategoryUrls())
+                ->merge($this->articleUrls())
+                ->merge($this->packageUrls())
+                ->unique('loc')
+                ->values();
+        });
 
         return response()
             ->view('website.sitemap', ['urls' => $urls])

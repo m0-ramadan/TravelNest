@@ -25,7 +25,7 @@ class NileCruiseExtendedContentTest extends TestCase
 
     private function fixtures(): array
     {
-        $admin = Admin::create(['name'=>'Admin','email'=>'nc@example.com','password'=>bcrypt('password')]);
+        $admin = $this->createSuperAdmin(['name'=>'Admin','email'=>'nc@example.com']);
         $country = Country::create(['name'=>['en'=>'Egypt','ar'=>'مصر'],'slug'=>'egypt-nc','code'=>'NC']);
         $luxor = City::create(['country_id'=>$country->id,'name'=>['en'=>'Luxor','ar'=>'الأقصر'],'slug'=>'luxor-nc']);
         $aswan = City::create(['country_id'=>$country->id,'name'=>['en'=>'Aswan','ar'=>'أسوان'],'slug'=>'aswan-nc']);

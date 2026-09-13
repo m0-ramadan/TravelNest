@@ -62,7 +62,7 @@ class NileCruiseController extends BaseWebsiteController
             ->count();
 
         $featuredPackagesQuery = Package::query()
-            ->with(['currency', 'category', 'primaryCountry'])
+            ->with(['currency', 'category', 'primaryCountry', 'highlights', 'tags', 'prices'])
             ->where('is_active', true)
             ->where(function ($q) use ($type) {
                 $q->where('nile_cruise_type_id', $type->id)
@@ -105,7 +105,7 @@ class NileCruiseController extends BaseWebsiteController
         $search = trim((string) $request->input('q', ''));
 
         $query = Package::query()
-            ->with(['currency', 'category', 'primaryCountry', 'nileCruiseCategory'])
+            ->with(['currency', 'category', 'primaryCountry', 'nileCruiseCategory', 'highlights', 'tags', 'prices'])
             ->where('is_active', true)
             ->where(function ($q) use ($type) {
                 $q->where('nile_cruise_type_id', $type->id)
@@ -210,7 +210,7 @@ class NileCruiseController extends BaseWebsiteController
         $search = trim((string) $request->input('q', ''));
 
         $query = Package::query()
-            ->with(['currency', 'category', 'primaryCountry', 'nileCruiseType'])
+            ->with(['currency', 'category', 'primaryCountry', 'nileCruiseType', 'highlights', 'tags', 'prices'])
             ->where('is_active', true)
             ->where('nile_cruise_category_id', $category->id)
             ->where(function ($q) use ($type) {

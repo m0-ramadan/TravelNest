@@ -6,11 +6,38 @@ use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\ArticleCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class BlogController extends Controller
 {
+    private function sidebarData(): array
+    {
+        $version = (int) Cache::get('website.home.version', 1);
+
+        return Cache::remember(
+            'website.blog.sidebar.v1.' . $version . '.' . app()->getLocale(),
+            now()->addMinutes(30),
+            function () {
+                $popularArticles = Article::query()
+                    ->with(['category'])
+                    ->active()
+                    ->published()
+                    ->orderByDesc('views_count')
+                    ->latest('published_at')
+                    ->limit(5)
+                    ->get();
+
+                $categories = ArticleCategory::query()
+                    ->where('is_active', true)
+                    ->orderBy('sort_order')
+                    ->get();
+
+                return compact('popularArticles', 'categories');
+            }
+        );
+    }
 
     public function index(Request $request)
     {
@@ -60,10 +87,9 @@ class BlogController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        return view('website.pages.blogs.index', compact(
-            'articles',
-            'popularArticles',
-            'categories'
+        return view('website.pages.blogs.index', array_merge(
+            compact('articles'),
+            $this->sidebarData()
         ));
     }
 
@@ -119,11 +145,9 @@ class BlogController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        return view('website.pages.blogs.show', compact(
-            'article',
-            'relatedArticles',
-            'popularArticles',
-            'categories'
+        return view('website.pages.blogs.show', array_merge(
+            compact('article', 'relatedArticles'),
+            $this->sidebarData()
         ));
     }
 

@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Support\LocaleNormalizer;
+use Illuminate\Support\Facades\Cache;
 
 trait HasTranslatableAttributes
 {
@@ -71,9 +72,12 @@ trait HasTranslatableAttributes
     protected function defaultTranslationLocale(): string
     {
         if (class_exists(\App\Models\Language::class)) {
-            $default = \App\Models\Language::query()
-                ->where('is_default', true)
-                ->value('code');
+            $default = Cache::remember('website.language.default.code', now()->addHour(), function () {
+                return \App\Models\Language::query()
+                    ->where('is_default', true)
+                    ->value('code')
+                    ?: (string) config('app.fallback_locale', 'en');
+            });
 
             if ($default) {
                 return $default;

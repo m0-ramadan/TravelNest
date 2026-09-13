@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Admin;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class CheckAdminPermissions extends Command
 {
@@ -25,12 +26,21 @@ class CheckAdminPermissions extends Command
         $this->info("Checking permissions for admin: {$admin->name} ({$admin->email})");
 
         // التحقق من دور super_admin
-        if (!$admin->hasRole('super_admin')) {
-            $this->warn("Admin does not have super_admin role. Assigning...");
-            $admin->assignRole('super_admin');
-            $this->info("✓ Assigned super_admin role");
+        $superRole = Role::where('guard_name', 'admin')
+            ->whereIn('name', ['super_admin', 'Super Admin'])
+            ->first();
+
+        if (!$superRole) {
+            $this->warn("No super admin role exists. Creating super_admin role...");
+            $superRole = Role::create(['name' => 'super_admin', 'guard_name' => 'admin']);
+        }
+
+        if (!$admin->hasRole($superRole)) {
+            $this->warn("Admin does not have super admin role. Assigning {$superRole->name}...");
+            $admin->assignRole($superRole);
+            $this->info("✓ Assigned {$superRole->name} role");
         } else {
-            $this->info("✓ Already has super_admin role");
+            $this->info("✓ Already has super admin role");
         }
 
         // التحقق من الصلاحيات

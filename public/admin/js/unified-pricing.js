@@ -2,7 +2,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const packageTypeSelect = document.getElementById('package_type');
 
     function syncPricingEngineBlocks() {
-        const currentType = packageTypeSelect ? packageTypeSelect.value : 'day_tour';
+        let currentType = packageTypeSelect ? packageTypeSelect.value : '';
+        if (!currentType) {
+            const selectedCard = document.querySelector('[data-tour-type-card].is-selected');
+            if (selectedCard) {
+                currentType = selectedCard.dataset.tourTypeCard;
+            }
+        }
+        if (!currentType) {
+            currentType = 'day_tour';
+        }
 
         document.querySelectorAll('.pricing-type-block').forEach(function (block) {
             const targetType = block.getAttribute('data-pricing-type');

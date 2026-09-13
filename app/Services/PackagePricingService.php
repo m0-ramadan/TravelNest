@@ -37,29 +37,37 @@ class PackagePricingService
     {
         $tiers = $package->group_pricing_tiers;
         $prices = [];
+        $tierPricesByPax = [];
 
         if (is_array($tiers)) {
             foreach ($tiers as $tier) {
                 $price = (float) ($tier['price_per_person'] ?? $tier['price'] ?? 0);
                 if ($price > 0) {
                     $prices[] = $price;
+                    $minPax = (int) ($tier['min'] ?? $tier['persons_count'] ?? 0);
+                    if ($minPax > 0) {
+                        $tierPricesByPax[$minPax] = $price;
+                    }
                 }
             }
         }
 
         if (empty($prices)) {
             $fallbackFields = [
-                $package->price_6_plus_persons,
-                $package->price_5_persons,
-                $package->price_4_persons,
-                $package->price_3_persons,
-                $package->price_2_persons,
-                $package->price_1_person,
-                $package->adult_price,
+                6 => $package->price_6_plus_persons,
+                5 => $package->price_5_persons,
+                4 => $package->price_4_persons,
+                3 => $package->price_3_persons,
+                2 => $package->price_2_persons,
+                1 => $package->price_1_person,
+                0 => $package->adult_price,
             ];
-            foreach ($fallbackFields as $f) {
+            foreach ($fallbackFields as $pax => $f) {
                 if ($f !== null && (float) $f > 0) {
                     $prices[] = (float) $f;
+                    if ($pax > 0) {
+                        $tierPricesByPax[$pax] = (float) $f;
+                    }
                 }
             }
         }
@@ -71,9 +79,13 @@ class PackagePricingService
             $package->start_from_price = $minPrice;
             $package->price_from = $minPrice;
             $package->price_to = $maxPrice > $minPrice ? $maxPrice : $minPrice;
+
+            if (empty($package->adult_price) || (float) $package->adult_price <= 0) {
+                $package->adult_price = $tierPricesByPax[1] ?? $minPrice;
+            }
         }
 
-        if ($package->isDirty(['start_from_price', 'price_from', 'price_to'])) {
+        if ($package->isDirty(['start_from_price', 'price_from', 'price_to', 'adult_price'])) {
             $package->saveQuietly();
         }
     }

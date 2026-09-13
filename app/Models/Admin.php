@@ -62,7 +62,7 @@ class Admin extends Authenticatable
 
     public function isSuperAdmin()
     {
-        return $this->hasRole('super_admin');
+        return $this->hasRole(['super_admin', 'Super Admin']);
     }
 
     /**

@@ -23,7 +23,7 @@ class PackageTypeContentService
         }
 
         $payload = (array) $request->input('experience', []);
-        if (!empty($payload['_present'])) {
+        if (!empty($payload['_present']) || !empty($payload['group_pricing_tiers']) || !empty($payload)) {
             $this->syncSharedPackageFields($package, $request, $payload);
             $this->syncAddons($package, $payload);
         }
@@ -365,7 +365,7 @@ class PackageTypeContentService
         }
 
         return collect((array) $value)
-            ->map(fn ($item) => trim((string) $item))
+            ->map(fn($item) => trim((string) $item))
             ->filter()
             ->unique()
             ->values()
@@ -375,8 +375,8 @@ class PackageTypeContentService
     private function intList(mixed $value): array
     {
         return collect((array) $value)
-            ->map(fn ($item) => (int) $item)
-            ->filter(fn ($item) => $item > 0)
+            ->map(fn($item) => (int) $item)
+            ->filter(fn($item) => $item > 0)
             ->unique()
             ->values()
             ->all();

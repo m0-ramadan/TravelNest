@@ -68,10 +68,9 @@ class NileCruiseIntegrationTest extends TestCase
 
     public function test_admin_can_create_nile_cruise_package_with_valid_classification(): void
     {
-        $admin = Admin::create([
+        $admin = $this->createSuperAdmin([
             'name' => 'Admin User',
             'email' => 'admin@example.com',
-            'password' => bcrypt('password'),
         ]);
 
         $category = PackageCategory::create([
@@ -132,10 +131,9 @@ class NileCruiseIntegrationTest extends TestCase
 
     public function test_admin_package_creation_fails_when_nile_cruise_type_is_missing(): void
     {
-        $admin = Admin::create([
+        $admin = $this->createSuperAdmin([
             'name' => 'Admin User 2',
             'email' => 'admin2@example.com',
-            'password' => bcrypt('password'),
         ]);
 
         $category = PackageCategory::create([

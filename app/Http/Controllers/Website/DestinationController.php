@@ -147,14 +147,19 @@ class DestinationController extends BaseWebsiteController
 
         $search = trim((string) $request->input('q', ''));
 
-        $statsQuery = Package::query()
-            ->where('is_active', true)
-            ->where($matchesDestination);
-
-        $packages = Package::query()
-            ->with(['currency', 'primaryCountry', 'highlights', 'tags', 'cruise', 'category'])
+        $matchedPackageIds = Package::query()
             ->where('is_active', true)
             ->where($matchesDestination)
+            ->pluck('id');
+
+        $statsQuery = function () use ($matchedPackageIds) {
+            return Package::query()
+                ->where('is_active', true)
+                ->whereIn('id', $matchedPackageIds);
+        };
+
+        $packages = $statsQuery()
+            ->with(['currency', 'primaryCountry', 'highlights', 'tags', 'cruise', 'category'])
             ->when($selectedType, fn($query) => $query->where('package_type', $selectedType))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
@@ -231,14 +236,14 @@ class DestinationController extends BaseWebsiteController
             ? ['day_tour', 'nile_cruise', 'travel_package']
             : ['day_tour', 'travel_package'];
 
-        $availableTypes = (clone $statsQuery)
+        $availableTypes = (clone $statsQuery())
             ->select('package_type')
             ->distinct()
             ->pluck('package_type')
             ->filter()
             ->values();
 
-        $typeCounts = (clone $statsQuery)
+        $typeCounts = (clone $statsQuery())
             ->select('package_type', DB::raw('COUNT(*) as total'))
             ->whereNotNull('package_type')
             ->groupBy('package_type')
@@ -300,8 +305,8 @@ class DestinationController extends BaseWebsiteController
         }
 
         $stats = [
-            'count' => (clone $statsQuery)->count(),
-            'featured' => (clone $statsQuery)->where('is_featured', true)->count(),
+            'count' => (clone $statsQuery())->count(),
+            'featured' => (clone $statsQuery())->where('is_featured', true)->count(),
             'attractions' => $destination->attractions->count(),
         ];
 
