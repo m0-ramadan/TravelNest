@@ -375,7 +375,7 @@ class PackageController extends BaseWebsiteController
                 'subtitle' => __('Luxor temples, royal tombs, and Red Sea cruise-port day trips.'),
                 'city' => 'safaga',
                 'search' => 'Safaga',
-                'image' => asset('website/images/day-tours/luxor-day-tours.jpg'),
+                'image' => asset('website/images/shore-excursions/safaga.jpg'),
             ],
             'alexandria' => [
                 'key' => 'alexandria',
@@ -384,7 +384,7 @@ class PackageController extends BaseWebsiteController
                 'subtitle' => __('Mediterranean arrivals with Cairo, pyramids, and Alexandria highlights.'),
                 'city' => 'alexandria',
                 'search' => 'Alexandria',
-                'image' => asset('website/images/day-tours/cairo-day-tours.jpg'),
+                'image' => asset('website/images/shore-excursions/alexandria.jpg'),
             ],
             'port-said' => [
                 'key' => 'port-said',
@@ -393,7 +393,7 @@ class PackageController extends BaseWebsiteController
                 'subtitle' => __('Suez Canal cruise calls with Cairo, Giza, and classic Egypt routes.'),
                 'city' => 'port-said',
                 'search' => 'Port Said',
-                'image' => asset('website/admin/uploads/1603406020abu-simbel.jpg'),
+                'image' => asset('website/images/shore-excursions/port-said.jpg'),
             ],
             'sharm-el-sheikh' => [
                 'key' => 'sharm-el-sheikh',
@@ -402,7 +402,7 @@ class PackageController extends BaseWebsiteController
                 'subtitle' => __('Sinai, Red Sea landscapes, and easy-paced cruise excursions.'),
                 'city' => 'sharm-el-sheikh',
                 'search' => 'Sharm El Sheikh',
-                'image' => asset('website/images/day-tours/sharm-el-sheikh-day-tours.jpg'),
+                'image' => asset('website/images/shore-excursions/sharm-el-sheikh.jpg'),
             ],
             'ain-el-sokhna' => [
                 'key' => 'ain-el-sokhna',
@@ -411,7 +411,7 @@ class PackageController extends BaseWebsiteController
                 'subtitle' => __('Fast access to Cairo, the pyramids, and museum treasures.'),
                 'city' => 'ain-sokhna',
                 'search' => 'Ain Sokhna',
-                'image' => asset('website/images/day-tours/cairo-destination.jpg'),
+                'image' => asset('website/images/shore-excursions/ain-el-sokhna.jpg'),
             ],
             'accessible' => [
                 'key' => 'accessible',
@@ -419,7 +419,7 @@ class PackageController extends BaseWebsiteController
                 'subtitle' => __('Smoother private touring options planned around mobility needs.'),
                 'city' => null,
                 'search' => 'Accessible',
-                'image' => asset('website/admin/uploads/1603406150Nile-Cruise-Egypt.jpg'),
+                'image' => asset('website/images/shore-excursions/accessible.jpg'),
             ],
         ];
     }
