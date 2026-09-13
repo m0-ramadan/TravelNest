@@ -72,6 +72,20 @@ class PackagePricingService
             }
         }
 
+        // Older day tours and prices created from the standalone Package
+        // Prices screen use package_prices instead of group tiers. They are a
+        // valid day-tour source and must feed both the public starting price
+        // and the pricing section.
+        if (empty($prices)) {
+            $package->loadMissing('prices');
+
+            foreach ($package->prices as $price) {
+                if ((float) $price->amount > 0) {
+                    $prices[] = (float) $price->amount;
+                }
+            }
+        }
+
         if (!empty($prices)) {
             $minPrice = min($prices);
             $maxPrice = max($prices);

@@ -145,13 +145,13 @@ class PackageController extends BaseWebsiteController
             ['shore_excursion'],
             [
                 'is_landing_hub' => false,
-                'badge' => __('Shore Excursions') . ' · ' . $sectionDef['title'],
+                'badge' => $sectionDef['title'],
                 'title' => $sectionDef['title'],
                 'subtitle' => $sectionDef['subtitle'],
                 'hero_image' => $sectionDef['image'],
                 'overview_title' => $sectionDef['title'],
-                'overview_text' => __('All excursions departing from :port are scheduled around your ship timetable, guaranteeing a timely return to your cruise.', ['port' => $sectionDef['title']]),
-                'empty_title' => __('No shore excursions found for :port', ['port' => $sectionDef['title']]),
+                'overview_text' => __('All excursions departing from :port are scheduled around your ship timetable, guaranteeing a timely return to your cruise.', ['port' => $sectionDef['port_name'] ?? $sectionDef['title']]),
+                'empty_title' => __('No shore excursions found for :port', ['port' => $sectionDef['port_name'] ?? $sectionDef['title']]),
                 'empty_text' => __('Try changing the search filters or contact us for a custom excursion from this port.', ['port' => $sectionDef['title']]),
                 'button_text' => __('View Shore Excursion'),
                 'shore_sections' => $shoreExcursionSections,
@@ -370,7 +370,8 @@ class PackageController extends BaseWebsiteController
         return [
             'safaga' => [
                 'key' => 'safaga',
-                'title' => __('Tours from Safaga Port'),
+                'title' => __('Shore Excursions from Safaga port'),
+                'port_name' => __('Safaga port'),
                 'subtitle' => __('Luxor temples, royal tombs, and Red Sea cruise-port day trips.'),
                 'city' => 'safaga',
                 'search' => 'Safaga',
@@ -378,7 +379,8 @@ class PackageController extends BaseWebsiteController
             ],
             'alexandria' => [
                 'key' => 'alexandria',
-                'title' => __('Tours from Alexandria Port'),
+                'title' => __('Shore Excursions from Alexandria port'),
+                'port_name' => __('Alexandria port'),
                 'subtitle' => __('Mediterranean arrivals with Cairo, pyramids, and Alexandria highlights.'),
                 'city' => 'alexandria',
                 'search' => 'Alexandria',
@@ -386,7 +388,8 @@ class PackageController extends BaseWebsiteController
             ],
             'port-said' => [
                 'key' => 'port-said',
-                'title' => __('Tours from Port Said Port'),
+                'title' => __('Shore Excursions from Port Said port'),
+                'port_name' => __('Port Said port'),
                 'subtitle' => __('Suez Canal cruise calls with Cairo, Giza, and classic Egypt routes.'),
                 'city' => 'port-said',
                 'search' => 'Port Said',
@@ -394,7 +397,8 @@ class PackageController extends BaseWebsiteController
             ],
             'sharm-el-sheikh' => [
                 'key' => 'sharm-el-sheikh',
-                'title' => __('Sharm El Sheikh Shore Excursions'),
+                'title' => __('Shore Excursions from Sharm el sheikh port'),
+                'port_name' => __('Sharm el sheikh port'),
                 'subtitle' => __('Sinai, Red Sea landscapes, and easy-paced cruise excursions.'),
                 'city' => 'sharm-el-sheikh',
                 'search' => 'Sharm El Sheikh',
@@ -402,7 +406,8 @@ class PackageController extends BaseWebsiteController
             ],
             'ain-el-sokhna' => [
                 'key' => 'ain-el-sokhna',
-                'title' => __('Tours from Ain El Sokhna Port'),
+                'title' => __('Shore Excursions from Ain El Sokhna port'),
+                'port_name' => __('Ain El Sokhna port'),
                 'subtitle' => __('Fast access to Cairo, the pyramids, and museum treasures.'),
                 'city' => 'ain-sokhna',
                 'search' => 'Ain Sokhna',

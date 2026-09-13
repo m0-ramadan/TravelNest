@@ -4490,7 +4490,11 @@
                                 </div>
                             @endif
 
-                            @if (!in_array($package->package_type, ['day_tour', 'shore_excursion'], true) && $prices->count())
+                            @if (
+                                $prices->count() &&
+                                (!in_array($package->package_type, ['day_tour', 'shore_excursion'], true) ||
+                                    $groupTiersForDisplay->isEmpty())
+                            )
                                 <div class="price-box pricing-options">
                                     <div class="price-table-wrap">
                                         <table class="price-table">

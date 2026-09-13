@@ -36,14 +36,14 @@ class ShoreExcursionPageTest extends TestCase
             ->assertOk()
             ->assertSee('Egypt Shore Excursions')
             ->assertSee('Browse by Cruise Port')
-            ->assertSee('Tours from Safaga Port')
+            ->assertSee('Shore Excursions from Safaga port')
             ->assertDontSee('Safaga Port VIP Shore Excursion')
             ->assertDontSee('Filter Results')
             ->assertDontSee('Cairo Regular Day Tour');
 
         $this->get(route('website.shore_excursions.section', 'safaga'))
             ->assertOk()
-            ->assertSee('Tours from Safaga Port')
+            ->assertSee('Shore Excursions from Safaga port')
             ->assertSee('Filter Results')
             ->assertSee('Safaga Port VIP Shore Excursion')
             ->assertSee(route('website.tours.show', $shoreExcursion->slug))
@@ -59,11 +59,11 @@ class ShoreExcursionPageTest extends TestCase
     public function test_all_shore_excursion_sections_are_accessible_and_filterable(): void
     {
         $sections = [
-            'safaga' => 'Tours from Safaga Port',
-            'alexandria' => 'Tours from Alexandria Port',
-            'port-said' => 'Tours from Port Said Port',
-            'sharm-el-sheikh' => 'Sharm El Sheikh Shore Excursions',
-            'ain-el-sokhna' => 'Tours from Ain El Sokhna Port',
+            'safaga' => 'Shore Excursions from Safaga port',
+            'alexandria' => 'Shore Excursions from Alexandria port',
+            'port-said' => 'Shore Excursions from Port Said port',
+            'sharm-el-sheikh' => 'Shore Excursions from Sharm el sheikh port',
+            'ain-el-sokhna' => 'Shore Excursions from Ain El Sokhna port',
             'accessible' => 'Accessible Shore Excursions',
         ];
 
@@ -78,7 +78,7 @@ class ShoreExcursionPageTest extends TestCase
         // Test alias support (ain-sokhna -> ain-el-sokhna)
         $this->get(route('website.shore_excursions.section', 'ain-sokhna'))
             ->assertOk()
-            ->assertSee('Tours from Ain El Sokhna Port');
+            ->assertSee('Shore Excursions from Ain El Sokhna port');
 
         // Test invalid section returns 404
         $this->get(route('website.shore_excursions.section', 'invalid-port-xyz'))

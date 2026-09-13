@@ -1,5 +1,65 @@
+@once
+    <style>
+        /* Keep this shared partial readable inside the dark package wizard.
+           Bootstrap's bg-light/bg-white utilities previously overrode the
+           wizard palette and made labels and inputs look blank. */
+        .day-tour-pricing-card {
+            padding: 18px;
+            border: 1px solid var(--wizard-border, rgba(255, 255, 255, .12)) !important;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, .035) !important;
+            color: #f5f3ff;
+        }
+
+        .day-tour-pricing-card .group-tier-row {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            border: 1px solid var(--wizard-border, rgba(255, 255, 255, .12)) !important;
+            border-radius: 14px !important;
+            background: rgba(12, 18, 40, .32) !important;
+            color: #f5f3ff;
+        }
+
+        .day-tour-pricing-card .group-tier-row .form-label {
+            color: #f5f3ff !important;
+            opacity: 1;
+        }
+
+        .day-tour-pricing-card .group-tier-row .form-control {
+            display: block;
+            width: 100%;
+            min-height: 42px;
+            border-color: rgba(255, 255, 255, .16) !important;
+            background: var(--wizard-input, rgba(15, 23, 42, .72)) !important;
+            color: #fff !important;
+            opacity: 1;
+        }
+
+        .day-tour-pricing-card .group-tier-row .form-control::placeholder {
+            color: rgba(255, 255, 255, .48) !important;
+        }
+
+        .day-tour-pricing-card .group-tier-row .input-group-text {
+            min-width: 42px;
+            justify-content: center;
+            border-color: rgba(255, 255, 255, .16) !important;
+            background: rgba(124, 58, 237, .28) !important;
+            color: #fff !important;
+        }
+
+        @media (max-width: 767.98px) {
+            .day-tour-pricing-card > .d-flex:first-child {
+                align-items: flex-start !important;
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+    </style>
+@endonce
+
 <div class="pricing-type-block" id="dayTourPricingBlock" data-pricing-type="day_tour">
-    <div class="card mb-4 border-light bg-light p-3 w-100">
+    <div class="card mb-4 day-tour-pricing-card w-100">
         <div class="d-flex align-items-center justify-content-between mb-3">
             <div>
                 <h6 class="fw-bold mb-1 text-primary"><i class="la la-users me-1"></i> {{ __('Group-Size Pricing Tiers') }}</h6>
@@ -15,7 +75,7 @@
                 $tiers = old('experience.group_pricing_tiers', isset($package) ? ($package->group_pricing_tiers ?? []) : []);
             @endphp
             @foreach ((array)$tiers as $tierIndex => $tier)
-                <div class="repeat-box group-tier-row mb-3 p-3 border rounded bg-white">
+                <div class="repeat-box group-tier-row mb-3">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <span class="badge bg-primary text-white">{{ __('Tier #') }}<span class="tier-number">{{ $tierIndex + 1 }}</span></span>
                         <button type="button" class="btn btn-sm btn-outline-danger js-remove-tier"><i class="ti ti-trash"></i> {{ __('Delete') }}</button>
@@ -59,7 +119,7 @@
 </div>
 
 <template id="groupTierTemplate">
-    <div class="repeat-box group-tier-row mb-3 p-3 border rounded bg-white">
+    <div class="repeat-box group-tier-row mb-3">
         <div class="d-flex align-items-center justify-content-between mb-2">
             <span class="badge bg-primary text-white">{{ __('Tier #') }}<span class="tier-number">__INDEX_PLUS_1__</span></span>
             <button type="button" class="btn btn-sm btn-outline-danger js-remove-tier"><i class="ti ti-trash"></i> {{ __('Delete') }}</button>
