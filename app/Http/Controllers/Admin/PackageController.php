@@ -1081,7 +1081,18 @@ class PackageController extends Controller
             }
         }
 
+        $generalPrices = [];
+        if ($request) {
+            foreach ((array) $request->input('prices', []) as $price) {
+                $amount = $price['amount'] ?? null;
+                if ($amount !== null && $amount !== '' && (float) $amount > 0) {
+                    $generalPrices[] = (float) $amount;
+                }
+            }
+        }
+
         $prices = collect(array_merge([
+            $data['start_from_price'] ?? null,
             $data['adult_price'] ?? null,
             $data['child_price'] ?? null,
             $data['infant_price'] ?? null,
@@ -1091,7 +1102,7 @@ class PackageController extends Controller
             $data['price_4_persons'] ?? null,
             $data['price_5_persons'] ?? null,
             $data['price_6_plus_persons'] ?? null,
-        ], $tierPrices))->filter(fn($price) => $price !== null && $price !== '');
+        ], $tierPrices, $generalPrices))->filter(fn($price) => $price !== null && $price !== '');
 
         $paidPrices = $prices->filter(fn($price) => (float) $price > 0);
 

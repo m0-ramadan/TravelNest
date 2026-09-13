@@ -115,8 +115,21 @@ class PackagePricingService
             }
         }
 
+        // The package editor and the standalone package-price screens both
+        // store valid legacy/general prices in package_prices. Include them
+        // when no accommodation season pricing has been configured.
         if (empty($prices)) {
-            $fallback = (float) ($package->adult_price ?: ($package->price_1_person ?: 0));
+            $package->loadMissing('prices');
+
+            foreach ($package->prices as $price) {
+                if ((float) $price->amount > 0) {
+                    $prices[] = (float) $price->amount;
+                }
+            }
+        }
+
+        if (empty($prices)) {
+            $fallback = (float) ($package->adult_price ?: ($package->price_1_person ?: $package->start_from_price));
             if ($fallback > 0) {
                 $prices[] = $fallback;
             }
@@ -150,11 +163,13 @@ class PackagePricingService
      */
     public function recalculateFallback(Package $package): void
     {
-        $prices = array_filter([
+        $package->loadMissing('prices');
+
+        $prices = array_filter(array_merge([
             (float) $package->start_from_price,
             (float) $package->adult_price,
             (float) $package->price_from,
-        ], fn($p) => $p > 0);
+        ], $package->prices->pluck('amount')->map(fn ($price) => (float) $price)->all()), fn($p) => $p > 0);
 
         if (!empty($prices)) {
             $minPrice = min($prices);

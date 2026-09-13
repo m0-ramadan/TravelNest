@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Currency;
 use App\Models\Package;
 use App\Models\PackagePrice;
+use App\Services\PackagePricingService;
 use App\Traits\HandlesTranslatedFields;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -67,7 +68,8 @@ class PackagePriceController extends Controller
 
         $data = $this->translateModelFields($data, ['label', 'season_name', 'notes']);
 
-        PackagePrice::create($data);
+        $packagePrice = PackagePrice::create($data);
+        $this->recalculatePackage($packagePrice->package_id);
 
         return $this->success('admin.package-prices.index', 'PackagePrice created.');
     }
@@ -86,6 +88,7 @@ class PackagePriceController extends Controller
 
     public function update(Request $request, PackagePrice $packagePrice): RedirectResponse
     {
+        $oldPackageId = $packagePrice->package_id;
         $data = $request->validate([
             'package_id' => ['nullable', 'integer'],
             'label' => ['nullable', 'string'],
@@ -106,13 +109,17 @@ class PackagePriceController extends Controller
         $data = $this->translateModelFields($data, ['label', 'season_name', 'notes']);
 
         $packagePrice->update($data);
+        $this->recalculatePackage($oldPackageId);
+        $this->recalculatePackage($packagePrice->package_id);
 
         return $this->success('admin.package-prices.index', 'PackagePrice updated.');
     }
 
     public function destroy(PackagePrice $packagePrice): RedirectResponse
     {
+        $packageId = $packagePrice->package_id;
         $packagePrice->delete();
+        $this->recalculatePackage($packageId);
 
         return $this->success('admin.package-prices.index', 'PackagePrice deleted.');
     }
@@ -120,5 +127,12 @@ class PackagePriceController extends Controller
     protected function perPage(Request $request, int $default = 15): int
     {
         return max(5, min((int) $request->input('per_page', $default), 100));
+    }
+
+    private function recalculatePackage(?int $packageId): void
+    {
+        if ($packageId && ($package = Package::find($packageId))) {
+            app(PackagePricingService::class)->recalculate($package);
+        }
     }
 }

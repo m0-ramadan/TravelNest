@@ -58,14 +58,19 @@ class BlogController extends Controller
             ->when($request->filled('keyword'), function ($query) use ($request, $languages) {
                 $keyword = trim($request->keyword);
 
-                $query->where(function ($q) use ($keyword, $languages) {
+                $hasSeoKeywords = Schema::hasColumn('articles', 'seo_keywords');
+
+                $query->where(function ($q) use ($keyword, $languages, $hasSeoKeywords) {
                     foreach ($languages as $locale) {
                         $q->orWhere("title->{$locale}", 'like', "%{$keyword}%")
                             ->orWhere("content->{$locale}", 'like', "%{$keyword}%")
                             ->orWhere("excerpt->{$locale}", 'like', "%{$keyword}%")
                             ->orWhere("seo_title->{$locale}", 'like', "%{$keyword}%")
-                            ->orWhere("seo_description->{$locale}", 'like', "%{$keyword}%")
-                            ->orWhere("seo_keywords->{$locale}", 'like', "%{$keyword}%");
+                            ->orWhere("seo_description->{$locale}", 'like', "%{$keyword}%");
+
+                        if ($hasSeoKeywords) {
+                            $q->orWhere("seo_keywords->{$locale}", 'like', "%{$keyword}%");
+                        }
                     }
                 });
             })

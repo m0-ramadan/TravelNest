@@ -31,9 +31,24 @@ class PageController extends BaseWebsiteController
         return redirect()->route('website.pages.show', ['slug' => $slug], 301);
     }
 
-    public function services()
+    public function services(): View
     {
-        return view('website.pages.services');
+        $page = Page::query()
+            ->publiclyVisible()
+            ->where('slug', 'services')
+            ->first();
+
+        if (!$page) {
+            $page = new Page([
+                'slug' => 'services',
+                'title' => ['en' => 'Our Services', 'ar' => 'خدماتنا'],
+                'body' => ['en' => 'Discover our carefully planned travel experiences and services.', 'ar' => 'اكتشف خدماتنا وتجارب السفر المصممة بعناية.'],
+                'seo_title' => ['en' => 'Our Services - Etro Tours', 'ar' => 'خدماتنا - Etro Tours'],
+                'seo_description' => ['en' => 'Explore Etro Tours travel services.', 'ar' => 'اكتشف خدمات السفر من Etro Tours.'],
+            ]);
+        }
+
+        return $this->renderStaticPage($page);
     }
 
     public function multiCountry(Request $request)
