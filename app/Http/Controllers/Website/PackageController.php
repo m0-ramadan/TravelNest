@@ -234,28 +234,7 @@ class PackageController extends BaseWebsiteController
                 ->when($selectedType, fn($query) => $query->where('package_type', $selectedType))
                 ->when($selectedCategory, fn($query) => $query->where('category_id', $selectedCategory->id))
                 ->when($selectedDestination, function ($query) use ($selectedDestination) {
-                    $cityId = $selectedDestination->id;
-                    $citySlug = $selectedDestination->slug;
-                    $rawName = $selectedDestination->getRawOriginal('name');
-                    $nameEn = is_array($rawName) ? ($rawName['en'] ?? '') : '';
-                    $nameAr = is_array($rawName) ? ($rawName['ar'] ?? '') : '';
-
-                    $query->where(function ($q) use ($cityId, $citySlug, $nameEn, $nameAr) {
-                        $q->whereHas('cities', fn($sub) => $sub->where('cities.id', $cityId))
-                            ->orWhereHas('destination', fn($sub) => $sub->where('city_id', $cityId))
-                            ->orWhereHas('packageAttractions.attraction', fn($sub) => $sub->where('city_id', $cityId))
-                            ->orWhere('destinations_text', 'like', "%{$citySlug}%");
-
-                        if ($nameEn !== '') {
-                            $q->orWhere('destinations_text', 'like', "%{$nameEn}%")
-                                ->orWhere('title', 'like', "%{$nameEn}%")
-                                ->orWhere('slug', 'like', "%{$citySlug}%");
-                        }
-                        if ($nameAr !== '') {
-                            $q->orWhere('destinations_text', 'like', "%{$nameAr}%")
-                                ->orWhere('title', 'like', "%{$nameAr}%");
-                        }
-                    });
+                    $query->where('destination_id', $selectedDestination->id);
                 })
                 ->when($duration, function ($query) use ($duration) {
                     $durationInt = (int) $duration;

@@ -211,7 +211,7 @@
                     <div class="col-md-4">
                         <div class="info-box">
                             <div class="info-label">المدينة</div>
-                            <div class="info-value">{{ adminTrans(optional(optional($package->destination)->city)->name) ?: (adminTrans(optional($package->destination)->name) ?: '-') }}</div>
+                            <div class="info-value">{{ adminTrans(optional($package->destination)->name) ?: '-' }}</div>
                         </div>
                     </div>
 

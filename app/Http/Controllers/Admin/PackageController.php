@@ -55,7 +55,7 @@ class PackageController extends Controller
     public function index(Request $request): View
     {
         $packages = Package::query()
-            ->with(['category', 'primaryCountry', 'currency', 'destination.city'])
+            ->with(['category', 'primaryCountry', 'currency', 'destination'])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $this->applyTranslatedSearch(
                     $query,
@@ -154,7 +154,7 @@ class PackageController extends Controller
         $package->load([
             'category',
             'primaryCountry',
-            'destination.city',
+            'destination',
             'currency',
             'facilities',
             'highlights',
@@ -294,9 +294,6 @@ class PackageController extends Controller
         $selectedCity = !empty($data['destination_id'])
             ? City::find($data['destination_id'])
             : null;
-        $destination = $selectedCity
-            ? $this->resolveDestinationAttractionFromCityId((int) $selectedCity->id)
-            : null;
 
         $category = !empty($data['category_id'])
             ? PackageCategory::find($data['category_id'])
@@ -320,7 +317,7 @@ class PackageController extends Controller
             return back()->withInput()->with('error', 'فشل توليد بيانات الرحلة بالذكاء الاصطناعي.');
         }
 
-        DB::transaction(function () use ($request, $data, $aiData, $destination, $selectedCity) {
+        DB::transaction(function () use ($request, $data, $aiData, $selectedCity) {
             $finalData = array_merge($aiData, $data);
 
             unset(
@@ -330,7 +327,7 @@ class PackageController extends Controller
                 $finalData['extra_instructions']
             );
 
-            $finalData['destination_id'] = $destination?->id;
+            $finalData['destination_id'] = $selectedCity?->id;
 
             if (!empty($selectedCity?->country_id)) {
                 $finalData['primary_country_id'] = $selectedCity->country_id;
@@ -942,10 +939,6 @@ class PackageController extends Controller
         $selectedCity = !empty($data['destination_id'])
             ? City::find($data['destination_id'])
             : null;
-        $selectedAttraction = $selectedCity
-            ? $this->resolveDestinationAttractionFromCityId((int) $selectedCity->id)
-            : null;
-
         $data['package_type'] = $this->normalizePackageType($data['package_type'] ?? null);
         if (in_array($data['package_type'], ['nile_cruise', 'travel_package'], true)) {
             $data['destination_id'] = null;
@@ -1160,16 +1153,6 @@ class PackageController extends Controller
             ->get();
     }
 
-    private function resolveDestinationAttractionFromCityId(int $cityId): ?Attraction
-    {
-        return Attraction::query()
-            ->where('city_id', $cityId)
-            ->orderByDesc('is_featured')
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->first();
-    }
-
     private function normalizeTranslatedFields(array $data): array
     {
         foreach ($this->translatedFields as $field) {
@@ -1284,8 +1267,8 @@ class PackageController extends Controller
         $package->loadMissing(['destination', 'packageAttractions.attraction']);
         $cityIds = collect();
 
-        if ($package->destination?->city_id) {
-            $cityIds->push($package->destination->city_id);
+        if ($package->destination?->id) {
+            $cityIds->push($package->destination->id);
         }
 
         foreach ($package->packageAttractions as $pa) {

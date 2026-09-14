@@ -76,7 +76,7 @@ class ReadyTourImportService
             $this->updateProgress($cacheKey, 30, 'Resolving cities and destinations');
             $resolvedCities = $this->taxonomyMapper->resolveCities((array) ($template->cities ?? []), $warnings);
             $primaryCity = $resolvedCities->first()['city'] ?? null;
-            $primaryDestination = $this->taxonomyMapper->resolvePrimaryDestination($primaryCity);
+            $primaryDestination = $primaryCity;
             $primaryCountryId = $primaryCity?->country_id;
 
             // 5. Prepare basic fields (Duration, Currency, Prices, Difficulty)

@@ -3925,7 +3925,6 @@
 
                                         $citySlug =
                                             $attractionModel?->city?->slug ?:
-                                            $package->destination?->city?->slug ?:
                                             $package->destination?->slug;
 
                                         if ($attractionModel && $attractionModel->slug) {

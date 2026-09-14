@@ -123,9 +123,7 @@ class DestinationController extends BaseWebsiteController
 
         $matchesDestination = function ($query) use ($destination, $packageIds) {
             $query->whereIn('id', $packageIds)
-                ->orWhereHas('destination', function ($attractionQuery) use ($destination) {
-                    $attractionQuery->where('city_id', $destination->id);
-                })
+                ->orWhere('destination_id', $destination->id)
                 ->orWhereHas('packageAttractions.attraction', function ($attractionQuery) use ($destination) {
                     $attractionQuery->where('city_id', $destination->id);
                 });

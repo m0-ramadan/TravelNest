@@ -1966,7 +1966,7 @@
                                                     <option value="{{ $destination->id }}"
                                                         data-country-id="{{ $destination->country_id }}"
                                                         data-destination-name="{{ adminTrans($destination->name) }}"
-                                                        {{ old('destination_id', $package->destination?->city_id ?? ($package->cities->first()?->id ?? $package->destination_id)) == $destination->id ? 'selected' : '' }}>
+                                                        {{ old('destination_id', $package->destination_id ?? $package->cities->first()?->id) == $destination->id ? 'selected' : '' }}>
                                                         {{ adminTrans($destination->name) }}
                                                     </option>
                                                 @endforeach

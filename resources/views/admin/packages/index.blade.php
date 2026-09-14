@@ -393,7 +393,7 @@
 
                             <div>
                                 <span class="detail-label">Destination:</span>
-                                <span>{{ adminTrans(optional(optional($package->destination)->city)->name) ?: (adminTrans(optional($package->destination)->name) ?: '-') }}</span>
+                                <span>{{ adminTrans(optional($package->destination)->name) ?: '-' }}</span>
                             </div>
 
                             <div>

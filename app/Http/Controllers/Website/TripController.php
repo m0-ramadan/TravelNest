@@ -45,7 +45,7 @@ class TripController extends BaseWebsiteController
             'currency',
             'category',
             'primaryCountry',
-            'destination.city',
+            'destination',
             'highlights',
             'facilities',
             'itineraries',
@@ -108,8 +108,7 @@ class TripController extends BaseWebsiteController
         $schedule = $this->packageScheduleLabel($package);
         $pickup = $this->translated($package->getRawOriginal('pickup_location') ?? $package->pickup_location);
         $dropoff = $this->translated($package->getRawOriginal('dropoff_location') ?? $package->dropoff_location);
-        $selectedDestination = $this->localizedModelText($package->destination?->city, 'name')
-            ?: $this->localizedModelText($package->destination, 'name');
+        $selectedDestination = $this->localizedModelText($package->destination, 'name');
         $destinationsText = $this->translated($package->getRawOriginal('destinations_text') ?? $package->destinations_text);
         $routeText = $this->translated($package->getRawOriginal('route_text') ?? $package->route_text);
         $locationSummary = $this->translated($package->getRawOriginal('location_summary') ?? $package->location_summary);

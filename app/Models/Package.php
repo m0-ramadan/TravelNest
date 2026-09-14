@@ -194,7 +194,7 @@ class Package extends Model
     }
     public function destination(): BelongsTo
     {
-        return $this->belongsTo(Attraction::class, 'destination_id');
+        return $this->belongsTo(City::class, 'destination_id');
     }
     public function facilities(): HasMany
     {
