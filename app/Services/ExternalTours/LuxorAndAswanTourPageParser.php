@@ -103,10 +103,269 @@ class LuxorAndAswanTourPageParser
             $facts = $this->applyRamassideOverrides($facts, $crawler);
         }
 
+        if (str_ends_with(strtolower($sourceHost), 'egypttoursportal.com')) {
+            $facts = $this->applyEgyptToursPortalOverrides($facts, $crawler, $sourceUrl);
+        }
+
         $facts['package_type'] = $this->detectPackageType($facts);
         $facts['warnings'] = $this->detectConflicts($facts, $crawler);
 
         return $facts;
+    }
+
+    /**
+     * Egypt Tours Portal uses its own tour markup and date-based group prices.
+     * Keep every published season while exposing the first season as the
+     * immediately bookable group tiers used by the existing booking UI.
+     */
+    protected function applyEgyptToursPortalOverrides(array $facts, Crawler $crawler, string $sourceUrl): array
+    {
+        $clean = fn(string $value): string => trim(preg_replace('/\s+/', ' ', strip_tags($value)));
+
+        $meta = [];
+        foreach ($crawler->filter('[gx-section="tour-overview"] .meta-col') as $node) {
+            $item = new Crawler($node);
+            $label = strtolower($clean($item->filter('.label')->text('')));
+            $value = $clean($item->filter('.value')->text(''));
+            if ($label !== '' && $value !== '') {
+                $meta[$label] = $value;
+            }
+        }
+
+        $portMap = [
+            'safaga-port' => 'Safaga',
+            'sokhna-port' => 'Ain Sokhna',
+            'port-said' => 'Port Said',
+            'alexandria-port' => 'Alexandria',
+        ];
+        $path = strtolower((string) parse_url($sourceUrl, PHP_URL_PATH));
+        $port = null;
+        foreach ($portMap as $fragment => $city) {
+            if (str_contains($path, '/' . $fragment . '/')) {
+                $port = $city;
+                break;
+            }
+        }
+
+        if (!$port && preg_match('/\b(Safaga|Ain Sokhna|Sokhna|Port Said|Alexandria)\s+Port\b/i', implode(' ', $meta), $match)) {
+            $port = strcasecmp($match[1], 'Sokhna') === 0 ? 'Ain Sokhna' : $match[1];
+        }
+        if (!$port && preg_match('/(?:from|arrive(?:s|d)?(?:\s+at)?)\s+(Safaga|Ain Sokhna|Sokhna|Port Said|Alexandria)(?:\s+Port)?\b/i', $facts['title'], $match)) {
+            $port = strcasecmp($match[1], 'Sokhna') === 0 ? 'Ain Sokhna' : $match[1];
+        }
+
+        if ($port) {
+            $facts['cities'] = array_values(array_unique(array_merge([$port], $facts['cities'] ?? [])));
+            $facts['primary_city'] = $port;
+            $facts['route_text'] = implode(' - ', $facts['cities']);
+            $facts['pickup_location'] = $meta['pickup & drop off'] ?? ($port . ' Port');
+            $facts['dropoff_location'] = $facts['pickup_location'];
+        }
+
+        $facts['schedule_text'] = $meta['availability'] ?? $facts['schedule_text'];
+        if (!empty($meta['duration']) && preg_match('/(\d+)\s*day/i', $meta['duration'], $duration)) {
+            $facts['duration_days'] = (int) $duration[1];
+            $facts['duration_nights'] = max(0, (int) $duration[1] - 1);
+            $facts['duration_text'] = $meta['duration'];
+        }
+
+        $overview = $crawler->filter('[gx-section="tour-overview"] .expandable-content-body')->first();
+        if ($overview->count()) {
+            $paragraphs = [];
+            foreach ($overview->filter('p') as $node) {
+                $text = $clean($node->textContent);
+                if ($text !== '') {
+                    $paragraphs[] = $text;
+                }
+            }
+            if ($paragraphs !== []) {
+                $facts['description'] = implode("\n\n", $paragraphs);
+                $facts['short_description'] = $paragraphs[0];
+            }
+        }
+
+        $highlights = [];
+        foreach ($crawler->filter('.highlight-card') as $node) {
+            $card = new Crawler($node);
+            $title = $clean($card->filter('.highlight-title')->text(''));
+            if ($title !== '') {
+                $highlights[] = [
+                    'title' => $title,
+                    'description' => $clean($card->filter('.highlight-desc')->text($title)),
+                    'sort_order' => count($highlights) + 1,
+                ];
+            }
+        }
+        if ($highlights !== []) {
+            $facts['highlights'] = $highlights;
+            $facts['attractions'] = array_values(array_unique(array_column($highlights, 'title')));
+        }
+
+        $included = [];
+        $excluded = [];
+        foreach ($crawler->filter('[gx-section="tour-overview"] li') as $node) {
+            $item = new Crawler($node);
+            $text = $clean($item->filter('span.text-muted')->text($node->textContent));
+            if ($text === '') {
+                continue;
+            }
+            $isExcluded = $item->filter('.fa-times, .fa-xmark, .text-danger')->count() > 0;
+            $target = $isExcluded ? 'excluded' : 'included';
+            ${$target}[] = [
+                'title' => Str::limit($text, 100, ''),
+                'content' => $text,
+                'description' => $text,
+                'sort_order' => count(${$target}) + 1,
+            ];
+        }
+        if ($included !== []) {
+            $facts['inclusions'] = $included;
+        }
+        if ($excluded !== []) {
+            $facts['exclusions'] = $excluded;
+        }
+
+        $itinerary = [];
+        foreach ($crawler->filter('.gx-itinerary-accordion .accordion-item') as $index => $node) {
+            $day = new Crawler($node);
+            $title = $clean($day->filter('.day-title')->text('Day ' . ($index + 1)));
+            $description = $clean($day->filter('.itinerary-timeline')->text(''));
+            $mealsText = strtolower($clean($day->filter('.meals-included, .meal-tags, .meals')->text('')));
+            $meals = array_values(array_filter(['breakfast', 'lunch', 'dinner'], fn($meal) => str_contains($mealsText, $meal)));
+            if ($description !== '') {
+                $itinerary[] = [
+                    'program' => null,
+                    'day_number' => $index + 1,
+                    'title' => $title,
+                    'description' => $description,
+                    'meals' => $meals,
+                    'meals_breakfast' => in_array('breakfast', $meals, true),
+                    'meals_lunch' => in_array('lunch', $meals, true),
+                    'meals_dinner' => in_array('dinner', $meals, true),
+                    'overnight_location' => '',
+                    'accommodation' => '',
+                    'transport_notes' => '',
+                    'activities' => [],
+                    'sort_order' => $index + 1,
+                ];
+            }
+        }
+        if ($itinerary !== []) {
+            $facts['itinerary'] = $itinerary;
+        }
+
+        $seasons = [];
+        foreach ($crawler->filter('#pricing-section .tp-dates-accordion .accordion-item') as $seasonIndex => $node) {
+            $season = new Crawler($node);
+            $period = $clean($season->filter('.accordion-button span')->last()->text(''));
+            $tiers = [];
+            foreach ($season->filter('.tp-pax-row') as $tierIndex => $tierNode) {
+                $tier = new Crawler($tierNode);
+                $label = $clean($tier->filter('.tp-pax-name')->text(''));
+                $priceNode = $tier->filter('.tp-pax-price')->first();
+                $price = (float) ($priceNode->attr('data-price-acc') ?: preg_replace('/[^\d.]/', '', $priceNode->text('0')));
+                [$min, $max] = $this->parsePaxRange($label);
+                if ($label !== '' && $price > 0) {
+                    $tiers[] = [
+                        'id' => 'season-' . ($seasonIndex + 1) . '-tier-' . ($tierIndex + 1),
+                        'title' => $label,
+                        'label' => $label,
+                        'min' => $min,
+                        'max' => $max,
+                        'price_per_person' => $price,
+                    ];
+                }
+            }
+            if ($tiers !== []) {
+                $seasons[] = ['period' => $period ?: 'Published season', 'tiers' => $tiers];
+            }
+        }
+
+        if ($seasons !== []) {
+            $allPrices = [];
+            foreach ($seasons as $season) {
+                foreach ($season['tiers'] as $tier) {
+                    $allPrices[] = $tier['price_per_person'];
+                }
+            }
+            $facts['seasonal_group_pricing'] = $seasons;
+            $facts['group_pricing_tiers'] = $seasons[0]['tiers'];
+            $facts['start_from_price'] = min($allPrices);
+            $facts['price_from'] = min($allPrices);
+            $facts['price_to'] = max($allPrices);
+            $facts['adult_price'] = min($allPrices);
+            $facts['pricing']['min_price'] = min($allPrices);
+            $facts['pricing']['max_price'] = max($allPrices);
+            $facts['pricing']['currency'] = 'USD';
+            $facts['pricing']['accommodations'] = [];
+            $facts['currency'] = 'USD';
+        }
+
+        $galleryImages = [];
+        foreach ($crawler->filter('.tour-gallery-wrapper img, .day-gallery img') as $node) {
+            $src = $node->getAttribute('data-src') ?: $node->getAttribute('src');
+            if ($src !== '') {
+                $galleryImages[] = $this->resolveAbsoluteUrl($src, $sourceUrl);
+            }
+        }
+        if (preg_match('/const\s+galleryData\s*=\s*(\[[^;]+\])/s', $crawler->html(), $match)) {
+            foreach ((array) json_decode($match[1], true) as $image) {
+                if (!empty($image['image'])) {
+                    $galleryImages[] = $this->resolveAbsoluteUrl($image['image'], $sourceUrl);
+                }
+            }
+        }
+        if ($galleryImages !== []) {
+            $facts['images'] = array_values(array_unique($galleryImages));
+        }
+
+        $whatToBring = [];
+        foreach ($crawler->filter('.pack-item .pack-title') as $node) {
+            $item = $clean($node->textContent);
+            if ($item !== '') {
+                $whatToBring[] = $item;
+            }
+        }
+        if ($whatToBring !== []) {
+            $facts['what_to_bring'] = array_values(array_unique($whatToBring));
+        }
+
+        $faq = [];
+        foreach ($crawler->filter('[gx-toggle="item"]') as $node) {
+            $item = new Crawler($node);
+            $question = $clean($item->filter('.toggle-label')->text(''));
+            $answer = $clean($item->filter('.toggle-body')->text(''));
+            if ($question !== '' && $answer !== '') {
+                $faq[] = ['question' => $question, 'answer' => $answer];
+            }
+        }
+        $facts['faq'] = $faq !== [] ? $faq : [
+            [
+                'question' => 'How long is this shore excursion?',
+                'answer' => 'The published duration is ' . ($facts['duration_text'] ?: 'as shown in the itinerary') . '.',
+            ],
+            [
+                'question' => 'Where is pickup and drop-off?',
+                'answer' => 'Pickup and drop-off are at ' . ($facts['pickup_location'] ?: ($port ? $port . ' Port' : 'the cruise port')) . '.',
+            ],
+        ];
+
+        $facts['breadcrumbs'][] = 'Egypt Shore Excursions';
+
+        return $facts;
+    }
+
+    /** @return array{0:int,1:?int} */
+    protected function parsePaxRange(string $label): array
+    {
+        if (preg_match('/(\d+)\s*[-–]\s*(\d+)/', $label, $match)) {
+            return [(int) $match[1], (int) $match[2]];
+        }
+        if (preg_match('/(\d+)\s*\+/', $label, $match)) {
+            return [(int) $match[1], null];
+        }
+
+        return [1, 1];
     }
 
     /**

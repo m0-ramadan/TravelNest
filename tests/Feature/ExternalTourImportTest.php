@@ -979,4 +979,59 @@ HTML;
             'download_images' => false,
         ]);
     }
+
+    public function test_egypt_tours_portal_shore_excursion_imports_port_details_images_and_all_price_seasons(): void
+    {
+        $country = Country::where('code', 'EG')->firstOrFail();
+        City::firstOrCreate(
+            ['slug' => 'safaga'],
+            ['country_id' => $country->id, 'name' => ['en' => 'Safaga', 'ar' => 'سفاجا'], 'is_active' => true]
+        );
+        PackageCategory::firstOrCreate(
+            ['slug' => 'shore-excursions'],
+            ['name' => ['en' => 'Shore Excursions', 'ar' => 'رحلات شاطئية'], 'category_type' => 'shore_excursion', 'is_active' => true]
+        );
+
+        $url = 'https://www.egypttoursportal.com/en-us/egypt-shore-excursions/safaga-port/luxor-tour-from-safaga-port/';
+        $html = <<<'HTML'
+        <html><head><title>Day Tour from Safaga to Luxor</title><meta property="og:image" content="https://www.egypttoursportal.com/images/tour-main.jpg"></head><body>
+        <nav class="tour-breadcrumbs">Egypt Shore Excursions &gt; Safaga Shore Excursions</nav>
+        <h1>Day Tour from Safaga to Luxor</h1>
+        <div class="tour-gallery-wrapper"><img src="https://www.egypttoursportal.com/images/tour-main.jpg"><img src="https://www.egypttoursportal.com/images/tour-two.jpg"></div>
+        <section gx-section="tour-overview">
+          <div class="meta-col"><span class="label">Pickup &amp; Drop Off</span><span class="value">Safaga Port</span></div>
+          <div class="meta-col"><span class="label">Duration</span><span class="value">1 Day</span></div>
+          <div class="meta-col"><span class="label">Availability</span><span class="value">Everyday</span></div>
+          <div class="expandable-content-body"><p>A complete private shore excursion from Safaga to Luxor.</p></div>
+          <div class="highlight-card"><h3 class="highlight-title">Karnak Temple</h3><p class="highlight-desc">Visit Karnak Temple.</p></div>
+          <li><i class="fa fa-check"></i><span class="text-muted">Private transfers.</span></li>
+          <li><i class="fa fa-times text-danger"></i><span class="text-muted">Tipping.</span></li>
+        </section>
+        <div class="gx-itinerary-accordion"><div class="accordion-item"><span class="day-title">Luxor Highlights</span><div class="itinerary-timeline">Visit Karnak Temple and return to Safaga Port.</div></div></div>
+        <section id="pricing-section"><div class="tp-dates-accordion">
+          <div class="accordion-item"><button class="accordion-button"><span>May to September</span></button><label class="tp-pax-row"><span class="tp-pax-name">2-4 Pax</span><span class="tp-pax-price" data-price-acc="285">$285</span></label></div>
+          <div class="accordion-item"><button class="accordion-button"><span>October to December</span></button><label class="tp-pax-row"><span class="tp-pax-name">Solo</span><span class="tp-pax-price" data-price-acc="585">$585</span></label></div>
+        </div></section>
+        </body></html>
+        HTML;
+
+        Http::fake(['https://www.egypttoursportal.com/*' => Http::response($html, 200)]);
+
+        $result = app(ExternalTourImportService::class)->import($url, [
+            'rewrite' => false,
+            'download_images' => false,
+        ]);
+        $package = $result['package']->fresh(['destination', 'cities', 'highlights', 'inclusions', 'itineraries']);
+
+        $this->assertSame('shore_excursion', $package->package_type);
+        $this->assertSame('safaga', $package->destination?->slug);
+        $this->assertSame('safaga', $package->cities->firstWhere('pivot.is_primary', true)?->slug);
+        $this->assertCount(2, $package->seasonal_group_pricing);
+        $this->assertSame(285.0, (float) $package->price_from);
+        $this->assertSame(585.0, (float) $package->price_to);
+        $this->assertCount(1, $package->highlights);
+        $this->assertCount(2, $package->inclusions);
+        $this->assertCount(1, $package->itineraries);
+        $this->assertSame(2, $result['stats']['images_discovered_count']);
+    }
 }

@@ -14,6 +14,7 @@ use App\Models\TourPackageHotel;
 use App\Models\TourPackagePriceItem;
 use App\Models\TourPackageSeason;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -128,6 +129,9 @@ class ExternalTourImportService
 
             $downloadedCount = ($imageResult['featured_image'] ? 1 : 0) + count($imageResult['gallery_images']);
         }
+
+        // Listing cards and shore-section counts are versioned with this key.
+        Cache::forever('website.home.version', (int) Cache::get('website.home.version', 1) + 1);
 
         Log::info('Tour import completed successfully', [
             'package_id' => $package->id,
@@ -635,6 +639,7 @@ class ExternalTourImportService
 
         $packageAttributes = [
             'category_id' => $taxonomy['category']?->id,
+            'destination_id' => $taxonomy['cities'][0]['model']?->id ?? null,
             'primary_country_id' => $taxonomy['country']?->id,
             'currency_id' => $taxonomy['currency']?->id,
             'package_type' => $data['package_type'],
@@ -664,6 +669,8 @@ class ExternalTourImportService
 
             'tour_type' => $data['tour_type'],
             'group_pricing_tiers' => $data['group_pricing_tiers'] ?? [],
+            'seasonal_group_pricing' => $data['seasonal_group_pricing'] ?? [],
+            'what_to_bring' => $data['what_to_bring'] ?? [],
 
             'pricing_information' => $data['policies']['pricing_information'] ?? null,
             'children_policy' => $data['policies']['children_policy'] ?? null,

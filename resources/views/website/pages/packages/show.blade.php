@@ -4234,6 +4234,45 @@
                                 </div>
                             @endif
 
+                            @if (!empty($package->seasonal_group_pricing))
+                                <div class="tour-accommodations-showcase mt-4">
+                                    <h3 class="fw-bold mb-3" style="color: var(--primary-navy, #1c325c); font-family: 'Playfair Display', serif;">
+                                        {{ __('Seasonal Group Pricing') }}
+                                    </h3>
+                                    <div class="accordion" id="seasonalGroupPricingAccordion">
+                                        @foreach ($package->seasonal_group_pricing as $seasonIndex => $season)
+                                            <div class="accordion-item mb-3 border rounded shadow-sm">
+                                                <h4 class="accordion-header">
+                                                    <button class="accordion-button {{ $seasonIndex ? 'collapsed' : '' }}" type="button"
+                                                        data-bs-toggle="collapse" data-bs-target="#seasonal-price-{{ $seasonIndex }}">
+                                                        {{ $season['period'] ?? __('Published season') }}
+                                                    </button>
+                                                </h4>
+                                                <div id="seasonal-price-{{ $seasonIndex }}"
+                                                    class="accordion-collapse collapse {{ $seasonIndex ? '' : 'show' }}"
+                                                    data-bs-parent="#seasonalGroupPricingAccordion">
+                                                    <div class="accordion-body">
+                                                        <div class="table-responsive">
+                                                            <table class="table align-middle mb-0">
+                                                                <thead><tr><th>{{ __('Group Size') }}</th><th>{{ __('Price per person') }}</th></tr></thead>
+                                                                <tbody>
+                                                                    @foreach (($season['tiers'] ?? []) as $tier)
+                                                                        <tr>
+                                                                            <td>{{ $tier['label'] ?? $tier['title'] ?? __('Group') }}</td>
+                                                                            <td>{{ $currencySymbol }}{{ number_format((float) ($tier['price_per_person'] ?? 0), 0) }}</td>
+                                                                        </tr>
+                                                                    @endforeach
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
                             @if ($hasAccommodations)
                                 <div class="tour-accommodations-showcase mt-4">
                                     <h3 class="fw-bold mb-3"
