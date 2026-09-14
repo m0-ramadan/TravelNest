@@ -13,10 +13,8 @@
             --dark-border: rgba(255, 255, 255, .08);
         }
 
-        body {
-            font-family: "Cairo", sans-serif !important;
-            background: var(--dark-bg);
-            color: #fff;
+        .shore-excursions-page {
+            color: #e5edf7;
         }
 
         .stats-card {
@@ -84,6 +82,17 @@
             margin-bottom: 25px;
         }
 
+        .main-card .table-dark-custom {
+            --bs-table-color: #e5edf7;
+            --bs-table-bg: #243447;
+            --bs-table-border-color: rgba(148, 163, 184, .16);
+            --bs-table-striped-color: #e5edf7;
+            --bs-table-striped-bg: rgba(255, 255, 255, .025);
+            --bs-table-hover-color: #fff;
+            --bs-table-hover-bg: rgba(56, 189, 248, .07);
+            margin-bottom: 0;
+        }
+
         .main-header {
             background: var(--primary-gradient);
             color: #fff;
@@ -91,7 +100,7 @@
         }
 
         .table-dark-custom th {
-            background: rgba(0, 0, 0, 0.25) !important;
+            background-color: #182636 !important;
             color: #38bdf8 !important;
             border-color: rgba(255, 255, 255, 0.1) !important;
             font-weight: 600;
@@ -102,14 +111,35 @@
 
         .table-dark-custom td {
             border-color: rgba(255, 255, 255, 0.05);
-            color: #fff;
+            color: #e5edf7 !important;
+            background-color: transparent !important;
             vertical-align: middle;
             font-size: 14px;
             padding: 14px 16px;
         }
 
         .table-dark-custom tbody tr:hover {
-            background: rgba(255, 255, 255, 0.04);
+            background-color: rgba(56, 189, 248, .07) !important;
+        }
+
+        .table-dark-custom tbody tr:nth-of-type(odd),
+        .table-dark-custom tbody tr:nth-of-type(even) {
+            --bs-table-accent-bg: transparent;
+            background-color: #243447 !important;
+        }
+
+        .table-dark-custom tbody tr:nth-of-type(even) {
+            background-color: #213044 !important;
+        }
+
+        .table-dark-custom .text-white,
+        .table-dark-custom .fw-bold {
+            color: #f8fafc !important;
+        }
+
+        .table-dark-custom .text-white-50,
+        .table-dark-custom .text-muted {
+            color: #9fb0c4 !important;
         }
 
         .thumb-img {
@@ -141,11 +171,15 @@
             color: #facc15;
             font-family: monospace;
         }
+
+        .main-card .border-top {
+            border-color: rgba(148, 163, 184, .18) !important;
+        }
     </style>
 @endsection
 
 @section('content')
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="container-xxl flex-grow-1 container-p-y shore-excursions-page">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">Dashboard</a></li>
@@ -288,9 +322,8 @@
                                         implode(', ', array_filter($item->pickup_location))
                                     : (string) $item->pickup_location;
                                 $titleEn = is_array($item->title)
-                                    ? $item->title['en'] ?? ($item->title['ar'] ?? $item->name)
+                                    ? $item->title['en'] ?? $item->name
                                     : $item->title ?? $item->name;
-                                $titleAr = is_array($item->title) ? $item->title['ar'] ?? '' : '';
                                 $imgSrc = get_package_image($item->featured_image);
                             @endphp
                             <tr>
@@ -301,9 +334,6 @@
                                 </td>
                                 <td>
                                     <div class="fw-bold text-white fs-6">{{ $titleEn }}</div>
-                                    @if ($titleAr && $titleAr !== $titleEn)
-                                        <div class="small text-white-50">{{ $titleAr }}</div>
-                                    @endif
                                     <div class="small text-info mt-1">
                                         <i class="fas fa-clock me-1"></i>
                                         {{ $item->duration_hours ? $item->duration_hours . ' Hours' : ($item->duration_days ? $item->duration_days . ' Days' : 'Day Tour') }}
