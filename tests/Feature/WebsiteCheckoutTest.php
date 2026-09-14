@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Mail\NewBookingAdminMail;
 use App\Models\Admin;
 use App\Models\Booking;
 use App\Models\NileCruiseCabin;
@@ -18,6 +19,7 @@ use App\Services\PackageBookingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
@@ -212,6 +214,8 @@ class WebsiteCheckoutTest extends TestCase
 
     public function test_checkout_recalculates_total_and_creates_travelers_before_paymob_redirect(): void
     {
+        Mail::fake();
+        Config::set('mail.booking_recipient', 'bookings@example.test');
         $this->configurePaymob();
         $package = $this->package(['adult_price' => 100, 'child_price' => 50]);
         $package = $this->package(['package_type' => 'day_tour', 'adult_price' => 100, 'child_price' => 50]);
@@ -250,6 +254,9 @@ class WebsiteCheckoutTest extends TestCase
         $this->assertSame(3, $booking->travelers()->count());
         $this->assertSame('250.00', (string) $booking->items()->sole()->total_amount);
         $this->assertDatabaseHas('payments', ['booking_id' => $booking->id, 'amount' => 250]);
+        Mail::assertSent(NewBookingAdminMail::class, function (NewBookingAdminMail $mail) use ($booking) {
+            return $mail->booking->is($booking) && $mail->hasTo('bookings@example.test');
+        });
     }
 
     public function test_shore_excursion_checkout_includes_selected_optional_addons(): void
@@ -361,7 +368,7 @@ class WebsiteCheckoutTest extends TestCase
         $this->expectException(ValidationException::class);
         app(PackageBookingService::class)->quote(
             $package,
-            'nile:' . $item->id,
+            'nile:'.$item->id,
             now()->addMonth(),
             2,
             0,
@@ -498,8 +505,8 @@ class WebsiteCheckoutTest extends TestCase
             ->assertSee('Standard')
             ->assertSee('Room 1')
             ->assertSee('Room 2')
-            ->assertSee(__('Room') . ' 1')
-            ->assertSee(__('Room') . ' 2')
+            ->assertSee(__('Room').' 1')
+            ->assertSee(__('Room').' 2')
             ->assertSee('2,500')
             ->assertSee('1,500')
             ->assertSee('4,000')
@@ -590,7 +597,7 @@ class WebsiteCheckoutTest extends TestCase
         $checkoutGet
             ->assertOk()
             ->assertSee('Standard')
-            ->assertSee(__('Room') . ' 1');
+            ->assertSee(__('Room').' 1');
     }
 
     public function test_day_tour_booking_with_infants_saves_and_displays_in_dashboard(): void
@@ -819,7 +826,7 @@ class WebsiteCheckoutTest extends TestCase
     private function package(array $overrides = []): Package
     {
         return Package::create(array_merge([
-            'slug' => 'checkout-' . uniqid(),
+            'slug' => 'checkout-'.uniqid(),
             'title' => ['en' => 'Egypt Adventure'],
             'package_type' => 'travel_package',
             'is_active' => true,

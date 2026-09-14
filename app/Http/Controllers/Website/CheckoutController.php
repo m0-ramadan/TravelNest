@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Website;
 
+use App\Mail\NewBookingAdminMail;
 use App\Models\Booking;
 use App\Models\Client;
 use App\Models\Payment;
@@ -12,6 +13,7 @@ use App\Services\Payments\PayPalService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -106,7 +108,7 @@ class CheckoutController extends BaseWebsiteController
                     'title' => $request->input('lead_title', 'Mr'),
                     'first_name' => $request->input('lead_first_name'),
                     'last_name' => $request->input('lead_last_name'),
-                ]
+                ],
             ];
             $totalPax = (int) $request->input('adults', 1) + (int) $request->input('children', 0) + (int) $request->input('infants', 0);
             for ($t = 2; $t <= $totalPax; $t++) {
@@ -206,7 +208,7 @@ class CheckoutController extends BaseWebsiteController
             ])->save();
 
             do {
-                $bookingNumber = 'WEB-' . now()->format('Ymd') . '-' . strtoupper(Str::random(8));
+                $bookingNumber = 'WEB-'.now()->format('Ymd').'-'.strtoupper(Str::random(8));
             } while (Booking::query()->where('booking_number', $bookingNumber)->exists());
 
             $booking = Booking::create([
@@ -300,6 +302,12 @@ class CheckoutController extends BaseWebsiteController
         }, 3);
 
         try {
+            Mail::to(config('mail.booking_recipient'))->send(new NewBookingAdminMail($booking));
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
+
+        try {
             /** @var PaymentMethod $method */
             $method = $selectedMethod['model'];
             $payment = $data['payment_method'] === 'paymob'
@@ -324,7 +332,7 @@ class CheckoutController extends BaseWebsiteController
         ]);
         $payment = Payment::query()
             ->where('transaction_reference', $request->string('reference'))
-            ->whereHas('paymentMethod', fn($query) => $query->where(function ($methodQuery) {
+            ->whereHas('paymentMethod', fn ($query) => $query->where(function ($methodQuery) {
                 $methodQuery->where('provider', 'paypal')->orWhere('code', 'paypal');
             }))
             ->firstOrFail();
