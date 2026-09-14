@@ -112,6 +112,7 @@ class PackageController extends BaseWebsiteController
             ['shore_excursion'],
             [
                 'is_landing_hub' => !$isSearch,
+                'hero_image' => asset('website/images/shore-excursions/safaga.jpg'),
                 'badge' => __('Egypt Cruise Port Tours'),
                 'title' => __('Egypt Shore Excursions'),
                 'subtitle' => __('Private and small-group shore excursions planned around your cruise schedule, with port pickup and a timely return to your ship.'),
