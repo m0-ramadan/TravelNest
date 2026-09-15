@@ -399,6 +399,7 @@ class PackageController extends BaseWebsiteController
                 'subtitle' => __('Smoother private touring options planned around mobility needs.'),
                 'city' => null,
                 'search' => 'Accessible',
+                'search_terms' => ['Accessible', 'Wheelchair', 'Mobility'],
                 'image' => asset('website/images/shore-excursions/accessible.jpg'),
             ],
         ];
@@ -408,6 +409,7 @@ class PackageController extends BaseWebsiteController
     {
         $citySlug = $section['city'] ?? null;
         $search = $section['search'] ?? '';
+        $searchTerms = $section['search_terms'] ?? [$search];
 
         if ($citySlug && $cities instanceof \Illuminate\Support\Collection && $cities->has($citySlug)) {
             $city = $cities->get($citySlug);
@@ -421,16 +423,21 @@ class PackageController extends BaseWebsiteController
                     ->orWhere('slug', 'like', '%' . str_replace(' ', '-', strtolower($search)) . '%');
             });
         } else {
-            $query->where(function ($q) use ($search, $citySlug) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('subtitle', 'like', "%{$search}%")
-                    ->orWhere('short_description', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%")
-                    ->orWhere('destinations_text', 'like', "%{$search}%")
-                    ->orWhere('pickup_location', 'like', "%{$search}%")
-                    ->orWhere('dropoff_location', 'like', "%{$search}%")
-                    ->orWhere('route_text', 'like', "%{$search}%")
-                    ->orWhere('slug', 'like', '%' . str_replace(' ', '-', strtolower($search)) . '%');
+            $query->where(function ($q) use ($searchTerms, $citySlug) {
+                foreach ($searchTerms as $term) {
+                    $slugTerm = str_replace(' ', '-', strtolower($term));
+                    $q->orWhere(function ($termQuery) use ($term, $slugTerm) {
+                        $termQuery->where('title', 'like', "%{$term}%")
+                            ->orWhere('subtitle', 'like', "%{$term}%")
+                            ->orWhere('short_description', 'like', "%{$term}%")
+                            ->orWhere('description', 'like', "%{$term}%")
+                            ->orWhere('destinations_text', 'like', "%{$term}%")
+                            ->orWhere('pickup_location', 'like', "%{$term}%")
+                            ->orWhere('dropoff_location', 'like', "%{$term}%")
+                            ->orWhere('route_text', 'like', "%{$term}%")
+                            ->orWhere('slug', 'like', "%{$slugTerm}%");
+                    });
+                }
 
                 if ($citySlug) {
                     $q->orWhere('destinations_text', 'like', "%{$citySlug}%")

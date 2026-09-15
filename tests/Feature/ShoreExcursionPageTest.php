@@ -85,6 +85,30 @@ class ShoreExcursionPageTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_accessible_section_includes_wheelchair_shore_excursions(): void
+    {
+        Package::create([
+            'title' => ['en' => 'Wheelchair Tour to Cairo from Port Said'],
+            'slug' => 'wheelchair-tour-to-cairo-from-port-said',
+            'package_type' => 'shore_excursion',
+            'duration_days' => 1,
+            'is_active' => true,
+        ]);
+
+        Package::create([
+            'title' => ['en' => 'Standard Cairo Tour from Port Said'],
+            'slug' => 'standard-cairo-tour-from-port-said',
+            'package_type' => 'shore_excursion',
+            'duration_days' => 1,
+            'is_active' => true,
+        ]);
+
+        $this->get(route('website.shore_excursions.section', 'accessible'))
+            ->assertOk()
+            ->assertSee('Wheelchair Tour to Cairo from Port Said')
+            ->assertDontSee('Standard Cairo Tour from Port Said');
+    }
+
     public function test_shore_excursion_uses_day_tour_group_pricing_and_booking_layout(): void
     {
         $package = Package::create([
